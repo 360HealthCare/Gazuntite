@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:component="com.gazuntite.view.patient.component.*"
+				xmlns:components="com.gazuntite.components.*" 				
+				xmlns:vitals="com.gazuntite.input.view.inputsections.physical.vitals.*" 
+				xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+				autoDrawBackground="false"
+				width="100%" 
+				initialize="init()"
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.common.util.converter.UnitConverter;
+			import com.gazuntite.input.event.visit.physical.vitals.LoadPatientPreviousVitalsEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable]	public var inEditMode:Boolean = false;
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	protected var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			protected function init():void
+			{
+				viewModel.inlineEditing = true;
+				removeGlow();
+			}
+			
+			[Bindable]
+			public var vitals:VitalsDTO = null;
+			
+			override public function set data(value:Object):void
+			{
+				super.data 					= value;
+				
+				if(value == null)
+					return;
+				
+				vitals= value as VitalsDTO;
+				
+				/* if (vitals && UtilityFunctions.IsNotNullOrEmpty(vitals.Note))
+				{
+					uiNote.setStyle("skinClass", NotesRedButtonSkin);
+				}
+				else
+				{
+					uiNote.setStyle("skinClass", WriteNoteButtonSkin);
+				} */
+				
+				id_editView.vitalsDTO = vitals;	
+				
+				id_editView.id_height.valueA = Number(vitals.Height);
+				id_editView.id_weight.valueA = Number(vitals.Weight);
+				
+				id_editView.id_SysPerDys.valueA = Number(vitals.BPSys);
+				id_editView.id_SysPerDys.valueB = Number(vitals.BPDys);				
+				id_editView.id_pulse.valueA = Number(vitals.Pulse);	
+				id_editView.id_resp.valueA = Number(vitals.Respiration);	
+				id_editView.id_temp.valueA = Number(vitals.Temperature);	
+				id_editView.id_os2.valueA = Number(vitals.Oxygen);	
+				
+				id_editView.heightPreValue = id_editView.id_height.valueA;
+				id_editView.weightPreValue = id_editView.id_weight.valueA;
+				id_editView.temprPreValue = id_editView.id_temp.valueA;
+				id_editView.pulsePreValue = id_editView.id_pulse.valueA;
+				id_editView.respPreValue = id_editView.id_resp.valueA;
+				id_editView.bpSYSPreValue = id_editView.id_SysPerDys.valueA;
+				id_editView.bpDYSPreValue = id_editView.id_SysPerDys.valueB;
+				
+				if(vitals.IsMetricDisplaySelected)
+				{
+					id_editView.isMetric = true;
+					id_editView.id_height.label = "Height (Cm)";
+					id_editView.id_weight.label = "Weight (Kg)";
+					id_editView.id_temp.label   = "Temp (C)";
+					
+					id_editView.id_height.Unit = " Inch";
+					id_editView.id_weight.Unit = " Lbs";
+					id_editView.id_temp.Unit   = " F";
+					
+					id_editView.id_height.valueB =    UnitConverter.centimetersToInches(Number(vitals.Height));
+					id_editView.id_weight.valueB =    UnitConverter.kilogramsToPounds(Number(vitals.Weight));
+					id_editView.id_temp.valueB =    UnitConverter.celsiusToFahrenheit(Number(vitals.Temperature));					
+					
+				}
+				else
+				{
+					id_editView.isMetric = false;
+					id_editView.id_height.label = "Height (Inch)";
+					id_editView.id_weight.label = "Weight (Lbs)";
+					id_editView.id_temp.label   = "Temp (F)"; 
+					
+					id_editView.id_height.Unit = " Cm";
+					id_editView.id_weight.Unit = " Kg";
+					id_editView.id_temp.Unit   = " C";
+					
+					id_editView.id_height.valueB =    UnitConverter.inchesToCentimeters(Number(vitals.Height));
+					id_editView.id_weight.valueB =    UnitConverter.poundsToKilograms(Number(vitals.Weight));
+					id_editView.id_temp.valueB =    UnitConverter.fahrenheitToCelsius(Number(vitals.Temperature));
+				}
+				
+				id_editView.calculateBMI();
+				
+				setDictationNoteButtonMode();
+				
+				showGlow();
+				
+				invalidateDisplayList();
+			}
+			
+			protected function toggleEditView():void
+			{
+				vitals.inEditMode = !vitals.inEditMode;
+				
+				if (!vitals.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+				}
+				
+				showGlow();
+			}
+			
+			private function setDictationNoteButtonMode():void
+			{
+				if (!vitals.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+				}
+				
+				showGlow();
+			}
+			
+			private function addItemEditView():void
+			{
+				var vtl:VitalsItemEditView2 				= new  VitalsItemEditView2();
+				vtl.inItemRenderer							= true;
+				vtl.percentWidth							= 100;
+				
+				gp.addElementAt(vtl, 1);
+				//	vtl.dto  					= dto;
+				
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function applyGlow():void
+			{
+				glow1.alpha = 1;
+				glowAnimation.play();
+			}
+			public function removeGlow():void
+			{
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+			}
+			
+			private function showGlow():void
+			{
+				if (vitals.inEditMode)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+			
+			public function getDispLabel(dataModel:VitalsDTO):String
+			{
+				if( ! vitals) return "";
+				
+				var htu:String = vitals.IsMetricDisplaySelected ? "Cm": "Inch";
+				var wtu:String = vitals.IsMetricDisplaySelected ? "Kg": "Lbs";
+								
+				var result:String = vitals.SNo +  ". Visit Date: " + UtilityFunctions.FormatDate(vitals.VisitDate,"MM/DD/YYYY") +  " Height: " + vitals.Height + " " + htu + 
+																" Weight: " + vitals.Weight + " " + wtu + " BMI: " + calculateBMI(Number(vitals.Height),Number(vitals.Weight)) ;				
+				
+				return result;
+			}
+			
+			public function getDispTooltip(dataModel:VitalsDTO):String
+			{
+				if (!vitals) return "";
+				
+				var htu:String = vitals.IsMetricDisplaySelected ? "Cm": "Inch";
+				var wtu:String = vitals.IsMetricDisplaySelected ? "Kg": "Lbs";
+				
+				var result:String ="Visit Date: " + UtilityFunctions.FormatDate(vitals.VisitDate,"MM/DD/YYYY") +  " Height: " + vitals.Height + " " + htu + 
+					" Weight: " + vitals.Weight + " " + wtu + " BMI: " + calculateBMI(Number(vitals.Height),Number(vitals.Weight)) ;				
+				
+				return result;
+			}
+			
+			public function calculateBMI(hgt:Number, wgt:Number):String
+			{
+				
+				var BMI:Number = 0;
+				var m:Number = 0;
+				if (! vitals.IsMetricDisplaySelected)
+				{
+					
+					var cm:Number 				= UnitConverter.inchesToCentimeters( hgt );
+					m				            = UnitConverter.centimetersToMeters( cm );
+					var hgtInMeterSq1:Number 	= Math.pow( m, 2 );
+					var kg:Number				= UnitConverter.poundsToKilograms( wgt );
+					
+					if (hgtInMeterSq1 > 0)
+					{
+						BMI =  int( ( kg / hgtInMeterSq1)* 100 ) / 100;
+					}
+					else
+						BMI = 0;					
+				}
+				else
+				{
+					m                     	 = UnitConverter.centimetersToMeters( hgt );
+					
+					var hgtInMeterSq2:Number = Math.pow( m , 2);
+					
+					if (hgtInMeterSq2 > 0)
+						BMI = int(( wgt / hgtInMeterSq2 ) * 100 ) / 100;
+					else
+						BMI = 0;
+					
+				}
+				
+				if (isNaN(BMI))
+					BMI = 0;
+				
+				return BMI.toString();
+			}
+			
+			protected function id_delete_clickHandler(event:MouseEvent):void
+			{
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					vitals.IsDeleted = true;
+					vitals.IsDirty = true;
+					vitals.ModifiedAt = new Date();
+					vitals.ModifiedBy = model.LoggedInUserId;
+					vitals.Editable = "true";
+					
+					var ev:PatientInputPhysicalVitalsEvent = new PatientInputPhysicalVitalsEvent(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_DELETE_EVENT, true);
+					ev.vitalsDTO = vitals;
+					
+					dispatchEvent(ev);
+					
+					/* var mpve1:ManagePatientVitalEvent = new ManagePatientVitalEvent(vitals,model.LoggedInUserId,vitals.VisitID,model.LoggedInUserSessionID,saveStatus);
+					CairngormEventDispatcher.getInstance().dispatchEvent(mpve1); */
+				});
+			}
+			
+			private function saveStatus(success:Boolean):void
+			{				
+				if(success)
+				{
+					var ev:LoadPatientPreviousVitalsEvent = new LoadPatientPreviousVitalsEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="0" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="26" buttonMode="true" toolTip="Open/Close Details"
+						  click="toggleEditView()">
+		
+		<s:Label left="8" right="76"  text="{getDispLabel(vitals)}" toolTip="{getDispTooltip(vitals)}"  color="#333333" fontFamily="CalibriCFF"	 fontSize="14"
+				 verticalCenter="0"/>
+		
+		<s:HGroup width="100%" height="100%" horizontalAlign="right" verticalAlign="middle" gap="2" paddingRight="6"  >
+			<s:Image source="@Embed('assets/images/new.png')" />
+			<!--	<s:ToggleButton 
+				id="uiDictation"
+				depth="3"
+				click="onDictationNoteButtonsClick(event)"
+				selected="@{viewModel.inDictationMode}"
+				buttonMode="true" toolTip="Record Level Dictation"
+				skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+				/>
+			<s:ToggleButton 
+				id="uiNote"
+				depth="4"
+				click="onDictationNoteButtonsClick(event)"
+				selected="@{viewModel.inNoteMode}"
+				buttonMode="true" toolTip="Record Level Notes"
+				skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+				/>-->
+			<s:Button id="id_delete" skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+					  buttonMode="true" useHandCursor="true"
+					  toolTip="Delete Record"	click="id_delete_clickHandler(event)"  />
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" top="25" width="{id_Header.width - 5}" visible="{vitals.inEditMode}" includeInLayout="{vitals.inEditMode}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="4" paddingLeft="4" paddingRight="4"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.input.RecordEditPopupSkin">
+			<s:layout>
+				<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="4" paddingTop="4"/>
+			</s:layout>
+			
+			<vitals:VitalsItemEditView2 id="id_editView" width="100%" inItemRenderer="true" ShowSaveButton="{vitals.inEditMode}" visible="{vitals.inEditMode}" includeInLayout="{vitals.inEditMode}"/>
+		</s:SkinnableContainer>
+		
+	</s:Group>
+		
+</s:ItemRenderer>

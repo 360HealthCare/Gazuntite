@@ -1,0 +1,435 @@
+<?xml version="1.0"?>
+<ArrayOfICDCodeDTO xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Taenia Solium Infection Intestinal Form</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.0</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Cysticercosis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.1</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Taenia Saginata Infection</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.2</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Taeniasis Unspecified</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.3</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Diphyllobothriasis Intestinal</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.4</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Sparganosis (Larval Diphyllobothriasis)</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.5</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Hymenolepiasis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.6</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Other Specified Cestode Infection</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.8</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Cestode Infection Unspecified</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>123.9</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Esophageal Varices With Bleeding</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.0</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Esophageal Varices Without Bleeding</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.1</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Esophageal Varices In Diseases Classified Elsewher</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.20</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Esophageal Varices In Diseases Classified Elsewher</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.21</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Sublingual Varices</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.3</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Scrotal Varices</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.4</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Pelvic Varices</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.5</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Vulval Varices</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.6</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Varices Of Other Sites</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>456.8</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Ulcerative (Chronic) Enterocolitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.0</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Ulcerative (Chronic) Ileocolitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.1</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Ulcerative (Chronic) Proctitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.2</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Ulcerative (Chronic) Proctosigmoiditis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.3</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Pseudopolyposis Of Colon</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.4</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Left-Sided Ulcerative (Chronic) Colitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.5</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Universal Ulcerative (Chronic) Colitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.6</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Other Ulcerative Colitis</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.8</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+<ICDCodeDTO>
+    <DiagnosisId>0</DiagnosisId>
+    <DictationID>00000000-0000-0000-0000-000000000000</DictationID>
+    <IcdCodeDescription>Ulcerative Colitis Unspecified</IcdCodeDescription>
+    <IcdCodeIdSeq>0</IcdCodeIdSeq>
+    <IcdCodeName>556.9</IcdCodeName>
+    <IsActive>false</IsActive>
+    <IsChronic i:nil="true"/>
+    <Notes i:nil="true"/>
+    <Onset i:nil="true"/>
+    <ProblemType i:nil="true"/>
+    <ReletionshipTypeID>0</ReletionshipTypeID>
+    <ReletionshipTypeName i:nil="true"/>
+    <SNOMEDCode i:nil="true"/>
+    <SNOMEDDescription i:nil="true"/>
+</ICDCodeDTO>
+</ArrayOfICDCodeDTO>

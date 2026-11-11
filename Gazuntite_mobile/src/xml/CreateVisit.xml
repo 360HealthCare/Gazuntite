@@ -1,0 +1,62 @@
+<VisitDTO xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model.Visit" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<AppointmentId>1</AppointmentId>
+<ClinicBranch xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.Clinic">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:Address i:nil="true"/>
+<a:BranchCode i:nil="true"/>
+<a:City i:nil="true"/>
+<a:ClinicBranchIdSeq>0</a:ClinicBranchIdSeq>
+<a:ClinicBranchName i:nil="true"/>
+<a:ClinicStatus i:nil="true"/>
+<a:ContactPerson i:nil="true"/>
+<a:DefaultStation xmlns:b="http://schemas.datacontract.org/2004/07/QuivusModel.Common" i:nil="true"/>
+<a:FaxNumber i:nil="true"/>
+<a:PhoneNumber i:nil="true"/>
+<a:State i:nil="true"/>
+<a:ZIP i:nil="true"/>
+</ClinicBranch>
+<CoSignedDate>2012-07-26T16:03:06.0854315-05:00</CoSignedDate>
+<CreatedAt>2012-07-26T16:03:06.0854315-05:00</CreatedAt>
+<CreatedBy>1</CreatedBy>
+<CreatedStationID>1</CreatedStationID>
+<DictationID>03ce5e41-d336-4a62-93ba-42cf3b2cdef4</DictationID>
+<EncounterTypeId>1</EncounterTypeId>
+<EncounterTypeName/>
+<IsDressedForPhysical/>
+<IsRecordEditable>true</IsRecordEditable>
+<IsValidDataExists>false</IsValidDataExists>
+<IsVirtualVisit>false</IsVirtualVisit>
+<ModifiedAt>0001-01-01T00:00:00</ModifiedAt>
+<ModifiedBy>0</ModifiedBy>
+<ModifiedDate>0001-01-01T00:00:00</ModifiedDate>
+<OwnerId>0</OwnerId>
+<OwnerUserType xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<a:IsClinicUser>false</a:IsClinicUser>
+<a:IsProvider>false</a:IsProvider>
+<a:UserTypeId>0</a:UserTypeId>
+<a:UserTypeName i:nil="true"/>
+</OwnerUserType>
+<PatientId>0</PatientId>
+<PlaceOfServiceTypeID>0</PlaceOfServiceTypeID>
+<PlaceOfServiceTypeName i:nil="true"/>
+<RecGuid>00000000-0000-0000-0000-000000000000</RecGuid>
+<RecordStatus i:nil="true"/>
+<SignedByUserId>0</SignedByUserId>
+<SignedByUserType xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs" i:nil="true"/>
+<SignedDate>0001-01-01T00:00:00</SignedDate>
+<TemplateId>0</TemplateId>
+<TemplateVisitId>0</TemplateVisitId>
+<UserId>0</UserId>
+<UserType xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<a:IsClinicUser>false</a:IsClinicUser>
+<a:IsProvider>false</a:IsProvider>
+<a:UserTypeId>0</a:UserTypeId>
+<a:UserTypeName i:nil="true"/>
+</UserType>
+<VisitDate>0001-01-01T00:00:00</VisitDate>
+<VisitId>0</VisitId>
+<VisitStatus/>
+</VisitDTO>

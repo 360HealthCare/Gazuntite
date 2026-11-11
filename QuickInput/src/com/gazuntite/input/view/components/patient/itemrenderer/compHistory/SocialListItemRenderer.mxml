@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*" 
+				xmlns:dictation="com.gazuntite.components.dictation.*"
+				autoDrawBackground="false"
+				initialize="init()" 
+				width="100%" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryAddictionDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryDTO;
+			import com.gazuntite.input.event.visit.pmh.comphistory.LoadSocialHistoryByPatientIdEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.ManagePatientSocialHistoryDeleteEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.ManagePatientSocialHistoryEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable]  private var isEditViewOpen:Boolean = false;
+			[Bindable]	public var dto:SocialHistoryDTO;
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	protected var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var allowEdit:Boolean;
+			
+			protected function init():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (value == null)
+					return;
+				
+				dto = value as SocialHistoryDTO;
+				
+				if (value == null || null == dto) //value as AllergyDTO fails somw how ... why object is being passed here in place of AllergyDTO ?
+					return;
+				
+				 if (dto.Social == "Marital" || dto.Social == "Work Status" || dto.Social == "Other" || dto.Status == "No" || dto.Status == "Unknown")
+					dto.allowEdit = false; 
+				
+				setDictationNoteButtonMode();
+				//	isEditViewOpen = false;
+				//	removeEditView();
+				removeGlow();
+				invalidateDisplayList();
+			}
+			
+			protected function toggleEditView():void
+			{
+				dto.IsRecordEditable = !dto.IsRecordEditable;
+				
+				if (!dto.allowEdit)
+					return;
+				
+				if (dto.IsRecordEditable)
+				{
+					applyGlow();
+					
+					if (gp.numChildren == 2)
+					{
+						if (gp.getElementAt(1) is SocialListItemEditView)
+						{
+							gp.removeElementAt(1);
+							callLater(addItemEditView); 
+						}
+						return;
+					}
+					else
+						callLater(addItemEditView); 
+				}
+				else
+				{
+					removeGlow();
+				}
+			}
+			
+			private function setDictationNoteButtonMode():void
+			{
+				if (!dto.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+				}else if(dto.inEditMode)
+				{
+					//id_ItemExpandView.viewModel.visible = false;
+				}
+				removeGlow();
+			}
+			
+			private function applyGlow():void
+			{
+				glow1.alpha = 1;
+				glowAnimation.play();
+			}
+			public function removeGlow():void
+			{
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+				//id_ItemExpandView.viewModel.visible 	= false;
+			}
+			
+			private function addItemEditView():void
+			{
+				var sev:SocialListItemEditView = new  SocialListItemEditView();				
+				sev.socialHistoryDTO = dto;
+				sev.socialHistoryAddictionDTO = new SocialHistoryAddictionDTO;
+				
+				var addictionTypeID:int = 1;
+				
+				if (dto.Social == "Alcohol")
+					addictionTypeID = 2;
+				
+				if (dto.Social == "Drugs")
+					addictionTypeID = 3;
+				
+				sev.socialHistoryAddictionDTO.SocialHistoryAddictionTypeID = addictionTypeID;
+				sev.socialHistoryAddictionDTO.ModifiedBy = model.LoggedInUserId;
+				sev.socialHistoryAddictionDTO.ModifiedAt = new Date();
+				sev.socialHistoryAddictionDTO.CreatedBy = model.LoggedInUserId;
+				sev.socialHistoryAddictionDTO.CreatedAt = new Date();
+				sev.socialHistoryAddictionDTO.IsDeleted = false;
+				sev.socialHistoryAddictionDTO.PatientID = model.patientDTO.ID;
+				sev.socialHistoryAddictionDTO.PatientSocialHistoryID = dto.PatientSocialHistoryID;
+				sev.socialHistoryAddictionDTO.SocialHistoryAddictionID = dto.patientSocialHistoryAddictionID;
+				sev.socialHistoryAddictionDTO.IsYesSelected = "true";
+				sev.socialHistoryAddictionDTO.IsNoSelected = "false";
+				
+				sev.selectType(addictionTypeID);
+				sev.selectUsageAmount(addictionTypeID);
+				sev.percentWidth = 100;
+				sev.setStyle('skinClass', NewRXExpandRendererSkin);
+				
+				gp.addElementAt(sev, 1);				
+			}
+			
+			/* public function getDispLabel(dataModel:SocialHistoryDTO):String
+			{
+				
+				var result:String = dto.SNo + ". " + dto.Social + " History- " + dto.Status;				
+				
+				return result;
+			} */
+			
+			public function getDispTooltip(dataModel:SocialHistoryDTO):String
+			{
+				
+				var result:String = dto.Social + " History- " + dto.Status;				
+				
+				return result;
+			}
+			
+			protected function delete_Record():void
+			{
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					model.socialHistoryDTO = dto;
+					
+					var ev:ManagePatientSocialHistoryDeleteEvent = new ManagePatientSocialHistoryDeleteEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				});
+			}
+			
+			private function saveSocialHistory():void
+			{
+				var socialHistoryRecord:SocialHistoryDTO = new SocialHistoryDTO();
+				
+				if (null != model.SocialHistoryList && model.SocialHistoryList.length)
+				{
+					socialHistoryRecord = model.SocialHistoryList.getItemAt(0) as SocialHistoryDTO;
+				}
+				
+				var evt:ManagePatientSocialHistoryEvent = new ManagePatientSocialHistoryEvent(model.LoggedInUserSelectedBranchId, model.patientDTO.ID, model.LoggedInUserSessionID, clearSocialHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt ); 
+			}
+			
+			private function clearSocialHistory():void
+			{
+				//update skins for icons....
+				dispatchEvent(new Event("clearNotesEvent",true, true ));
+				
+				//update controls
+				dispatchEvent(new Event("data_added", true, true));
+				
+				loadSocialHistory();
+			}
+			
+			private function loadSocialHistory():void
+			{
+				var lshEvent:LoadSocialHistoryByPatientIdEvent = new LoadSocialHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(lshEvent);
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin:GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="-4" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="{this.width - 7}" height="26" >
+		
+		<s:HGroup left="0" right="55" top="0" bottom="0"
+				  horizontalAlign="left"
+				  verticalAlign="middle"
+				  paddingLeft="8" paddingRight="8" gap="6"
+				  buttonMode="true" toolTip="Open/Close Details"
+				  click="toggleEditView()"
+				  >
+			<s:Label text="{itemIndex+1 +' .'+ dto.label}" width="100%" toolTip="{getDispTooltip(dto)}"  color="#333333" fontFamily="CalibriCFF"	 fontSize="14"/>
+		</s:HGroup>
+		
+		<s:HGroup right="5" gap="4" verticalCenter="0" height="100%" verticalAlign="middle" horizontalAlign="right">
+			<s:Image source="@Embed('assets/images/new.png')"	 />
+			
+			<!--<s:ToggleButton id="id_btnNote"
+							click="onDictationNoteButtonsClick(event)"
+							selected="@{viewModel.inNoteMode}"
+							buttonMode="true" toolTip="Record Level Notes"
+							skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+							includeInLayout="{id_btnNote.visible}"
+							/>
+			<s:ToggleButton id="id_btnDictation"
+							click="onDictationNoteButtonsClick(event)"
+							selected="@{viewModel.inDictationMode}"
+							buttonMode="true" toolTip="Record Level Dictation"
+							skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+							includeInLayout="{id_btnDictation.visible}"
+							/>-->
+			<s:Button id="id_delete"
+					  click="delete_Record()"
+					  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+					  buttonMode="true" useHandCursor="true"
+					  toolTip="{'Delete social history' }"	  
+					  />
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 5}" visible="{dto.IsRecordEditable}" includeInLayout="{dto.IsRecordEditable}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{dto.Note}" note="@{dto.Note}"
+											 isSaveButtonVisible="false"/>
+	</s:Group>
+	
+</s:ItemRenderer>

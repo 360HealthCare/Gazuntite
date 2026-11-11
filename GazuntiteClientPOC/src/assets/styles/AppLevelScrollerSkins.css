@@ -1,0 +1,92 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Scroller 
+White scroller */
+
+.whiteScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.whiteScroller");
+}
+
+.whiteVerticalScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.whiteVerticalScroller");
+}
+
+
+.beigeListBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.listBoxSkins.beigeListBox");
+/*	focusSkin : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.pinkFocusPointer") ;*/
+}
+
+/*Blue scroller */
+
+.blueScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.blueScroller");
+}
+
+.greyScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.greyScroller");
+}
+
+.blueLargeScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.blueLargeScroller");
+}
+
+/*Purple scroller */
+
+.purpleScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.purpleScroller");
+}
+
+.blueVerticalScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.blueVerticalScroller");
+}
+
+.blueVerticalLargeScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.blueVerticalLargeScroller");
+}
+
+.scrollUpDownButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.scrollUpDownButton");
+}
+
+.thumbButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.thumbButton");
+}
+
+.trackButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.trackButton");
+}
+.trackButtonLargeSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.trackLargeButton");
+}
+
+/* Grey scroller button */
+
+.greyScrollUpScrollerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.greyScrollUpButton");
+}
+
+/* Black scroller button */
+.blackScrollDownScrollerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.scrollerSkins.blackScrollDownButton");
+}
+
+

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:diagnosis="com.gazuntite.input.view.inputsections.assessment.diagnosis.*" 
+		 xmlns:plan="com.gazuntite.input.view.inputsections.assessment.plan.*" 
+		 xmlns:treatment="com.gazuntite.input.view.inputsections.assessment.treatment.*" 
+		 xmlns:supportclass="com.gazuntite.input.view.supportclass.*"
+		 creationComplete="cc()" 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]	private var viewModel:PatientInputAssessmentViewModel = PatientInputAssessmentViewModel.getInstance();
+			[Bindable]  public var PhysicalviewModel:PatientInputPhysicalViewModel = PatientInputPhysicalViewModel.getInstance();
+			[Bindable]	private var NavItems:ArrayCollection = new ArrayCollection([{label:"Diagnosis", NavMainTitle:"Assessment"},{label:"Treatment"},{label:"Plan"}, ]);
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, patientInputLoadFollowUpLabsHandler, false, 0, true);
+				
+				addEventListener(SelectSection.SelectSelectionEvent,function (event:SelectSection):void
+				{
+					MoveToSection(event.SectionID);
+				});
+			}
+			
+			private function patientInputLoadFollowUpLabsHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				//viewModel.loadFollowUpLabs();
+			}
+			public function clearAssessmentInputForms():void
+			{
+				if(id_diagnosisInputView)
+					id_diagnosisInputView.ClearDiagnosisInputView();
+				
+				if(id_TreatmentInputView)
+					id_TreatmentInputView.ClearTreatmentInputView();
+				
+				if(id_PlanInputView)
+					id_PlanInputView.ClearPlanFormView();
+			}
+			
+			
+			public function MoveToSection(Section_menuLabel:String)
+			{
+				PhysicalviewModel.selectedViewLabel = Section_menuLabel;
+				
+				if(Section_menuLabel == 'Treatment' && id_TreatmentInputView && id_TreatmentInputView.uiViewStack)
+					id_TreatmentInputView.uiViewStack.selectedIndex = 0;
+					
+				else if(Section_menuLabel == 'Plan' && id_PlanInputView && id_PlanInputView.uiViewStack)
+					id_PlanInputView.uiViewStack.selectedIndex = 0;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout	paddingLeft="4" paddingRight="4" paddingBottom="3" paddingTop="3"/>
+	</s:layout>
+	
+	<supportclass:PatientSubViewContainer id="uiViewContainer" width="100%" height="100%">
+		<supportclass:inputViews>
+			<supportclass:FlipViewContainer menuLabel="Diagnosis" selected="false">
+				<supportclass:flipViews>
+					<diagnosis:DiagnosisInputView id="id_diagnosisInputView" NavItems="{NavItems}" skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin"/>
+					<diagnosis:DiagnosisHistoryView  NavItems="{NavItems}" skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="Treatment" selected="false">
+				<supportclass:flipViews>
+					<treatment:TreatmentInputView id="id_TreatmentInputView"  NavItems="{NavItems}"/>
+					<treatment:TreatmentHistoryView  NavItems="{NavItems}"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="Plan" selected="false">
+				<supportclass:flipViews>
+					<plan:PlanInputView id="id_PlanInputView"  NavItems="{NavItems}"/>
+					<plan:PlanHistoryView NavItems="{NavItems}"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+		</supportclass:inputViews>
+	</supportclass:PatientSubViewContainer>
+	
+</s:Group>

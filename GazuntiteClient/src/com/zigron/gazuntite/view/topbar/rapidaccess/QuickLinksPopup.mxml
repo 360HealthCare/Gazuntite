@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="cc(event)" 
+					   maxHeight="280"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.rapidAccess.LoadAllQuickLinksEvent;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.zigron.gazuntite.event.rapidAccess.LoadUserDefaultQuickLinksbyLocationEvent;
+			import com.zigron.gazuntite.event.rapidAccess.ManageQuickLinksEvent;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable]	private var rapidAccessModel : RapidAccessModel = RapidAccessModel.getInstance();
+			[Bindable]public var defaultArray : ArrayCollection = new ArrayCollection();
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						var e:Event = new Event('closePopup', true);
+						dispatchEvent( e);
+						//removePopup();
+					}
+				});
+			}
+			
+			protected function listItem_SelectchangeHandler(event:Event):void
+			{
+				if(null != id_selectedQuickLinks.selectedItem)
+				{
+					var e:GeneralEvent = new GeneralEvent('changeView', true);
+					e.value = id_selectedQuickLinks.selectedItem.label;
+					dispatchEvent(e);
+				}
+			}
+			
+			protected function listItemSelection_changeHandler(event:IndexChangeEvent):void
+			{
+				
+			}
+			
+			protected function setAsDefault_Clickhandler(event:MouseEvent):void
+			{
+				call_ManageQuickLinksEvent(true);
+			}
+			
+			private function call_ManageQuickLinksEvent(isdefault:Boolean = false):void
+			{
+				var evts:ManageQuickLinksEvent = new ManageQuickLinksEvent(isdefault, callBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(evts);
+			}
+			
+			protected function save_clickHandler(event:MouseEvent):void
+			{
+				if(model.manageQuickLinksList && model.manageQuickLinksList.length )
+				{
+					call_ManageQuickLinksEvent();
+				}else
+				{
+					Alert.show('Please select some option.','Info', 4, FlexGlobals.topLevelApplication.mainContainer);
+				}
+			}
+			
+			private function callBack():void
+			{
+				var evt:LoadUserDefaultQuickLinksbyLocationEvent = new LoadUserDefaultQuickLinksbyLocationEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(evt);
+				
+				var evts:LoadAllQuickLinksEvent = new LoadAllQuickLinksEvent(onLoadAllQuickLinksEvent);
+				CairngormEventDispatcher.getInstance().dispatchEvent(evts);
+			}
+			
+			private function onLoadAllQuickLinksEvent(arr:ArrayCollection):void
+			{
+				rapidAccessModel.LoadAllQuickLinks();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:BorderContainer width="100%" height="100%" cornerRadius="4" backgroundColor="#000000"  borderVisible="false">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="6" paddingLeft="6" paddingRight="6" paddingTop="6" gap="4"/>
+		</s:layout>
+		
+		<s:BorderContainer backgroundColor="0xE8E8E8" width="100%" height="100%" borderVisible="false" cornerRadius="0">
+			<s:List id="id_selectedQuickLinks" 
+					width="100%" height="100%" 
+					maxHeight="135"
+					minHeight="45"
+					borderVisible="false" contentBackgroundAlpha="0"
+					click="listItem_SelectchangeHandler(event)"
+					dataProvider="{model.quickLinksList}"
+					itemRenderer="com.zigron.gazuntite.view.topbar.rapidaccess.quickListRenderer"
+					skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+					/>
+		</s:BorderContainer>
+		
+		<s:BorderContainer backgroundColor="0xc5c5c5" width="100%" height="100%" borderVisible="false">
+			<s:VGroup width="100%" height="100%" horizontalAlign="left" verticalAlign="top" gap="-2" paddingTop="3" paddingLeft="3" paddingRight="3" >
+				<s:ToggleButton id="id_manageTB" 
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ManageTBSkin"
+								toolTip="Manage" useHandCursor="true" buttonMode="true"
+								/>
+				<s:BorderContainer backgroundColor="0xE8E8E8" width="100%" height="65" borderVisible="false" cornerRadius="0" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}">
+					<s:List  id="id_allQuicklinks"
+							 width="100%" height="100%" 
+							 borderVisible="false" contentBackgroundAlpha="0"
+							 change="listItemSelection_changeHandler(event)"
+							 dataProvider="{model.allQuickLinksList}"
+							 itemRenderer="com.zigron.gazuntite.view.topbar.rapidaccess.AllQuickListRenderer"
+							 skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+							 />
+				</s:BorderContainer>
+				<s:Spacer height="8" width="100%" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}"/>
+				<s:Group width="100%" height="20" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}">
+					<s:Button label="Set as default"
+							  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"
+							  click="setAsDefault_Clickhandler(event)"
+							  toolTip="Set as default"
+							  buttonMode="true"
+							  useHandCursor="true"
+							  left="0" width="100"
+							  />
+					<s:Button label="Set as default"
+							  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"
+							  click="save_clickHandler(event)"
+							  toolTip="save"
+							  buttonMode="true"
+							  useHandCursor="true"
+							  right="0"
+							  />
+				</s:Group>
+			</s:VGroup>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</components:PopupGroup>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="27" height="18">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<s:BitmapImage x="0" y="0" smooth="true"
+				   source="@Embed('assets/images/ePrescription/search_text.png')"/>
+	
+	<s:Path x="27.101" y="11.991" width="8.063" height="5"
+			data="M 6.27 5.40 L 0.03 5.40 3.15 -0.01 Z " rotation="180">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+	</s:Path>
+</s:Skin>

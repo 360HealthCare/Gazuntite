@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			protected function clear_clickHandler(event:Event):void
+			{
+				contents.visible=false;
+
+				var pop:CallAlertPop=new CallAlertPop();
+				pop.x=300;
+				pop.y=400;
+				pop.addEventListener(Event.REMOVED_FROM_STAGE, onRemove);
+				mx.managers.PopUpManager.addPopUp(pop,this.parentApplication as DisplayObject,true);
+				mx.managers.PopUpManager.bringToFront(pop);
+				
+			}
+			
+			protected function call_clickHandler(event:Event):void
+			{
+				contents.visible=false;
+
+				var pop:CallConnectPop=new CallConnectPop();
+				pop.x=300;
+				pop.y=400;
+				pop.addEventListener(Event.REMOVED_FROM_STAGE, onRemove);
+				mx.managers.PopUpManager.addPopUp(pop,this.parentApplication as DisplayObject,true);
+				mx.managers.PopUpManager.bringToFront(pop);
+			}
+			
+			private function onRemove(event:Event):void
+			{
+				contents.visible=true;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Rect width="100%" height="100%">
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="99.1" blurY="99.1" color="#CCCCCC" inner="true" knockout="false" quality="3" strength="2"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Group id="contents" horizontalCenter="0" verticalCenter="0">
+		
+		
+		<s:Rect x="0" y="0" width="248" height="248" radiusX="5"
+				
+			>
+			<s:filters>
+				<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="#333333" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+			</s:filters>
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#989898" ratio="0.00784313725490196"/>
+					<s:GradientEntry alpha="1.0" color="#282828" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:TextInput x="5" y="10" width="236" height="38"
+					 skinClass="com.gazuntite.skins.controls.textInput.CallNumberTextInputSkin"
+					 textAlign="right"/>
+		
+		<s:SkinnableContainer buttonMode="true" x="6" y="52"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="1" fontSize="18" fontWeight="bold" />
+			<s:Label text="00" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="86" y="52"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="2" fontSize="18" fontWeight="bold" />
+			<s:Label text="ABC" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="165" y="52"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="3" fontSize="18" fontWeight="bold" />
+			<s:Label text="DEF" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="6" y="90"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="4" fontSize="18" fontWeight="bold" />
+			<s:Label text="GHI" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="86" y="90"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="5" fontSize="18" fontWeight="bold" />
+			<s:Label text="JKL" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="165" y="90"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="6" fontSize="18" fontWeight="bold" />
+			<s:Label text="MNO" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="6" y="128"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="7" fontSize="18" fontWeight="bold" />
+			<s:Label text="PQRS" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="86" y="128"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="8" fontSize="18" fontWeight="bold" />
+			<s:Label text="TUV" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="165" y="128"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="9" fontSize="18" fontWeight="bold" />
+			<s:Label text="WXYZ" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer buttonMode="true" x="6" y="167"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label height="13" fontSize="30" fontWeight="bold" text="*" verticalAlign="top"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="86" y="167"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="0" fontSize="18" fontWeight="bold" />
+			<s:Label text="+" fontSize="11" fontWeight="bold"/>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer buttonMode="true" x="165" y="167"
+							  width="76" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" gap="1" verticalAlign="middle"/>
+			</s:layout>
+			<s:Label text="#" fontSize="24" fontWeight="bold" />
+		</s:SkinnableContainer>
+	
+		
+		<s:SkinnableContainer buttonMode="true" x="7" y="206"
+							  width="36" height="36" skinClass="com.gazuntite.skins.controls.container.CallNumberSkin">
+			<s:Rect x="29" y="10" width="4" height="18">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#46ACE1" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#417FC1" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Rect x="23" y="13" width="4" height="15">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#46ACE1" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#417FC1" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Rect x="17" y="16" width="4" height="12">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#46ACE1" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#417FC1" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Rect x="11" y="19" width="4" height="9">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#46ACE1" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#417FC1" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+			<s:Rect x="5" y="22" width="4" height="6">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#46ACE1" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#417FC1" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+		</s:SkinnableContainer>	
+		<s:ToggleButton x="46" y="206" label="Toggle Button" buttonMode="true"
+					    skinClass="com.gazuntite.skins.controls.toggleButtonSkin.CalEndCallTBSkin"
+						toolTip="Call or End Call" change="call_clickHandler(event)"/>
+		<s:Button x="205" y="206" label="Button" buttonMode="true"
+				   skinClass="com.gazuntite.skins.controls.button.ClearNumberSkin" toolTip="Clear Number"
+				   click="clear_clickHandler(event)"
+				   />
+	</s:Group>
+</s:Group>

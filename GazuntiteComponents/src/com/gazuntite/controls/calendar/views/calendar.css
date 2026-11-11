@@ -1,0 +1,29 @@
+.Timeline {
+   calendarLabelWidth: 150;
+   calendarRowHeight: 200;
+   backgroundAlpha: 0;
+   contentBackgroundAlpha: 0;
+}
+
+.CalendarEvent {
+   headerHeight: 15;
+   cornerRadius: 6;
+   borderThickness: 2;
+   fontFamily: "Calibri";
+}
+
+.DayChrome {
+	backgroundColor: #AAAAAA;
+	backgroundAlpha: 0;
+	contentBackgroundAlpha: 0;
+}
+
+.ThisMonth {
+	backgroundColor: #AAAAAA;
+	backgroundAlpha: 0;
+}
+
+.NotThisMonth {
+	backgroundColor: #EEEEEE;
+	backgroundAlpha: 0;
+}

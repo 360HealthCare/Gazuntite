@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:controls="com.gazuntite.provider.eprescription.services.patient.view.controls.*" 
+		 xmlns:skins="com.gazuntite.common.view.skins.*"
+		 creationComplete="creComp()"
+		 width="100%" xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PendingRefillRequestDTO;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPendingRefillsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.view.views.newrx.NewDenyNewPrescriptionPopup;
+			import com.gazuntite.provider.eprescription.services.patient.view.views.newrx.SummaryPopUp;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			private var _userId:String;						
+			private var _clinicBranchID:String;
+			private var _securityHeaderXML:XML;
+			private var searchTypeCase:int 		= 1;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			public var GaxenRefillRequestID:String;
+			public var approveSummary:SummaryPopUp;//RXRefillApproveSummary;
+			public var denypopup:NewRXRefillDenyPopup;
+			public var denyNewPrescriptionPopup:NewDenyNewPrescriptionPopup;
+			
+			// **************** GETTER & SETTER ************** STRAT *************
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			
+			[Bindable]
+			public function get userId():String
+			{
+				return _userId;
+			}
+			
+			public function set userId(value:String):void
+			{
+				_userId = value;
+			}
+			// **************** GETTER & SETTER ************** END *************
+			
+			// Ceation complete handler
+			protected function creComp():void
+			{
+				securityHeaderXML	 			= <Header />;					
+				securityHeaderXML.@EUserName	= "TESTUSER";
+				securityHeaderXML.@EPassword	= "TESTPASS";
+				securityHeaderXML.@ClinicID		= "sad";
+				
+				var rpEvent_ : GetPendingRefillsEvent = new GetPendingRefillsEvent();	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );  
+			}
+			// Open deny summary popup
+			private function createDenySummaryReport():void
+			{
+				
+				/* summary = new SummaryPopUp()
+				summary.height = this.height - 25;
+				summary.width = this.width + 10;
+				
+				summary.URL = queryStr;
+				
+				var pt:Point = new Point(this.x, this.y);
+				var loc:Point = localToGlobal( pt );
+				summary.move( loc.x - 5  , loc.y -5 ); 
+				
+				summary.ShowPopup(this); */
+				
+				
+				denypopup  							= new NewRXRefillDenyPopup();
+				denypopup.height 					= this.height;
+				denypopup.width 					= this.width; 
+				var pLoc:Point 						= new Point( this.x , this.y );
+				var loc:Point 						= this.localToGlobal( pLoc );
+				denypopup.move( loc.x  , loc.y );
+				denypopup.Status					= "2";
+				denypopup.GaxenRefillRequestID		= model.selectedApproveRefillRequest.GaxenRefillRequestID;
+				denypopup.securityHeaderXML 		= securityHeaderXML;
+				denypopup.ShowPopup(this);
+			}
+			// Open approve summary poopup
+			private function createApproveSummaryReport():void
+			{
+				approveSummary  					= new SummaryPopUp();
+				
+				approveSummary.height = this.height;
+				approveSummary.width = this.width;
+				approveSummary.URL = "http://beta.quivus.com/Eprescriptionstagging/Reports/SummaryView/View/summaryview2.html";
+				var pLoc:Point 						= new Point( this.x , this.y );
+				var loc:Point 						= this.localToGlobal( pLoc );
+				approveSummary.x 					= loc.x ; 
+				approveSummary.y 					= loc.y ;				
+				/* approveSummary.GaxenRefillRequestID	= model.selectedApproveRefillRequest.GaxenRefillRequestID;
+				approveSummary.securityHeaderXML 	= securityHeaderXML; */
+				approveSummary.ShowPopup(this);
+			}
+			// Approve change click handler
+			private function createApproveChangesSummaryReport():void
+			{
+				approveSummary  					= new SummaryPopUp();
+				
+				approveSummary.height = this.height;
+				approveSummary.width = this.width;
+				approveSummary.URL = "http://beta.quivus.com/Eprescriptionstagging/Reports/SummaryView/View/summaryview2.html";
+				//approveSummary.isApproveChangeCase 		= true;
+				var pLoc:Point 							= new Point( this.x , this.y );
+				var loc:Point 							= this.localToGlobal( pLoc );
+				approveSummary.x 						= loc.x ; 
+				approveSummary.y 						= loc.y ;				
+				/* approveSummary.GaxenRefillRequestID		= model.selectedApproveRefillRequest.GaxenRefillRequestID;
+				approveSummary.securityHeaderXML 		= securityHeaderXML; */
+				approveSummary.ShowPopup(this);
+			}
+			// Deny new prescription open popup
+			private function createDeniedNewPrescriptionton(selectedDto:PendingRefillRequestDTO):void
+			{
+				denyNewPrescriptionPopup 						= new NewDenyNewPrescriptionPopup();
+				denyNewPrescriptionPopup.height = this.height;
+				denyNewPrescriptionPopup.width = this.width;
+				var pLoc:Point 									= new Point( this.x , this.y );
+				var loc:Point 									= this.localToGlobal( pLoc );
+				denyNewPrescriptionPopup.x 						= loc.x ; 
+				denyNewPrescriptionPopup.y 						= loc.y ;				
+				denyNewPrescriptionPopup.securityHeaderXML 		= securityHeaderXML;
+				
+				denyNewPrescriptionPopup.selectedPatient = GetPatientDTO(selectedDto);
+				denyNewPrescriptionPopup.selectedPharmacy = GetPharmacyDTO(selectedDto);
+				
+				denyNewPrescriptionPopup.ShowPopup(this);
+			}
+			
+			private function GetPatientDTO(DTO:PendingRefillRequestDTO):PatientDTO
+			{
+				var patient:PatientDTO = new PatientDTO();
+				patient.FirstName = DTO.pharmacyPatientDTO.FirstName;
+				patient.LastName = DTO.pharmacyPatientDTO.LastName;
+				patient.DOB = DTO.pharmacyPatientDTO.DOB;
+				patient.GAXENID = DTO.pharmacyPatientDTO.GaxenPatientID;
+				patient.Gender = DTO.pharmacyPatientDTO.Gender;
+				patient.SSN = DTO.pharmacyPatientDTO.SSN;
+				patient.RecGuid = QSConstants.GUID_FORMAT; // this should come from backend.
+				
+				return patient;
+			}
+			
+			private function GetPharmacyDTO(DTO:PendingRefillRequestDTO):PharmaciesResult
+			{
+				var pharmacy:PharmaciesResult = new PharmaciesResult();
+				
+				pharmacy.StoreName = DTO.pharmacyDTO.StoreName;
+				pharmacy.AddressLine1 = DTO.pharmacyDTO.AddressLine1;
+				pharmacy.NCPDPID = DTO.pharmacyDTO.NCPDPID;
+				pharmacy.PharmaciesID  = int(DTO.pharmacyDTO.PharmaciesID);
+				pharmacy.Phone = DTO.pharmacyDTO.PhonePrimary;
+				pharmacy.rownum = DTO.pharmacyDTO.rownum;
+				pharmacy.Zip = DTO.pharmacyDTO.Zip;
+				
+				return pharmacy;
+			}
+			// Deny NewPrescriptionto changes click handler
+			public function deniedNewPrescriptionto_ClickHandler(event:MouseEvent):void
+			{
+				var selectedDTO:PendingRefillRequestDTO = new PendingRefillRequestDTO();
+				selectedDTO = (id_pendingRequestList.dataProvider as ArrayCollection).getItemAt(id_pendingRequestList.selectedIndex) as PendingRefillRequestDTO;
+				
+				createDeniedNewPrescriptionton(selectedDTO);
+			}
+			// Approve with changes click handler
+			public function approveWithChange_clickHandler(event:MouseEvent):void
+			{
+				model.selectedApproveRefillRequest = new PendingRefillRequestDTO();
+				model.selectedApproveRefillRequest = (id_pendingRequestList.dataProvider as ArrayCollection).getItemAt(id_pendingRequestList.selectedIndex) as PendingRefillRequestDTO;
+				createApproveChangesSummaryReport();
+			}
+			// Approve Click handler
+			public function approve_ClickHandler(event:MouseEvent):void
+			{
+				model.selectedApproveRefillRequest = new PendingRefillRequestDTO();
+				model.selectedApproveRefillRequest = (id_pendingRequestList.dataProvider as ArrayCollection).getItemAt(id_pendingRequestList.selectedIndex) as PendingRefillRequestDTO;;
+				if(model.selectedApproveRefillRequest.pharmacyPatientDTO.GaxenPatientID != '')
+				{
+					
+				}
+				createApproveSummaryReport();
+			}
+			// Deny button click Handler
+			public function deny_clickHandler(event:MouseEvent):void
+			{
+				model.selectedApproveRefillRequest = new PendingRefillRequestDTO();
+				model.selectedApproveRefillRequest = (id_pendingRequestList.dataProvider as ArrayCollection).getItemAt(id_pendingRequestList.selectedIndex) as PendingRefillRequestDTO;;
+				createDenySummaryReport();
+			}
+			// Label function for refill
+			private function getREfillData(oItem:Object,iCol:int):String
+			{
+				var result:String = '';
+				
+				if(oItem.PreisPRN)
+					result =oItem.PreisPRN;
+				
+				if(result.toUpperCase() == 'TRUE')
+				{
+					result = 'AS NEEDED';
+				}else
+				{
+					if(oItem.PreRefill)
+						result = oItem.PreRefill;
+				}
+				
+				return result;
+			}
+			// Label function record no
+			/*  private function getSrNo(oItem:Object,iCol:int):String
+			{
+			var ret:String;
+			try
+			{
+			var rowNumber:int = id_pendingRequestsGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+			ret = String(rowNumber);
+			}
+			catch(e:Error )
+			{
+			ret = "##";
+			}
+			return ret;
+			}  */
+			// Label function patient name
+			private function getPatientName(oItem:Object,iCol:int):String
+			{
+				var result:String = '';
+				if(oItem.pharmacyPatientDTO.FirstName)
+					result = oItem.pharmacyPatientDTO.FirstName;
+				
+				if(oItem.pharmacyPatientDTO.LastName)
+					result =result+' '+ oItem.pharmacyPatientDTO.LastName;
+				
+				return result;
+			}
+			// Label function Prescriber name
+			private function getPrescriberName(oItem:Object,iCol:int):String
+			{
+				var result:String = '';
+				if(oItem.prescriberDTO.FirstName)
+					result = oItem.prescriberDTO.FirstName;
+				
+				if(oItem.prescriberDTO.LastName)
+					result =result+' '+ oItem.prescriberDTO.LastName;
+				
+				return result;
+			}
+			
+			protected function id_pendingRequestList_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_pendingRequestList.addEventListener("DentPrescriptionBtnClicked",deniedNewPrescriptionto_ClickHandler);
+				id_pendingRequestList.addEventListener("ApproveChangeBtnClicked",approveWithChange_clickHandler);
+				id_pendingRequestList.addEventListener("ApproveBtnClicked",approve_ClickHandler);
+				id_pendingRequestList.addEventListener("DenyBtnClicked",deny_clickHandler);
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					//Search();
+				}
+			}
+			
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();				
+			}
+			
+			protected function id_pharmacy_changeHandler(event:TextOperationEvent):void
+			{
+				if(id_pharmacy.text.length == 3)
+				{
+					//Search();
+				}
+			}
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(id_searchType.selectedIndex)
+				{
+					case 0:
+						id_pharmacy.prompt = 'Patient';
+						id_image.source = selected_name;
+						break;
+					case  1:
+						id_pharmacy.prompt = 'Pharmacy';
+						id_image.source = selected_name;
+						break;
+					case 2:
+						id_pharmacy.prompt = 'Provider';
+						id_image.source = selected_name; 
+						break;
+				}
+			}	
+			
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/name_selected.png")]
+			[Bindable]	public var selected_name:Class;
+			
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout  gap="1"/>
+	</s:layout>
+	
+	<s:BorderContainer width="100%" backgroundColor="#707981" borderColor="#707981" >
+		<s:layout>
+			<s:HorizontalLayout  verticalAlign="middle" paddingLeft="5" paddingRight="5"/>
+		</s:layout>
+		<s:BorderContainer borderColor="#FFFFFF" backgroundColor="#FFFFFF" cornerRadius="4" width="50%" height="23">
+			
+			<s:Group left="0" verticalCenter="0">
+				<s:DropDownList id="id_searchType"
+								labelField="label" 
+								requireSelection="true"
+								skinClass="com.gazuntite.skins.controls.combobox.CustomDropDownListSkin"
+								itemRenderer="spark.skins.spark.DefaultComplexItemRenderer"	
+								width="1" height="1" left="0"
+								change="searchType_changeHandler(event)" 
+								>
+					<s:dataProvider>
+						<s:ArrayList>
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/patient.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/pharmacy.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/provider.png')" />
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Image id="id_image" 
+						 width="30" height="19" source="{selected_name}" left="0" click="id_image_clickHandler(event)" buttonMode="true" useHandCursor="true" />
+			</s:Group>
+			<components:LabelTextInput id="id_pharmacy" 
+									   height="100%"  borderColor="#333333" borderVisible="false" borderAlpha="0" verticalCenter="0"
+									   focusAlpha="0" left="30" right="20"
+									   prompt="Patient" restrict="[A-Z a-z , . / \- 0-9]" fontSize="14"
+									   keyUp="textInput_keyUpHandler(event)"
+									   click="textInput_clickHandler(event)"  
+									   change="id_pharmacy_changeHandler(event)"
+									   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin"
+									   toolTip="Search Pending Request"/>
+			<s:Image id="id_search"
+					 buttonMode="true" useHandCursor="true" toolTip="Search" right="2" verticalCenter="0"
+					 source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/pe_search_selected.png')"/>
+		</s:BorderContainer>
+		<s:Spacer width="100%" />
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.PagingBackgroundSkin">
+			<s:layout>
+				<s:HorizontalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Button id="id_showPharmaciesPrev"  
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.PreviousPageButton" 
+					  buttonMode="true" toolTip="Previous" tabIndex="13"/>
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="id_lblPageNo"   text="01" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="13" width="18" textAlign="center"/>
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Button id="id_showPharmacies" 
+					  buttonMode="true" toolTip="Next" tabIndex="14"
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.NextPageButton"/>
+		</s:SkinnableContainer>
+		
+		
+	</s:BorderContainer>
+	
+	<s:SkinnableContainer id="id_ListHeader" width="100%" height="29" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label width="25%" text="Patient" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="4" />
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		<s:Label width="25%" text="Prescriber" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="4" />
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		<s:Label width="25%" text="SIG" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		<s:Label width="25%" text="Actions" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+	</s:SkinnableContainer>
+	
+	<s:List id="id_pendingRequestList"  
+			dataProvider="{model.PendingRequestList}"
+			width="100%" height="100%"
+			allowMultipleSelection="false"
+			skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+			borderVisible="false"
+			creationComplete="id_pendingRequestList_creationCompleteHandler(event)"
+			itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.views.pendingRequest.PendingRequestIR" />
+</s:Group>

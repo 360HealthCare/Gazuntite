@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    ADOBE SYSTEMS INCORPORATED
+    Copyright 2008 Adobe Systems Incorporated
+    All Rights Reserved.
+
+    NOTICE: Adobe permits you to use, modify, and distribute this file
+    in accordance with the terms of the license agreement accompanying it.
+
+-->
+<!--- The default skin class for Spark TextInput component.  
+
+     @see spark.components.TextInput
+        
+      @langversion 3.0
+      @playerversion Flash 10
+      @playerversion AIR 1.5
+      @productversion Flex 4
+-->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+    alpha.disabledStates="0.5" blendMode="normal">
+	<fx:Metadata>[HostComponent("com.gazuntite.controls.extended.components.LabelTextInput")]</fx:Metadata>
+
+	<s:states>
+        <s:State name="normal"/>
+        <s:State name="disabled" stateGroups="disabledStates"/>
+        <s:State name="normalWithPrompt"/>
+        <s:State name="disabledWithPrompt" stateGroups="disabledStates"/>
+	</s:states>
+		
+		<fx:Script>
+			<![CDATA[
+				protected function textDisplay_focusOutHandler(event:FocusEvent):void
+				{
+					
+					if(textDisplay.text.length)
+						
+						id_rect.fill = id_validated ;
+					else
+						id_rect.fill = id_required ;
+				}
+			]]>
+		</fx:Script>
+		
+		
+		<fx:Declarations>
+			
+			<s:LinearGradient  id="id_validated" rotation="90">
+				<s:GradientEntry alpha="1.0" color="#1cef00"   ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#71cd0e" ratio="1"/>
+			</s:LinearGradient>
+			
+			<s:LinearGradient  id="id_required" rotation="90">
+				<s:GradientEntry alpha="1.0" color="#EE0202"  ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#AF0000" ratio="1"/>
+			</s:LinearGradient>
+			
+			
+		</fx:Declarations>
+
+    
+	<s:Rect id="background" radiusX="2" width="100%"			
+			height="19"
+			>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#7F7F7F" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0.7215686274509804"/>
+				<s:GradientEntry alpha="1.0" color="#E1E1E1" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="19" id="id_rect"  width="5" x="1"  >
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#EE0202"     ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#AF0000"  ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<!--<s:Path data="M 6.27 5.45 L 0.03 5.45 3.15 0.04 Z " rotation="180" height="5" id="path1"  width="9"  y="13"  right="5">
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+	</s:Path>
+	<s:Line id="line1" x="1" y="3.5" yTo="13" right="17">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#7F7F7F" joints="miter" miterLimit="4" weight="1" />
+		</s:stroke>
+	</s:Line>-->
+  
+		<s:RichEditableText 
+			id="textDisplay"
+			bottom="1"
+			paddingBottom="3"
+			paddingLeft="3"
+			paddingRight="3"
+			right="1"
+			left="8"
+			top="1"
+			fontFamily="Calibri"
+			focusRect="false"
+			focusThickness="0"
+			color="#333333"
+			paddingTop="5"
+			fontSize="11"
+			focusOut="textDisplay_focusOutHandler(event)"
+            />
+    <!--- Defines the Label that is used for prompt text. The includeInLayout property is false so the prompt text does not affect measurement. -->
+	<s:Label 
+		id="promptDisplay"
+		bottom="1"
+		includeIn="disabledWithPrompt,normalWithPrompt"
+		color="#333333"		
+		left="1"
+		paddingBottom="3"
+		paddingLeft="8"
+		paddingRight="3"
+		paddingTop="5"
+		right="1"
+		top="1"
+		fontStyle="normal"
+		fontFamily="Calibri"
+		fontSize = "11"/>
+
+</s:SparkSkin>

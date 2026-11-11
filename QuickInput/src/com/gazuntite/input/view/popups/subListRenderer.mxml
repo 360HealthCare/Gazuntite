@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				height="26" width="100%"
+				useHandCursor="true" buttonMode="true">
+	<fx:Script>
+		<![CDATA[
+			private function onMouseOver():void
+			{
+				id_Header.setStyle('backgroundColor', 0xFFD08F);
+			}
+			private function onMouseOut():void
+			{
+			//	id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xDDDEDE : 0xDDDEDE);
+				id_Header.setStyle('backgroundColor', 0xE8E8E8);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+		<s:State name="selected" />
+	</s:states>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<!--<s:Line width="100%" includeInLayout="{currentState == 'selected' ? false : true}" visible="{currentState == 'selected' ? false : true}">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Line>-->
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="100%" 
+						  mouseOver="onMouseOver()" mouseOut="onMouseOut()"
+						  backgroundColor="0xE8E8E8"
+						  skinClass.selected="com.gazuntite.skins.controls.container.input.ItemSectionViewSkin"
+						  toolTip="{data.label}">
+		<s:Label text="{data.label}" 
+				 verticalCenter="0" width="100%"  left="3" right="3"
+				 showTruncationTip="true" maxDisplayedLines="1"
+				 fontFamily.selected="CalibriCFFBold"
+				 typographicCase.selected="uppercase"
+				 fontFamily="CalibriCFF"
+				 fontStyle="normal"
+				 fontSize="13"
+				 />
+	</s:SkinnableContainer>
+	
+	<s:Line width="100%" includeInLayout="{currentState == 'selected' ? false : true}" visible="{currentState == 'selected' ? false : true}">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+</s:ItemRenderer>

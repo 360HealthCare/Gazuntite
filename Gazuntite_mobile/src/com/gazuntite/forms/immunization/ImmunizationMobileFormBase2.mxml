@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.components.controls.*"
+					  width="100%" 
+					  height="100%"
+					  creationComplete="init(event)"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<!-- this is just for testing Parsley -->
+	<fx:Metadata>
+		[ManagedEvents("saveFormData")]
+		[ManagedEvents("getImmunizationBodySideRouteEvent")]
+		[ManagedEvents("getImmunizationManufacturersEvent")]
+		[ManagedEvents("getImmunizationReasonForRefusalEvent")]
+		[ManagedEvents("getImmunizationLotEvent")]
+		[ManagedEvents("getImmunizationSeriesEvent")]
+		[ManagedEvents("getImmunizationSitesEvent")]
+		[ManagedEvents("getImmunizationTypesEvent")]
+		
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.immunization.GetImmunizationBodySideRouteEvent;
+			import com.gazuntite.events.immunization.GetImmunizationLotEvent;
+			import com.gazuntite.events.immunization.GetImmunizationManufacturersEvent;
+			import com.gazuntite.events.immunization.GetImmunizationReasonForRefusalEvent;
+			import com.gazuntite.events.immunization.GetImmunizationSeriesEvent;
+			import com.gazuntite.events.immunization.GetImmunizationSitesEvent;
+			import com.gazuntite.events.immunization.GetImmunizationTypesEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.commands.immunization.*;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			public override function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+				
+				if(value == true)
+				{
+					//fullOptionsHandle.includeInLayout = false;
+					this.currentState = "presentation";
+				}else
+				{
+					//fullOptionsHandle.includeInLayout = true;
+					this.currentState = "normal";
+				} 
+				
+			}
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+				setForm();
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				if(cl1.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(cl2.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(cl3.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				
+				return true;
+			}
+			
+			
+			
+			protected function updateRecord(event:MouseEvent):void
+			{
+				
+				if(validateEditForm())
+				{
+					// dummy data for test binding
+					var r:ObjectProxy = new ObjectProxy();
+					r.associatedWith = cl1.selectedItemText;
+					r.immunization = cl2.selectedItemText;
+					r.dose = cl3.selectedItemText;
+					
+					r.manufacturer = cl4.selectedItemText;
+					r.body = cl5.selectedItemText;
+					r.lotNumber = cl6.selectedItemText;
+					r.dateAdmin = dsl1.selectedItemText;
+					r.nextDue = dsl2.selectedItemText;
+					r.expiryDate = dsl3.selectedItemText;
+					r.refusal = refusalTS2.selected;
+					r.reasonForRefusal = cl7.selectedItemText;
+					r.site = cl8.selectedItemText;
+					r.series = cl9.selectedItemText;
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = r;
+					
+					if(_isEditForm)
+					{
+						e.isUpdate = true;
+					}else
+					{
+						clearForm();
+					}
+					
+					dispatchEvent(e);
+					
+				} 
+			}
+			
+			protected function setForm():void
+			{
+				this.currentState = "presentation";
+				cl1.selectedItemText = _selectedRecord.associatedWith;
+				cl2.selectedItemText = _selectedRecord.immunization;
+				cl3.selectedItemText = _selectedRecord.dose;
+				
+				cl4.selectedItemText = _selectedRecord.manufacturer;
+				cl5.selectedItemText = _selectedRecord.body;
+				cl6.selectedItemText = _selectedRecord.lotNumber;
+				
+				dsl1.selectedItemText = _selectedRecord.dateAdmin;
+				dsl2.selectedItemText = _selectedRecord.nextDue;
+				dsl3.selectedItemText = _selectedRecord.expiryDate;
+				
+				cl7.selectedItemText = _selectedRecord.reasonForRefusal;
+				cl8.selectedItemText = _selectedRecord.site;
+				cl9.selectedItemText = _selectedRecord.series;
+				
+				refusalTS2.selected = _selectedRecord.refusal;
+				
+			}
+			
+			protected function clearForm():void
+			{
+				cl1.selectedItemText = "";
+				cl2.selectedItemText = "";
+				cl3.selectedItemText = "";
+				
+				cl4.selectedItemText = "";
+				cl5.selectedItemText = "";
+				cl6.selectedItemText = "";
+				
+				dsl1.selectedItemText = "";
+				dsl2.selectedItemText = "";
+				dsl3.selectedItemText = "";
+				
+				cl7.selectedItemText = "";
+				cl8.selectedItemText = "";
+				cl9.selectedItemText = "";
+				
+				refusalTS2.selected = false;
+				
+			}
+			
+			protected function refusalTS2_clickHandler(event:MouseEvent):void
+			{
+				if(!refusalTS2.selected)
+				{
+					cl7.selectedItemText = "";
+					cl8.selectedItemText = "";
+					cl9.selectedItemText = "";
+				}
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				if(sharedModel.immunizationHistoryAC.length > 0)
+				{
+					_selectedRecord = sharedModel.immunizationHistoryAC.getItemAt(0) as ObjectProxy;
+				}
+				
+				
+				dispatchServiceEvents();
+			}
+			
+			private function dispatchServiceEvents():void
+			{
+				var e1:GetImmunizationBodySideRouteEvent = new GetImmunizationBodySideRouteEvent();
+				dispatchEvent( e1 );
+				
+				var e2:GetImmunizationLotEvent = new GetImmunizationLotEvent();
+				dispatchEvent( e2 );
+				
+				var e3:GetImmunizationManufacturersEvent = new GetImmunizationManufacturersEvent();
+				dispatchEvent( e3 );
+				
+				var e4:GetImmunizationReasonForRefusalEvent = new GetImmunizationReasonForRefusalEvent();
+				dispatchEvent( e4 );
+				
+				var e5:GetImmunizationSeriesEvent = new GetImmunizationSeriesEvent();
+				dispatchEvent( e5 );
+				
+				var e6:GetImmunizationSitesEvent = new GetImmunizationSitesEvent();
+				dispatchEvent( e6 );
+				
+				var e7:GetImmunizationTypesEvent = new GetImmunizationTypesEvent(GetImmunizationTypesEvent.GET_IMMUNIZATION_TYPES);
+				dispatchEvent(e7);
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<forms:states>
+		<s:State name="normal"/>
+		<s:State name="presentation"/>
+	</forms:states>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="0"
+						  paddingLeft="3"
+						  paddingRight="3"
+						  paddingTop="0"
+						  gap="1"
+						  horizontalAlign="center"
+						  verticalAlign="top"/>
+	</forms:layout>
+	
+	<s:BorderContainer id="presentationForm" 
+					   width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xf3f3f3"/>
+				<s:GradientEntry color="0xffffff"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		
+		<s:HGroup width="100%">
+			
+			<s:Image source="assets/done.png" includeInLayout="{_isEditForm}"/>
+			<s:Image source="assets/edit.png" includeInLayout="{!_isEditForm}"/>
+			
+			<s:VGroup width="100%">
+				
+				<controls:CalloutLabelText id="cl2" 
+										   styleName="title"
+										   labelField="immunizationTypeName" 
+										   buttonLabel="Immunization:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   dataProvider="{sharedModel.immunizationTypes}"/>
+				
+				<controls:CalloutLabelText id="cl1" 
+										   styleName="subTitle"
+										   labelField="associatedWith" 
+										   buttonLabel="Associated with:"
+										   required="true" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object associatedWith="This Visit" immunization="7-Valent" dose="1000000"/>
+							<fx:Object associatedWith="Last Visit" immunization="Immunization 2" dose="1000000"/>
+							<fx:Object associatedWith="Visit 3" immunization="Immunization 3" dose="1000000"/>
+							<fx:Object associatedWith="Visit 4" immunization="Immunization 3" dose="2000000"/>
+							<fx:Object associatedWith="Visit 5" immunization="Immunization 3" dose="3000000"/>
+							<fx:Object associatedWith="Visit 6" immunization="Immunization 3" dose="4000000"/>
+							<fx:Object associatedWith="Visit 7" immunization="Immunization 3" dose="5000000"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			
+			<s:Spacer width="16"/>
+			
+			<s:VGroup width="100%">
+				
+				<!--<controls:CalloutLabelText id="cl3" 
+										   newStyleName="grayText"
+										   labelField="dose" 
+										   buttonLabel="Dose:"
+										   required="true"
+										   isEditForm="{_isEditForm}"/>
+				-->
+				<controls:CalloutLabelText id="cl3" 
+										   styleName="grayText" 
+										   labelField="dose" 
+										   buttonLabel="Dose:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   />
+				
+				<controls:CalloutLabelDateSpinner id="dsl1"
+												  newStyleName="grayText"
+												  labelField="dateAdmin" 
+												  buttonLabel="Date Admin:"
+												  required="false"
+												  isEditForm="{_isEditForm}"/>
+				
+				<controls:CalloutLabelDateSpinner id="dsl2"
+												  newStyleName="grayText"
+												  labelField="nextDue" 
+												  buttonLabel="Next Due:"
+												  required="false"
+												  isEditForm="{_isEditForm}"/>
+				
+				<controls:CalloutLabelDateSpinner id="dsl3"
+												  newStyleName="grayText"
+												  labelField="expiryDate" 
+												  buttonLabel="Expirty Date:"
+												  required="false"
+												  isEditForm="{_isEditForm}"/>
+				
+				<controls:CalloutLabelText id="cl4" 
+										   newStyleName="grayText"
+										   labelField="manufacturer" 
+										   buttonLabel="Manufacturer:" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object manufacturer="Manufacturer 1"/>
+							<fx:Object manufacturer="Manufacturer 2"/>
+							<fx:Object manufacturer="Manufacturer 3"/>
+							<fx:Object manufacturer="Manufacturer 4"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				<controls:ToggleSwitchLabel id="refusalTS2" 
+											label="Refusal:" 
+											click="refusalTS2_clickHandler(event)"
+											width="120"/>
+				
+			</s:VGroup>
+			
+			<s:VGroup width="100%">
+				
+				<controls:CalloutLabelText id="cl5" 
+										   newStyleName="grayText"
+										   labelField="body" 
+										   buttonLabel="Body/Side Route:" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object body="Body/Side Route 1"/>
+							<fx:Object body="Body/Side Route 2"/>
+							<fx:Object body="Body/Side Route 3"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				<controls:CalloutLabelText id="cl6" 
+										   newStyleName="grayText"
+										   labelField="lot" 
+										   buttonLabel="Lot #:" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object lot="Lot # 1"/>
+							<fx:Object lot="Lot # 2"/>
+							<fx:Object lot="Lot # 3"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				<controls:CalloutLabelText id="cl7" 
+										   newStyleName="grayText"
+										   labelField="reason" 
+										   buttonLabel="Reason:" 
+										   enabled="{refusalTS2.selected}" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object reason="Reason for refusal 1"/>
+							<fx:Object reason="Reason for refusal 2"/>
+							<fx:Object reason="Reason for refusal 3"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				<controls:CalloutLabelText id="cl8" 
+										   newStyleName="grayText"
+										   labelField="site" 
+										   buttonLabel="Site:" 
+										   enabled="{refusalTS2.selected}" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object site="Site 1"/>
+							<fx:Object site="Site 2"/>
+							<fx:Object site="Site 3"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				<controls:CalloutLabelText id="cl9" 
+										   newStyleName="grayText"
+										   labelField="series" 
+										   buttonLabel="Series:" 
+										   enabled="{refusalTS2.selected}" 
+										   isEditForm="{_isEditForm}">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object series="Series 1"/>
+							<fx:Object series="Series 2"/>
+							<fx:Object series="Series 3"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+				
+				
+				<s:HGroup>
+					<s:Button label="Save"
+							  styleName="button"
+							  click="updateRecord(event)"/>
+					
+					<!--<controls:NotesAndDictationCalloutButton width="21"
+															 skinClass="com.gazuntite.skins.RecordLevelNotesDictationBtnSkin"/>-->
+				</s:HGroup>
+				
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	
+	<!-- end presentation form -->
+	
+	
+</forms:MobileFormBase>

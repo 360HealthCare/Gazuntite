@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:controls="com.gazuntite.view.controls.*" xmlns:lists="com.gazuntite.view.lists.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.itemrenderers.Plan.FollowUp.followUpIRAgeType;
+			import com.gazuntite.view.itemrenderers.Plan.FollowUp.followUpIRAgeValue;
+			import com.gazuntite.view.itemrenderers.Plan.FollowUp.followUpIRPostVisitPreventation;
+			import com.gazuntite.view.itemrenderers.diagnosis.DiagnosisIRICD;
+			import com.gazuntite.events.SaveFormDataEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.StateChangeEvent;
+			import mx.utils.ObjectProxy;
+			
+			
+			private var _dataprovider : ArrayCollection;
+			
+			[Bindable]
+			public function get dataprovider():ArrayCollection
+			{
+				return _dataprovider;
+			}
+
+			public function set dataprovider(value:ArrayCollection):void
+			{
+				_dataprovider = value;
+			}
+
+			protected function ID_btnSend_clickHandler(event:MouseEvent):void
+			{
+				var followup:ObjectProxy = new ObjectProxy();
+				
+				followup.postVisitPreventation = ID_postVisitInstruction.selectedItemText;
+				followup.ageType = ID_ageType.selectedItemText;
+				followup.ageValue = ID_ageValue.selectedItemText;
+				
+				var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+				e.payload = followup;
+				
+				/* if(_isEditForm)
+				{
+					e.isUpdate = true;
+				}
+				else
+				{
+					clearForm();
+				} */
+				
+				dispatchEvent(e);
+		
+				
+			}
+			
+			protected function id_UponComplitionOf_clickHandler(event:MouseEvent):void
+			{
+				if(id_UponComplitionOf.selected)
+				{
+					ID_drug.visible = true;
+					ID_labTest.visible = true;
+					ID_labTest.includeInLayout = true;
+					ID_drug.includeInLayout = true;
+				}
+				else if(!id_UponComplitionOf.selected)
+				{
+					ID_drug.includeInLayout = false;
+					ID_labTest.includeInLayout = false;
+					ID_drug.visible = false;
+					ID_labTest.visible = false;
+				}
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" paddingLeft="4" paddingRight="4">
+		<s:HGroup width="100%">
+			<s:VGroup horizontalAlign="right" width="40%">
+				<controls:ToggleSwitchLabel id="id_byDate" 
+											styleName="subTitle"
+											label="By Date :" 									
+											width="50%"
+											/>
+				<controls:CalloutLabelText id="ID_labTest" 
+										   styleName="subTitle"
+										   labelField="labTest" 
+										   buttonLabel="Lab Test:"
+										   required="false"
+										   visible="false"
+										   includeInLayout="false"
+										   width="99%" 
+										   />
+				<controls:CalloutLabelDateSpinner id="id_date"
+												  newStyleName="subTitle"
+												  labelField="OnSetDate" 
+												  buttonLabel="Date :"
+												  required="true"
+												  isEditForm="false" 
+												  width="86%"
+												  />
+				<controls:ToggleSwitchLabel id="id_Office" 
+											styleName="subTitle"
+											label="Office :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Chat" 
+											styleName="subTitle"
+											label="Chat :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Chronic" 
+											styleName="subTitle"
+											label="Chronic :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel  id="id_Acute" 
+											 styleName="subTitle"
+											 label="Acute :" 									
+											 width="50%"
+											 />
+			</s:VGroup>
+			
+			<s:VGroup horizontalAlign="right" width="40%">
+				
+				<controls:ToggleSwitchLabel id="id_UponComplitionOf" 
+											styleName="subTitle"
+											label="Upon Complition Of :" 									
+											width="50%"
+											click="id_UponComplitionOf_clickHandler(event)"
+											/>
+				<controls:CalloutLabelText id="ID_drug" 
+										   styleName="subTitle"
+										   labelField="Drug" 
+										   buttonLabel="Drug :"
+										   required="false"
+										   visible="false"
+										   includeInLayout="false"
+										   width="60%" 
+										   />
+				<controls:ToggleSwitchLabel id="id_PRN" 
+											styleName="subTitle"
+											label="PRN :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Phone" 
+											styleName="subTitle"
+											label="Phone :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Video" 
+											styleName="subTitle"
+											label="Video :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Preventive" 
+											styleName="subTitle"
+											label="Preventive :" 									
+											width="50%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Email" 
+											styleName="subTitle"
+											label="Email :" 									
+											width="50%"
+											/>
+				
+				
+			</s:VGroup>
+			
+			<s:VGroup width="20%">
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:BorderContainer borderWeight="1" width="100%">
+			<s:layout>
+				<s:VerticalLayout paddingRight="4" paddingTop="4" paddingLeft="4" paddingBottom="4"/>
+			</s:layout>
+			
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_postVisitInstruction" 
+										   styleName="subTitle"
+										   buttonLabel="Post Visit Preventive and wellness Service :"
+										   required="true" 
+										   width="100%" 
+										   />
+			</s:HGroup>
+			
+			<s:HGroup width="100%">
+				<!--<s:Label text="Frequency :"/>-->
+				<controls:ToggleSwitchLabel id="id_age" 
+											styleName="subTitle"
+											label="Age :" 									
+											width="33%"
+											/>
+				<controls:ToggleSwitchLabel id="id_Duration" 
+											styleName="subTitle"
+											label="Duration :" 									
+											width="33%"
+											/>
+				<controls:CalloutLabelText id="ID_ageType" 
+										   styleName="subTitle"
+										   buttonLabel="Age Type :"
+										   required="true" 
+										   width="100%" 
+										   />
+				
+			</s:HGroup>
+			<s:HGroup width="100%">
+				
+				<controls:CalloutLabelText id="ID_ageValue" 
+										   styleName="subTitle"
+										   buttonLabel="Age Value :"
+										   required="true" 
+										   width="60%" 
+										   />
+				<s:HGroup width="40%" horizontalAlign="right">
+					<s:Button id="ID_btnSend"
+							  styleName="button"
+							  label="Send"
+							  visible="true"
+							  click="ID_btnSend_clickHandler(event)"/>
+				</s:HGroup>
+				
+			</s:HGroup>
+		</s:BorderContainer>
+		
+		
+		<lists:SortableList id="id_SortableList" width="100%" label="Prescription records added"
+							dataProvider="{dataprovider}"
+							sortableIRList="{new ArrayCollection([{irClass:followUpIRPostVisitPreventation, name:'Post Visit Preventation'}, {irClass:followUpIRAgeType, name:'Age Type'}, {irClass:followUpIRAgeValue, name:'Age Value'}])}"
+							itemRenderer="com.gazuntite.view.itemrenderers.Plan.FollowUp.followUpIRPostVisitPreventation" />
+	</s:VGroup>
+	
+</s:Group>

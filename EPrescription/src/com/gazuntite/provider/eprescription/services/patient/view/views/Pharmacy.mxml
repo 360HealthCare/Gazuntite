@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:registeration="com.adobe.gazuntite.view.controls.registeration.*"
+		 xmlns:controls="com.gazuntite.provider.eprescription.services.patient.view.controls.*" 
+		 xmlns:skins="com.gazuntite.common.view.skins.*" 
+		 xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" 
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		 creationComplete="creComp()" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.LoadStateCodesOnlyEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.SearchPharmaciesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]	private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			private var _inSearchPopup:Boolean; 
+			private var _userSessionStatus:String = '0';
+			public var _storename:String = '0';
+			public var _NCPDPID:String = '0';
+			public var _AddressLine1:String = '0';
+			public var _Phone:String = '0';
+			public var _ServiceLevel:String = '0';
+			public var pageNo : int = 0;
+			[Bindable]
+			public var npcid:String = '0';
+			private var _pharmacyname:String = '0';
+			public var address:String = '0';
+			public var zipcode:String = '0';
+			public var state:String = '0';
+			public var city:String = '0';
+			public var phone:String = '0';
+			public var fax:String = '0'
+			public var serviceLevel:int  = -1;
+			public var changelevel:String = "0";
+			public var isActivated:Boolean = true;
+			
+			private var searchTypeCase:int 		= 1;
+			// fax:String, serviceLevel:int,  changelevel:String, activated:Boolean
+			private var personalPhoneNumbers:ArrayCollection;
+			
+			[Bindable]
+			public function get inSearchPopup():Boolean
+			{
+				return _inSearchPopup;
+			}
+			
+			public function set inSearchPopup(value:Boolean):void
+			{
+				_inSearchPopup = value;
+			}
+			
+			[Bindable]
+			public function get pharmacyname():String
+			{
+				return _pharmacyname;
+			}
+			
+			public function set pharmacyname(value:String):void
+			{
+				_pharmacyname 	= value;
+			}
+			//--------------- Creation Complete -------------------------------------------
+			protected function creComp():void
+			{
+				if(!model.isSetNewRXView)//only call when New RX is opend from LPS
+				{
+					var loadStateonlyEvent:LoadStateCodesOnlyEvent = new LoadStateCodesOnlyEvent(loadStateCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadStateonlyEvent);
+				}
+			}
+			
+			//----- call back for LoadStateCodesOnlyEvent -------------------------
+			private function loadStateCallBack(arrType:ArrayCollection):void
+			{
+				if(null != model.stateCodeList)
+					model.stateCodeList.removeAll();
+				else 
+					model.stateCodeList = new ArrayCollection();
+				
+				model.stateCodeList.addAll(arrType); 
+				
+				PharmacyFields();
+				SearchPharmacies(0);
+			}
+			//------------- call SearchPharmaciesEvent ---------------------------------
+			private function SearchPharmacies(_pageNo:int):void
+			{
+				var pharmacyEvent: SearchPharmaciesEvent = new SearchPharmaciesEvent(_pageNo, npcid, pharmacyname, address, zipcode, state, city, phone, fax, serviceLevel, changelevel, isActivated, getPharmacies);
+				CairngormEventDispatcher.getInstance().dispatchEvent(pharmacyEvent); 
+			}
+			// ---------- call back SearchPharmaciesEvent ------------------------
+			private function getPharmacies():void
+			{
+				if(id_lblPageNo.text == '0')
+					id_lblPageNo.text = (int(id_lblPageNo.text) + 1).toString();
+				//resetFields();
+				return;	
+			}
+			//------------ reset fields -------------------
+			private function resetFields():void
+			{
+				/* ti_npcid.text 					= '';
+				ti_name.text  					= '';
+				ti_address.text 				= '';
+				ti_zip.text 					= '';
+				ti_state.selectedIndex 			= -1;
+				ti_city.text 					= '';
+				ti_phone.text 					= '';
+				ti_fax.text 					= '';
+				ti_servicelevel.selectedIndex 	= -1;
+				ti_changeLevel.text 			= '';
+				id_chActive.selected 			= false; */
+			}
+			//--------- select data from Fields -----------------
+			public function PharmacyFields():void
+			{
+				/* npcid 			= ti_npcid.text;
+				pharmacyname	= ti_name.text;
+				address 		= ti_address.text;
+				zipcode  		= ti_zip.text;
+				if(null != ti_state.selectedItem)
+				state 			= ti_state.selectedItem.StateCode;
+				city 			= ti_city.text;
+				phone 			= ti_phone.text;
+				fax				= ti_fax.text;
+				if(null != ti_servicelevel.selectedItem)
+				serviceLevel 	= ti_servicelevel.selectedItem.code
+				changelevel     = ti_changeLevel.text;
+				isActivated		= id_chActive.selected;
+				
+				if(ti_npcid.text == "") 
+				npcid = "0";
+				if(ti_name.text == "") { 
+				pharmacyname = "0";
+				ti_name.text = "";
+				}
+				if(ti_address.text == "") 
+				address = "0";  
+				if(ti_zip.text == "")
+				zipcode = "0";  
+				if(ti_state.selectedIndex == -1)
+				state = "0"; 
+				if(ti_city.text == "") 
+				city = "0"; 
+				if(ti_phone.text == "") 
+				phone = "0"  
+				if(ti_fax.text == "") 
+				fax = "0"  
+				if(ti_servicelevel.selectedIndex == -1)
+				serviceLevel = -1; 
+				if(ti_changeLevel.text == '')
+				changelevel = '0'; */
+			}
+			
+			protected function searchNextPharmacy():void
+			{
+				PharmacyFields();
+				pageNo += 20;
+				id_lblPageNo.text = (int(id_lblPageNo.text) + 1).toString();
+				SearchPharmacies(pageNo);
+			}
+			
+			private function searchPreviousPharmacy():void
+			{
+				PharmacyFields();
+				if(pageNo > 0)
+				{
+					pageNo = pageNo - 20;
+					id_lblPageNo.text = (int(id_lblPageNo.text) - 1).toString();
+					SearchPharmacies(pageNo);
+				}
+			}
+			// --------------- id_search button click handler ------------------------------
+			public function searchPharmacy():void
+			{
+				PharmacyFields();
+				SearchPharmacies(pageNo);
+			}
+			
+			public function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				_storename 		= id_pharmaciesList.selectedItem.StoreName;
+				_NCPDPID 		= id_pharmaciesList.selectedItem.NCPDPID;
+				_AddressLine1 	= id_pharmaciesList.selectedItem.AddressLine1;
+				_Phone 			= id_pharmaciesList.selectedItem.Phone;
+				_ServiceLevel 	= id_pharmaciesList.selectedItem.ServiceLevel;
+				
+				_Phone 			= UtilityFunctions.TrimString(_Phone);
+				
+				if(_Phone == "" || _Phone == null )
+				{
+					var alert:Alert = Alert.show("Primary phone number of Pharmacy is missing. Please choose some other Pharmacy", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{						
+						return;
+					});
+				}
+				else
+				{			
+					dispatchEvent(new Event("SelectButtonClicked", true, true));
+				}
+			} 
+			
+			//-------------display row no for datagrid
+			public function displayRowNum(oItem:Object,iCol:int):String
+			{
+				var rowNumber:int = id_pharmaciesList.dataProvider.getItemIndex(oItem) + pageNo + 1;
+				return String(rowNumber);
+			}
+			
+			
+			
+			protected function id_pharmaciesList_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				switch(id_searchType.selectedIndex)
+				{
+					case 0:
+						id_pharmacy.prompt = 'Name';
+						id_image.source = selected_name;
+						break;
+					case  1:
+						id_pharmacy.prompt = 'NCPDPID';
+						id_image.source = selected_NCPDPID;
+						break;
+					case 2:
+						/* serviceLevel = pharmacy;
+						id_pharmacy.prompt = 'Change Level';
+						id_image.source = selected_serviceLvl; 
+						break;*/
+					case 3:
+						id_pharmacy.prompt = 'Change Level';
+						id_image.source = selected_changeLvl;
+						break;
+					case 4:
+						id_pharmacy.prompt = 'State';
+						id_image.source = selected_State;
+						break;
+					case 5:
+						id_pharmacy.prompt = 'Phone';
+						id_image.source = selected_Phone;
+						break;
+					case 6:
+						id_pharmacy.prompt = 'Fax';
+						id_image.source = selected_Fax;
+						break;
+					case 7:
+						id_pharmacy.prompt = 'Zip';
+						id_image.source = selected_Zip;
+						break;
+					case 8:
+						id_pharmacy.prompt = 'City';
+						id_image.source = selected_City;
+						break;
+					case 9:
+						id_pharmacy.prompt = 'Address';
+						id_image.source = selected_Address;
+						break;
+					
+					default:
+						id_pharmacy.prompt = 'Name';
+						id_image.source = selected_name;
+						break;
+				}
+				
+			}	
+			
+			private function Search():void
+			{
+				var pharmacy:String = id_pharmacy.text;
+				
+				resetFields();
+				
+				switch(id_searchType.selectedIndex)
+				{
+					
+					case 0:
+						pharmacyname = pharmacy;
+						break;
+					break;
+					case  1:
+						npcid = pharmacy;
+						break;
+					break;
+					case 2:
+						serviceLevel = int(pharmacy); 
+						break;
+					case 3:
+						changelevel = pharmacy;
+						break;
+					case 4:
+						state = pharmacy;
+						break;
+					case 5:
+						phone = pharmacy;
+						break;
+					case 6:
+						fax = pharmacy;
+						break;
+					case 7:
+						zipcode = pharmacy;
+						break;
+					case 8:
+						city = pharmacy;
+						break;
+					case 9:
+						address = pharmacy;
+						break;
+					
+					default:
+						pharmacyname = pharmacy;
+						break;
+				}
+				SearchPharmacies(pageNo);
+			}
+			
+			protected function id_pharmacy_changeHandler(event:TextOperationEvent):void
+			{
+				if(id_pharmacy.text.length == 3)
+					Search();
+			}
+			
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();				
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					Search();
+				}
+			}
+			
+			
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/name_selected.png")]
+			[Bindable]	public var selected_name:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/ncpdpid_selected.png")]
+			[Bindable]	public var selected_NCPDPID:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/service_selected.png")]
+			[Bindable]	public var selected_serviceLvl:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/change_selected.png")]
+			[Bindable]	public var selected_changeLvl:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/state_selected.png")]
+			[Bindable]	public var selected_State:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/phone_selected.png")]
+			[Bindable]	public var selected_Phone:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/fax_selected.png")]
+			[Bindable]	public var selected_Fax:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/zip_selected.png")]
+			[Bindable]	public var selected_Zip:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/city_selected.png")]
+			[Bindable]	public var selected_City:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/address_selected.png")]
+			[Bindable]	public var selected_Address:Class;
+			
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="1" />
+	</s:layout>
+	
+	<s:BorderContainer width="100%" backgroundColor="#707981" borderColor="#707981" >
+		<s:layout>
+			<s:HorizontalLayout  verticalAlign="middle" paddingLeft="5" paddingRight="5" gap="1"/>
+		</s:layout>
+		<s:BorderContainer borderColor="#FFFFFF" backgroundColor="#FFFFFF" cornerRadius="4" width="50%" height="23">
+			
+			<s:Group left="0" verticalCenter="0">
+				<s:DropDownList id="id_searchType"
+								labelField="label" 
+								requireSelection="true"
+								skinClass="com.gazuntite.skins.controls.combobox.CustomDropDownListSkin"
+								itemRenderer="spark.skins.spark.DefaultComplexItemRenderer"	
+								width="1" height="1" left="0"
+								change="searchType_changeHandler(event)" 
+								>
+					<s:dataProvider>
+						<s:ArrayList>
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/name.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/ncpdpid.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/servicelevel.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/changelevel.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/state.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/phone.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/fax.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/zip.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/city.png')" />
+							<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/address.png')" />
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Image id="id_image" 
+						 width="30" height="19" source="{selected_name}" left="0" click="id_image_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="More Options"/>
+			</s:Group>
+			
+			<components:LabelTextInput id="id_pharmacy" 
+									   height="100%"  borderColor="#333333" borderVisible="false" borderAlpha="0" verticalCenter="0"
+									   focusAlpha="0" left="30" right="20" fontSize="14"
+									   prompt="Search Pharmacy" restrict="[A-Z a-z , . / \- 0-9]" 
+									   keyUp="textInput_keyUpHandler(event)"
+									   click="textInput_clickHandler(event)"  
+									   change="id_pharmacy_changeHandler(event)"
+									   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin"
+									   toolTip="Search Pharmacy"/>
+			
+			<s:Image id="id_search"
+					 buttonMode="true" useHandCursor="true" toolTip="Search" right="2" verticalCenter="0"
+					 source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/pe_search_selected.png')"/>
+		</s:BorderContainer>
+		
+		<s:Spacer width="100%" />
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.PagingBackgroundSkin">
+			<s:layout>
+				<s:HorizontalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Button id="id_showPharmaciesPrev" 
+					  click="searchPreviousPharmacy()"  
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.PreviousPageButton" 
+					  buttonMode="true" toolTip="Previous" />
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="id_lblPageNo" text="0" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="13" width="18" textAlign="center"/>
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Button id="id_showPharmacies"  
+					  click="searchNextPharmacy()"  
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.NextPageButton"  buttonMode="true" toolTip="Next" />
+		</s:SkinnableContainer>
+		
+	</s:BorderContainer>
+	
+	<s:SkinnableContainer id="id_ListHeader" width="100%" height="29" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		<s:Label width="33%" text="Name" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		<s:Label width="33%" text="Address" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		<s:Label width="33%" text="Phone" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+	</s:SkinnableContainer>
+	
+	<s:List id="id_pharmaciesList"  
+			dataProvider="{model.PharmacyListDTO.Pharmacies}"
+			width="100%" height="100%"
+			allowMultipleSelection="false"
+			skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+			borderVisible="false"
+			creationComplete="id_pharmaciesList_creationCompleteHandler(event)"
+			itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.pharmacy.PharmacyListIR" />
+	
+</s:Group>

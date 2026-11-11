@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   skinClass="{mainViewModel.showPriacticeManagerView ? practiceMangerSkinSelected : practiceMangerSkin}"
+				   width="100%" height="50"
+				   >
+	
+	<fx:Metadata>
+		[Event(name="PracticeManagerClickEvent", type="com.zigron.gazuntite.view.event.PracticeManagerClickEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.MainContainerViewModel;
+			import com.gazuntite.skins.controls.container.practiceMangerSkin;
+			import com.gazuntite.skins.controls.container.practiceMangerSkinSelected;
+			import com.zigron.gazuntite.utils.Constants;
+			import com.zigron.gazuntite.view.event.PracticeManagerClickEvent;
+			
+			[Bindable] protected var mainViewModel:MainContainerViewModel = MainContainerViewModel.getInstance();
+			
+			public function onclosePriacticeManagerView():void
+			{
+				if(mainViewModel.showPriacticeManagerView == false)
+				{
+					unSelectAllButtons();
+				}
+			}
+			
+			private function unSelectAllButtons():void
+			{
+				id_shedular.selected 		= false;
+				id_ePrescription.selected 	= false;
+				id_eLab.selected 			= false;
+				id_dmg.selected 			= false;
+				id_un_Encounter.selected 	= false;
+				id_diseaseManagement.selected = false;
+			}
+			
+			private function ifAllUnselect():Boolean
+			{
+				var bool:Boolean = false;
+				if(id_shedular.selected== false && id_ePrescription.selected==false && id_eLab.selected == false && id_dmg.selected == false && id_un_Encounter.selected == false && id_diseaseManagement.selected == false)
+					bool = true;
+				return bool;
+			}
+			protected function clickHandler(section:String, sectionFlag:int):void
+			{
+				if(mainViewModel.showPriacticeManagerView == true && ifAllUnselect())
+				{
+					mainViewModel.showPriacticeManagerView = false;
+					return;
+				}
+				
+				if(mainViewModel.showPriacticeManagerView == true)
+				{
+					switch(sectionFlag)
+					{
+						case 1:
+							DeselectAllNavButton(id_shedular);
+							break;
+						case 2:
+							DeselectAllNavButton(id_ePrescription);
+							break;
+						case 3:
+							DeselectAllNavButton(id_eLab);
+							break;
+						case 4:
+							DeselectAllNavButton(id_dmg);
+							break;
+						case 5:
+							DeselectAllNavButton(id_un_Encounter);
+							break;
+						case 6:
+							DeselectAllNavButton(id_diseaseManagement);
+							break;
+						
+					}
+					
+/* 					switch(sectionFlag)
+					{
+						
+						case 1:
+							id_ePrescription.selected = false; id_eLab.selected = false; id_dmg.selected = false; id_un_Encounter.selected = false; id_diseaseManagement.selected = false;
+							break;
+						case 2:
+							id_shedular.selected = false; id_eLab.selected = false; id_dmg.selected = false; id_un_Encounter.selected = false; id_diseaseManagement.selected = false;
+							break;
+						case 3:
+							id_shedular.selected = false; id_ePrescription.selected = false; id_dmg.selected = false; id_un_Encounter.selected = false; id_diseaseManagement.selected = false;
+							break;
+						case 4:
+							id_shedular.selected = false; id_eLab.selected = false; id_ePrescription.selected = false; id_un_Encounter.selected = false; id_diseaseManagement.selected = false;
+							break;
+						case 5:
+							id_shedular.selected = false; id_eLab.selected = false; id_dmg.selected = false; id_ePrescription.selected = false; id_diseaseManagement.selected = false;
+							break;
+						case 6:
+							id_shedular.selected = false; id_eLab.selected = false; id_dmg.selected = false; id_ePrescription.selected = false; id_un_Encounter.selected = false;
+							break;
+					} */
+				}
+				
+				mainViewModel.showPriacticeManagerView = true;
+				
+				var practiceManagerClickEvent:PracticeManagerClickEvent = new PracticeManagerClickEvent(section);
+				dispatchEvent(practiceManagerClickEvent);
+				
+				/* if(hidePracticeManager() == true )
+				return; */
+				
+			}
+			
+			private function DeselectAllNavButton(SelectedBtnID:ToggleButton):void
+			{
+				id_ePrescription.selected 				= SelectedBtnID == id_ePrescription;
+				id_shedular.selected 					= SelectedBtnID == id_shedular;
+				id_eLab.selected  						= SelectedBtnID == id_eLab;
+				id_dmg.selected  						= SelectedBtnID == id_dmg;
+				id_un_Encounter.selected 				= SelectedBtnID == id_un_Encounter;
+				id_diseaseManagement.selected   		= SelectedBtnID == id_diseaseManagement;
+			}
+			
+			private function hidePracticeManager():Boolean
+			{
+				var bool:Boolean = false;
+				
+				if((!id_shedular.selected || !id_ePrescription.selected || !id_eLab.selected  || !id_dmg.selected || !id_un_Encounter.selected || !id_diseaseManagement.selected) && mainViewModel.showPriacticeManagerView == true)
+				{
+					mainViewModel.showPriacticeManagerView = false;
+					bool = true;
+				}
+				
+				return bool;
+			}
+			
+			public function setAllDefaults():void
+			{
+				id_ePrescription.selected 	= false;
+				id_eLab.selected 			= false; 
+				id_dmg.selected 			= false; 
+				id_un_Encounter.selected 	= false;
+				id_shedular.selected 		= false;
+				id_diseaseManagement.selected 		= false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!--<s:layout>
+		<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle"/>	
+	</s:layout>-->
+	
+	<s:RichText 
+		visible="{!mainViewModel.showPriacticeManagerView}"
+		verticalCenter="0" color="#1C1C1C" fontSize="15" paddingLeft="5"
+		lineHeight="0" tabStops="S0 S50 S100" text="Practice Manager" trackingRight="1%"
+		fontFamily="CalibriCFFBold" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	
+	<s:HGroup horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" gap="0">
+		<s:ToggleButton id="id_shedular" label="Schedular" buttonMode="true" useHandCursor="true" toolTip="Schedular" click="clickHandler(Constants.SCHEDULAR_SECTION, 1)" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.SchedularTButtonSkin"/>
+		<s:ToggleButton id="id_ePrescription" label="e-Prescription" buttonMode="true" useHandCursor="true" toolTip="ePrescription" click="clickHandler(Constants.EPRESCRIPTION_SECTION, 2)" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.EprescriptionTButtonSkin"/>
+		<s:ToggleButton id="id_eLab" label="e-Labs" buttonMode="true" useHandCursor="true" toolTip="eLab" click="clickHandler(Constants.ELAB_SECTION, 3)"
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.ELabTButtonSkin"/>
+		<s:ToggleButton id="id_dmg" label="Document Management" buttonMode="true" useHandCursor="true" toolTip="Document Management" click="clickHandler(Constants.DMG_SECTION, 4)" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.DMTButtonSkin"/>
+		<s:ToggleButton id="id_un_Encounter" label="Un-Signed Encounter" buttonMode="true" useHandCursor="true" toolTip="Billing" click="clickHandler(Constants.BILLING_SECTION, 5)"
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.BillingTButtonSkin"/>
+		<s:ToggleButton id="id_diseaseManagement" label="Disease Management" buttonMode="true" useHandCursor="true" toolTip="Disease Management" click="clickHandler(Constants.DISEASE_MANAGEMENT, 6)"
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.DiseaseManagementTBSkin"/>
+	</s:HGroup>
+</s:BorderContainer>

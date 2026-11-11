@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:ai="http://ns.adobe.com/ai/2009" 
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
+		xmlns:flm="http://ns.adobe.com/flame/2008"
+		>
+	
+	<fx:Metadata>[HostComponent("spark.components.TextInput")]</fx:Metadata>
+	
+	<s:states>
+		<s:State name="normal"/><s:State name="normalWithPrompt"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+	</s:states>
+	
+	<s:Rect height="100%" includeIn="normal,normalWithPrompt" radiusX="5" width="100%" x="0.5" y="0.5">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CECBCE" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.9" angle="90" blurX="3" blurY="3" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1.0" color="#525552" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="0.27450980392156865"/>
+				<s:GradientEntry alpha="1.0" color="#BABABA" ratio="0.803921568627451"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:RichEditableText id="textDisplay"
+						color="#000000" 
+						columnCount="1" 
+						fontFamily="CalibriCFF" 
+						fontSize="15" 
+						heightInLines="1"  
+						kerning="off" 
+						lineHeight="100%" 
+						tabStops="S0 S50 S100 S150 S200" 
+						textAlign="left" 
+						trackingRight="0%"  
+						whiteSpaceCollapse="preserve" 
+						width="286" 
+						verticalCenter="0" 
+						x="10" 
+						/>
+	<s:Label 
+		id="promptDisplay"
+		bottom="1" top="1"
+		verticalCenter="0"
+		includeIn="disabledWithPrompt,normalWithPrompt"
+		color="#333333"		
+		left="2"
+		paddingLeft="3"
+		x="10"
+		verticalAlign="middle" 
+		paddingRight="3"
+		right="1"
+		
+		fontStyle="normal"
+		fontFamily="CalibriCFF"
+		fontSize = "15"
+		/>
+	
+</s:Skin>

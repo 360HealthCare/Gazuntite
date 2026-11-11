@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:input="com.gazuntite.view.patient.input.*" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:history="com.gazuntite.input.view.inputsections.history.*"
+					  xmlns:physical="com.gazuntite.input.view.inputsections.physical.*"
+					  xmlns:assessment="com.gazuntite.input.view.inputsections.assessment.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  xmlns:inputsections="com.gazuntite.input.view.inputsections.*" 
+					  xmlns:checkOut="com.gazuntite.input.view.components.visit.checkOut.*" 
+					  resize="onResize(event)" 
+					  creationComplete="cc()" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.DictationNoteHistoryDTO;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.view.MaxRestorePopupManager;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			import com.gazuntite.input.view.popups.InputNavMenuePopup;
+			import com.gazuntite.input.view.popups.InputOptionsPopup;
+			import com.gazuntite.input.view.supportclass.FlipViewContainer;
+			import com.gazuntite.input.view.supportclass.PatientSubViewContainer;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	protected var viewModel:PatientViewModel = PatientViewModel.getInstance();
+			[Bindable]	protected var inputViewModel:PatientInputViewModel = PatientInputViewModel.getInstance();
+			[Bindable]	private var dp:ArrayCollection;
+			private var inputOptionPopup:InputOptionsPopup;
+			private var notesDTO:ModuleNoteDTO;
+			private var inputNavPopup:InputNavMenuePopup;
+			[Bindable] private var isCheckoutView:Boolean = false;
+			
+			private function cc():void
+			{
+				var notesDTO:ModuleNoteDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.QUICK_INPUT_MODULE_NAME);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, patientInputLoadFollowUpLabsHandler, false, 0, true);
+			}
+			
+			private  function SelectTab(event:SelectSection):void
+			{
+				if(event.SectionID == 'id_InputHistoryMain')
+				{
+					uiViewStack.selectedIndex = 0;
+					
+					//if the below panel is not null ,its means it is already created , in that case we have to forecefully rest it to the ist tab.
+					if(id_InputHistoryMain)
+						id_InputHistoryMain.MoveToSection('Allergies');
+				}
+				else if(event.SectionID == 'id_InputPhysicalMain')
+				{
+					uiViewStack.selectedIndex = 1;
+					
+					if(id_InputPhysicalMain)
+						id_InputPhysicalMain.MoveToSection('Vitals');
+				}
+				else if(event.SectionID == 'id_InputAssessmentMain')
+				{
+					uiViewStack.selectedIndex = 2;
+					
+					if(id_InputAssessmentMain)
+						id_InputAssessmentMain.MoveToSection('Diagnosis');
+				}
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{	
+				if (null == notesDTO)
+					var notesDTO:ModuleNoteDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.QUICK_INPUT_MODULE_NAME);
+				
+				if (notesDTO.ModuleNoteId == 0) // new note
+				{
+					notesDTO.ManagedByUserId = model.LoggedInUserId;
+					notesDTO.CreatedBy = model.LoggedInUserId;
+					notesDTO.CreatedAt = new Date();
+					notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(QIConstants.QUICK_INPUT_MODULE_NAME);
+					notesDTO.VisitID = model.VisitID;
+					notesDTO.PatientID = model.patientDTO.ID;
+					notesDTO.IsNewAdded = true;
+				}
+				else // edited Notes
+				{
+					notesDTO.ModifiedBy = model.LoggedInUserId;
+					notesDTO.ModifiedAt = new Date();
+					notesDTO.IsDirty = true;
+				}
+				
+				notesDTO.Note = event.data.toString();
+				
+				inputViewModel.manageModuleNotes(notesDTO, QIConstants.QUICK_INPUT_MODULE_NAME, ManageModuleNotesCallBack);
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation:", isNoteSaved ? "successful":"failed")
+			}
+			
+			private function patientDictationNoteSaveHistoryHandler(event:PatientDictationNoteViewEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var notesDTO:ModuleNoteDTO = new ModuleNoteDTO();
+				var dictationNoteHistoryDTO:DictationNoteHistoryDTO;
+				
+				if (!notesDTO)
+					return;
+				
+				if (event.data is DictationNoteHistoryDTO)
+					dictationNoteHistoryDTO = DictationNoteHistoryDTO(event.data);
+				
+				
+				if (!dictationNoteHistoryDTO)
+					return;
+				
+				notesDTO.ModuleTypeId = dictationNoteHistoryDTO.ModuleTypeID;
+				notesDTO.ModuleNoteId = dictationNoteHistoryDTO.ModuleNoteID;
+				notesDTO.Note = dictationNoteHistoryDTO.Note;
+				
+				notesDTO.VisitID = dictationNoteHistoryDTO.VisitID;
+				notesDTO.VisitDate = dictationNoteHistoryDTO.VisitDate;
+				
+				notesDTO.PatientID = model.patientDTO.ID;
+				
+				if (notesDTO.ModuleNoteId == 0) // new note
+				{
+					notesDTO.ManagedByUserId = model.LoggedInUserId;
+					notesDTO.CreatedBy = model.LoggedInUserId;
+					notesDTO.CreatedAt = new Date();
+					notesDTO.IsNewAdded = true;
+				}
+				
+				inputViewModel.manageModuleNotes(notesDTO, QIConstants.HISTORY_VIEW);
+			}
+			
+			private function patientInputLoadFollowUpLabsHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				inputViewModel.patientInputAssessmentViewModel.loadFollowUpLabs();
+			}
+			// navigation popup
+			protected function onOpenNavMenue(event:Event):void
+			{
+				if( null != inputNavPopup && inputNavPopup.isPopUp )
+				{
+					removeEditPopup();
+					return;
+				}
+				
+				/* 	if(null == inputNavPopup)
+				var inputNavPopup:InputNavMenuePopup; */
+				
+				inputNavPopup = new InputNavMenuePopup();
+				inputNavPopup.DataProvider = createNavMenueDP();
+				inputNavPopup.ShowPopup( this );
+				inputNavPopup.width = 300;
+				
+				var pt:Point = id_InputHeader.localToGlobal(new Point(id_InputHeader.x, id_InputHeader.y));
+				inputNavPopup.move((id_InputHeader.width/2)  - 124, pt.y + id_InputHeader.height);
+				//				inputNavPopup.move((id_InputHeader.width /2) - 117, pt.y + id_InputHeader.height);
+				
+				inputNavPopup.callLater( function ():void
+				{
+					inputNavPopup.setSelection( uiViewStack.selectedIndex );
+				});
+				
+				inputNavPopup.addEventListener(CloseEvent.CLOSE, function (event:Event):void
+				{
+					//id_btnEdit.selected = false;
+				});
+				
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, removeEditPopup);
+				
+				viewModel.expandMainInput = true;
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			private function removeEditPopup(event:Event = null):void
+			{
+				if( null != inputNavPopup && inputNavPopup.isPopUp )
+				{
+					inputNavPopup.removePopup();
+					FlexGlobals.topLevelApplication.removeEventListener(MouseEvent.CLICK, removeEditPopup);
+					inputNavPopup = null;
+				}
+			}
+			
+			private function createNavMenueDP():ArrayCollection
+			{
+				if( null == dp )
+				{
+					var content:ArrayList = uiViewStack.content;
+					var nc: NavigatorContent;
+					dp = new ArrayCollection()
+					for (var i:int =0; i < content.length; i ++ )
+					{
+						nc = content.getItemAt( i ) as NavigatorContent;
+						var obj:Object = new Object();
+						obj.label = nc.label.split(',')[0];
+						obj.children = new ArrayCollection();
+						
+						obj.selectTabFunc = selectTab;
+						dp.addItem( obj );
+					}
+				}
+				
+				return dp;
+			}
+			
+			private function loadChildTabLabels (sel:Object):void
+			{
+				var nc:NavigatorContent = uiViewStack.selectedChild as NavigatorContent;
+				var ncobj:Object = nc.getElementAt(0) as Object;
+				
+				var contianer:PatientSubViewContainer = ncobj.uiViewContainer as PatientSubViewContainer;
+				if( contianer )
+				{
+					for each (var view:FlipViewContainer in contianer.inputViews)
+					{
+						var ch:Object = new Object();
+						ch.label = view.menuLabel;
+						sel.children.addItem( ch );
+					}
+				}
+			}
+			
+			private function selectTab (index:int, sel:Object):void
+			{
+				if( uiViewStack.selectedIndex == index )
+				{
+					if( null == sel.children || sel.children.length == 0 )
+						loadChildTabLabels(sel);
+					return;
+				}
+				
+				uiViewStack.selectedIndex = index;
+				tabBar_IndexChanged(index);
+				
+				var changehndlr:Function = function (event:IndexChangeEvent):void
+				{
+					loadChildTabLabels(sel);
+					uiViewStack.removeEventListener(Event.CHANGE, changehndlr);
+				}
+				
+				if( sel.children.length == 0 )
+				{
+					uiViewStack.addEventListener(Event.CHANGE, changehndlr);
+				}
+			}
+			
+			protected function onInputMainTitleBarClick(event:Event):void
+			{
+				if (MaxRestorePopupManager.curView == this)
+				{
+					return;
+				}
+				viewModel.expandMainInput = !viewModel.expandMainInput;
+				
+				if(!viewModel.expandMainInput)
+				{
+					onCloseInputOptionsPopup(event);
+				}
+				else
+				{
+					uiViewStack.selectedIndex 	= 0;
+				}
+			}
+			
+			protected function showSoap(event:MouseEvent):void
+			{
+				/* if(inputViewModel.showInputSoap)
+				{
+				id_soapNoteVerticalTitleContainer.toolTip = "Open SOAP";
+				inputViewModel.showInputSoap=false;
+				}
+				else
+				{
+				id_soapNoteVerticalTitleContainer.toolTip = "Close SOAP";
+				inputViewModel.showInputSoap=true;
+				} */
+				
+				event.stopImmediatePropagation();
+			}
+			
+			protected function showGuide(event:MouseEvent):void
+			{
+				//inputViewModel.showInputHistoryGuide = !inputViewModel.showInputHistoryGuide;
+				event.stopImmediatePropagation();
+			}
+			protected function onResize(event:ResizeEvent):void
+			{
+				viewModel.patientInputContainerHeight = this.height;
+			}
+			
+			public function set onExpandModeChange(param:*):void
+			{
+				if (viewModel.expandMainInput)
+				{
+					uiMainContainer.percentHeight = 100;
+					uiMainContainer.minHeight = 0;
+				}
+				else
+				{
+					uiMainContainer.percentHeight = 0;
+					uiMainContainer.minHeight = 0;
+				}
+			}
+			
+			protected function any_clickHandler(event:MouseEvent):void
+			{
+				if(!viewModel.expandMainInput)
+					viewModel.expandMainInput = true;
+			}
+			
+			protected function inputHeaderOptionClickEventHandler(event:Event):void
+			{
+				inputOptionPopup = new InputOptionsPopup();
+				inputOptionPopup.ShowPopup(this);
+				
+				var pt:Point = id_InputHeader.localToGlobal(new Point(id_InputHeader.x, id_InputHeader.y));
+				inputOptionPopup.move(0, pt.y + id_InputHeader.height);
+				
+				inputOptionPopup.width = id_InputHeader.width;
+				inputOptionPopup.addEventListener(CloseEvent.CLOSE, onCloseInputOptionsPopup);
+				inputOptionPopup.addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+				inputOptionPopup.addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHistoryHandler, false, 0, true);
+			}
+			
+			private function onCloseInputOptionsPopup(e:Event):void
+			{
+				inputOptionPopup = null;
+				id_InputHeader.id_Options.visible = true;
+			}
+			
+			public function removeInputOptionsPopup():void
+			{
+				if(inputOptionPopup)
+				{
+					PopUpManager.removePopUp(inputOptionPopup);
+					inputOptionPopup = null;
+					id_InputHeader.id_Options.visible = true;
+				}
+			}
+			
+			protected function id_tabBar_changeHandler(event:IndexChangeEvent):void
+			{
+				tabBar_IndexChanged(id_tabBar.selectedIndex)
+			}
+			
+			protected function id_InputPhysicalMain_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_InputPhysicalMain.addEventListener(SelectSection.SelectTabEvent,SelectTab);
+				trace("CC:" + event.currentTarget.id);
+			}
+			
+			private function tabBar_IndexChanged(indx:int):void
+			{
+				switch(indx)
+				{
+					case 0:
+						inputViewModel.selectedTabIdx = 0;
+						break;
+					case 1:
+						inputViewModel.selectedTabIdx = 1;
+						inputViewModel.loadPhysicalTabData();
+						break;
+					case 2:
+						inputViewModel.selectedTabIdx = 2;
+						inputViewModel.loadAssessmentTabData();
+						break;
+				}
+			}
+			//TA - 7 oct, 2013
+			// On new patient Load Clear all input fields including record level notes & dictation.
+			public function clearInputForms():void
+			{
+				uiViewStack.selectedIndex 	= 0;
+				PatientInputPhysicalViewModel.getInstance().selectedViewLabel = 'Allergies';
+				
+				if(id_InputHistoryMain)
+					id_InputHistoryMain.clearPMHInputForms();
+				
+				if(id_InputPhysicalMain)
+					id_InputPhysicalMain.clearPhysicalsInputForms();
+				
+				if(id_InputAssessmentMain)
+					id_InputAssessmentMain.clearAssessmentInputForms();
+				
+				if(isCheckoutView)
+					isCheckoutView = false;
+			}
+			
+			protected function id_InputHistoryMain_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_InputHistoryMain.addEventListener(SelectSection.SelectTabEvent,SelectTab);
+			}
+			
+			protected function id_InputAssessmentMain_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_InputAssessmentMain.addEventListener(SelectSection.SelectTabEvent,SelectTab);
+			}
+			
+			protected function checkoutClickEventHandler(event:Event):void
+			{
+				//UtilityFunctions.ShowStatusMessage('Comming Soon', FlexGlobals.topLevelApplication.mainContainer);
+				if(isCheckoutView)
+				{
+					isCheckoutView = false;
+					//id_InputHeader.id_checkTbtn.selected = false;
+				}
+				else
+					isCheckoutView = true;
+			}
+			
+			protected function visitSummaryClickEventHandler(event:Event):void
+			{
+				if(!inputViewModel.showInputSoap)
+					inputViewModel.showInputSoap = true;
+			}
+			
+			protected function visitAmountClickEventHandler(event:Event):void
+			{
+				if(!inputViewModel.showInputBilling)
+					inputViewModel.showInputBilling = true;
+			}
+			
+			protected function visitAmountCloseEventHandler(event:Event):void
+			{
+				isCheckoutView = false;
+				id_InputHeader.id_checkTbtn.selected = false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{viewModel.expandMainInput}" destination="onExpandModeChange"/>
+	
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2" />
+	</fx:Declarations>
+	
+	<s:SkinnableContainer id="uiMainContainer"
+						  skinClass="com.gazuntite.skins.controls.container.InputMainSkin" backgroundAlpha="0"
+						  width="100%" minHeight="0"	height="100%"	>
+		<!--		top="0" bottom="{viewModel.expandMainInput?0: Number.NaN}" minHeight="100"	>	-->	
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="-5"/>
+		</s:layout>
+		
+		<s:Group width="100%" >
+			<inputsections:PatientInputMainTitleBar id="id_InputHeader"
+													width="100%" buttonMode="true" useHandCursor="true" 
+													InputHeaderClickEvent="onInputMainTitleBarClick(event)"
+													InputHeaderOptionClickEvent="inputHeaderOptionClickEventHandler(event)"
+													CheckoutClickEvent="checkoutClickEventHandler(event)"
+													OpenNavMenueEvent="onOpenNavMenue(event)"
+													maximizeView="{this}"
+													/>
+			<!--								click="onInputMainTitleBarClick(event)"-->
+			<s:HGroup  horizontalAlign="center" verticalAlign="top" left="5" top="0" height="31">
+				<s:TabBar id="id_tabBar"
+						  dataProvider="{uiViewStack}"
+						  skinClass="com.gazuntite.skins.controls.tabbar.number.NumberTabBarSkin"
+						  change="id_tabBar_changeHandler(event)">
+					<s:layout>
+						<s:HorizontalLayout gap="6" />
+					</s:layout>
+				</s:TabBar>
+				<s:Group height="100%" visible="false" includeInLayout="false">
+					<s:Button id="id_btnOpenNav" 
+							  toolTip="Navigation" click="onOpenNavMenue(event)"
+							  skinClass="com.gazuntite.skins.controls.button.input.QINavButtonSkin"
+							  useHandCursor="true" buttonMode="true" top="7" />
+				</s:Group>
+			</s:HGroup>
+		</s:Group>
+		
+		<s:HGroup width="100%" height="100%" 
+				  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4" gap="1"
+				  visible="{viewModel.expandMainInput}" includeInLayout="{viewModel.expandMainInput}"
+				  >
+			<!--				  visible="{viewModel.expandMainInput &amp;&amp; !viewModel.showInputSoap &amp;&amp; !viewModel.showInputHistoryGuide}" 
+			includeInLayout="{viewModel.expandMainInput &amp;&amp; !viewModel.showInputSoap &amp;&amp; !viewModel.showInputHistoryGuide}"
+			>
+			-->			
+			<s:VGroup width="100%" height="100%" paddingTop="-4" horizontalAlign="center" gap="2">
+				<components:LabelViewStack id="uiViewStack" width="100%" height="100%"  borderVisible="false" backgroundAlpha="0"
+										   visible="{!isCheckoutView}" includeInLayout="{!isCheckoutView}"
+										   >
+					<s:ArrayList>
+						<s:NavigatorContent id="id_PMH" width="100%" height="100%" label="History,A">
+							<history:InputHistoryMain id="id_InputHistoryMain" width="100%" height="100%" creationComplete="id_InputHistoryMain_creationCompleteHandler(event)"/>
+						</s:NavigatorContent>
+						<s:NavigatorContent id="id_Physical" width="100%" height="100%" label="Physical,B">
+							<physical:InputPhysicalMain id="id_InputPhysicalMain" width="100%" height="100%" creationComplete="id_InputPhysicalMain_creationCompleteHandler(event)"/>
+						</s:NavigatorContent>
+						<s:NavigatorContent id="id_Assessment" width="100%" height="100%" label="Assessment,C">
+							<assessment:InputAssessmentMain id="id_InputAssessmentMain" width="100%" height="100%" creationComplete="id_InputAssessmentMain_creationCompleteHandler(event)"/>
+						</s:NavigatorContent>
+					</s:ArrayList>
+				</components:LabelViewStack>
+				
+				<checkOut:CheckOutView id="id_checkoutView" width="100%" height="100%" visible="{isCheckoutView}" includeInLayout="{isCheckoutView}"
+									   visitSummaryClickEvent="visitSummaryClickEventHandler(event)"
+									   visitAmountClickEvent="visitAmountClickEventHandler(event)"
+									   visitAmountCloseEvent="visitAmountCloseEventHandler(event)"
+									   />
+			</s:VGroup>
+			
+			<s:SkinnableContainer id="id_soapNoteVerticalTitleContainer"
+								  width="23" height="100%" 
+								  skinClass="com.gazuntite.skins.controls.button.bar.SoapBarSkin" backgroundAlpha="0"
+								  buttonMode="true" 
+								  >
+				<s:layout>
+					<s:VerticalLayout gap="0" verticalAlign="middle" horizontalAlign="right"/>
+				</s:layout>
+				
+				<s:ToggleButton id="id_showBilling"
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ShowBillingTBSkin" 
+								toolTip="{id_showBilling.selected ? 'Collapse Billing': 'Expand Billing'}"
+								buttonMode="true" useHandCursor="true"
+								label="{numberFormatter.format(SuperBillModelLocator.getInstance().PatientBalance)}"
+								click="showGuide(event)"
+								selected="@{inputViewModel.showInputBilling}"
+								/>
+				<s:ToggleButton id="id_showGuide"
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ShowGuideTBSkin" 
+								toolTip="{id_showGuide.selected ? 'Collapse Guide': 'Expand Guide'}"
+								buttonMode="true" useHandCursor="true"
+								label="GUIDE"
+								click="showGuide(event)"
+								selected="@{inputViewModel.showInputHistoryGuide}"
+								/>
+				<s:ToggleButton id="id_showSoapnote"
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ShowSoapnoteTBSkin" 
+								toolTip="{id_showSoapnote.selected ? 'Collapse Soapnote': 'Expand Soapnote'}"
+								buttonMode="true" useHandCursor="true"
+								selected="@{inputViewModel.showInputSoap}"
+								click="showSoap(event)"
+								/>
+				
+			</s:SkinnableContainer>
+		</s:HGroup>
+	</s:SkinnableContainer>
+</s:SkinnableContainer>

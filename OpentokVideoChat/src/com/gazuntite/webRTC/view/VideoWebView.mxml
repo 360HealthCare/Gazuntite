@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc(event)" xmlns:view="com.gazuntite.webRTC.view.*"
+		 
+		 >
+	<fx:Metadata>
+		[Event(name="VideoCallEnded", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.common.view.events.PatientVideoChatEndEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.webRTC.manager.OpenTokWebViewManager;
+			import com.gazuntite.webRTC.model.WebRTCModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]
+			private var manager: OpenTokWebViewManager = OpenTokWebViewManager.getInstance();
+			
+			[Bindable]
+			private var opentokModel: WebRTCModel = WebRTCModel.getInstance();
+			
+			protected function id_htmlArea_completeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+				id_htmlArea.htmlLoader.navigateInSystemBrowser = false;
+				
+				id_htmlArea.addEventListener(Event.COMPLETE, completeHandler);
+			}
+			
+			protected function completeHandler(event:Event):void 
+			{
+				
+				if(null != id_htmlArea.htmlLoader.window.document.getElementById("btncallended"))
+				{
+					trace('got You baby ,how dare you disconnect my call :@ ');
+					clickHandler(null);
+				}
+				
+			}
+			
+			protected function clickHandler(object:*):void 
+			{
+				if( uiInfoBar.visible )
+				{
+					var Vitals:VitalsDTO = new VitalsDTO;
+					Vitals.Temperature = uiInfoBar.id_temp.text;
+					Vitals.BPDys = uiInfoBar.id_BP.text;
+					Vitals.BPSys = uiInfoBar.id_BP.text;
+					Vitals.Pulse = uiInfoBar.id_pulse.text;
+					Vitals.Respiration = uiInfoBar.id_resp.text;
+					Vitals.sugarLevel = uiInfoBar.id_sugarLevel.text;
+					Vitals.Note = uiInfoBar.id_notesText.text;
+					Vitals.IsDirty = true;
+					
+					manager.model.isCallfromProvider = true; // to hide the vitals panel.
+					
+					dispatchEvent( new PatientVideoChatEndEvent(Vitals));
+					
+					uiInfoBar.ClearVitals();
+				}
+				else
+				{
+					
+					Alert.show("Call with "+opentokModel.CallerName+" ended.","Call Ended", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void {
+						
+						dispatchEvent(new Event('VideoCallEnded',true));
+						
+					}); 
+					
+					/* UtilityFunctions.ShowMessage("Call with "+opentokModel.CallerName+" ended.","Call Ended", function():void {
+					
+					dispatchEvent(new Event('VideoCallEnded',true));
+					
+					});  */
+					
+					
+				}
+				
+				// temp redirect to Google. To avoid stage Null exception. create a new blank page for this.
+				manager.VideoChat_URL = 'http://www.quivus.com/QuivusAirDev/VideoChatStaging/blankpage.aspx';
+				manager.isAvailable = true;
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!--
+	<s:layout>
+		<s:HorizontalLayout gap="4" horizontalAlign="left" verticalAlign="top" paddingTop="2" paddingLeft="2"/>
+	</s:layout>
+	-->
+	<s:BorderContainer backgroundColor="0xFFFFFF" width="500" height="170" borderVisible="false">
+		<s:layout>
+			<s:HorizontalLayout gap="3" horizontalAlign="center" verticalAlign="top" paddingTop="0" paddingLeft="0"/>
+		</s:layout>
+		<mx:HTML id="id_htmlArea" 
+				 width="393" height="170"  
+				 horizontalScrollPolicy="off" verticalScrollPolicy="off" 
+				 location="{manager.VideoChat_URL}" 
+				 complete="id_htmlArea_completeHandler(event)"
+				 />
+		
+		<view:VideoChatVitalPanel  id="uiInfoBar" 
+								   width="100" height="100%"
+								   visible="{!manager.model.isCallfromProvider}" 
+								   includeInLayout="{!manager.model.isCallfromProvider}"
+								   />
+	</s:BorderContainer>
+</s:Group>

@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 height="20" creationComplete="creComp()"
+		 xmlns:components1="com.gazuntite.controls.extended.components.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			/**
+			 * Author
+			 * TA 
+			 * Date - 15 Oct, 2012
+			 * Gazuntite Online Clinic
+			 * ************ All Search/Select Case*************************
+			 * Case 1- When Zip is select populate All three Zip, City State o index result
+			 * Case 2 - when State is search select state 0 index but don't populate zip and city as zero index provided that city is not selected.
+			 * Case 3 - when State is search and city is already selected then select state from local list
+			 * Case 4 - when city is search select city 0 index but don't populate ZIP and state 0 index  provided that state is not select.
+			 * Case 5 - when city is search and State is already selected then select city from local list
+			 * Case 6 - On city selection if more then one state then don't select zero index of State and Zip
+			 * Case 7 - On State Selection when city is already selected send Selected city and selected state as pram for search and populate the zip at zero index.
+			 * Case 8 - When state is slect don't select City and Zip at Zero index.
+			 * Case 9 - When Zip is search don't populate city State or Zip at Zero index 
+			 **/ 
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.CitiesDTO;
+			import com.gazuntite.common.dto.StatesDTO;
+			import com.gazuntite.common.dto.ZipsDTO;
+			import com.gazuntite.common.event.GetStateCityZipCodeCombineEvent;
+			
+			import mx.collections.ArrayCollection;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var statscodeList:ArrayCollection;
+			[Bindable]
+			private var citiesList:ArrayCollection;
+			[Bindable]
+			private var zipcodeList:ArrayCollection;
+			
+			private var focusOutCase:Boolean = false;
+			private var caseNo:int 			 = 0;
+			private var _haschange:Boolean;
+			
+			// --- getter and setter ------------------------------
+			[Bindable]
+			public function get haschange():Boolean {
+				return _haschange;
+			}
+			public function set haschange(value:Boolean):void {
+				_haschange = value;
+			}
+			
+			// ---- Creation Complete Handler -----------
+			private function creComp():void
+			{
+				statscodeList 		= new ArrayCollection();
+				citiesList 			= new ArrayCollection();
+				zipcodeList 		= new ArrayCollection(); 
+				
+				//create Tabing sequence
+				id_ZIP.tabIndex		=	tabIndex;
+				id_City.tabIndex	=	tabIndex + 1;
+				id_State.tabIndex	=	tabIndex + 2;
+			}
+			// -------- call GetStateCityZipCodeCombineEvent -- always call from outside at time of load first time(in most cases for edit mode) ----------
+			public function loadStateCityZipCodeCombineEvent(State:String='0', City:String='0', Zip:String='0'):void
+			{
+				caseNo = 1;
+				var getSateCityZipEvent:GetStateCityZipCodeCombineEvent = new GetStateCityZipCodeCombineEvent(State, City, Zip, callbackGetStateCityZipCodeCombineEvent);				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getSateCityZipEvent);
+				cursorManager.setBusyCursor();
+			}
+			// --------- State drop down change handler -----------------------------
+			protected function id_StateCB_changeHandler(event:IndexChangeEvent):void
+			{
+				if(id_State.selectedIndex >= 0 && id_City.selectedIndex >= 0  && id_State.selectedItem != null && id_City.selectedItem != null)
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent(id_State.selectedItem.Name, id_City.selectedItem.CityName, '0');
+				}
+				else if(id_State.selectedIndex >= 0 && id_City.selectedIndex < 0 && id_State.selectedItem != null)
+				{
+					caseNo = 2;
+					getStateCityZipCodeCombineEvent(id_State.selectedItem.Name, '0', '0');
+				}
+			}
+			// ------ states secltion change handler ------------------------------
+			protected function id_CitiesCB_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				if(id_City.selectedIndex >= 0 && id_State.selectedIndex >= 0 && id_City.selectedItem != null && id_State.selectedItem != null)// case : city and state both selected
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent(id_State.selectedItem.Name, id_City.selectedItem.CityName, '0');
+				}
+				else if (id_State.selectedIndex < 0 && id_City.selectedIndex >= 0 && id_City.selectedItem != null)// Case : only City selected
+				{
+					caseNo = 3;
+					getStateCityZipCodeCombineEvent('0', id_City.selectedItem.CityName, '0');
+				}
+			}
+			//------------ Zip selection change handler ---------------------------------------
+			protected function id_ZIPCB_changeHandler(event:IndexChangeEvent):void
+			{
+				if(id_ZIP.selectedIndex >= 0  && id_ZIP.selectedItem != null)// Case : Zip selected
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent('0', '0', id_ZIP.selectedItem.ZipCode);
+				}
+			}
+			//------------- state name text change handler --------------------------------------
+			protected function id_StateCB_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.TAB && id_State.selectedIndex >= 0)
+					return;
+				
+				if((event.keyCode == Keyboard.TAB || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.RIGHT || event.keyCode == Keyboard.LEFT) && (event.keyCode == Keyboard.DOWN && statscodeList.length > 1))
+					return;
+				
+				var serachString:String = '';
+				serachString = id_State.textInput.text;
+				if(id_State.selectedIndex !=-1)
+					id_State.selectedIndex == -1;
+				
+				if(serachString.length >=3 && id_City.selectedIndex < 0)// Case : State Search only
+				{
+					caseNo = 2;
+					getStateCityZipCodeCombineEvent(serachString, '0', '0');
+				}
+				else if(serachString.length >= 3 && id_City.selectedIndex >= 0 && id_City.selectedItem != null)// Caes : city is selected and search for state
+				{
+					caseNo = 6;
+					getStateCityZipCodeCombineEvent(serachString, id_City.selectedItem.CityName, '0');
+				}
+			}
+			// -------------- City name text handler --------------------------------------
+			protected function id_CitiesCB_keyUpHandler(event:KeyboardEvent):void
+			{
+				if((event.keyCode == Keyboard.TAB || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.RIGHT || event.keyCode == Keyboard.LEFT) && (event.keyCode == Keyboard.DOWN && citiesList.length > 1))
+					return;
+				
+				var serachString:String = '';
+				serachString = id_City.textInput.text;
+				if(id_City.selectedIndex !=-1)
+					id_City.selectedIndex == -1;
+				
+				if(serachString.length >=3 && id_State.selectedIndex < 0 )// case : City search
+				{
+					caseNo = 3;
+					getStateCityZipCodeCombineEvent('0', serachString, '0');
+				}
+				else if(serachString.length >=3 && id_State.selectedIndex >= 0 && id_State.selectedItem != null)// Case : when state is selected and city is search use local serach
+				{
+					//caseNo = 5;
+					//getStateCityZipCodeCombineEvent(id_State.selectedItem.Name, serachString, '0');
+					return;
+				}
+			}
+			// ------------- Zip code text change handler --------------------------------------
+			protected function id_ZIPCB_keyUpHandler(event:KeyboardEvent):void
+			{
+				// if tab press and the Zip code has one loaded record in array
+				if(event.keyCode == Keyboard.TAB && zipcodeList.length)
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent('0', '0', zipcodeList[0].ZipCode);
+					return;
+				}
+				//if one record is load after serach and user press down key and focus on that record 
+				if(event.keyCode == Keyboard.DOWN && zipcodeList.length)
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent('0', '0', zipcodeList[0].ZipCode);
+					return;
+				}
+				// when loaded recordeds are more than 1 then on pessing down key 
+				if((event.keyCode == Keyboard.TAB || event.keyCode == Keyboard.UP  || event.keyCode == Keyboard.RIGHT || event.keyCode == Keyboard.LEFT) && (event.keyCode == Keyboard.DOWN && zipcodeList.length > 1))
+					return;
+				
+				// Stop calling on pressing back space & clear all lists
+				if(event.charCode == Keyboard.BACKSPACE)
+				{
+					//clearStateCityZiplists();
+					return;
+				}
+				// when one record is loaded after search & user press ENTER KEY 
+				if(event.charCode == Keyboard.ENTER && zipcodeList.length)// on enter key 
+				{
+					caseNo = 1;
+					getStateCityZipCodeCombineEvent('0', '0', id_ZIP.selectedItem.ZipCode);
+					return;
+				}
+				// Simple Serach case
+				var serachString:String = '';
+				serachString = id_ZIP.textInput.text;
+				if(id_ZIP.selectedIndex !=-1)
+					id_ZIP.selectedIndex == -1;
+				
+				if(serachString.length == 5 || serachString.length == 9)//Search only when zip conatin 5 char
+				{
+					caseNo = 4;
+					getStateCityZipCodeCombineEvent('0', '0', serachString);
+				}
+			}
+			
+			// ----------------- call GetStateCityZipCodeCombineEvent-------------------------
+			private function getStateCityZipCodeCombineEvent(State:String='0', City:String='0', Zip:String='0'):void
+			{
+				var getSateCityZipEvent:GetStateCityZipCodeCombineEvent = new GetStateCityZipCodeCombineEvent(State, City, Zip, callbackGetStateCityZipCodeCombineEvent);				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getSateCityZipEvent);
+				cursorManager.setBusyCursor();
+			}
+			//----------------- call back function for GetStateCityZipCodeCombineEvent----------------------
+			private function callbackGetStateCityZipCodeCombineEvent(resultXML:XML):void
+			{
+				clearStateCityZiplists();
+				
+				if(null != resultXML)
+				{
+					//load states
+					var stateXML:XML = resultXML.States[0];
+					for(var i:int=0; i<stateXML.State.length(); i++)
+					{
+						var stateDTO:StatesDTO = new StatesDTO();
+						stateDTO.FromXML(stateXML.State[i]);
+						statscodeList.addItem(stateDTO);
+					}
+					// load cities
+					var citiesXML:XML = resultXML.Cities[0];
+					for(var c:int=0; c<citiesXML.Cities.length(); c++)
+					{
+						var cityDTO:CitiesDTO = new CitiesDTO();
+						cityDTO.FromXML(citiesXML.Cities[c]);
+						citiesList.addItem(cityDTO);
+					}
+					//load zips
+					var zipXML:XML = resultXML.ZipCodes[0];
+					for(var z:int=0; z<zipXML.ZipCodes.length(); z++)
+					{
+						var zipsDTO:ZipsDTO = new ZipsDTO();
+						zipsDTO.FromXML(zipXML.ZipCodes[z]);
+						zipcodeList.addItem(zipsDTO);
+					}
+				}
+				
+				showZipCityStateWithCase();
+			}
+			//----------------- Show result according to case------------------------------
+			private function showZipCityStateWithCase():void
+			{
+				switch(caseNo)
+				{
+					case 0:
+					case 1:
+						id_State.selectedIndex 	= 0;
+						id_City.selectedIndex 	= 0;
+						id_ZIP.selectedIndex 	= 0;
+						break;
+					case 2:
+						id_State.selectedIndex 	= 0;
+						id_City.selectedIndex 	= -1;
+						id_ZIP.selectedIndex 	= -1;
+						break;
+					case 3:
+						id_State.selectedIndex 	= -1;
+						id_City.selectedIndex 	=  0;
+						id_ZIP.selectedIndex 	= -1;
+						break;
+					case 4:
+						id_State.selectedIndex 	=  -1;
+						id_City.selectedIndex 	=  -1;
+						id_ZIP.selectedIndex 	=  0;
+						break;
+					/* case 5:
+					id_State.selectedIndex 	=  0;
+					id_City.selectedIndex 	=  0;
+					id_ZIP.selectedIndex 	=  -1;
+					break; */
+					case 6:
+						id_State.selectedIndex 	=  0;
+						//id_City.selectedIndex 	=  0;
+						id_ZIP.selectedIndex 	=  -1;
+						break;
+					case 7:
+						id_State.selectedIndex 	= 0;
+						id_City.selectedIndex 	= 0;
+						id_ZIP.selectedIndex 	= 0;
+						focusOutCase = true;
+						break;
+				}
+				if(haschange)
+					haschange = false;
+				
+				haschange = true;
+			}
+			// ---------------- clear all city state and zip list -----------------------------
+			private function clearStateCityZiplists():void
+			{
+				if(statscodeList)
+					statscodeList.removeAll();
+				if(citiesList)
+					citiesList.removeAll();
+				if(zipcodeList)
+					zipcodeList.removeAll();
+				
+				focusOutCase = false;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout />
+	</s:layout>
+	
+	<components1:LabelComboBox id="id_ZIP" 
+							  prompt="Zip"  width="33%" dataProvider="{zipcodeList}" autoWidth="false" toolTip="Select zip code" 
+							  labelField="ZipCode" skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin"
+							  keyUp="id_ZIPCB_keyUpHandler(event)"  change="id_ZIPCB_changeHandler(event)" />
+	<components1:LabelComboBox id="id_City" 
+							  prompt="City" width="33%" dataProvider="{citiesList}" autoWidth="false" toolTip="Select city"
+							  change="id_CitiesCB_changeHandler(event)" keyUp="id_CitiesCB_keyUpHandler(event)"
+							  labelField="CityName" required="true" />
+	<components1:LabelComboBox id="id_State" 
+							  prompt="State"  dataProvider="{statscodeList}" width="34%" toolTip="Select state" 
+							  change="id_StateCB_changeHandler(event)" keyUp="id_StateCB_keyUpHandler(event)"
+							  autoWidth="false"  labelField="StateName" 
+							  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" />
+</s:Group>

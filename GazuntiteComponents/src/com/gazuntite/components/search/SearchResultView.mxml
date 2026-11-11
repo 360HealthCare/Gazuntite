@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:extended="com.adobe.Quivus.view.controls.extended.*" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="popupgroup1_creationCompleteHandler(event)"
+					   >
+	<fx:Metadata>
+		[Event(name="ResultSelectionChange", type="flash.events.Event")]
+		[Event(name="CloseSearchBox", type="mx.events.CloseEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		
+	</fx:Script>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var ir_ResultRenderer:IFactory;
+			private var m_sSearchString:String
+			private var ac_DataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return ac_DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				ac_DataProvider = value;
+			}
+
+			public function get SearchString():String
+			{
+				return m_sSearchString;
+			}
+			
+			public function set SearchString(value:String):void
+			{
+				m_sSearchString = value;
+			}
+			
+			public function closeHandler( event:MouseEvent = null ):void
+			{
+				this.removePopup();
+				id_outValue.text = '';
+				var e:CloseEvent = new CloseEvent( "CloseSearchBox", true );
+				dispatchEvent( e );
+			}
+			
+			public function getListLength():Number{
+				
+				if(id_SearchList && id_SearchList.dataProvider.length < 5)
+				{
+					trace( "list hieght: " + id_SearchList.dataProvider.length * 10);
+					return id_SearchList.dataProvider.length * 10;					
+				}
+				else
+				{
+					return 115;
+				}
+			} 
+			
+			[Bindable]
+			public function get ResultRenderer():IFactory
+			{
+				return ir_ResultRenderer;
+			}
+			
+			public function set ResultRenderer(value:IFactory):void
+			{
+				ir_ResultRenderer = value;
+			}
+
+			public function refreshList(query:String):void
+			{
+				SearchString = query;
+			}
+			
+			protected function id_SearchList_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				if( null == ResultRenderer )
+				{
+					ResultRenderer = new ClassFactory(DefaultResultRenderer);
+				}
+				
+				//	setListHeight();
+				
+				id_SearchList.setStyle("useRollOver", true);
+				id_SearchList.setStyle("backgroundColor", 0xFFFFFF );
+				id_SearchList.setStyle( "rollOverColor", 0xF7C174 );
+				id_SearchList.setStyle( "textRollOverColor", 0x333333 );
+				id_SearchList.setStyle( "selectionColor", 0x7c632c ); 
+			}
+			
+			override public function set visible(value:Boolean):void
+			{
+				super.visible = value;
+			}
+			
+			/* private function filterForData(item:Object):Boolean
+			{
+				var retValue:Boolean;
+				var arr:Array;
+				
+				if( SearchString.indexOf( ',' ) != -1 )
+				{
+					arr = SearchString.split( "," );
+				}
+				else if ( SearchString.indexOf( ' ' ) != -1 ) // its a Name 
+				{
+					arr = SearchString.split( ' ' );
+				}
+				
+				if( ! UtilityFunctions.IsNullOrEmpty( arr ) )
+				{
+					var i:int;
+					var token:String;
+					for( i = 0; i < arr.length; i++ )
+					{
+						token = arr[1];
+						retValue = filterPatient( dto, token );
+					}
+				}
+				else if( SearchString )
+				{
+					retValue = filterPatient( dto, SearchString )
+				}
+				/    * else
+				{
+				return true;
+				} *    /
+				
+				return retValue;
+			}
+			
+			private function filterPatient( dto:PatientDTO, criteria:String ):Boolean
+			{
+				var retValue:Boolean;
+				if(retValue == false && dto.FirstName!=null && dto.FirstName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.LastName!=null && dto.LastName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.MiddleName!=null && dto.MiddleName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.QuivusID!=null && dto.QuivusID.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.SSN!=null && dto.SSN.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				trace("PatientSearchList::filterPatient -- > retValue =", retValue, "Patient Name: ", dto.FullName );
+				return retValue;
+			} */
+			
+			protected function id_SearchList_clickHandler(event:MouseEvent):void
+			{
+				setOutValue();
+				
+				if( event.target is spark.components.Button )
+				{
+					event.stopImmediatePropagation();
+					return;
+				}
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+				{
+					closeHandler()
+				}); 
+			}
+			
+			protected function id_OK_clickHandler(event:MouseEvent):void
+			{
+				var evt:Event = new Event( "ResultSelectionChange" );
+				this.dispatchEvent( evt );
+				closeHandler(); 
+				
+			}
+			
+			protected function id_SearchList_valueCommitHandler(event:FlexEvent):void
+			{
+				setOutValue();
+				
+				id_OK_clickHandler( null );
+			}
+			
+			private function setOutValue():void
+			{
+				/* if( null != id_SearchList.selectedItem )
+				{
+					id_outValue.text = id_SearchList.selectedItem.FirstName; 
+					id_outValue.text += " "+ id_SearchList.selectedItem.MiddleName; 
+					id_outValue.text += " "+ id_SearchList.selectedItem.LastName;
+					id_outValue.text += "    "+ id_df.format(id_SearchList.selectedItem.DOB);
+				} */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="id_df" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingTop="0" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.PatientSearchListSpinnerBG" >
+		<s:layout>
+			<s:VerticalLayout gap="3" verticalAlign="top" horizontalAlign="left" paddingLeft="5" paddingRight="6" paddingTop="6" paddingBottom="6"/>
+		</s:layout>
+		
+		<s:List id="id_SearchList"
+				width="100%" height="70" left="7" right="7" top="10" bottom="24"
+				dataProvider="{DataProvider}" borderVisible="false"
+				click="id_SearchList_clickHandler(event)" 
+				valueCommit="id_SearchList_valueCommitHandler(event)"
+				creationComplete="id_SearchList_creationCompleteHandler(event)" 
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+				itemRenderer="{ResultRenderer}" 
+				/>	
+		
+		<s:Group width="100%" visible="false" includeInLayout="false">
+			<s:Label id="id_outValue" text="# of Rec(s) : {DataProvider.length}" fontFamily="CalibriCFF" fontSize="13" color="#FFFFFF" right="50" left="0" maxDisplayedLines="1" verticalCenter="0"/>
+			
+			<s:Button id="id_OK" 
+					  click="id_OK_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton" 
+					  toolTip="Select Patient" verticalCenter="0" right="25"/>
+			<s:Button id="id_CloseBtn" 
+					  click="closeHandler(event)"
+					  buttonMode="true" useHandCursor="true" toolTip="Close Patient Search" right="0" verticalCenter="0"  
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"/>
+		</s:Group>
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%" 
+		 xmlns:ns="library://ns.tink.ws/flex/spark"
+		 creationComplete="init(event)" xmlns:controls="com.gazuntite.view.controls.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				setNotesVisible();
+			}
+			
+			protected function setNotesVisible():void
+			{
+				dictation.visible = false;
+				notes.visible = true;
+			}
+			
+			protected function setDictationVisible():void
+			{
+				dictation.visible = true;
+				notes.visible = false;
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(event.currentTarget.id == "notesBtn")
+				{
+					setNotesVisible();
+				}else
+				{
+					setDictationVisible();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout />
+	</s:layout>
+	
+	<s:HGroup>
+		<s:Button id="dictationBtn" 
+				  skinClass="com.gazuntite.skins.DictatioinCalloutButtonSkin"
+				  click="button1_clickHandler(event)"/>
+		<s:Button id="notesBtn" 
+				  skinClass="com.gazuntite.skins.NotesCalloutButtonSkin"
+				  click="button1_clickHandler(event)"/>
+	</s:HGroup>
+	
+	<s:Group width="100%">
+		<controls:Notes id="notes" 
+						width="100%"
+						useHandCursor="true"
+						buttonMode="true"/>
+		<controls:Dictation id="dictation" 
+							width="100%"
+							useHandCursor="true"
+							buttonMode="true"/>
+	</s:Group>
+	
+	
+	
+</s:Group>

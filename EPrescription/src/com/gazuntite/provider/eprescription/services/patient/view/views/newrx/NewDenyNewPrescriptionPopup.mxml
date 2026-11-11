@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+					   creationComplete="popupgroup1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.SaveNewRXEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			public var InsurancesXML:XML = <Insurances />;
+			
+			[Bindable]
+			private var _selectedPatient:PatientDTO;
+			[Bindable]
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			private var _SPI:String;
+			
+			private var _securityHeaderXML:XML;
+
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+			}
+
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+			}
+
+			public function get SPI():String
+			{
+				return _SPI;
+			}
+
+			public function set SPI(value:String):void
+			{
+				_SPI = value;
+			}
+
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+					}
+				});
+				
+				id_InputView.loadStaticData();
+				addEventListener( "sendData", onSendData);
+			}
+			
+			
+			private function onSendData(event:Event):void
+			{
+				if(!model.checkPrescriberServiceLevels)
+				{
+					var alert:Alert = Alert.show("You don’t have the required service level to prescribe this medicine", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						return;											
+					});
+					return;
+				}
+				
+				if(!ValidateNEWRX() )
+				{
+					return;
+				}
+					
+				else
+				{
+					AssignSummary(true,id_InputView.id_ChronicMedication.selected?true:false);
+				}
+			}
+			
+			public function ValidateNEWRX():Boolean
+			{
+				return true;
+			}
+			
+			private function AssignSummary(sendOnly:Boolean, isChronic:Boolean = false, encounterId:String="0"):void
+			{
+				var SaveNewRXXML_:XML = <Messages />;				
+				//SaveNewRXXML_.appendChild(securityHeaderXML);
+				//var SubscriberXML:XML = <Prescriber />;				
+				if(id_InputView.selectedPatient.GAXENID == '')
+					SaveNewRXXML_.@GaxenPatientID		= model.patientGaxenID;
+				else
+					SaveNewRXXML_.@GaxenPatientID		= id_InputView.selectedPatient.GAXENID;
+				
+				SaveNewRXXML_.@NDCCODE					= id_InputView.selectedMedicine.NDC.NDC //id_ndc.text;
+				SaveNewRXXML_.@Strength					= id_InputView.selectedMedicine.STRENGTH_ID; //StrengthId; //id_strength.text;
+				
+				SaveNewRXXML_.@Dose						= id_InputView.id_MedicineInputView.selectedDose.value; //id_dose.text?id_dose.text:"0";
+				SaveNewRXXML_.@DoseForm					= id_InputView.id_MedicineInputView.selectedDose.item.Code; //id_dosageForm.text;
+				SaveNewRXXML_.@Quantity					= id_InputView.id_MedicineInputView.selectedQuantity.value; //id_quantity.text?id_quantity.text:"0";
+				SaveNewRXXML_.@QuantityForm				= id_InputView.id_MedicineInputView.selectedQuantity.item.Code;//QuantityForm; // id_quantityForm.text;
+				SaveNewRXXML_.@Route					= id_InputView.id_MedicineInputView.selectedRoute.value; //Route; //id_route.text;
+				SaveNewRXXML_.@frequency				= id_InputView.id_MedicineInputView.selectedFrequency.item.Abbreviation; //Frequency; //id_frequency.text;
+				SaveNewRXXML_.@Duration					= id_InputView.id_MedicineInputView.selectedFrequency.value;//id_duration.text;
+				
+				var isPRN:String 						= id_InputView.id_MedicineInputView.selectedRefill.value;
+				SaveNewRXXML_.@isPRN					= isPRN.length > 0 ? isPRN:"false";
+				
+				if(id_InputView.id_MedicineInputView.selectedRefill.value == "true")
+				{
+					SaveNewRXXML_.@Refill					= "0";				
+				}
+				else
+				{
+					SaveNewRXXML_.@Refill				= id_InputView.id_MedicineInputView.selectedRefill.item.Refill;
+				}
+				SaveNewRXXML_.@Substitution				= id_InputView.id_MedicineInputView.selectedSubstitution.item.SubstitutionCode; //id_substitution.text;				
+				SaveNewRXXML_.@EncounterID				= id_InputView.encounterID; //EncounterId; //id_associatedVisit.text
+				SaveNewRXXML_.@Phone					= id_InputView.selectedPatientPhone;//id_phone.text;
+				SaveNewRXXML_.@Address					= id_InputView.selectedPatientAddress//id_address.label; //id_address.text;
+				SaveNewRXXML_.@VisitDate				= id_InputView.visitDate;//visitDate;
+				SaveNewRXXML_.@SIG						= id_InputView.id_SIG.text;//id_sig.label; //id_sig.text;
+				
+				if(!isChronic)
+				{
+					SaveNewRXXML_.@NCPDPID					= id_InputView.selectedPharmacy.NCPDPID; //id_NPCDID.text;
+					SaveNewRXXML_.@PharmPhone				= id_InputView.selectedPharmacy.Phone; //id_NPCDID.text;
+					SaveNewRXXML_.@PharmName				= id_InputView.selectedPharmacy.StoreName; //id_NPCDID.text;
+					SaveNewRXXML_.@PharmAddress				= id_InputView.selectedPharmacy.AddressLine1; //id_NPCDID.text;
+				}
+				
+				SaveNewRXXML_.@ReferenceNumber			= "";
+				SaveNewRXXML_.@WrittenDate				= AppUtils.getToday(); //"1985-01-28T00:00:00";
+				SaveNewRXXML_.@MessageTypeID			= "1";
+				SaveNewRXXML_.@LastName					= id_InputView.selectedPatient.FirstName;//id_PatientLName.text;
+				SaveNewRXXML_.@FirstName				= id_InputView.selectedPatient.LastName;//id_PatientName.label;
+				SaveNewRXXML_.@Gender					= id_InputView.selectedPatient.Gender;//id_gender.text;
+				SaveNewRXXML_.@DOB						= AppUtils.formatDate(id_InputView.selectedPatient.DOB);//id_dob.text;
+				
+				SaveNewRXXML_.@UserName					= "TESTUSER";
+				SaveNewRXXML_.@UserPassord				= "TESTPASS";
+				SaveNewRXXML_.@ClinicID					= "sad";
+				SaveNewRXXML_.@DrugName					= id_InputView.selectedMedicine.Drug.DrugName; //id_medicine.text;
+				SaveNewRXXML_.@GenericName				= id_InputView.selectedMedicine.Product.GenericName; //id_medicine.text;
+				//SaveNewRXXML_.@isActive					= isActive;
+				
+				
+				if(sendOnly)
+					SaveNewRXXML_.@MessageStatus			= "2";  //2 for send
+				else
+					SaveNewRXXML_.@MessageStatus			= "1";  //1 for save
+				
+				if(isChronic) //add more
+				{
+					SaveNewRXXML_.@isChronic				= "true";
+					SaveNewRXXML_.@MessageStatus			= "3";
+					//SaveNewRXXML_.@Type						= id_type.text;//id_type.selectedItem;					
+				}
+				else
+				{
+					SaveNewRXXML_.@isChronic				= "false";
+					SaveNewRXXML_.@Type						= "e-Prescribed" ;//id_type.selectedItem;
+				}
+				
+				SaveNewRXXML_.@SPI						= SPI;//SPI; 
+				SaveNewRXXML_.@OtherID  = "";//Dication ID
+				SaveNewRXXML_.@Notes = id_InputView.id_pharmacyNote.text;//Notes
+				SaveNewRXXML_.appendChild(InsurancesXML);
+				
+				
+				
+				var rpEvent : SaveNewRXEvent = new SaveNewRXEvent(SummaryRecived,true);
+				rpEvent.data = SaveNewRXXML_;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent ); 
+			}
+			
+			public function SummaryRecived(response:XML):void
+			{
+				// temp change for the Summary POPUp URL.
+				var Summry_url:String = "http://beta.quivus.com/Eprescriptionstagging/" + response.toString(); 
+				//id_InputView.ShowSummaryScreen(Summry_url);
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer width="100%" height="100%" color="#ffffff">
+		
+		<newrx:NewRXInputView id="id_InputView" width="100%" selectedPatient="{selectedPatient}" selectedPharmacy="{selectedPharmacy}"/>
+		
+	</s:BorderContainer>
+</components:PopupGroup>

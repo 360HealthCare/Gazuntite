@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import utils.SkinAssetsUtility;
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect includeIn="disabled,disabledAndSelected,down,downAndSelected,over,overAndSelected,upAndSelected" 
+			radiusX="3" 
+			bottomRightRadiusX.upAndSelected="3" 
+			bottomRightRadiusX.overAndSelected="3" 
+			bottomRightRadiusX.downAndSelected="3" 
+			width="146" 
+			height.over="68" 
+			height.down="68" 
+			height.disabled="68" 
+			height.upAndSelected="80"
+			height.overAndSelected="80" 
+			height.downAndSelected="80" 
+			height.disabledAndSelected="80"
+			visible.disabled="false" 
+			visible.disabledAndSelected="false" 
+			x="0" y="0" >
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#54BFDC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2981A9" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#1875A2" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#369AC4" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="0" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage 
+		smooth="true" 
+		source="{SkinAssetsUtility.getByteArray(SkinAssetsUtility.TOPBAR_LOGO_B4STR)}" 
+		y="1" x="9"
+		/>
+	<s:RichText color="#FFFFFF" fontFamily="Calibri" fontSize="14" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" tabStops="S0 S50" text="GAZUNTITE" trackingRight="1" y="1" x="67"/>
+	<s:RichText fontFamily="Calibri" fontSize="10" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" 
+				text="VER 0.4.1" 
+				trackingRight="1" y="15" color="#FFFFFF" tabStops="S0" color.up="#AFC4E5" x="93"/>
+</s:Skin>

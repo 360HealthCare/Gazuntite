@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:ATE="http://ns.adobe.com/ate/2009"
+		xmlns:ai="http://ns.adobe.com/ai/2009"
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
+		xmlns:flm="http://ns.adobe.com/flame/2008" 
+		xmlns:lib="assets.graphics.*"
+		xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+		buttonMode="true" useHandCursor="true" toolTip="Search">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import utils.SkinAssetsUtility;
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Path data="M 18.065 0 L 0 0 L 0 16.033 L 18.065 16.033 C 20.148 16.033 21.838 14.239 21.838 12.025 L 21.838 4.008 C 21.838 1.795 20.148 0 18.065 0 Z" includeIn="disabled,down,over" width.down="21.838" x.down="0" y="0" minHeight="19" width.disabled="21.838" x.disabled="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" ratio="0" color="#FFCB00"/>
+				<s:GradientEntry alpha="1.0" ratio="1" color="#FF9300"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="4.0" blurY="4.0" color="0x000000" distance="4.0" hideObject="false" includeIn="disabled,down" inner="true" knockout="false" quality="2" strength="1" distance.down="1" blurX.down="2" blurY.down="2"/>
+			<s:DropShadowFilter alpha="0.5" angle="180" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="over" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<s:fill.disabled>
+			<s:SolidColor color="#CCCCCC"/>
+		</s:fill.disabled>
+	</s:Path>
+	<s:BitmapImage smooth="true" source="{SkinAssetsUtility.getByteArray(SkinAssetsUtility.PE_SEARCH_HOVER)}" x="5" y="2" alpha.disabled="0.37"/>
+	<s:BitmapImage id="bitmapimage1" smooth="true" source="{SkinAssetsUtility.getByteArray(SkinAssetsUtility.PE_SEARCH_HOVER)}" x="5" y="2" visible="false">
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="78" blurY="78" color="#FFFFFF" includeIn="down" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms1:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.view.controls.*"
+					  width="100%" 
+					  height="100%"
+					  creationComplete="init(event)"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*" 
+					  xmlns:ipeControls="qs.ipeControls.*" 
+					  xmlns:ipe="com.gazuntite.components.controls.ipe.*" xmlns:forms1="com.gazuntite.view.quickInput.forms.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.GetImmunizationTypesEvent;
+			import com.gazuntite.events.immunization.GetImmunizationManufacturersEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+				this.currentState = "presentation";
+				
+				var e7:GetImmunizationTypesEvent = new GetImmunizationTypesEvent(GetImmunizationTypesEvent.GET_IMMUNIZATION_TYPES);
+				dispatchEvent(e7);
+				
+				var e3:GetImmunizationManufacturersEvent = new GetImmunizationManufacturersEvent(false);
+				dispatchEvent( e3 );
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<forms:states>
+		<s:State name="normal"/>
+		<s:State name="presentation"/>
+	</forms:states>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="0"
+						  paddingLeft="3"
+						  paddingRight="3"
+						  paddingTop="0"
+						  gap="1"
+						  horizontalAlign="center"
+						  verticalAlign="top"/>
+	</forms:layout>
+	
+	<s:BorderContainer id="presentationForm" 
+					   width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xf3f3f3"/>
+				<s:GradientEntry color="0xffffff"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		<s:VGroup width="100%" 
+				  includeIn="presentation">
+			<ipe:IPELabelCombobox labelField="immunizationTypeName" 
+								  buttonLabel="Immunization:"
+								  showIcon="true" 
+								  requireSelection="true"
+								  newStyleName="subTitle"
+								  enableIcon="true"  
+								  editOnEnter="false" 
+								  editOnClick="true"  
+								  commitOnEnter="true" 
+								  commitOnBlur="false"
+								  dataProvider="{sharedModel.immunizationTypes}"/>
+			
+			
+			<ipe:IPELabelCombobox labelField="Name" 
+								  buttonLabel="Manufacturer:"
+								  newStyleName="subTitle"
+								  showIcon="true" 
+								  enableIcon="true"  
+								  editOnEnter="false" 
+								  editOnClick="true"  
+								  commitOnEnter="true" 
+								  commitOnBlur="false"
+								  dataProvider="{sharedModel.ImmunizationManufacturersDTOList}"/>
+			
+			<ipe:IPELabelCombobox buttonLabel="Dose:"
+								  newStyleName="subTitle"
+								  showIcon="true" 
+								  enableIcon="true"  
+								  editOnEnter="false" 
+								  editOnClick="true"  
+								  commitOnEnter="true" 
+								  commitOnBlur="false"/>
+			
+			
+		</s:VGroup>
+		
+		<s:HGroup width="100%"
+				  includeIn="presentation">
+			
+			<ipe:IPELabelDateSpinner id="ds1"
+									 newStyleName="grayText"
+									 showIcon="true" 
+									 enableIcon="true"  
+									 editOnEnter="false" 
+									 editOnClick="true"  
+									 commitOnEnter="true" 
+									 commitOnBlur="false"
+									 labelField="dateAdmin" 
+									 buttonLabel="Date Admin:"
+									 requireSelection="true"/>
+			
+			<ipe:IPELabelDateSpinner id="ds2"
+									 newStyleName="grayText"
+									 showIcon="true" 
+									 enableIcon="true"  
+									 editOnEnter="false" 
+									 editOnClick="true"  
+									 commitOnEnter="true" 
+									 commitOnBlur="false"
+									 labelField="onSet" 
+									 buttonLabel="OnSet:"
+									 requireSelection="true"/>
+			
+		</s:HGroup>
+		
+		
+		
+		
+	</s:BorderContainer>
+	
+	
+	<!-- end presentation form -->
+	
+	
+	
+</forms1:MobileFormBase>

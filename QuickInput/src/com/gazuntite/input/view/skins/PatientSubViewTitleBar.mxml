@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.button.bar.PatientSubViewTitleBarSkin" 
+					  doubleClickEnabled="true"
+					  doubleClick="onDoubleClick(event)"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  height="30" 
+					  >
+	<fx:Metadata>
+		[Event(name="gotoPrevSectionEvent", type="flash.events.Event")]
+		[Event(name="gotoNextSectionEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.event.FlipViewEvent;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			import com.gazuntite.input.view.popups.InputNavMenuePopup;
+			import com.gazuntite.skins.controls.button.patient.PatientOptionToggleButtonSkin;
+			import com.gazuntite.skins.controls.button.patient.RedOptionTBSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			[Bindable]	public var NavItems:ArrayCollection;
+			[Bindable]	public var label:String = "";
+			[Bindable]	public var sectionNumber:int = 1;// that show in center with selected
+			[Bindable]	public var maxSectionCounter:int = 4;
+			[Bindable]	public var showInputPart:Boolean = false;
+			[Bindable]	public var showHistoryPart:Boolean = false;
+			[Bindable]	public var inputCounter:Number = 0;
+			[Bindable]	public var dictationNoteViewModel:PatientDictationNoteViewModel;
+			[Bindable]	public var showFlipButton:Boolean = true;
+			[Bindable]	public var showAllNormalButton:Boolean = false;
+			[Bindable]	public var viewModel:PatientInputPhysicalViewModel = PatientInputPhysicalViewModel.getInstance();
+			[Bindable]  private var model:QIModelLocator = QIModelLocator.getInstance();
+			private var inputNavPopup:InputNavMenuePopup;
+			private var m_sPrevSectionLabel:String = "";
+			private var m_sNextSectionLabel:String = "";
+			private var m_MainSectionLabel:String = "";
+			private var _SectionLevelNote:String = '';
+			private var _SectionLevelDictationID:String = "00000000-0000-0000-0000-000000000000";
+			
+			[Bindable]
+			public function get SectionLevelNote():String
+			{
+				return _SectionLevelNote;
+			}
+			
+			public function set SectionLevelNote(value:String):void
+			{
+				_SectionLevelNote = value;
+				if(null != uiOptionButton)
+				{
+					if(_SectionLevelNote)
+					{
+						if(_SectionLevelNote.length)
+							uiOptionButton.setStyle('skinClass', RedOptionTBSkin)
+					}else
+						uiOptionButton.setStyle('skinClass', PatientOptionToggleButtonSkin)
+				}
+			}
+			[Bindable]
+			public function get SectionLevelDictationID():String
+			{
+				return _SectionLevelDictationID;
+			}
+			
+			public function set SectionLevelDictationID(value:String):void
+			{
+				_SectionLevelDictationID = value;
+				if(null != uiOptionButton)
+				{
+					if(_SectionLevelDictationID && _SectionLevelDictationID != DictationConstants.GUID_FORMAT)
+					{
+							uiOptionButton.setStyle('skinClass', RedOptionTBSkin)
+					}else
+						uiOptionButton.setStyle('skinClass', PatientOptionToggleButtonSkin)
+				}
+			}
+			
+			[Bindable]
+			public function get MainSectionLabel():String
+			{
+				return m_MainSectionLabel;
+			}
+			
+			public function set MainSectionLabel(value:String):void
+			{
+				m_MainSectionLabel = value;
+			}
+			
+			[Bindable]
+			public function get NextSectionLabel():String
+			{
+				return m_sNextSectionLabel;
+			}
+			
+			public function set NextSectionLabel(value:String):void
+			{
+				m_sNextSectionLabel = value;
+			}
+			
+			[Bindable]
+			public function get PrevSectionLabel():String
+			{
+				return m_sPrevSectionLabel;
+			}
+			
+			public function set PrevSectionLabel(value:String):void
+			{
+				m_sPrevSectionLabel = value;
+			}
+			
+			protected function getFlipTooltip(isInput:Boolean, isHistory:Boolean):String
+			{
+				var result:String = "";
+				if (showInputPart)
+				{
+					result = "Flip to History";
+				}
+				else if (showHistoryPart)
+				{
+					result = "Flip to Input";
+				}
+				return result;
+			}
+			
+			protected function onDoubleClick(event:MouseEvent):void
+			{
+				this.dispatchEvent(new FlipViewEvent());
+			}
+			
+			protected function showCounter(p:Array):Boolean
+			{
+				var result:Boolean = true;
+				if (inputCounter==0
+					//					|| !uiOptionButton.selected
+				)
+				{
+					result = false;
+				}
+				
+				return result;
+			}
+			
+			protected function gotoSection_clickHandler(event:MouseEvent):void
+			{
+				viewModel.selectedViewLabel = event.currentTarget.label;
+				
+				dispatchEvent( new Event( "goto" + event.currentTarget.name + "Event", true ) );
+			}
+			
+			protected function OpenNav_clickHandler(event:MouseEvent):void
+			{
+				if( null != inputNavPopup && inputNavPopup.isPopUp )
+				{
+					removeEditPopup();
+					return;
+				}
+				
+				inputNavPopup = new InputNavMenuePopup();
+				inputNavPopup.DataProvider = NavItems;
+				inputNavPopup.ShowChildrenList = false;
+				inputNavPopup.width = 230;
+				inputNavPopup.ShowPopup( this );
+				
+				var pt:Point = id_btnOpenNav.parent.localToGlobal(new Point(id_btnOpenNav.x, id_btnOpenNav.y));
+				inputNavPopup.move(pt.x - 110, pt.y + id_btnOpenNav.height);
+				
+				
+				inputNavPopup.addEventListener(CloseEvent.CLOSE, function (event:Event):void
+				{
+					//id_btnEdit.selected = false;
+				});
+				
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, removeEditPopup);
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			private function removeEditPopup(event:Event = null):void
+			{
+				if( null != inputNavPopup && inputNavPopup.isPopUp )
+				{
+					inputNavPopup.removePopup();
+					FlexGlobals.topLevelApplication.removeEventListener(MouseEvent.CLICK, removeEditPopup);
+					inputNavPopup = null;
+				}
+			}
+			
+			protected function uiOptionButton_doubleClickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Button id="id_PrevSection" 
+			  name="PrevSection"
+			  click="gotoSection_clickHandler(event)"
+			  visible="{PrevSectionLabel.length > 0}" includeInLayout="{id_PrevSection.visible}"
+			  skinClass="com.gazuntite.skins.controls.button.input.PrevSectionButtonSkin"
+			  label="{PrevSectionLabel}" buttonMode="true" useHandCursor="true"
+			  left="5" verticalCenter="0"/>
+	
+	<s:HGroup  height="17" horizontalAlign="center" verticalAlign="middle" horizontalCenter="0" verticalCenter="0">
+		<s:Label text="{label}" 
+				 fontSize="16" color="#FFFFFF" fontFamily="CalibriCFFBold" typographicCase="uppercase" textAlign="center"
+				 />
+		
+		<s:Button id="id_btnOpenNav" 
+				  toolTip="Navigation" 
+				  click="OpenNav_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.button.input.QINavButtonSkin"
+				  useHandCursor="true" buttonMode="true" height="17"
+				  visible="false" includeInLayout="false"/>
+	</s:HGroup>
+	
+	<s:HGroup  height="100%" verticalAlign="middle" horizontalAlign="right" right="5">
+		<s:Button id="id_NextSection"
+				  name="NextSection"
+				  click="gotoSection_clickHandler(event)"
+				  label="{NextSectionLabel}"
+				  visible="{NextSectionLabel.length > 0}" includeInLayout="{id_NextSection.visible}"
+				  skinClass="com.gazuntite.skins.controls.button.input.NextSectionButtonSkin"
+				  buttonMode="true" useHandCursor="true"/>
+		<s:ToggleButton id="uiOptionButton"  
+						buttonMode="true" toolTip="More Options"
+						selected="@{dictationNoteViewModel.visible}"
+						skinClass="com.gazuntite.skins.controls.button.patient.PatientOptionToggleButtonSkin"
+						doubleClick="uiOptionButton_doubleClickHandler(event)"
+						/><!--skinClass="{SectionLevelNote.length > 0? RedOptionTBSkin:PatientOptionToggleButtonSkin}"-->
+		<skins:FlipViewButton	visible="{showFlipButton}"	toolTip="{getFlipTooltip(showInputPart, showHistoryPart)}"	/>
+	</s:HGroup>
+	
+</s:SkinnableContainer>

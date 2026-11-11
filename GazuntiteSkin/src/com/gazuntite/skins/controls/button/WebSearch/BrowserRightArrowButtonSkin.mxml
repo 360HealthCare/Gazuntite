@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008" xmlns:lib="assets.graphics.*" xmlns:fc="http://ns.adobe.com/flashcatalyst/2009">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Ellipse height="19" width="19" x="0.5" y="0.5" visible.over="false" visible.down="false" visible.disabled="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#689BE4" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#4A88DF" ratio="0.49411764705882355"/>
+				<s:GradientEntry alpha="1.0" color="#236ED8" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#2F76DA" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Ellipse>
+	<s:Ellipse includeIn="disabled,down,over" x="0.5" y="0.5" height="19" width="19" alpha.disabled="0.65">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#737373" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.4627450980392157"/>
+				<s:GradientEntry alpha="1.0" color="#292929" ratio="0.4666666666666667"/>
+				<s:GradientEntry alpha="1.0" color="#565656" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+			<s:DropShadowFilter includeIn="down" blurX="4.0" blurY="4.0" distance="1" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.98" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Ellipse>
+	<s:Path data="M 5.966 4.006 L 5.966 3.006 L 4.95 3.006 L 4.95 2.006 L 3.95 2.006 L 3.95 1.006 L 2.961 1.006 L 2.961 0.006 L 1.984 0.006 L 1.984 0 L 1 0 L 0.984 0 L 0 0 L 0 1 L 0.984 1 L 0.984 2 L 1.982 2 L 1.982 3.001 L 2.956 3.001 L 2.956 4.001 L 3.94 4.001 L 3.94 5.022 L 2.94 5.022 L 2.94 6.006 L 1.982 6.006 L 1.982 7.016 L 0.984 7.016 L 0.984 8.016 L 0 8.016 L 0 9.016 L 0.984 9.016 L 1 9.016 L 1.982 9.016 L 1.982 9.017 L 2.961 9.017 L 2.961 8.017 L 3.95 8.017 L 3.95 7.017 L 4.95 7.017 L 4.95 6.001 L 5.966 6.001 L 5.966 5.001 L 6.966 5.001 L 6.966 4.006 L 5.966 4.006 Z" height="10" width="8" winding="nonZero" x="7.047" y="5.797">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Path>
+</s:Skin>

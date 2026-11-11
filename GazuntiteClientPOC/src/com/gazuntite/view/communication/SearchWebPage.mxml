@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				id_htmlArea.historyBack();
+				event.stopImmediatePropagation();
+				
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				id_htmlArea.historyForward();
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+		<s:VGroup id="id_content" height="100%"  gap="0" width="100%" verticalAlign="top" horizontalAlign="center">
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.WebPanelBodySkin" width="100%" height="100%">		
+					<s:layout>
+						<s:VerticalLayout paddingTop="3" paddingLeft="3" paddingRight="3" paddingBottom="3" verticalAlign="middle" horizontalAlign="center" />
+					</s:layout>
+					<s:HGroup width="100%" height="3%" >
+						<s:Button skinClass="com.gazuntite.skins.WebSearch.leftButton_web" click="button1_clickHandler(event)" toolTip="Back" buttonMode="true" />
+						<s:HGroup height="75%" verticalAlign="bottom" useHandCursor="true">
+							<s:Label  text="back " click="button1_clickHandler(event)"/>
+							<s:Label  text=" forword"  click="button2_clickHandler(event)"/>
+						</s:HGroup>
+						<s:Button skinClass="com.gazuntite.skins.WebSearch.rightButton_web" click="button2_clickHandler(event)" toolTip="Forward" buttonMode="true"/>
+					</s:HGroup>
+					<mx:HTML id="id_htmlArea" location="http:\\www.google.com" width="100%" height="97%" />
+				</s:SkinnableContainer>				
+		</s:VGroup>
+</s:Group>

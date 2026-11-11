@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  verticalAlign="top" horizontalAlign="center" gap="1"
+		  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			
+			import spark.components.Group;
+			import spark.components.HGroup;
+			import spark.components.Label;
+			
+			private var _data:Object;
+			private var _fieldOrder:Array;
+			private var fieldToRendererMap:Array;
+			
+			private var _disableEditableMode:Boolean;
+			private var _disableEditableModeChanged:Boolean;
+			
+			private var hpiField:HPISingleFieldItemRenderer;
+
+			public function get data():Object
+			{
+				return _data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				var hg:HGroup;
+				if (!fieldToRendererMap)
+					fieldToRendererMap = [];
+				
+				if (_data != value)
+				{
+					_data = value;
+					hg = new HGroup();	
+					var i:int = 0;
+					
+					if (fieldOrder)
+					{
+						for (var j:int = 0; j < fieldOrder.length; j++)
+						{
+							if (j < fieldToRendererMap.length)
+							{
+								fieldToRendererMap[j].data = _data[fieldOrder[j]];
+							}
+							else
+							{
+								
+								fieldToRendererMap.push(createItem(_data[fieldOrder[j]]));
+								/* if(j % 2 == 0)
+								{
+									hg = new HGroup();									
+								}
+								hg.addElement(hpiField); */
+							}
+						}
+					}
+					else
+					{
+						for (var key:String in _data)
+						{
+							if (i < fieldToRendererMap.length)
+							{
+								fieldToRendererMap[i].data = _data[key];
+								i++;
+							}
+							else
+							{
+								
+								fieldToRendererMap.push(createItem(_data[key]));
+							/* 	if(i % 2 == 0)
+								{
+									hg = new HGroup();									
+								}
+								hg.addElement(hpiField); */
+								i++;
+							}
+						}
+					}
+				}
+			}
+			
+			public function get fieldOrder():Array
+			{
+				return _fieldOrder;
+			}
+			
+			public function set fieldOrder(value:Array):void
+			{
+				_fieldOrder = value;
+			}
+			
+			[Bindable]
+			public function get disableEditableMode():Boolean
+			{
+				return _disableEditableMode;
+			}
+			
+			public function set disableEditableMode(value:Boolean):void
+			{
+				_disableEditableMode = value;
+				_disableEditableModeChanged = true;
+				
+				invalidateProperties();
+			}
+
+			public function makeIndexToRendererEditable(index:int):void
+			{
+				if (index < fieldToRendererMap.length)
+					HPISingleFieldItemRenderer(fieldToRendererMap[index]).makeItEditable();
+			}
+			
+			public function makeDataToRendererEditable(data:*):void
+			{
+				for (var i:int = 0; i < fieldToRendererMap.length; i++)
+				{
+					var singleField:HPISingleFieldItemRenderer = HPISingleFieldItemRenderer(fieldToRendererMap[i]);
+					if (singleField.data == data)
+					{
+						singleField.makeItEditable();
+					}
+				}
+			}
+			
+			private function createItem(value:Object):HPISingleFieldItemRenderer
+			{							
+				
+				if (value)
+				{
+					hpiField = new HPISingleFieldItemRenderer();
+					hpiField.data = value;
+					hpiField.percentWidth = 100;
+					hpiField.disableEditableMode = _disableEditableMode;
+					
+					addElement(hpiField);
+				}
+				
+				return hpiField;
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (_disableEditableModeChanged)
+				{
+					_disableEditableModeChanged = false;
+					
+					if (fieldToRendererMap)
+					{
+						for (var i:int = 0; i < fieldToRendererMap.length; i++)
+						{
+							var field:HPISingleFieldItemRenderer = HPISingleFieldItemRenderer(fieldToRendererMap[i]);
+							//H
+							if(field!==null)
+							{
+								field.disableEditableMode = _disableEditableMode;
+							}
+						}
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+</s:VGroup>

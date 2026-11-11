@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin name="CustomButtonBarSkin"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		alpha.disabled="0.5"
+		>
+	<!-- states -->
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<fx:Metadata>
+		<![CDATA[
+		[HostComponent("spark.components.ButtonBar")]
+		]]>
+	</fx:Metadata>
+	
+	<fx:Declarations>
+		<fx:Component id="firstButton">
+			<s:ButtonBarButton skinClass="com.gazuntite.skins.controls.button.EnergyIconButtonBarButtonSkin" useHandCursor="true" buttonMode="true" toolTip="Rapid Access"/>
+		</fx:Component>
+		<fx:Component id="middleButton">
+			<s:ButtonBarButton skinClass="com.gazuntite.skins.controls.button.UserIconButtonBarButtonSkin" useHandCursor="true" buttonMode="true" toolTip="Communication"/>
+		</fx:Component>
+		<fx:Component id="lastButton">
+			<s:ButtonBarButton skinClass="com.gazuntite.skins.controls.button.HourGlassIconButtonBarButtonSkin" useHandCursor="true" buttonMode="true" toolTip="Web Search"/>
+		</fx:Component>
+	</fx:Declarations>
+	
+	<s:DataGroup id="dataGroup" width="100%" >
+		<s:layout>
+			<s:ButtonBarHorizontalLayout gap="5" />
+			<!--<s:HorizontalLayout horizontalAlign="left" verticalAlign="top" gap="-10" />-->
+		</s:layout>
+	</s:DataGroup>
+	
+</s:Skin>

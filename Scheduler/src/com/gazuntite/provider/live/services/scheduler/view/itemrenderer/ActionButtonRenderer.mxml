@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true"
+						  autoDrawBackground="false"
+						  initialize="init()" >
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.dto.AppointmentDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.components.RoomInPopup;
+			import com.gazuntite.provider.live.services.scheduler.view.event.ActionEvent;
+			import com.gazuntite.provider.live.services.scheduler.view.event.RefreshScheduleAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.view.util.SchedularUtils;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			private var date:Date;
+			private var scUtils:SchedularUtils;
+			private var roomInPopup:RoomInPopup;
+			
+			//************ initlize method ****************************
+			private function init():void
+			{
+				date 	= new Date();
+				scUtils = new SchedularUtils();
+			}
+			// ************** Action button click handler **********************
+			protected function actionBtn_clickHandler(event:MouseEvent):void
+			{
+				if(btnData.label == 'Room-In')
+				{
+					scUtils.getRoomsList(data.StationID);
+					model.SelectedAppointmentDTO = data as AppointmentDTO;
+					dispatchEvent(new Event('OpenRoomInViewEvent',true, true));
+				}
+				else
+				{
+					actionAppointment();
+				}
+			}
+			//************* action appointment on action button click **********************
+			private function actionAppointment():void
+			{
+				var obj2:Object				= new Object();
+				var appointmentDTO:AppointmentDTO = new AppointmentDTO();
+				obj2 						= scUtils.getNextAction(data.Action.Name);
+				data.ModifiedAt 			= dateFormatter.format(date.toDateString())+'T'+time.format(date);
+				data.ModifiedBy 			= model.loggedInUserProviderId;
+				data.Action.ID				= obj2.ID;
+				data.Action.Name			= obj2.Name;
+				data.Action.NextAction		= obj2.NextAction;
+				var appointmentXML:XML = appointmentDTO.ToXML(data);
+				manageAppointment(appointmentXML, data.UserID);
+				
+			}
+			//************ manage appointment*****************************
+			private function manageAppointment(appXML:XML, userID:int):void
+			{
+				var MAPPEvent:ManageAppointmentEvent = new ManageAppointmentEvent(appXML, model.loggedInUserProviderId, userID , refreshAppointments );
+				CairngormEventDispatcher.getInstance().dispatchEvent(MAPPEvent);
+				CursorManager.setBusyCursor();
+			}
+			// Refresh appointment schedule
+			private function refreshAppointments(val:* = null):void
+			{
+				dispatchEvent(new RefreshScheduleAppointmentsEvent('refreshScheduleAppointments'));
+			}
+			// action button creation complete
+			protected function btnData_creationCompleteHandler(event:FlexEvent):void
+			{
+				var dt:Date = new Date();
+				var dt1:Date = new Date(data.Date);
+				
+				// Only today's date appointment 
+				if(dateFormatter.format(dt) != dateFormatter.format(dt1))
+					btnData.enabled = false;
+				
+				// If appointment is confirmed or canncelled the button not shown 
+				if(data.Action.Name == 'Confirmed' || data.Action.Name == 'Cancelled' || btnData.label.length < 0)
+					btnData.visible = false;
+			}
+
+		]]>
+	</fx:Script>
+	
+	
+	<s:Button id="btnData" styleName="actionButtonSkin" toolTip="{btnData.label}" 
+			  creationComplete="btnData_creationCompleteHandler(event)"  buttonMode="true" useHandCursor="true" 
+			  label="{data.Action.NextAction}" horizontalCenter="-0" verticalCenter="0"
+			  click="actionBtn_clickHandler(event)" visible="{data.Action.Name == 'Confirmed' ? false : true}" />
+	
+</s:MXDataGridItemRenderer>

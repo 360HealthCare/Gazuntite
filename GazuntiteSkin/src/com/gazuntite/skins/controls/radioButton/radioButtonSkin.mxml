@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		>
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Ellipse width="14" height="14"
+			   x.disabled="0" verticalCenter.disabled="0"
+			   x.disabledAndSelected="0" verticalCenter.disabledAndSelected="0"
+			   left.down="0" verticalCenter.down="0"
+			   x.downAndSelected="0" verticalCenter.downAndSelected="0"
+			   left.over="0" verticalCenter.over="0"
+			   x.overAndSelected="0" verticalCenter.overAndSelected="0"
+			   left.up="0" verticalCenter.up="0"
+			   x.upAndSelected="0" width.upAndSelected="14" height.upAndSelected="14"
+			   verticalCenter.upAndSelected="0">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" joints="miter" miterLimit="4" weight="1"
+								color.disabled="#999999"
+								color.disabledAndSelected="#999999"
+								color.down="#5C5C5C"
+								color.downAndSelected="#5C5C5C"
+								color.over="#5C5C5C"
+								color.overAndSelected="#5C5C5C"
+								color.up="#5C5C5C"
+								color.upAndSelected="#5C5C5C"/>
+		</s:stroke>
+		
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry ratio="0"
+								 alpha.disabled="1.0" color.disabled="#CCCCCC"
+								 alpha.disabledAndSelected="1.0" color.disabledAndSelected="#CCCCCC"
+								 alpha.down="1" color.down="#FFFFFF"
+								 alpha.downAndSelected="1" color.downAndSelected="#FFFFFF"
+								 alpha.over="1" color.over="#FFFFFF"
+								 alpha.overAndSelected="1" color.overAndSelected="#FFFFFF"
+								 alpha.up="1" color.up="#FFFFFF"
+								 alpha.upAndSelected="1" color.upAndSelected="#FFFFFF"/>
+				<s:GradientEntry alpha="1.0" ratio="1"
+								 color.disabled="#999999"
+								 color.disabledAndSelected="#999999"
+								 color.down="#CCCCCC"
+								 color.downAndSelected="#CCCCCC"
+								 color.over="#CCCCCC"
+								 color.overAndSelected="#CCCCCC"
+								 color.up="#CCCCCC"
+								 color.upAndSelected="#CCCCCC"/>
+				
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Ellipse>
+	
+	<s:Ellipse width="7" height="7"
+			   visible.disabled="false" x.disabled="4" y.disabled="4"
+			   x.disabledAndSelected="4" verticalCenter.disabledAndSelected="0"
+			   visible.down="false" x.down="4" y.down="4"
+			   x.downAndSelected="4" verticalCenter.downAndSelected="0"
+			   visible.over="false" x.over="4" y.over="4"
+			   left.overAndSelected="4" verticalCenter.overAndSelected="0"
+			   visible.up="false" x.up="4" y.up="4"
+			   left.upAndSelected="4" verticalCenter.upAndSelected="0">
+		
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Ellipse>
+	
+	<s:Label id="labelDisplay" 
+			 left="18" right="0" fontFamily="CalibriCFFBold" 
+			 maxDisplayedLines="1" textAlign="start" verticalAlign="middle" verticalCenter="0"
+			 left.down="18" right.down="0" top.down="0" bottom.down="0" verticalCenter.down="0"
+			 left.over="18" right.over="0" top.over="1" bottom.over="1" verticalCenter.over="0"
+			 left.up="18" right.up="0" top.up="1" bottom.up="1" verticalCenter.up="0"/>
+</s:Skin>

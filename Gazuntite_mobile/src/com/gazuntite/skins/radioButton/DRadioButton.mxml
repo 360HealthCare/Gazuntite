@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect height="12" includeIn="disabled,up" width="16" y="0.5" x="0.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#949494" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#D3D3D3" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#919191" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#A8A8A8" ratio="0.5333333333333333"/>
+				<s:GradientEntry alpha="1.0" color="#D3D3D3" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="12" includeIn="disabledAndSelected,down,downAndSelected,over,overAndSelected,up,upAndSelected" width="16" y="0.5" visible.up="false" x="0.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#949494" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="2" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#565656" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.47058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#292929" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1.0" color="#565757" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:RichText ai:aa="2" color="#FFFFFF" columnCount="1" fontSize="11" d:id="3" kerning="on" tabStops="S0" text="D" d:userLabel="D" flm:variant="1" whiteSpaceCollapse="preserve" y="2" x="5" fontFamily="Calibri" fontWeight="bold">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="270" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

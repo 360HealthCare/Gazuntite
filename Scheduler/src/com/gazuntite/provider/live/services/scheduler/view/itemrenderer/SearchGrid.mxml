@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		 creationComplete="creationCompleteHandler()" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			[Bindable]
+			private var arrSearch:ArrayCollection;
+			
+			
+
+			protected function creationCompleteHandler():void
+			{
+				arrSearch = new ArrayCollection([
+					{name:'Mr Tony',   time:'08:15 AM-08:30AM', status:'Arrived',    provider: 'Dr Tahir', action:'Check In'},
+					{name:'Ms.Nash',   time:'09:15 AM-09:30AM', status:'Being Seen', provider: 'Dr Tahir', action:'Room In'},
+					{name:'Mr John',   time:'10:15 AM-10:30AM', status:'Arrived',    provider: 'Dr Tahir', action:'Check Out'},
+					{name:'Mr. khan',  time:'11:15 AM-11:30AM', status:'Being Seen', provider: 'Dr Tahir', action:'Check In'},
+					{name:'Ms. Mena',  time:'12:15 PM-12:30PM', status:'Being Seen', provider: 'Dr Tahir', action:'Check Out'}]);
+			}
+
+		]]>
+	</fx:Script>
+	<components1:LabelDataGrid width="100%" rowCount="{arrSearch.length}" dataProvider="{arrSearch}"
+				 resizableColumns="false" allowDragSelection="false" alternatingItemColors="[0xF4EEE9,0xF4EEE9]">
+		<components1:columns>
+			<mx:DataGridColumn headerText="Patient Name" dataField="name" />
+			<mx:DataGridColumn headerText="Time"         dataField="time" />
+			<mx:DataGridColumn headerText="Status"       dataField="status"/>
+			<mx:DataGridColumn headerText="Provider"     dataField="provider"/>
+			<mx:DataGridColumn headerText="Action"       dataField="action" />
+		</components1:columns>
+	</components1:LabelDataGrid>
+</s:Group>

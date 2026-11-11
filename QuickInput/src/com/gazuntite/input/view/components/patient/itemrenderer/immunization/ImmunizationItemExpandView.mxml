@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+///////////////////////////////////////////////
+///    Author : TA					///
+///    Date   : 6 May, 2013					///
+///    Project: Gazuntite Online Clinic		///
+///////////////////////////////////////////////
+-->
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:components="com.gazuntite.controls.extended.components.*" xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.immunization.ImmunizationDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]	public var labelWidth:Number = 120;
+			
+			private var _immDTO:ImmunizationDTO;
+			
+			[Bindable]
+			public function get immDTO():ImmunizationDTO
+			{
+				return _immDTO;
+			}
+			
+			public function set immDTO(value:ImmunizationDTO):void
+			{
+				_immDTO = value;
+			}
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="4" paddingRight="5" paddingTop="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:Group width="100%" height="100%"  >
+		<s:HGroup width="100%" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4">
+			<s:VGroup width="25%" horizontalAlign="left" verticalAlign="top" >
+				<s:HGroup width="100%" verticalAlign="middle" >
+					<s:Spacer width="{img_Associated.width}"/>
+					<s:Label text="Visit Date:" width="{labelWidth}" styleName="patientFormLabel" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:BitmapImage id="img_Associated" source="{QIConstants.IMG_GREEN}"/>
+					<s:Label text="Associated With:" width="{labelWidth}" styleName="patientFormLabel" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle" >
+					<s:BitmapImage id="img_Immunization" source="{QIConstants.IMG_GREEN}"/>
+					<s:Label text="Immunization:" width="{labelWidth}"	 styleName="patientFormLabel"	 />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label text="Date Admin:"	styleName="patientFormLabel" width="100%" verticalCenter="0" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label text="Expiry Date:" styleName="patientFormLabel" width="100%" verticalCenter="0" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label text="Body Route:"	styleName="patientFormLabel" width="100%" verticalCenter="0" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label text="Site:" styleName="patientFormLabel" width="100%" verticalCenter="0" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label text="Refusal:" styleName="patientFormLabel" width="100%" verticalCenter="0" />
+				</s:HGroup>
+				
+			</s:VGroup>
+			
+			<s:VGroup width="25%"  gap="7" >
+				<s:Label width="100%" text="{UtilityFunctions.FormatDate(immDTO.VisitDate, 'MM/DD/YYYY')}" toolTip="{immDTO.VisitDate}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label id="id_AssociateType" width="100%" text="{immDTO.AssociateType}" toolTip="{immDTO.AssociateType}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.ImmunizationType.Name}" toolTip="{immDTO.ImmunizationType.Name}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.DateAdmin == 'null' ? '':immDTO.DateAdmin}" toolTip="{immDTO.DateAdmin == 'null' ? '':immDTO.DateAdmin}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.ExpiryDate}" toolTip="{immDTO.ExpiryDate}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.Rout == 'null' ? '':immDTO.Rout}" toolTip="{immDTO.Rout == 'null' ? '':immDTO.Rout}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.Site == 'null' ? '':immDTO.Site}" toolTip="{immDTO.Site == 'null' ? '':immDTO.Site}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.RefusalReason == 'null' ? '':immDTO.RefusalReason}" toolTip="{immDTO.RefusalReason == 'null' ? '':immDTO.RefusalReason}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			</s:VGroup>
+			
+			<s:Spacer width="10" />
+			
+			<s:VGroup width="25%" horizontalAlign="left" verticalAlign="top" >
+				<s:HGroup id="id_preVisits" width="100%" verticalAlign="middle"  >
+					<s:BitmapImage id="img_preVisits" source="{QIConstants.IMG_GREEN}" visible="{id_preVisitDates.text.length >=1 ? true:false}"/>
+					<s:Label text="Previous Visits:" width="{labelWidth}" styleName="patientFormLabel" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:BitmapImage id="img_Dose" source="{QIConstants.IMG_GREEN}"/>
+					<s:Label text="Dose:" styleName="patientFormLabel" />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label width="100%" verticalCenter="0" styleName="patientFormLabel" text="Next Due:"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label width="100%" verticalCenter="0" styleName="patientFormLabel" text="Lot #:"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label width="100%" verticalCenter="0" styleName="patientFormLabel" text="Manufacturer:"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label width="100%" verticalCenter="0" styleName="patientFormLabel" text="Series:"/>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Spacer width="11"/>
+					<s:Label  width="100%" verticalCenter="0"	 styleName="patientFormLabel" text="Reason of Refusal:"/>
+				</s:HGroup>
+			</s:VGroup>
+			
+			<s:VGroup width="25%" gap="7" >
+				<s:Label width="100%" id="id_preVisitDates" text="{immDTO.AssociateType == 'Previous Visit' ? UtilityFunctions.FormatDate(immDTO.VisitDate, 'MM/DD/YYYY') : ''}" toolTip="{immDTO.AssociateType == 'Previous Visit' ? UtilityFunctions.FormatDate(immDTO.VisitDate, 'MM/DD/YYYY') : ''}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" id="id_dose" text="{immDTO.Dose == 'null' ? '':immDTO.Dose}" toolTip="{immDTO.Dose == 'null' ? '':immDTO.Dose}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.NextDoseDue == 'null' ? '':immDTO.NextDoseDue}" toolTip="{immDTO.NextDoseDue == 'null' ? '':immDTO.NextDoseDue}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.LotNumber == 'null' ? '':immDTO.LotNumber}" toolTip="{immDTO.LotNumber == 'null' ? '':immDTO.LotNumber}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.Manufacturer == 'null' ? '':immDTO.Manufacturer}" toolTip="{immDTO.Manufacturer == 'null' ? '':immDTO.Manufacturer}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.Series == 'null' ? '':immDTO.Series}" toolTip="{immDTO.Series == 'null' ? '':immDTO.Series}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				<s:Label width="100%" text="{immDTO.RefusalReason == 'null' ? '':immDTO.RefusalReason}" toolTip="{immDTO.RefusalReason == 'null' ? '':immDTO.RefusalReason}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			</s:VGroup>
+		</s:HGroup>
+	</s:Group>
+	<s:HGroup width="100%" paddingRight="0" paddingLeft="4">
+		<s:Spacer width="{img_Associated.width}"/>
+		<s:Label text="Notes:"	 styleName="patientFormLabel" />
+		<s:Label text="{immDTO.Note}" toolTip="{immDTO.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (immDTO.DictationID &amp;&amp; immDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{immDTO.Note}" note="@{immDTO.Note}" isSaveButtonVisible="false" DictationID="{immDTO.DictationID}" IsDictaionEditMode="{false}"/>
+	
+</s:SkinnableContainer>

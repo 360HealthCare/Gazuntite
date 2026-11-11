@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		minWidth="50" minHeight="22"
+		>
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<s:Rect x="0" y="0" width="100%" height="100%" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="90"
+							  rotation.down="270">
+				<s:GradientEntry alpha="1.0" color="#00A0D7" ratio="0"
+								 color.disabled="#999999"
+								 color.over="#25ACD8"/>
+				<s:GradientEntry alpha="1.0" color="#0063A5" ratio="1"
+								 color.disabled="#666666"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="0" blurY="0" color="#00416A" distance="1"
+								hideObject="false" inner="false" knockout="false" quality="3"
+								strength="1"
+								alpha.down="0.75" color.down="#FFFFFF"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"
+								color.down="#000000"/>
+		</s:filters>
+		<s:fill.down>
+			<s:SolidColor color="#0063A5"/>
+		</s:fill.down>
+	</s:Rect>
+	
+	<s:RichText id="labelDisplay"
+				color="#FFFFFF" fontFamily="CalibriCFF" fontSize="14"
+				tabStops="S0 S50"
+				color.disabled="#CCCCCC"
+				horizontalCenter="0" verticalCenter="0"
+				>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

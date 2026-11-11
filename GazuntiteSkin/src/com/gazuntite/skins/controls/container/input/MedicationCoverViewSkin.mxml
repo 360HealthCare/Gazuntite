@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+		alpha.disabled="0.5"
+		width="100%" height="100%"
+		>
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata> 
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!--<s:Rect id="background" left="0" right="0" top="0" bottom="0" alpha="0.3" radiusX="3">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4"
+								weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>-->
+	
+	<s:Rect width="109" height="25" alpha="1"
+			radiusX="3">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#61696E" joints="miter" miterLimit="4"
+								weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#E2E5E7" ratio="0.30196078431372547"/>
+				<s:GradientEntry alpha="1.0" color="#95A3AC" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<s:RichText x="7" y="7" color="#000000" fontFamily="CalibriCFF" fontSize="14" tabStops="S0"	text="Continue"/>
+	
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+	
+</s:Skin>

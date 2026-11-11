@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:view="com.gazuntite.video.chat.view.*"
+		 
+		 implements="com.gazuntite.video.chat.manager.IVideoChatClient"
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.video.chat.manager.VideoChatManager;
+			import com.gazuntite.video.chat.view.event.VideoChatControlEvent;
+			
+			import labs.otuome.p2p.events.VideoChatEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var _VideoCallingAlert:CallConnectPop;
+			
+			private var _showNeighborList:Boolean;
+
+			[Bindable]
+			public function get showNeighborList():Boolean
+			{
+				return _showNeighborList;
+			}
+
+			public function set showNeighborList(value:Boolean):void
+			{
+				_showNeighborList = value;
+			}
+
+			private var _neighborhood:ArrayCollection;
+
+			[Bindable]
+			public function get neighborhood():ArrayCollection
+			{
+				return _neighborhood;
+			}
+
+			public function set neighborhood(value:ArrayCollection):void
+			{
+				_neighborhood = value;
+			}
+
+			private var debugLog:String = "Debug Log\n";
+			
+			private var chatManager:VideoChatManager = VideoChatManager.getInstance();
+			
+			protected function cc(event:FlexEvent):void
+			{
+				neighborhood = new ArrayCollection();
+				
+				chatManager.BindView( this, outgoingPreview, incomingPreview );
+				
+				
+				uiVideoControlBar.addEventListener( VideoChatControlEvent.END_VIDEO_CHAT, OnStopChatting );
+				
+				
+			}
+			
+			private function toggleLog(event:Event):void
+			{
+				if (currentState != VideoChatManager.DEBUG)
+				{
+					debugUI.console.text = chatManager.debugLog;
+					chatManager.lastState = currentState;
+					currentState = VideoChatManager.DEBUG;
+				}
+				else
+				{
+					currentState = chatManager.lastState;
+				}
+			}
+			
+			public function onCameraActivated(event:VideoChatEvent):void
+			{
+				currentState = VideoChatManager.LOBBY;
+			}
+			
+			public function onCameraDeactivated(event:VideoChatEvent):void
+			{
+				//currentState = VideoChatManager.LOGIN;
+			}
+			
+			private function onNeighborSelected(event:Event):void
+			{
+				if (neighborList.selectedItems.length == 1)
+				{
+					var selectedUser:Object = neighborList.selectedItem;
+					if (selectedUser.name != chatManager.username)
+					{
+						chatManager.sendChatNotification( VideoChatEvent.INVITE, selectedUser );
+					}
+				}
+			}
+			
+			public function onInvitationReceived(event:VideoChatEvent):void
+			{
+				//UtilityFunctions.AskMessage( chatManager.sender.name + " has invited you to chat, do you want to connect?", onAcceptInvitation, null, onDeclineInvitation );
+			}
+			
+			public function onInvitationDeclined(event:VideoChatEvent):void
+			{
+				neighborList.selectedIndex = -1;
+				
+				removeCallingPopup();
+			}
+			
+			public function onUserUnavailable( e:VideoChatEvent ):void
+			{
+				neighborList.selectedIndex = -1;
+				
+				removeCallingPopup();
+			}
+			
+			public function onChatStart(event:VideoChatEvent):void
+			{
+				currentState = VideoChatManager.CHAT;
+				removeCallingPopup();
+			}
+
+			public function onChatEnded(event:VideoChatEvent):void
+			{
+				neighborList.selectedIndex = -1;
+				currentState = VideoChatManager.LOBBY;
+				chatManager.stopChatting();
+			}
+			
+			public function OnStopChatting( e:Event ):void
+			{
+				stopChatting();
+				
+				removeCallingPopup();
+			}
+			
+			public function stopChatting():void
+			{
+				if( null !=  chatManager.recipient )
+					chatManager.sendChatNotification( VideoChatEvent.END_CHAT, chatManager.recipient );
+				neighborList.selectedIndex = -1;
+				currentState = VideoChatManager.LOBBY;
+				chatManager.stopChatting();
+				
+				removeCallingPopup();
+			}
+			
+			protected function outgoingPreview_CC(event:FlexEvent):void
+			{
+				trace("VideoChatView.outgoingPreview_CC(event)");
+				trace("outgoingPreview width, height",outgoingPreview.width, outgoingPreview.height);
+			}
+			
+			protected function incomingPreview_CC(event:FlexEvent):void
+			{
+				trace("VideoChatView.incomingPreview_CC(event)");
+				trace("incomingPreview width, height",incomingPreview.width, incomingPreview.height);
+			}
+			
+			public function showCallingPopup():void
+			{
+				id_ChatView.visible = false;
+				_VideoCallingAlert = new CallConnectPop();
+				_VideoCallingAlert.addEventListener(VideoChatControlEvent.END_VIDEO_CHAT, OnStopChatting );
+				//_VideoCallingAlert.ShowPopup( this );
+				
+				addElement( _VideoCallingAlert );
+				
+				//var loc:Point = localToGlobal( new Point( x, y ) );
+				
+				//_VideoCallingAlert.move( loc.x + 10, loc.y + 50 );
+				
+				_VideoCallingAlert.callerName = chatManager.username;
+				_VideoCallingAlert.calleeName = chatManager.recipient.name;
+				
+				_VideoCallingAlert.percentHeight = 100;
+				_VideoCallingAlert.percentWidth  = 100;
+				
+			}
+			
+			public function removeCallingPopup():void
+			{
+				if( null != _VideoCallingAlert )
+					//_VideoCallingAlert.removePopup();
+					removeElement( _VideoCallingAlert );
+				
+				_VideoCallingAlert = null;
+				
+				id_ChatView.visible = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="Lobby"/>
+		<s:State name="Chat"/>
+		<s:State name="Debug"/>
+	</s:states>
+	
+	
+	<s:Group id="id_ChatView" width="100%" height="100%" includeInLayout="{id_ChatView.visible}">
+		
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		
+		<view:VideoChatInfoBar id="uiInfoBar" width="100%" top="0"/>
+		
+		<view:DebugUI id="debugUI" bottom="4" left="4" right="4" top="32"
+					  visible.Lobby="false" includeInLayout.Lobby="false"
+					  visible.Chat="false" includeInLayout.Chat="false"
+					  />
+		
+		<!-- start chat UI  -->
+		
+		<s:HGroup width="100%" height="100%" >
+			
+			<s:VGroup width="100%" height="100%" paddingLeft="4" paddingRight="4">
+				<s:Group width="100%" height="100%" 
+						 visible.Debug="false" includeInLayout.Debug="false"
+						 >
+					<mx:UIComponent id="incomingPreview"
+									width="100%" height="100%"
+									creationComplete="incomingPreview_CC(event)"
+									/>
+					<s:BorderContainer width="30%" height="25%" right="10" top="5" borderWeight="2" borderColor="#4B4B4B" cornerRadius="2">
+						<s:filters>
+							<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="0x4B4B4B" distance="3" hideObject="false" inner="false" knockout="false" quality="2" strength="2"/>
+						</s:filters>
+						
+						<mx:UIComponent id="outgoingPreview"
+										width="100%" height="100%"
+										creationComplete="outgoingPreview_CC(event)"
+										/>
+					</s:BorderContainer>
+					
+					
+				</s:Group>
+				
+			</s:VGroup>
+			
+			<s:List id="neighborList" dataProvider="{neighborhood}"
+					width="25%" height="100%"
+					change="onNeighborSelected(event)"
+					labelField="name"
+					visible="{showNeighborList}" includeInLayout="{showNeighborList}"
+					/>
+			
+			
+		</s:HGroup>
+		
+		<view:VideoChatControlBar id="uiVideoControlBar" width="100%" left="1" right="2" />
+		
+		<!-- end chat UI  -->
+		
+	</s:Group>
+	
+</s:Group>

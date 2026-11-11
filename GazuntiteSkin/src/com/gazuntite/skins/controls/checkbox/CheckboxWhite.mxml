@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="100%" height="18">
+	<fx:Metadata>[HostComponent("spark.components.CheckBox")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0.5" y="0.5" width="14" height="14" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2C2C2C" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#9B9B9B" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Path x="4.875" y="0.5" width="11" height="11"
+			data="M 1.901 3.053 L 2.823 4.839 C 2.823 4.839 4.321 1.21 6.683 0 C 6.625 0.864 6.395 1.613 6.798 2.535 C 5.761 2.765 3.629 5.357 2.938 6.625 C 1.959 5.415 0.807 4.494 0 4.206 L 1.901 3.053 Z"
+			visible.disabled="false"
+			visible.down="false"
+			visible.over="false"
+			visible.up="false">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false"
+								inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Path>
+	
+	<s:Label id="labelDisplay"
+			 textAlign="start"
+			 verticalAlign="middle"
+			 maxDisplayedLines="1"
+			 left="18" right="0"  
+			 fontFamily="CalibriCFF"
+			 verticalCenter="0"
+			 fontSize="13"
+			 color="0xFFFFFF"
+			 />
+</s:Skin>

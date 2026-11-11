@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				width="100%" 
+				height="100%"
+				minHeight="40" 
+				contentBackgroundAlpha="0">
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="0"
+						  paddingRight="10"
+						  paddingTop="0"
+						  paddingLeft="10"/>
+	</s:layout>
+	
+	<s:Group width="100%" height="100%">
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:VGroup width="100%">
+			<s:Label fontWeight="bold" text="{data.immunization}"/>
+			<s:Label fontSize="10" text="{data.associatedWith}"/>
+		</s:VGroup>
+		
+		<s:Label text="{data.dose}"/>
+		
+		<s:Label text="{data.manufacturer != null ? data.manufacturer : ' --- '}"/>
+		
+		<s:Label text="{data.body != null ? data.body : ' --- '}"/>
+		
+		<s:Label text="{data.lotNumber != null ? data.lotNumber : ' --- '}"/>
+		
+		<s:Image source="assets/itemLevelNote.png"/>
+		<s:Image source="assets/itemLevelDictation.png"/>
+		
+	</s:Group>
+	
+</s:ItemRenderer>

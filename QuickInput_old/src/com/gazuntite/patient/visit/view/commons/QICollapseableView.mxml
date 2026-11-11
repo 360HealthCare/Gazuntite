@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer    xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						 xmlns:s="library://ns.adobe.com/flex/spark" 
+						 xmlns:mx="library://ns.adobe.com/flex/mx"
+						 creationComplete="init(event)" 
+						 xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+						 
+						>
+	
+	<fx:Metadata>
+		[DefaultProperty("Contents")]
+		[Event(name="QSViewStateChange", type="com.gazuntite.common.view.events.QSViewStateEvent")]
+		[Event(name="saveData", type="flash.events.Event")]
+		[Event(name="clearClicked", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		[Event(name="importVitalsClicked", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]	
+		[Event(name="englishUnitSelected", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		[Event(name="metricUnitSelected", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.event.visit.LoadVisitModuleTypesEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.core.UIComponent;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var m_bPinView:Boolean;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			public var allowExpandedView:Boolean 	= true;
+			private var m_bExpandedView:Boolean	= true;
+			
+			[ArrayElementType("mx.core.IDeferredInstance")]
+			public var Contents:Array;
+			
+			[ArrayElementType("mx.core.IDeferredInstance")]
+			public var HeaderContents:Array;
+			
+			private var m_bhasChange:Boolean;
+			private var m_sHeadingLable:String;
+			private var m_sHeadingLableUpperCase:String;
+			private var _ShowSaveButton:Boolean;
+			private var _ShowVitalHeader:Boolean;
+			
+			
+		
+			[Bindable]
+			public function get ShowVitalHeader():Boolean
+			{
+				return _ShowVitalHeader;
+			}
+
+			public function set ShowVitalHeader(value:Boolean):void
+			{
+				_ShowVitalHeader = value;
+			}
+
+			[Bindable]
+			public function get ShowSaveButton():Boolean
+			{
+				return _ShowSaveButton;
+			}
+			
+			public function set ShowSaveButton(value:Boolean):void
+			{
+				_ShowSaveButton = value;
+			}
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bhasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				m_bhasChange = value;
+			}
+			
+			[Bindable]
+			public function get HeadingLable():String
+			{
+				return m_sHeadingLable;
+			}
+			
+			public function set HeadingLable(value:String):void
+			{
+				m_sHeadingLable = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+				
+				//id_Header.id_CloseBtn.addEventListener(MouseEvent.CLICK , onClosePanel);
+			}
+			
+			protected function onClosePanel(event : Event):void
+			{
+				this.visible = false;
+				var e:CloseEvent = new CloseEvent(CloseEvent.CLOSE ,true);
+				dispatchEvent(e);
+				event.stopImmediatePropagation();
+			}
+			
+			public function get PinView():Boolean
+			{
+				return m_bPinView;
+			}
+			
+			public function set PinView(value:Boolean):void
+			{
+				m_bPinView 		= value;
+				/* super.ContentsVisible( value ); */
+			}
+			
+			
+			public function AllowMoveToNextPanel( callBack:Function ):void
+			{
+				
+				callBack();
+				
+				/* if( id_Add.enableAll )
+				{
+					UtilityFunctions.AskMessage( "There are changes in the form, do you still want to leave form in current state?", function ():void
+					{
+						callBack(); 
+					}); 
+				}
+				else
+				{
+					callBack();
+				} */
+			}
+			/**
+			 * 
+			 * @true : panel will show its contents on start up
+			 * @false: contents will not be visible until header is clicked.
+			 * 
+			 */
+			[Bindable]
+			public function get ExpandedView():Boolean
+			{
+				return m_bExpandedView;
+			}
+			
+			public function set ExpandedView(value:Boolean):void
+			{
+				if( ! allowExpandedView || PinView) return;
+				m_bExpandedView = value;
+				ContentsVisible( value );
+				
+				if( UtilityFunctions.IsNotNullOrEmpty( HeadingLable ) )
+					HeadingLable = value? HeadingLable.toUpperCase():UtilityFunctions.TitleCase(HeadingLable);
+				
+				var vstate:String 			= value ? QSViewStateEvent.EXPANDED_VIEW : QSViewStateEvent.COLLAPSED_VIEW
+				var vse:QSViewStateEvent 	= new QSViewStateEvent( QSViewStateEvent.QS_VIEW_STATE_CHANGE, vstate );
+				dispatchEvent( vse );
+			}
+			
+			protected function ContentsVisible(value:Boolean):void
+			{
+				callLater(function():void
+				{
+					id_PanelBodyWraper.includeInLayout 	= value;
+					id_PanelBodyWraper.visible 			= value;
+					if(value)
+					{
+						fadeEffect.play();
+					}
+				});
+			}
+			
+			protected function OnContentAreaInitialize(event:FlexEvent):void
+			{
+				if( Contents )
+				{
+					for (var i:int = 0; i < Contents.length; i++)
+						id_PanelBody.addElement(UIComponent(Contents[i].getInstance()));
+				}
+			}
+			
+			protected function OnHeaderInitialize(event:FlexEvent):void
+			{
+				//return;// just to test, check createChildren();
+				if( HeaderContents )
+					for (var i:int = 0; i < HeaderContents.length; i++)
+						id_HeaderView.addElement(UIComponent(HeaderContents[i].getInstance()));
+				
+			}
+			
+			private function OnHeaderClick(event:MouseEvent):void
+			{
+				
+				ExpandedView = !ExpandedView;
+	
+			}
+			
+			public function set ShowFocusBorder(value:Boolean):void
+			{
+				
+			}
+			
+			protected function id_Header_showNotesPanelHandler(event:Event):void
+			{
+				id_notesDictation.visible = true;
+				id_notesDictation.id_Area.visible = true;
+				id_notesDictation.id_Area.includeInLayout = true;
+				id_notesDictation.id_Views.selectedIndex = 0;
+			}
+			
+			protected function id_Header_showDictationPanelHandler(event:Event):void
+			{
+						
+				id_notesDictation.visible = true;
+				id_notesDictation.id_Area.visible = true;
+				id_notesDictation.id_Area.includeInLayout = true;
+				id_notesDictation.id_Views.selectedIndex = 1;
+			}
+			
+			protected function id_Header_pinPanelHandler(event:Event):void
+			{
+				this.PinView = ! this.PinView
+			}
+			
+			protected function onDictationSave(event:Event):void
+			{
+				trace("child class should implement saveNotes here");
+			}
+			
+			protected function onNotesSave(event:Event):void
+			{
+				trace("child class should implement dictation here");
+			}
+			
+			
+			private var m_oDictationDTO:ModuleDictationDTO;					
+			private var m_oNotesDTO:ModuleNoteDTO;
+			
+			[Bindable]
+			public function get notesDTO():ModuleNoteDTO
+			{
+				return m_oNotesDTO;
+			}
+			
+			public function set notesDTO(value:ModuleNoteDTO):void
+			{
+				m_oNotesDTO = value;
+			}
+			
+			[Bindable]
+			public function get DictationDTO():ModuleDictationDTO
+			{
+				return m_oDictationDTO;
+			}
+			
+			public function set DictationDTO(value:ModuleDictationDTO):void
+			{
+				m_oDictationDTO = value;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:Fade target="{id_PanelBodyWraper}" id="fadeEffect" duration="600" alphaFrom="0" alphaTo="1" />
+		<s:Animate id="scaleEffectX" repeatCount="1" target="{id_PanelBodyWraper}" duration="400">
+			
+			<s:SimpleMotionPath property="scaleX" valueFrom="0" valueTo="1" />
+			
+		</s:Animate>
+		
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" gap="0" paddingBottom="4" paddingTop="3" paddingLeft="0" paddingRight="0" />
+	</s:layout>
+	<!--<s:VGroup width="100%" >
+		<commons:SectionHeader id="id_Header" click="OnHeaderClick(event)" width="100%" HeadingLable="{HeadingLable}" ShowVitalHeader="{ShowVitalHeader}"  ShowSaveButton="{ShowSaveButton}" 	
+						   pinPanel="id_Header_pinPanelHandler(event)"
+						   showNotesPanel="id_Header_showNotesPanelHandler(event)" 
+						   showDictationPanel="id_Header_showDictationPanelHandler(event)"  />
+		<commons:QIHeader id="id_qiHeader" click="OnHeaderClick(event)" />
+	</s:VGroup>-->
+	
+	<s:HGroup id="id_HeaderView" width="100%" horizontalAlign="right" verticalAlign="top" tabChildren="true"
+			  initialize="OnHeaderInitialize(event);" click="OnHeaderClick(event)" maxHeight="22" 
+			  />
+	
+	
+	<s:VGroup id="id_PanelBodyWraper" width="100%" height="100%" >
+		<commons:QISectionLevelNotesDictation id="id_notesDictation" notesDTO="{notesDTO}" DictationDTO="{DictationDTO}" 
+											  notesSaved="onNotesSave(event)"
+											  DictationSaved="onDictationSave(event)"
+											  width="100%" visible="false" includeInLayout="{id_notesDictation.visible}" />
+		
+		<s:VGroup id="id_PanelBody" height="100%" width="100%" horizontalAlign="left" tabChildren="true" paddingTop="-2"
+				  initialize="OnContentAreaInitialize(event);" clipAndEnableScrolling="true" 
+				  x="0" y="0"
+				  />
+		
+	</s:VGroup>
+	
+</s:SkinnableContainer>

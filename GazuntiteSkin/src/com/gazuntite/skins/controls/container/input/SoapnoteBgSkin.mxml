@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+		alpha.disabled="0.5"
+		>
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata> 
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:Rect id="background" left="0" right="0" top="0" bottom="0" radiusX="3">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="135" blurX="5" blurY="5" color="#000000"
+								distance="5" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.6" angle="144.78240703180728" blurX="100" blurY="100" color="#38527F"
+								distance="0" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="2"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="#CADBF6"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+	
+</s:Skin>

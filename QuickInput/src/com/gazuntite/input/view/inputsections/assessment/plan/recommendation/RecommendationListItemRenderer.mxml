@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:recommendation="com.gazuntite.input.view.inputsections.assessment.plan.recommendation.*" 
+				xmlns:components="com.gazuntite.components.*"
+				autoDrawBackground="false"
+				width="100%" 
+				initialize="init()" xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+				>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.common.dto.assessment.recommendation.RecommendationDTO;
+			import com.gazuntite.controls.extended.components.PopupGroup;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.skins.controls.container.input.RecordEditPopupSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			[Bindable]  private var isEditViewOpen:Boolean = false;
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	private var recommendationDTO:RecommendationDTO;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				recommendationDTO = data as RecommendationDTO;
+				
+				if (!recommendationDTO)
+					return;
+				
+				
+				id_SerialLabel.text = itemIndex + 1 + ". ";
+				var serialLabel:String = "";
+				
+				//[10/11/2013] Shahid Munir, fixing #4400
+/* 				if (recommendationDTO.Description.length > 0)
+				{
+					serialLabel += recommendationDTO.Description;
+				}
+				else if (recommendationDTO.plantype && recommendationDTO.plantype.ID != 0)
+				{
+					serialLabel += recommendationDTO.plantype.Name;
+				} */
+				if (recommendationDTO.plantype && recommendationDTO.plantype.ID != 0)
+				{
+					serialLabel += recommendationDTO.plantype.Name;
+				}
+				else if (recommendationDTO.Description.length > 0)
+				{
+					serialLabel += recommendationDTO.Description;
+				}
+				
+				id_SerialLabel.text += serialLabel;
+				id_SerialLabel.toolTip = serialLabel;
+				
+				setDictationNoteButtonMode();
+				/* isEditViewOpen = false;
+				removeEditView(); */
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+				
+				invalidateDisplayList();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function init():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			// section 1 is Expand View & section 2 for Edit view
+			protected function toggleEditView(sectionNo:int):void
+			{				
+				if(!recommendationDTO) 
+					return;
+				
+				if(sectionNo == 2 )
+				{
+					if(id_btnEdit.selected)
+					{
+						recommendationDTO.inEditMode = false;
+						isEditViewOpen = true;
+						openEditView();
+						showGlow();
+						return;
+					}else
+					{
+						removeEditView();
+						glowAnimation.play(null, true);
+						glow1.alpha = 0;
+						isEditViewOpen 								= false;
+						id_btnEdit.selected 						= false;
+						return;
+					}
+				}else
+				{
+					removeEditView();
+					if(id_btnEdit.selected)
+						id_btnEdit.selected = false;
+					isEditViewOpen = false;
+				}
+				
+				recommendationDTO.inEditMode = !recommendationDTO.inEditMode;
+				setDictationNoteButtonMode();
+				showGlow();
+			}
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!recommendationDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					recommendationDTO.IsDirty = true;
+					recommendationDTO.IsDeleted = true;
+					
+					var ev:PatientInputAssessmentRecommendationEvent = new PatientInputAssessmentRecommendationEvent(
+						PatientInputAssessmentRecommendationEvent.PATIENT_INPUT_RECOMMENDATION_DELETE_EVENT, true);
+					
+					ev.recommedationDTO = recommendationDTO;
+					
+					dispatchEvent(ev);
+				});
+				
+				event.stopPropagation();
+			}
+			
+			private function setDictationNoteButtonMode():void
+			{
+				if (!recommendationDTO.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+				}
+				
+				showGlow();
+			}
+			
+			private function showGlow():void
+			{
+				if (data.inEditMode || id_btnEdit.selected)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+					id_ItemExpandView.viewModel.visible 	= false;
+				}
+			}
+			
+			protected function openEditView():void
+			{
+				if(!id_btnEdit.selected)
+					return;
+				else if(id_editExpandView.numChildren > 0)
+					removeEditView();
+				
+				var editor:RecommendationListItemEditView						= new RecommendationListItemEditView();
+				editor.recommendationDTO 										= recommendationDTO;
+				editor.width  													= id_editExpandView.width - 5;
+				
+				editor.setStyle('skinClass', RecordEditPopupSkin);
+				
+				editor.addEventListener('saveStatus',function(event:Event):void{
+					
+					isEditViewOpen = false;
+					id_btnEdit.selected = false;
+					removeEditView();
+					
+				});
+				
+				id_editExpandView.addElement(editor);
+				
+				
+				if (editor.recommendationDTO != null)// Populate the Form with Selected DTO
+				{
+					if (editor.recommendationDTO.plantype)
+					{
+						if (editor.recommendationDTO.plantype.ID == 0)
+						{
+							editor.img_PlanType.source 			=  QIConstants.IMG_RED;
+						}
+						else
+						{
+							editor.id_PlanTypeCmbo.selectedItem = recommendationDTO.plantype;
+							editor.img_PlanType.source  		=  QIConstants.IMG_GREEN;
+						}
+						
+						editor.id_PlanTypeCmbo.text = recommendationDTO.plantype.Name;
+					}
+					
+					//[10/11/2013] Shahid Munir, to fix # 4367
+					
+					if(editor.recommendationDTO.PatientDiagnosisID > 0)
+					{
+						var diagnsis:DiagnosisDTO = new DiagnosisDTO();
+						diagnsis.ID = editor.recommendationDTO.PatientDiagnosisID;
+						diagnsis.IcdDto.IcdCodeDescription = editor.recommendationDTO.DiagnosisInfo;
+						
+						editor.id_AssociatedDiagnosisCmbo.selectedItem	= diagnsis;
+					}
+					
+					
+					if (editor.recommendationDTO.methodtype)
+					{
+						if (editor.recommendationDTO.methodtype.ID == 0)
+							editor.img_Method.source  			=  QIConstants.IMG_RED;
+						else
+						{
+							editor.id_MethodCmbo.selectedItem 	= recommendationDTO.methodtype;
+							editor.img_Method.source  			=  QIConstants.IMG_GREEN;
+						}
+					}
+					
+					if (editor.recommendationDTO.Links)
+						editor.id_WebLinksCmbo.text = recommendationDTO.Links;
+					
+					if (editor.recommendationDTO.DurationType)
+					{
+						if (editor.recommendationDTO.DurationType.ID == 0)
+							editor.img_Duration.source = QIConstants.IMG_RED;
+						else
+						{
+							editor.img_Duration.source = QIConstants.IMG_GREEN;
+							editor.id_DurationCmbo.selectedItem = recommendationDTO.DurationType;
+						}
+						
+					}
+					
+					if (editor.recommendationDTO.Description)
+					{
+						editor.id_Description.text = recommendationDTO.Description;
+					}
+					
+					editor.id_DiscussedWithPatient.selected =  editor.recommendationDTO.IsDiscussedWithPatient;
+					
+				} 
+			}
+			private function removeEditView():void
+			{
+				if(id_editExpandView)
+				{
+					if(id_editExpandView.numChildren > 0)
+						id_editExpandView.removeAllElements();
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="-4" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="{this.width - 7}" height="26" >
+		
+		<s:HGroup left="0" right="70" top="0" bottom="0"
+				  horizontalAlign="left"
+				  verticalAlign="middle"
+				  paddingLeft="8" paddingRight="8" gap="6"
+				  buttonMode="true" toolTip="Open/Close Details"
+				  click="toggleEditView(1)"
+				  >
+			<s:Label id="id_SerialLabel" 
+					 width="100%" styleName="qiRecordTitle" maxDisplayedLines="1" showTruncationTip="true"
+					 text="{itemIndex + 1 + ' . ' + recommendationDTO.plantype.Name}" verticalCenter="0"/>
+		</s:HGroup>
+		
+		<s:HGroup right="5" gap="4" verticalCenter="0" height="100%" verticalAlign="middle" horizontalAlign="right">
+			<s:Image source="{QIConstants.IMG_NEW}"  buttonMode="true" useHandCursor="true"/>
+			<s:ToggleButton id="id_btnEdit"
+							click="toggleEditView(2)"
+							buttonMode="true" toolTip="Edit the Record"
+							selected="{isEditViewOpen}"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.EditRecordArrowTBSkin"
+							/>
+			<s:Button skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"
+					  toolTip="Delete Lab"  click="deleteClickHandler(event)"
+					  />
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 5}" visible="{recommendationDTO.inEditMode}" includeInLayout="{recommendationDTO.inEditMode}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		<recommendation:RecommendationListItemExpandView id="id_ItemExpandView" width="100%" recommendationDTO="{recommendationDTO}"/>
+	</s:Group>
+	
+	<s:Group id="id_editExpandView" width="{id_Header.width - 5}" top="21"  visible="{id_btnEdit.selected}" includeInLayout="{id_btnEdit.selected}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+	</s:Group>
+	
+</s:ItemRenderer>

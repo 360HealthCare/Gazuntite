@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="130" height="80"
+		 >
+	<fx:Script>
+		<![CDATA[
+			
+			[Bindable]
+			public var BMI:String = "0";
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Rect x="0.5" y="0.5" width="129" height="79" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#111212" ratio="0.48627450980392156"/>
+				<s:GradientEntry alpha="1.0" color="#252525" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#6D6D6D" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4"
+								weight="1"/>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect x="9" y="31" width="112" height="42" radiusX="3">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="2" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="#606060"/>
+		</s:fill>
+	</s:Rect>
+	<s:RichText x="49" y="9" color="#FFFFFF"
+				fontSize="16" tabStops="S0" text="BMI" fontFamily="Calibri" fontWeight="bold"/>
+	<s:RichText x="48" color="#FFF3AF" fontFamily="Calibri" textAlign="center"
+				fontSize="18" fontWeight="bold" tabStops="S0" text="{BMI}"
+				y="45"/>
+</s:Group>

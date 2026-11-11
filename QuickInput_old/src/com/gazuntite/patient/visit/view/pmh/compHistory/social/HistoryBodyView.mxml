@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:compHistory="com.gazuntite.patient.visit.view.pmh.compHistory.*" 
+		 creationComplete="creComp(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.dto.SocialHistoryDTO;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.LoadFamilyHistoryByPatientIdEvent;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.LoadMedicalHistoryByPatientIdEvent;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.LoadSocialHistoryByPatientIdEvent;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.ManagePatientFamilyHistoryEvent;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.ManagePatientSocialHistoryEvent;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.SaveMedicalHistoryEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			//-- Creation Complete ------------------------
+			protected function creComp(event:Event):void
+			{
+				addEventListener("saveGeneralHistoryEvent", function(event:Event):void
+				{
+					saveGeneralHistory();
+				});
+				addEventListener("clearGeneralHistoryEvent", function(event:Event):void
+				{
+					clearGeneralHistory();
+				});
+				addEventListener("saveFamilyHistoryEvent", function(event:Event):void
+				{
+					saveFamilyHistory();
+				});
+				addEventListener("clearFamilyHistoryEvent", function(event:Event):void
+				{
+					loadFamilyHistory();
+				});
+				addEventListener("saveSocialHistoryEvent", function(event:Event):void
+				{
+					saveSocialHistory();
+				});
+			}
+			
+			protected function id_noteIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_dictationIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			protected function id_AddMoreBtn_clickHandler():void
+			{
+				if(id_AddMoreBtn.label == 'Add More')
+				{
+					//dateToolTipContainer.includeInLayout =  true;
+					//dateToolTipContainer.visible =  true;
+					id_AddMoreBtn.label = '';
+					id_HistoryView.visible = true;
+					id_HistoryView.enabled = true;
+					id_HistoryView.includeInLayout = true;
+					//id_Header.id_SpinerList.enabled = true;
+					id_AddMoreBtn.label		 	= 'Close';
+					id_AddMoreBtn.toolTip 		= 'Close';
+					id_AddMoreBtn.width			= 60;
+					/* if(!isEditMode)
+					{
+					//id_AssociateVisitzCombo.visible = true;
+					//id_AssociateVisitzCombo.selectedIndex = -1;
+					id_HistoryView.enabled = false;
+					}else{
+					id_HistoryView.enabled = true;
+					} */
+				}
+				else if(id_AddMoreBtn.label == 'Close')
+				{
+					//dateToolTipContainer.includeInLayout =  false;
+					//dateToolTipContainer.visible =  false;
+					id_AddMoreBtn.label = '';
+					id_HistoryView.visible = false;
+					id_HistoryView.includeInLayout = false;
+					
+					//id_Header.id_SpinerList.enabled = false;
+					id_AddMoreBtn.label = 'Add More';
+					id_AddMoreBtn.toolTip = 'Add More';
+					id_AddMoreBtn.width = 80;
+					
+					/*  if(!isEditMode)
+					{
+					if(id_HistoryView.enabled == true)
+					id_HistoryView.enabled = false;
+					id_AssociateVisitzCombo.visible = false;
+					if(id_VisitDatesCombo.visible == true)
+					id_VisitDatesCombo.visible = false;
+					id_VisitDatesCombo.selectedIndex = -1;
+					}  */
+				}
+			}
+			
+			public function loadCompHistoryGridData():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(model.PreviousGeneralMedicalHistoryList))
+				{
+					model.PreviousGeneralMedicalHistoryList = new ArrayCollection();
+					loadMedicalHistory();
+				}
+				
+				if(UtilityFunctions.IsNullOrEmpty(model.PreviousFamilyHistoryList))
+				{
+					model.PreviousFamilyHistoryList = new ArrayCollection();
+					loadFamilyHistory();
+				}
+				
+				if(UtilityFunctions.IsNullOrEmpty(model.PreviousSocialHistoryList))
+				{
+					model.PreviousSocialHistoryList = new ArrayCollection();
+					loadSocialHistory();
+				}
+			}
+			//--- Save general history ------------------------------
+			private function saveGeneralHistory():void
+			{
+				var medicalHistoryRecord:MedicalHistoryDTO = new MedicalHistoryDTO();
+				if( null != model.GeneralMedicalHistoryList && model.GeneralMedicalHistoryList.length)
+				{
+					medicalHistoryRecord = model.GeneralMedicalHistoryList.getItemAt(0) as MedicalHistoryDTO;
+				}
+				var evt:SaveMedicalHistoryEvent = new SaveMedicalHistoryEvent( model.patientID, model.ClinicBranchIdSeq, medicalHistoryRecord, clearGeneralHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			// ----- Clear general history and load the save result --------------------------------
+			private function clearGeneralHistory():void
+			{
+				id_HistoryView.clearMedicalHistory();
+				id_HistoryView.id_GeneralSection.hasChange = false;
+				id_HistoryView.id_GeneralSection.DeselectAllButtons(); // deselet Y and N buutton
+				id_HistoryView.id_GeneralSection.clearGeneralSectionView(); // reset all view
+				
+				loadMedicalHistory();
+			}
+			//---------- save family history --------------------------
+			private function saveFamilyHistory():void
+			{
+				var evt:ManagePatientFamilyHistoryEvent = new ManagePatientFamilyHistoryEvent( model.patientID, model.ClinicBranchIdSeq, model.selectedFamilyHistoryRecord, loadFamilyHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			//------- clear family history form ---------------------------------
+			private function loadFamilyHistory():void
+			{
+				var ll:LoadFamilyHistoryByPatientIdEvent = new LoadFamilyHistoryByPatientIdEvent( );
+				CairngormEventDispatcher.getInstance().dispatchEvent( ll );
+			}
+			//--- Save Social history ------------------------------
+			private function saveSocialHistory():void
+			{
+				model.socialHistoryDTO.PatientID  = model.patientID;
+				model.socialHistoryDTO.VisitID    = model.VisitID;
+				model.socialHistoryDTO.CreatedAt  = new Date();
+				model.socialHistoryDTO.CreatedBy  = model.LoggedInUserId;
+				model.socialHistoryDTO.ModifiedAt = new Date();
+				model.socialHistoryDTO.ModifiedBy = model.LoggedInUserId;
+				
+				var evt:ManagePatientSocialHistoryEvent = new ManagePatientSocialHistoryEvent( model.ClinicBranchIdSeq, model.patientID, model.LoggedInUserSessionID, clearSocialHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			//----------------- clear social history form -------------------
+			private function clearSocialHistory():void
+			{
+				id_HistoryView.clearSocialHistory();
+				id_HistoryView.id_SocialSection.hasChange = false;
+				
+				//if(model.isQISocHistorySave)
+				addNewHistoryView();
+				loadSocialHistory();
+			}
+			//---------- loadMedicalHistory() -----------------------------
+			private function loadMedicalHistory():void
+			{
+				var loadMedicalHistoryByPatientIdEvent:LoadMedicalHistoryByPatientIdEvent = new LoadMedicalHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( loadMedicalHistoryByPatientIdEvent );
+			}
+			//------- loadSocialHistory data -------------------------------------
+			private function loadSocialHistory():void
+			{
+				var loadSocialHistoryEvent : LoadSocialHistoryByPatientIdEvent = new LoadSocialHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( loadSocialHistoryEvent );
+			}
+			
+			private function addNewHistoryView():void
+			{
+				id_mainGroup.removeElement( id_HistoryView );
+				
+				id_HistoryView 					= new HistoryInputView();
+				id_HistoryView.percentWidth		= 100;
+				id_HistoryView.visible			= false;
+				id_HistoryView.includeInLayout	= false;
+				id_HistoryView.enabled			= false;
+				
+				id_mainGroup.addElementAt( id_HistoryView, 0 );
+				
+				id_AddMoreBtn.label				= 'Add More';
+				id_AddMoreBtn.toolTip			= "Add More";
+				id_AddMoreBtn.width				= 80;
+				
+				id_HistoryView.showOnlySection( 0 );//show all section
+				model.isQISocHistorySave = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!--<notes:QISectionLevelNotesDictation id="id_notesDictation" width="100%" />-->
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		
+		<s:SkinnableContainer id="id_mainGroup"  height="100%"  width="100%" 
+							  includeInLayout="{id_mainGroup.visible}"> <!--visible="{model.securityProxyObject.PatientExam.QuickInput.PMH.ComprehensiveHistory.IsViewAllowed}"-->
+			
+			<s:layout>
+				<s:VerticalLayout gap="3" horizontalAlign="right"  paddingLeft="3" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+			</s:layout>
+			
+			<compHistory:HistoryInputView id="id_HistoryView" width="100%" visible="false" includeInLayout="false" enabled="false" />
+			
+			<s:HGroup width="100%">					
+				<s:HGroup id="id_IndicatorGrp" width="100%" horizontalAlign="left" >
+					
+					<s:Button id="id_noteIndicator" label="Notes" visible="false" includeInLayout="{id_noteIndicator.visible}"
+							  click="id_noteIndicator_clickHandler(event)" toolTip="View Notes" 
+							  useHandCursor="true" buttonMode="true" 
+							  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesIndicatorBtnSkin" /><!-- -->
+					
+					<s:Button id="id_dictationIndicator" label="Dictation" visible="false" includeInLayout="{id_dictationIndicator.visible}"
+							  click="id_dictationIndicator_clickHandler(event)" toolTip="Play Dictation" 
+							  useHandCursor="true" buttonMode="true" 
+							  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.dictationIndicatorBtnSkin"/>
+				</s:HGroup>
+				
+				<s:Group id="id_spacer" width="100%" height="2" />
+				
+				<s:Button id="id_AddMoreBtn" label="Add More" click="id_AddMoreBtn_clickHandler()" 
+						  skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.addMoreButton"
+						  buttonMode="true" useHandCursor="true" toolTip="Add Comprehensive History" width="80"/>
+				
+				<s:Button label="Next" click="dispatchEvent( new SelectSection('SelectSection','id_HistoryPanel', true, true) )" 
+						  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" toolTip="Next Section" buttonMode="true" />
+			</s:HGroup>
+			<compHistory:HistoryBodyContent  id="id_contents" width="100%" height="100%" />
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</s:Group>

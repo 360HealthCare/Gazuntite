@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:procedure="com.gazuntite.provider.live.services.billing.superBill.view.procedure.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:view="com.gazuntite.provider.live.services.billing.superBill.view.*" 
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.typeDTO.CPTMedicalTypeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillProcedureInfoDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			[Bindable]
+			private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			private var _selectedProcedure:CPTMedicalTypeDTO;
+			
+			private var _showInputView:Boolean = false;
+			private var _isInItemRenderer:Boolean = false;
+			
+			[Bindable]
+			public function get isInItemRenderer():Boolean
+			{
+				return _isInItemRenderer;
+			}
+			
+			public function set isInItemRenderer(value:Boolean):void
+			{
+				_isInItemRenderer = value;
+			}
+			
+			
+			[Bindable]
+			public function get showInputView():Boolean
+			{
+				return _showInputView;
+			}
+			
+			public function set showInputView(value:Boolean):void
+			{
+				_showInputView = value;
+			}
+			
+			
+			[Bindable]
+			public function get selectedProcedure():CPTMedicalTypeDTO
+			{
+				return _selectedProcedure;
+			}
+			
+			public function set selectedProcedure(value:CPTMedicalTypeDTO):void
+			{
+				_selectedProcedure = value;
+			}
+			
+			private var _procedureDTO:SuperBillProcedureInfoDTO = null;
+			
+			[Bindable]
+			public function get procedureDTO():SuperBillProcedureInfoDTO
+			{
+				return _procedureDTO;
+			}
+			
+			public function set procedureDTO(value:SuperBillProcedureInfoDTO):void
+			{
+				_procedureDTO = value;
+				if(value && isInItemRenderer)
+				{
+					id_modifiers.id_Modifier1.text				= _procedureDTO.Modifier1;
+					id_modifiers.id_Modifier2.text				= _procedureDTO.Modifier2;
+					id_modifiers.id_Modifier3.text				= _procedureDTO.Modifier3;
+					id_modifiers.id_Modifier4.text				= _procedureDTO.Modifier4;					
+					id_modifiers.setModifierNo();
+					
+					id_Amount.text = _procedureDTO.Fee;
+					id_Unit.text = _procedureDTO.Unit;
+				}
+			}
+			
+			
+			private function saveClickHandler():void
+			{
+				if (selectedProcedure == null)
+				{
+					Alert.show("Please Select Procedure","Required Field",4, FlexGlobals.topLevelApplication.mainContainer);
+					id_ProcedureSelectionView.id_searchDD.setFocus();
+					return;
+				}
+				
+				if(UtilityFunctions.TrimString(id_Amount.text).length > 0 && UtilityFunctions.TrimString(id_Unit.text).length == 0)
+				{
+					Alert.show("Please enter procedure unit","Required Field",4, FlexGlobals.topLevelApplication.mainContainer);
+					id_Unit.setFocus();
+					return;
+				}
+				
+				if(procedureDTO == null)
+				{
+					//save new procedureDTO
+					procedureDTO = new SuperBillProcedureInfoDTO();
+					
+					procedureDTO.ProcedureCode = selectedProcedure.ProcedureCode;
+					procedureDTO.CPTMedicalTypeID = selectedProcedure.CPTMedicalTypeID;
+					procedureDTO.ProcedureDescription = selectedProcedure.ProcedureDescription;
+					procedureDTO.Fee = id_Amount.text;
+					procedureDTO.Unit = id_Unit.text;
+					procedureDTO.IncludeInBilling = "true";
+					procedureDTO.IsCreatedFromSuperBill = "true";
+					procedureDTO.IsDeleted = "false";
+					procedureDTO.CreatedBy = String(model.LoggedInUserId);
+					procedureDTO.ModifiedBy = "0";
+					
+					procedureDTO.Modifier1 = id_modifiers.id_Modifier1.text;
+					procedureDTO.Modifier2 = id_modifiers.id_Modifier2.text;
+					procedureDTO.Modifier3 = id_modifiers.id_Modifier3.text;
+					procedureDTO.Modifier4 = id_modifiers.id_Modifier4.text;
+					
+					if(UtilityFunctions.TrimString(id_Amount.text).length > 0)
+					{
+						model.TotalProcedureCharges +=  (Number(id_Amount.text) * Number(id_Unit.text));
+						model.TotalCharges +=  (Number(id_Amount.text) * Number(id_Unit.text));
+						model.CalculateSuperBill();
+					}
+					model.procedureDTOList.addItem(procedureDTO);
+					cancel_clickHandler(null);
+				}
+				else
+				{
+					if(UtilityFunctions.TrimString(procedureDTO.Fee).length > 0)
+					{
+						model.TotalProcedureCharges -=  (Number(procedureDTO.Fee) * Number(procedureDTO.Unit));
+						model.TotalCharges -=  (Number(procedureDTO.Fee) * Number(procedureDTO.Unit));
+					}
+					
+					if(UtilityFunctions.TrimString(id_Amount.text).length > 0)
+					{
+						model.TotalProcedureCharges +=  (Number(id_Amount.text) * Number(id_Unit.text));
+						model.TotalCharges +=  (Number(id_Amount.text) * Number(id_Unit.text));
+						
+						procedureDTO.Fee = id_Amount.text;
+						procedureDTO.Unit = id_Unit.text;
+					}
+					
+					model.CalculateSuperBill();
+				}
+				
+			}
+			
+			protected function showInputViewButton_clickHandler(event:MouseEvent):void
+			{
+				showInputView = ! showInputView;
+				//if(! showInputView)
+				//reset();
+			}
+			
+			protected function cancel_clickHandler(event:MouseEvent):void
+			{
+				selectedProcedure = null;
+				showInputView = false;
+				reset();
+			}
+			
+			private function reset():void
+			{
+				id_Amount.text = "0";
+				id_Unit.text = "1";
+				id_modifiers.selectedModifier1 = null;
+				id_modifiers.selectedModifier2 = null;
+				id_modifiers.selectedModifier3 = null;
+				id_modifiers.selectedModifier4 = null;
+				
+				id_modifiers.id_Modifier1.text				= '';
+				id_modifiers.id_Modifier2.text				= '';
+				id_modifiers.id_Modifier3.text				= '';
+				id_modifiers.id_Modifier4.text				= '';
+				
+				id_modifiers.modifierDispalyNo = 1;		
+				procedureDTO = null;
+				selectedProcedure = null;
+				
+			}
+			
+			protected function id_Amount_focusOutHandler(event:FocusEvent):void
+			{
+				if(UtilityFunctions.TrimString(id_Amount.text).length > 0 && (UtilityFunctions.TrimString(id_Unit.text).length == 0  || Number(id_Unit.text) == 0 ))
+				{
+					id_Unit.text = "1";
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%"  height="20" buttonMode="true" useHandCursor="true" includeInLayout="{!isInItemRenderer}" visible="{!isInItemRenderer}"
+						  skinClass="com.gazuntite.skins.superBill.SummaryHeaderSkin">
+		
+		<s:RichText left="5" color="#FFFFFF" fontFamily="CalibriCFFBold" fontSize="15" tabStops="S0 S50" text="CHARGES" verticalCenter="0"/>		
+		<s:ToggleButton right="5" click="showInputViewButton_clickHandler(event)" toolTip="{showInputView ? 'Collapse':'Add Charges'}"
+						color="#333333" fontFamily="CalibriCFF" fontSize="18" verticalCenter="0" visible="{model.isFromPendingBills}" includeInLayout="{model.isFromPendingBills}"
+						skinClass="com.gazuntite.skins.superBill.PlusExpandTBSkin"/>
+		
+	</s:SkinnableContainer>
+	
+	<s:VGroup width="100%" includeInLayout="{showInputView}" visible="{showInputView}" paddingTop="3" paddingBottom="3" paddingLeft="3" paddingRight="3">			
+		
+		<s:HGroup width="100%" horizontalAlign="center" gap="6">
+			<procedure:ProcedureSelectionView id="id_ProcedureSelectionView" selectedProcedure="@{selectedProcedure}" width="50%" isInputView="{showInputView}"   />
+			
+			<s:HGroup  verticalAlign="middle" height="25" width="50%" gap="3" visible="{selectedProcedure}" includeInLayout="{selectedProcedure}">
+				<s:Label text="Amount:" fontFamily="CalibriCFF" fontSize="13" />
+				<s:TextInput id="id_Amount"
+							 prompt="Amount"  focusOut="id_Amount_focusOutHandler(event)" 
+							 toolTip="{'Procedure Amount: ' + procedureDTO.Fee  }" text="0" height="100%" width="50%"
+							 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin"/>
+				<s:Spacer width="5" />
+				<s:Label text="Unit:" fontFamily="CalibriCFF" fontSize="13" />
+				<s:TextInput id="id_Unit"
+							 prompt="Unit" toolTip="{'Procedure Unit: ' + procedureDTO.Unit }" text="1" 
+							 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin" height="100%" width="50%"/>
+			</s:HGroup>
+		</s:HGroup>
+		
+		<view:SuperBillModifierInputView id="id_modifiers" width="100%" visible="{selectedProcedure}" includeInLayout="{selectedProcedure}"/>
+		
+		<s:HGroup width="100%" verticalAlign="bottom" horizontalAlign="right" visible="{selectedProcedure}" includeInLayout="{selectedProcedure}">
+			<s:Button id="save" 
+					  buttonMode="true" useHandCursor="true" enabled="{model.isFromPendingBills}"
+					  label="{isInItemRenderer ? 'Save' : 'Add'}" toolTip="{isInItemRenderer ? 'Save' : 'Add'}"
+					  click="saveClickHandler()" skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" />
+			<s:Button id="cancel" 
+					  toolTip="Cancel" includeInLayout="{!isInItemRenderer}" visible="{!isInItemRenderer}"
+					  buttonMode="true" useHandCursor="true"
+					  label="Cancel" click="cancel_clickHandler(event)"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" />
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>

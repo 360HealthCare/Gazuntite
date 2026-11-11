@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 title="Family Histroy" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.checkboxCollapsiblePanelSkin" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+				super.isSelected = value;
+				
+				model.reviewHistroy.IsFamilyReviewed = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</components1:layout>
+	<components1:LabelDataGrid id="id_FamilyHistroy" horizontalScrollPolicy="off" verticalScrollPolicy="on" width="100%" maxHeight="150"
+							  rowCount="{id_FamilyHistroy.dataProvider.length?id_FamilyHistroy.dataProvider.length:1}"
+							  columnWidths="{['20%','30%','30%','20%']}" verticalGridLines="false" dataProvider="{model.PreviousFamilyHistoryList}"
+							  >
+		<components1:columns>
+			<mx:DataGridColumn  headerText="Disease" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="DiseaseType.Name"/>
+			<mx:DataGridColumn 	headerText="Disease Type" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="FamilyHistoryType.Name"/>
+			<mx:DataGridColumn  headerText="Relation"  dataField="ReletionshipType.Name" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label"/>
+			<mx:DataGridColumn  headerText="Notes"  dataField="FamilyHistoryNote" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label"/>
+		</components1:columns>
+	</components1:LabelDataGrid>
+</components1:CollapsiblePanel>
+

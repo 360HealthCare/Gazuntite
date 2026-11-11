@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:views="com.gazuntite.controls.custom.calendar.views.*"
+					  xmlns:skins="com.gazuntite.provider.live.services.scheduler.view.skins.*" 
+					  xmlns:views1="com.gazuntite.controls.calendar.views.*" 
+					  width="100%" height="100%" 
+					  initialize="init()" creationComplete="creComp()" 
+					  >
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter" formatString="MM-DD-YYYY"/>
+		<mx:DateFormatter id="dateFormatter2" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.controls.calendar.cal.event.CalendarEvent;
+			import com.gazuntite.controls.calendar.cal.event.OpenAppointmentEvent;
+			import com.gazuntite.controls.calendar.views.CalendarDescriptor;
+			import com.gazuntite.controls.calendar.views.CalendarUtils;
+			import com.gazuntite.controls.calendar.views.NullCalendarDescriptor;
+			import com.gazuntite.provider.live.services.scheduler.dto.AppointmentDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.components.NewAppointment;
+			import com.gazuntite.provider.live.services.scheduler.view.components.UpdateAppointment;
+			import com.gazuntite.provider.live.services.scheduler.view.event.RefreshCalendarAppoinmentsEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			[Bindable]	public var calendarDescriptor:com.gazuntite.controls.calendar.views.CalendarDescriptor = new com.gazuntite.controls.calendar.views.NullCalendarDescriptor();
+			[Bindable]	public var calendars:ArrayCollection = new ArrayCollection();
+			[Bindable]	public var events:ArrayCollection = new ArrayCollection();
+			[Bindable]	private var selectedAppointmentID:int ;	//Selected Appointment ID
+			[Bindable]	private var selectedAppointmentStID:int; //Selected Appointment Station ID
+			[Bindable]private var arrRooms:Array;				 //Slected Appointment RoomsList					
+			private var obj:Object;
+			private var obj_roomIn:Object;
+			
+			private var todayDate:Date; 
+			private var currentDate:Date = new Date();
+			private var currentMonth:Number;
+			private var currentYear:Number;
+			
+			private function init():void{
+				
+				todayDate = new Date();
+				dayView.date = todayDate; 	
+				wWView.date = todayDate;  
+				wView.date = todayDate;	
+				mView.date = todayDate;
+				currentMonth = todayDate.month; 	
+				currentYear = currentDate.fullYear;
+				lbldate.text = todayDate.toDateString(); 
+				addEventListener('openMenus', openContextMenue);						//for Open Edit Menue
+				addEventListener('newAppointmentMenus', openContextMenue);				//for Open new App Menu
+			}	
+			private function creComp():void
+			{
+				setDayViewStatus();//Check if today is Saterday or Sunday hide the Day view
+			}
+			//************************* Next Day Button handler *********************************************			
+			private function next_clickHandler(event:MouseEvent):void{
+				
+				switch(tab.selectedIndex){
+					case 0:
+						currentDate["date"]+=1;
+						dayView.date = currentDate;
+						lbldate.text = currentDate.toDateString();
+						setDayViewStatus();
+						break;
+					case 1:
+						currentDate = CalendarUtils.getNextDate(currentDate, 5);
+						wWView.date = currentDate;
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						break;
+					case 2:
+						currentDate = CalendarUtils.getNextDate(currentDate, 7);
+						wView.date = currentDate;
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						break;
+					case 3:
+						if(currentMonth == 11)
+						{
+							currentMonth = -1;
+							currentYear = currentYear + 1;
+						}
+						currentMonth = currentMonth + 1;				
+						currentDate = new Date(currentYear, currentMonth, 1);
+						mView.date = currentDate;
+						lbldate.text = CalendarUtils.getMonthdate(currentDate.month, currentDate.fullYear);
+						break; 
+					default:
+						break;
+				}
+			}
+			//************************* Today Button handler *********************************************			
+			private function currentDate_clickHandler(event:MouseEvent):void {
+				todayDate = new Date();
+				switch(tab.selectedIndex){
+					case 0:
+						lbldate.text = todayDate.toDateString();
+						dayView.date = todayDate;
+						setDayViewStatus();
+						break;
+					case 1:
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						wWView.date = todayDate;
+						break;
+					case 2:
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						wView.date = todayDate;
+						break;
+					case 3:
+						lbldate.text = CalendarUtils.getMonthdate(todayDate.month, todayDate.fullYear);
+						mView.date = todayDate;
+						break; 
+					default:
+						break;
+				}
+				currentDate = todayDate;
+			}
+			//************************* Back Button handler *********************************************			
+			private function back_clickHandler(event:MouseEvent):void {
+				switch(tab.selectedIndex){
+					case 0:
+						currentDate["date"]-=1;
+						dayView.date = currentDate;
+						lbldate.text = currentDate.toDateString();
+						setDayViewStatus();
+						break;
+					case 1:
+						currentDate = CalendarUtils.getNextDate(currentDate, -5);
+						wWView.date = currentDate;
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						break;
+					case 2:
+						currentDate = CalendarUtils.getNextDate(currentDate, -7);
+						wView.date = currentDate;
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						break;
+					case 3:
+						if(currentMonth == 0)
+						{
+							currentMonth = 12;
+							currentYear = currentYear -1;
+						}
+						currentMonth = currentMonth - 1;				
+						currentDate = new Date(currentYear, currentMonth, 1);
+						mView.date = currentDate;
+						lbldate.text = CalendarUtils.getMonthdate(currentDate.month, currentDate.fullYear);
+						break; 
+					default:
+						break;
+				}
+			}
+			private function tab_changeHandler(event:Event):void	{
+				if( tab.selectedIndex > 0){
+					lbldate.text = "";
+				}else{
+					lbldate.text = currentDate.toDateString();
+				}
+				
+				contextMenu = null;
+			}
+			private function setDayViewStatus():void{
+				/* if(lbldate.text.indexOf('Sat',0) != -1 || lbldate.text.indexOf('Sun',0) != -1)
+				{
+				dayView.visible = false;
+				}else{
+				dayView.visible = true;
+				} */
+			}
+			//************* Edit Appointment Popup **************************************************			
+			private function openContextMenue(event:com.gazuntite.controls.calendar.cal.event.OpenAppointmentEvent):void{
+				if( lbldate.text.indexOf('Sat') == -1 && lbldate.text.indexOf('Sun') == -1)
+				{
+					if( event.target is CalendarEvent ){
+						contextMenu = openContextMenu(event.StationID, event.ID, event.title);
+						selectedAppointmentID = event.ID;
+						selectedAppointmentStID = event.StationID;
+					}
+					else {
+						contextMenu = createContextMenu();
+					}
+				}
+				else
+				{
+					//contextMenu = null;
+					if( event.target is CalendarEvent ){
+						contextMenu = openContextMenu(event.StationID, event.ID, event.title);
+						selectedAppointmentID = event.ID;
+						selectedAppointmentStID = event.StationID;
+					}
+					else {
+						contextMenu = createContextMenu();
+					}
+				}
+			}
+			//Get Rooms List and Bind it with Context menu
+			private function getRoomsList(sid:int):void
+			{
+				if(model.ClinicRoomList == null)
+					return;
+				
+				if(arrRooms == null)
+				{
+					arrRooms = new Array();
+				}
+				else
+				{
+					arrRooms = [];
+					arrRooms = new Array();
+				}
+				
+				if(model.ClinicRoomList.length > 0)
+				{
+					for(var i:uint =0; i< model.ClinicRoomList.length; i++)
+					{
+						//trace('Rooms >> ',String(sid),  model.ClinicRoomList[i].Station);
+						if(String(sid) == model.ClinicRoomList[i].Station)
+						{
+							arrRooms.push(model.ClinicRoomList[i].Title);
+							//trace('Room Added in Menu', model.ClinicRoomList[i].Title);
+						}
+					}
+				}
+				else
+				{
+					var noRoom:String = 'No Room';
+					arrRooms.push(noRoom);
+				}
+			}
+			/// ############################# Menue Section #####################################################			
+			// ******************* Open menue for edit Appointment ********************************************	
+			private function openContextMenu(_sid:int, _id:int, _title:String):ContextMenu {
+				
+				var cm:ContextMenu 				= new ContextMenu();
+				var open:ContextMenuItem 		= new ContextMenuItem("Open");
+				var checkIn:ContextMenuItem     = new ContextMenuItem("Check In");
+				var del:ContextMenuItem     	= new ContextMenuItem("Delete",true);
+				
+				if(_title.indexOf('Cancelled',0) == -1)
+				{
+					getRoomsList(_sid);
+					var RoomsMenu:ContextMenuItem 	= UtilityFunctions.CreateSubmenue( "Room In", arrRooms, roomSelectHandler );
+					var StatusMenu1:ContextMenuItem = UtilityFunctions.CreateSubmenue( "Status", ["Reschedule", "Cancel"], statusSelectHandler );
+					//Room-In option in context menu should only be shown on appointments with Arrived status
+					if(_title.indexOf('Arrived',0) != -1 )
+					{
+						cm.customItems = [open, StatusMenu1, RoomsMenu];
+					}else if(_title.indexOf('Scheduled',0) != -1 || _title.indexOf('Confirmed',0) != -1)
+					{
+						cm.customItems = [open, StatusMenu1, checkIn]; 
+					}
+					open.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editAppointmnetPopup);
+					del.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, callDelete);
+					checkIn.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, callCheckIn);
+				}else		
+				{
+					var StatusMenu2:ContextMenuItem = UtilityFunctions.CreateSubmenue( "Status", ["Reschedule"], statusSelectHandler );
+					cm.customItems = [open, StatusMenu2, del];
+					open.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editAppointmnetPopup);
+					del.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, callDelete); 
+				} 
+				return cm;
+			}
+			private function statusSelectHandler(event:Event):void
+			{
+				if(event.currentTarget.label == 'Reshedule'){
+					editAppointmnetPopup(event);
+				}
+				if(event.currentTarget.label == 'Cancel'){
+					callCancel(event);
+				}
+			}
+			private function roomSelectHandler(event:Event):void
+			{
+				if(event.currentTarget.label == 'No Room'){
+					Alert.show( "No Room Available for this Appointment", "- No Room -", 4, FlexGlobals.topLevelApplication.mainContainer);
+				}else{
+					roomInAppointmentHandler(selectedAppointmentID, selectedAppointmentStID, event.currentTarget.label);
+					Alert.show( "Patient is successfully roomed in", "- Room In-", 4, FlexGlobals.topLevelApplication.mainContainer);
+				}
+			}
+			//******************************** Open menue for New Appontment and Switch views **********************************************			
+			private function createContextMenu():ContextMenu {
+				//trace('createContextMenu >>>>>>>>>>>>>>>>>>' )
+				var cm:ContextMenu = new ContextMenu();
+				var addAppointment:ContextMenuItem = new ContextMenuItem("Add Appointment");
+				var viewsMenu:ContextMenuItem = UtilityFunctions.CreateSubmenue( "Change view", ["Day View", "WorkWeek View", "Week View", "Month View"], viewsSelectHandler );
+				cm.customItems = [addAppointment, viewsMenu];
+				addAppointment.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, openNewAppointmnetPopup);
+				return cm;
+			}
+			//******************* Different View Change handler according to selction on Context menu ***********************************			
+			private function viewsSelectHandler(event:Event):void {
+				if(event.currentTarget.label == 'Day View')     {   tab.selectedIndex = 0;	}
+				if(event.currentTarget.label == 'WorkWeek View'){ 	tab.selectedIndex = 1; 	}
+				if(event.currentTarget.label == 'Week View')    {  	tab.selectedIndex = 2;	}
+				if(event.currentTarget.label == 'Month View')   {	tab.selectedIndex = 3;	}
+			}
+			/// ############################# Appointment Popup Section #####################################################	
+			//************* Open New Appointment Popup **************************************************			
+			private function openNewAppointmnetPopup(event:Event):void {
+				var newAppointmnet:NewAppointment = new NewAppointment();
+				PopUpManager.addPopUp(newAppointmnet, this, true);
+				newAppointmnet.x = 50;
+				newAppointmnet.y = 100;
+				newAppointmnet.onCreComp(currentDate);
+				newAppointmnet.addEventListener('refreshCalendarAppoinmentsEvent', refreshCalendarAppoinmentsEvent_handler); 
+			}
+			private function refreshCalendarAppoinmentsEvent_handler(e:RefreshCalendarAppoinmentsEvent):void
+			{
+				dispatchEvent(new Event('reFreshCalendar', true));
+			}
+			//************************ open Update menue ******************************************************************			
+			private function editAppointmnetPopup(event:Event): void	
+			{
+				var appointmnet:UpdateAppointment = new UpdateAppointment();
+				PopUpManager.addPopUp(appointmnet, this, true);
+				appointmnet.x = 50;
+				appointmnet.y = 100;
+				appointmnet.loadAppointment(selectedAppointmentID)
+				appointmnet.addEventListener('refreshCalendarAppoinmentsEvent', refreshCalendarAppoinmentsEvent_handler); 
+			}
+			//*************Conformation Cancel Appointment Handlers **************************************************			
+			private function callCancel(event:Event): void	
+			{
+				Alert.show('Are you sure to Cancel this Appointment', 'Cancel Confirmation', Alert.YES | Alert.NO, this, alertCancelListener, null, Alert.OK, FlexGlobals.topLevelApplication.mainContainer)
+			}
+			//**************popup of yes/No handler *****************************
+			private function alertCancelListener(eventObj:CloseEvent):void 
+			{
+				if (eventObj.detail == Alert.YES) 
+				{
+					cancelAppointmentHandler(selectedAppointmentID);
+				}
+			}
+			//******************On press yes of Cancel Confirmation Alert handler *******************************************
+			public function cancelAppointmentHandler(val:int):void	
+			{
+				
+				obj = new Object();
+				var mAppointmentDto:AppointmentDTO = new AppointmentDTO();
+				
+				for(var i:uint = 0; i < model.ScheduledAppointmentList.length; i++)
+				{
+					obj 			= model.ScheduledAppointmentList[i];
+					if(obj.ID == val)
+					{
+						var date:Date = new Date();
+						obj.ModifiedBy 				= model.loggedInUserProviderId.toString();
+						obj.ModifiedAt 				= dateFormatter2.format(date.toDateString())+'T'+time.format(date);
+						obj.Action.ID				= 6;
+						obj.Action.Name				= 'Cancelled';
+						obj.Action.NextAction		= '';
+						model.ScheduledAppointmentList[i] = obj;
+						var appointmentXML:XML = mAppointmentDto.ToXML(model.ScheduledAppointmentList[i] as Object)
+						//	trace('Cancel Appointment XML >> ',appointmentXML.toXMLString());
+						callManageService(appointmentXML, model.loggedInUserProviderId, model.loggedInUserId);
+					}
+				}
+			}
+			//***************** Check In functionality handler *************************************************************
+			private function callCheckIn(e:Event):void
+			{
+				var obj:Object = new Object();
+				var mAppointmentDto:AppointmentDTO = new AppointmentDTO();
+				
+				for(var i:uint = 0; i < model.ScheduledAppointmentList.length; i++)
+				{
+					obj 			= model.ScheduledAppointmentList[i];
+					if(obj.ID == selectedAppointmentID)
+					{
+						var date:Date = new Date();
+						obj.ModifiedBy 				= model.loggedInUserProviderId.toString();
+						obj.ModifiedAt 				= dateFormatter2.format(date.toDateString())+'T'+time.format(date);
+						obj.Action.ID				= 2;
+						obj.Action.Name				= 'Arrived';
+						obj.Action.NextAction		= 'Room-In';
+						model.ScheduledAppointmentList[i] = obj;
+						var appointmentXML:XML = mAppointmentDto.ToXML(model.ScheduledAppointmentList[i] as Object)
+						trace('Check-In XML ',appointmentXML.toXMLString());
+						callManageService(appointmentXML, model.loggedInUserProviderId, model.loggedInUserId);
+					}
+				}
+			}
+			//**************** Confirmation Delete Appointment mathods ******************************************************
+			private function callDelete(event:Event):void 
+			{
+				Alert.show('Are you sure to Delete this Appointment', 'Delete Confirmation', Alert.YES | Alert.NO, this, alertDeleteListener, null, Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+			}
+			//*************************delete popup of yes/No handler *****************************
+			private function alertDeleteListener(eventObj:CloseEvent):void 
+			{
+				if (eventObj.detail == Alert.YES) 
+				{
+					deleteAppointmentHandler(selectedAppointmentID);
+				}
+			}
+			//****************  On press yes of Confirmation Alert handler *******************************************
+			public function deleteAppointmentHandler(val:int):void	
+			{
+				
+				var obj:Object = new Object();
+				var mAppointmentDto:AppointmentDTO = new AppointmentDTO();
+				
+				for(var i:uint = 0; i < model.ScheduledAppointmentList.length; i++)
+				{
+					obj 			= model.ScheduledAppointmentList[i];
+					if(obj.ID == val)
+					{
+						var date:Date = new Date();
+						var objAppointment:Object = new Object();
+						obj.ModifiedBy 		= model.loggedInUserProviderId.toString();
+						obj.ModifiedAt 		= dateFormatter2.format(date.toDateString())+'T'+time.format(date);
+						obj.IsDeleted 		= 'true';
+						model.ScheduledAppointmentList[i] = obj;
+						var appointmentXML:XML = mAppointmentDto.ToXML(model.ScheduledAppointmentList[i] as Object)
+						//trace('Delete Appointment XML >> ',appointmentXML.toXMLString());
+						callManageService(appointmentXML, model.loggedInUserProviderId, model.loggedInUserId);
+					}
+				}
+			}
+			
+			//******************* RoomIN Appointment handler **************************************************************
+			private function roomInAppointmentHandler(_id:int, _sid:int, roominfo:String):void
+			{
+				var obj:Object = new Object();
+				var mAppointmentDto:AppointmentDTO = new AppointmentDTO();
+				for(var i:uint = 0; i < model.ScheduledAppointmentList.length; i++)
+				{
+					obj 							= model.ScheduledAppointmentList[i];
+					if(obj.ID == _id)
+					{
+						var date:Date 					= new Date();
+						var objAppointment:Object 		= new Object();
+						obj.ModifiedBy 					= model.loggedInUserProviderId.toString();
+						obj.ModifiedAt 					= dateFormatter2.format(date.toDateString())+'T'+time.format(date);
+						obj.IsDeleted 					= 'false';
+						obj.Action.ID					= 3;	
+						obj.Action.Name					= "Arrived";		 
+						obj.Action.NextAction			= 'BeingSeen';
+						for(var j:uint =0; j < model.ClinicRoomList.length; j++){
+							if(_sid == model.ClinicRoomList[j].Station && roominfo == model.ClinicRoomList[j].Title){
+								obj.Room.ID 			= model.ClinicRoomList[j].ID;
+								obj.Room.Station 		= model.ClinicRoomList[j].Station;
+								obj.Room.Title 			= model.ClinicRoomList[j].Title;
+							}
+						}
+						model.ScheduledAppointmentList[i] = obj;
+						
+						var appointmentXML:XML = mAppointmentDto.ToXML(model.ScheduledAppointmentList[i] as Object)
+						//trace('Room-IN Appointment XML >> ',appointmentXML.toXMLString());
+						callManageService(appointmentXML, model.loggedInUserProviderId, model.loggedInUserId);
+					}
+				}
+			}
+			//********************Call ManageAppointment Service and on result Refresh Appointments and Show update message after Delete ****************************************************
+			private function callManageService(_appointmentXML:XML, _PUId:int, _Uid:int ):void
+			{
+				var MAPPEvent:ManageAppointmentEvent = new ManageAppointmentEvent(_appointmentXML, _PUId, _Uid, refreshAppointments );
+				CairngormEventDispatcher.getInstance().dispatchEvent(MAPPEvent);
+				CursorManager.setBusyCursor();
+			}
+			private function refreshAppointments(val:* = null):void
+			{
+				dispatchEvent(new Event('reFreshCalendar', true));
+				//Alert.show('Action Done Successfully.', 'Congradulation',4,FlexGlobals.topLevelApplication.mainContainer);
+			}
+			//********************* Appointments Filter Functions *************************************************
+			protected function cmbProviders_changeHandler(event:IndexChangeEvent):void
+			{
+				cmbLocation.selectedIndex = -1;
+				model.sl_userId = cmbProviders.selectedItem.UserID;
+				model.sl_stanId = model.loggedInUserSelectedStationId;
+				model.sl_isProAll = false;
+				model.sl_isStaAll = true;
+				dispatchEvent(new Event('reFreshCalendar', true));
+			}
+			protected function cmbLocation_changeHandler(event:IndexChangeEvent):void
+			{
+				model.sl_userId = cmbProviders.selectedItem.UserID;
+				model.sl_stanId = cmbLocation.selectedItem.ID;
+				model.sl_isProAll = false;
+				model.sl_isStaAll = false;
+				dispatchEvent(new Event('reFreshCalendar', true));
+			}			
+			//********************** set provider as per looged in user ****************************************************
+			public function setProviderSetting():void
+			{
+				if(model.StaticData.ProviderByClinicIDList != null)
+				{
+					if(model.StaticData.ProviderByClinicIDList.length > 0){
+						for(var i:uint =0; i < model.StaticData.ProviderByClinicIDList.length; i++){
+							if(model.loggedInUserId == model.StaticData.ProviderByClinicIDList[i].UserID && model.loggedInUserProviderId == model.StaticData.ProviderByClinicIDList[i].ID){
+								cmbProviders.selectedIndex = i;
+								cmbProviders.enabled = false;
+								cmbLocation.enabled  = true;
+								break;
+							}	
+						}
+					}	
+				}
+			}
+			
+			protected function buttonbar1_changeHandler(event:IndexChangeEvent):void
+			{
+				id_today.text = id_buttonBar.selectedItem.label;
+				if(id_today.text == 'Day')
+					id_today.text = 'Today';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingTop="7" paddingBottom="2" paddingLeft="3" paddingRight="2" />
+	</s:layout>
+	
+	<s:VGroup width="100%" height="100%" horizontalAlign="left" verticalAlign="top">
+		<s:HGroup gap="5" width="100%">
+			<components:LabelComboBox  id="cmbProviders" 
+									   dataProvider="{model.StaticData.ProviderByClinicIDList}" 
+									   labelField="ProviderName"  prompt="Providers" width="20%" top="0"
+									   change="cmbProviders_changeHandler(event)" styleName="optionalComboBoxSkin"/>	
+			<components:LabelComboBox  id="cmbLocation" 
+									   dataProvider="{model.StaticData.StationsByClinicIDList}"
+									   labelField="Name"  prompt="Locations" width="20%" top="0"
+									   change="cmbLocation_changeHandler(event)" styleName="optionalComboBoxSkin" />
+			
+		</s:HGroup>
+		
+		<s:SkinnableContainer width="100%" height="35"  styleName="lightGreyBGContainerSkin">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" paddingTop="4" paddingBottom="4" paddingLeft="5" paddingRight="5" />
+			</s:layout>
+			
+			<s:SkinnableContainer width="20%" styleName="greyishBlackBGContainerSkin">
+				<s:layout>
+					<s:HorizontalLayout gap="4" verticalAlign="middle" horizontalAlign="center" />
+				</s:layout>
+				<s:Button click="back_clickHandler(event)"  buttonMode="true" toolTip="Previous"
+						  styleName="whiteArrButtonSkin" rotation="180"/>
+				<s:Label id="id_today" click="currentDate_clickHandler(event)" text="Today" 
+						 toolTip="{id_today.text}" fontFamily="Calibri" color="#ffffff" />
+				<s:Button click="next_clickHandler(event)" buttonMode="true" toolTip="Next"
+						  styleName="whiteArrButtonSkin" />
+			</s:SkinnableContainer>	
+			
+			<s:Label id="lbldate"  horizontalCenter="0" color="#272728" fontFamily="Calibri Bold" fontSize="12" width="10%" maxDisplayedLines="1"/>
+			
+			<s:HGroup width="60%" horizontalAlign="right">
+				
+				<s:ButtonBar id="id_buttonBar" dataProvider="{tab}" width="100%"  right="10" styleName="greyButtonBarSkin" change="buttonbar1_changeHandler(event)">
+					<s:layout>
+						<s:ButtonBarHorizontalLayout gap="5" />
+					</s:layout>
+				</s:ButtonBar>
+				
+			</s:HGroup>
+			
+			
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer styleName="blueBGContainerSkin" 	width="100%" top="59" height="100%">
+			<s:layout>
+				<s:VerticalLayout />
+			</s:layout>	
+			
+			<mx:ViewStack id="tab" width="100%" height="100%" maxHeight="315" backgroundAlpha="0" contentBackgroundAlpha="0" change="tab_changeHandler(event)" >
+				<views1:DayView backgroundAlpha="0" contentBackgroundAlpha="0" id="dayView" width="100%" height="100%" label="Day" 	    	calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" />
+				<views1:WeekView backgroundAlpha="0" contentBackgroundAlpha="0" id="wWView" width="100%" height="100%" label="Work Week"   	calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" IsWorkWeek="true"/>
+				<views1:WeekView backgroundAlpha="0" contentBackgroundAlpha="0" id="wView"  width="100%" height="100%" label="Week" 		calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}"  />
+				<views1:MonthView backgroundAlpha="0" contentBackgroundAlpha="0" id="mView" width="100%" height="100%" label="Month"		calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" />
+			</mx:ViewStack>
+		</s:SkinnableContainer>	
+	</s:VGroup>
+	
+</s:SkinnableContainer>

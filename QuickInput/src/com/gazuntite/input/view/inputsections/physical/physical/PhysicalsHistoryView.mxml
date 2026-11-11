@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:component="com.gazuntite.view.patient.component.*"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin"
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc()" 
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.physical.ros.PhysicalDTO;
+			import com.gazuntite.common.dto.physical.ros.ROSDTO;
+			import com.gazuntite.common.view.components.reviewofsystem.PatientInputPhysicalReviewOfSystemViewModel;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.input.event.visit.physical.physical.ManagePatientPhysicalEvent;
+			import com.gazuntite.input.event.visit.physical.ros.ManagePatientROSEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable] private var viewModel:PatientInputPhysicalReviewOfSystemViewModel = new PatientInputPhysicalReviewOfSystemViewModel();//.getInstance();
+			[Bindable] private var dictationNoteViewModel:PatientDictationNoteViewModel;
+			[Bindable] private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable] private var dictationNoteDataProvider:ArrayCollection;
+			[Bindable] private var patientSubViewTitle:String;
+			[Bindable] public var sectionNumber:String;
+			[Bindable]	public var NavItems:ArrayCollection;
+			private var m_sNextSectionLabel:String = "";
+			private var m_sPrevSectionLabel:String = "";
+			private var _dataProvider:ArrayCollection;
+			private var _moduleName:String;
+			
+			private function cc():void
+			{
+				addEventListener("saveClick", onSaveRequested)
+				addEventListener("deleteClick", onSaveRequested)
+			}
+			
+			[Bindable]
+			public function get NextSectionLabel():String
+			{
+				return m_sNextSectionLabel;
+			}
+			
+			public function set NextSectionLabel(value:String):void
+			{
+				m_sNextSectionLabel = value;
+			}
+			
+			[Bindable]
+			public function get PrevSectionLabel():String
+			{
+				return m_sPrevSectionLabel;
+			}
+			
+			public function set PrevSectionLabel(value:String):void
+			{
+				m_sPrevSectionLabel = value;
+			}
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				if( _dataProvider != value )
+				{
+					_dataProvider = value;
+					
+					//UtilityFunctions.SortArrayCollection( value, 'VisitDate', false, true );
+				}
+			}
+			
+			protected function onSaveRequested(event:GeneralEvent):void
+			{
+				if( moduleName == QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME )
+				{
+					var manageROS:ManagePatientROSEvent = new ManagePatientROSEvent(onSaveCallBack);
+					manageROS.IsEditMode = true;
+					manageROS.dto = event.value as ROSDTO;
+					CairngormEventDispatcher.getInstance().dispatchEvent( manageROS );
+				}
+				else if( moduleName == QIConstants.PHYSICAL_MODULE_NAME )
+				{
+					var managePhy:ManagePatientPhysicalEvent = new ManagePatientPhysicalEvent(onSaveCallBack);
+					managePhy.IsEditMode = true;
+					managePhy.dto = event.value as PhysicalDTO;
+					CairngormEventDispatcher.getInstance().dispatchEvent( managePhy );
+				}
+			}
+			
+			protected function onSaveCallBack():void
+			{
+				if( moduleName == QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME )
+				{
+					PatientInputPhysicalViewModel.getInstance().LoadROSByPatientId();
+				}
+				else if( moduleName == QIConstants.PHYSICAL_MODULE_NAME )
+				{
+					PatientInputPhysicalViewModel.getInstance().LoadPhysicalsByPatientId();
+				}
+			}
+			
+			protected function uiSort_changeHandler(event:IndexChangeEvent):void
+			{
+				if(uiSort.selectedIndex == 0)
+				{
+					uiSort.toolTip = 'Recently Added';
+					UtilityFunctions.SortArrayCollection( model.physicalHistoryDTOList, "VisitDate", false, true );
+				}
+				else
+				{
+					uiSort.toolTip = 'Category';
+					UtilityFunctions.SortArrayCollection( model.physicalHistoryDTOList, "MainCategoryName", false, false );
+				}
+			}
+			
+			public function get moduleName():String
+			{
+				return _moduleName;
+			}
+			
+			public function set moduleName(value:String):void
+			{
+				_moduleName = value;
+				/*
+				switch (moduleName)
+				{
+					case QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME:
+						
+						patientSubViewTitle = "REVIEW OF SYSTEM";
+						PrevSectionLabel="Chief Complaint/HPI"
+						NextSectionLabel="Physical"
+						dictationNoteViewModel = viewModel.rosDictatioNoteHistoryViewModel;
+						dictationNoteDataProvider = model.reviewOfSystemDictationNoteHistoryDTOList;
+						break;
+					
+					case QIConstants.PHYSICAL_MODULE_NAME:
+						
+						patientSubViewTitle = "PHYSICAL";
+						PrevSectionLabel="REVIEW OF SYSTEM"
+						NextSectionLabel="In-House Lab"
+						dictationNoteViewModel = viewModel.physicalDictationNoteHistoryViewModel;
+						dictationNoteDataProvider = model.physicalDictationNoteHistoryDTOList;
+						break;
+				}
+				
+				if (moduleName.length < 0)
+					return;
+				*/
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="10"/>
+	</s:layout>
+	<!--<skins:PatientSubViewTitleBar width="100%" label="CHIEF COMPLAINT/HPI" sectionNumber="2" maxSectionCounter="5"  showInputPart="false" showHistoryPart="true" inputCounter="0"
+	PrevSectionLabel="Vitals"
+	NextSectionLabel="Review of System"
+	MainSectionLabel="Physical"
+	NavItems="{NavItems}"
+	dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}"/>
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}"
+	dictationNoteDataProvider="{model.chiefComplaintDictationNoteHistoryDTOList}"/>-->
+	
+	<skins:PatientSubViewTitleBar id="id_TitleBar" 
+								  width="100%" 
+								  label="PHYSICAL"
+								  PrevSectionLabel="REVIEW OF SYSTEM"
+								  NextSectionLabel="In-House Lab"
+								  MainSectionLabel="Physical"
+								  maxSectionCounter="5" 
+								  sectionNumber="{sectionNumber}" 
+								  showHistoryPart="true" 
+								  inputCounter="0" showFlipButton="true"
+								  NavItems="{NavItems}"
+								  dictationNoteViewModel="{viewModel.physicalDictationNoteHistoryViewModel}" 
+								  />
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" 
+												viewModel="{viewModel.physicalDictationNoteHistoryViewModel}"
+												dictationNoteDataProvider="{model.physicalDictationNoteHistoryDTOList}"
+												/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+				<s:DropDownList id="uiSort"  
+								selectedIndex="0"
+								buttonMode="true" 
+								toolTip="Recently Added"
+								change="uiSort_changeHandler(event)"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+								>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Category" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%" />
+			</s:SkinnableContainer>
+			
+			<s:List id="uiReviewOfSystemList"
+					width="100%" allowMultipleSelection="true"
+					height="100%"
+					dataProvider="{model.physicalHistoryDTOList}"
+					borderVisible="false" skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					itemRenderer="com.gazuntite.input.view.inputsections.physical.reviewofsystem.itemrenderer.ReviewOfSystemListIR"/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

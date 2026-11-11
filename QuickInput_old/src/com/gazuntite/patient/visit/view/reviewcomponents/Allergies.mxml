@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 title="Allergies" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.checkboxCollapsiblePanelSkin" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+				super.isSelected = value;
+				
+				model.reviewHistroy.IsAllergiesReviewed = value;
+			}
+			
+		]]>
+	</fx:Script>
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</components1:layout>
+	
+	<components1:LabelDataGrid id="id_Allergies" 
+							  horizontalScrollPolicy="off" verticalScrollPolicy="auto" width="100%"
+							  rowCount="{id_Allergies.dataProvider.length?id_Allergies.dataProvider.length:1}"
+							  dataProvider="{model.QIAllergyDTOList}" verticalGridLines="false"  
+							  columnWidths="{['20%','20%','20%','30%','10%']}">
+		<components1:columns>
+			<mx:DataGridColumn dataField="NKDA" 		headerText="NKDA" 		itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn dataField="OnSet" 		headerText="On Set" 	itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn dataField="AllergyName" 	headerText="Allergy" 	itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn dataField="Reaction" 	headerText="Reaction" 	itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn dataField="Status"  		headerText="Active" 	itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+		</components1:columns>
+	</components1:LabelDataGrid>
+	
+</components1:CollapsiblePanel>
+

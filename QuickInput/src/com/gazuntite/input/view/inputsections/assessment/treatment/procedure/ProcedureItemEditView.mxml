@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.procedure.ProcedureDTO;
+			import com.gazuntite.common.dto.typeDTO.CPTMedicalTypeDTO;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]	
+			public var labelWidth:Number = 100;
+			
+			private var _procedureDTO:ProcedureDTO;
+			public var toolTipChanged:Boolean;
+			
+			[Bindable]
+			public function get procedureDTO():ProcedureDTO
+			{
+				return _procedureDTO;
+			}
+			
+			public function set procedureDTO(value:ProcedureDTO):void
+			{
+				_procedureDTO = value;
+			}
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.DOWN)
+					return;
+				
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var ev:PatientInputAssessmentProcedureEvent = new PatientInputAssessmentProcedureEvent(
+							PatientInputAssessmentProcedureEvent.PATIENT_INPUT_PROCEDURE_ITEM_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				
+				if (curTar.id == "id_CptCmbo")
+				{
+					ev.searchType = PatientInputAssessmentProcedureViewModel.PROCEDURE_CODE;
+				}
+				else
+				{
+					ev.searchType = PatientInputAssessmentProcedureViewModel.PROCEDURE_NAME;
+				}
+				
+				dispatchEvent(ev);
+				
+				toolTipChanged = true;
+				invalidateProperties();
+			}
+			
+			private function comboChangeHandler(event:IndexChangeEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				if (curTar.id == "id_CptCmbo")
+				{
+					id_ProcedureCmbo.selectedIndex = curTar.selectedIndex;
+				}
+				else
+				{
+					id_CptCmbo.selectedIndex = curTar.selectedIndex;
+				}
+				
+				if (curTar.selectedIndex < 0 || curTar.selectedIndex > curTar.dataProvider.length - 1)
+				{
+					id_CptCmbo.text = "";
+					id_ProcedureCmbo.text = "";
+				}
+				else
+				{
+					var procedure:CPTMedicalTypeDTO = curTar.dataProvider[curTar.selectedIndex] as CPTMedicalTypeDTO;
+					
+					id_CptCmbo.text = procedure.ProcedureCode;
+					id_ProcedureCmbo.text = procedure.ProcedureDescription;
+				}
+				
+				changeRequiredFieldIcons(curTar);
+				
+				toolTipChanged = true;
+				invalidateProperties();
+			}
+			
+			private function changeRequiredFieldIcons(comboBox:AutoComplete):void
+			{
+				if (comboBox.selectedIndex >= 0)
+				{
+					img_CptCode.source = QIConstants.IMG_GREEN;
+					img_Procedure.source = QIConstants.IMG_GREEN;
+				}
+				else
+				{
+					img_CptCode.source = QIConstants.IMG_RED;
+					img_Procedure.source = QIConstants.IMG_RED;
+				}
+			}
+			
+			private function saveClickHandler():void
+			{
+				if (isInvalid())
+					return;
+				
+				if (!procedureDTO)
+					return;
+				
+				procedureDTO.IsDirty = true;
+				
+				procedureDTO.cptmedicalDTO = id_CptCmbo.selectedItem as CPTMedicalTypeDTO;
+				
+				procedureDTO.ModifiedBy = model.LoggedInUserId;
+				procedureDTO.ModifiedAt = new Date();
+				
+				var ev:PatientInputAssessmentProcedureEvent = new PatientInputAssessmentProcedureEvent(
+							PatientInputAssessmentProcedureEvent.PATIENT_INPUT_PROCEDURE_EDIT_EVENT, true);
+				
+				ev.procedureDTO = procedureDTO;
+				
+				dispatchEvent(ev);
+			}
+			
+			private function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (isCptCodeInvalid())
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select CPT Code\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_CptCmbo;
+				}
+				
+				if (isProcedureInvalid())
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Procedure\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ProcedureCmbo;
+				}
+				
+				if (errorStr.length > 0)
+				{
+					Alert.show(errorStr, "Required Field", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			
+			private function isCptCodeInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				
+				if (id_CptCmbo.selectedIndex < 0)
+				{
+					if (!id_CptCmbo.selectedItem)
+					{
+						isNotValid = true;
+					}
+					else
+					{
+						var cptCode:CPTMedicalTypeDTO = id_CptCmbo.selectedItem as CPTMedicalTypeDTO;
+						
+						if (!cptCode)
+						{
+							isNotValid = true;
+						}
+					}
+				}
+
+				return isNotValid;
+			}
+			
+			private function isProcedureInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				
+				if (id_ProcedureCmbo.selectedIndex < 0)
+				{
+					if (!id_ProcedureCmbo.selectedItem)
+					{
+						isNotValid = true;
+					}
+					else
+					{
+						var procedure:CPTMedicalTypeDTO = id_ProcedureCmbo.selectedItem as CPTMedicalTypeDTO;
+						
+						if (!procedure)
+							isNotValid = true;
+					}
+				}
+				
+				return isNotValid;
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (toolTipChanged)
+				{
+					toolTipChanged = false;
+					
+					if (id_ProcedureCmbo.text.length)
+					{
+						id_ProcedureCmbo.toolTip = id_ProcedureCmbo.text;
+					}
+					else
+					{
+						id_ProcedureCmbo.toolTip = "Procedure";
+					}
+				
+					if (id_CptCmbo.text.length)
+					{
+						id_CptCmbo.toolTip = id_CptCmbo.text;
+					}
+					else
+					{
+						id_CptCmbo.toolTip = "CPT Code";
+					}
+				}
+			}
+			protected function id_cptCode_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_CptCmbo.selectedIndex == -1)
+					return;
+				
+				if(id_CptCmbo.selectedIndex >= 0 || id_CptCmbo.selectedItem != null)
+					img_CptCode.source = QIConstants.IMG_GREEN;
+				
+				id_ProcedureCmbo.selectedItem = model.CptMedicalTypeDTOList.getItemAt(id_CptCmbo.selectedIndex);
+			}
+			protected function id_AssociateVisitsCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_CptCmbo.text.length <= 2)
+					img_CptCode.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_procedure_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_ProcedureCmbo.selectedIndex >= 0 || id_ProcedureCmbo.selectedItem != null)
+					img_Procedure.source = QIConstants.IMG_GREEN;
+			}
+			
+			protected function id_procedure_textClearedHandler(event:Event):void
+			{
+				if(id_ProcedureCmbo.text.length <= 2)
+					img_Procedure.source = QIConstants.IMG_RED;
+			}
+			// TA - hide whole view of notes & dictation 
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+					viewModel.visible = false;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="5" paddingLeft="8" paddingRight="8" paddingTop="8" paddingBottom="8"/>
+	</s:layout>
+	
+	<s:HGroup width="100%"  height="25" verticalAlign="middle">
+		<s:BitmapImage id="img_CptCode" source="{QIConstants.IMG_GREEN}"/>
+		<autoComplete:AutoComplete id="id_CptCmbo" 
+								   width="100%" height="25" 
+								   prompt="Select CPT Code" toolTip="CPT Code"
+								   dataProvider="{model.CptMedicalTypeDTOList}" labelField="ProcedureCode"
+								   selectedItemChange="id_cptCode_selectedItemChangeHandler(event)"
+								   textCleared="id_AssociateVisitsCmbo_textClearedHandler(event)"
+								   keyUp="comboKeyUpHandler(event)" 
+								   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+								   />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="25" verticalAlign="middle">
+		<s:BitmapImage id="img_Procedure" source="{QIConstants.IMG_GREEN}"/>
+		<autoComplete:AutoComplete id="id_ProcedureCmbo" 
+								   width="100%" height="25" 
+								   prompt="Select Procedure" toolTip="Procedure"
+								   dataProvider="{model.CptMedicalTypeDTOList}" labelField="ProcedureDescription"
+								   selectedItemChange="id_procedure_selectedItemChangeHandler(event)"
+								   textCleared="id_procedure_textClearedHandler(event)"
+								   keyUp="comboKeyUpHandler(event)" 
+								   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+								   />
+	</s:HGroup>
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:ToggleButton id="id_btnDictation"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+						/>
+		
+		<s:ToggleButton id="id_btnNote"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inNoteMode}"
+						toolTip="Record Level Notes"
+						skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+						/>
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  toolTip="Save"  click="saveClickHandler()"
+				  right="0" verticalCenter="0"
+				  tabIndex="5"
+				  />
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{procedureDTO.Note}" note="@{procedureDTO.Note}"	isSaveButtonVisible="false"/>
+	
+</s:SkinnableContainer>

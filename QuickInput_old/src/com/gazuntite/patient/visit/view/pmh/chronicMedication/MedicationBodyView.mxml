@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreAllergiesBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.closeCrossButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.addMoreButton;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			import com.gazuntite.patient.visit.dto.visit.UserTypeDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.view.ePrescription;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _ePrescription:ePrescription;
+			
+			/* 
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+			super.isSelected = value;
+			
+			model.reviewHistroy.IsChornicMedicationReviewed = value; 
+			} */
+			
+			private function statusLabelFunction(oItem:Object, iCol:int):String
+			{
+				var vd:String = (oItem as Object /* MedicationDTO */).IsActive;
+				if(vd == "true" || vd == "True")
+				{
+					return "Active";
+				}
+				else if(vd == "false" || vd == "False")
+				{
+					return "InActive";
+				}
+				return ""; 
+				
+				
+			}
+			//Tahir Alvi  - 
+			private function getRefillData(item:Object, iCol:int):String
+			{
+				var result:String;
+				if(item.Refill)
+					result = item.Refill;
+				
+				if(item.isPRN)
+					result = item.isPRN;
+				
+				if(result.toLowerCase() == 'true')
+					result = 'AS NEEDED';
+				else if(item.Refill)
+					result = item.Refill;
+				return result;
+			}
+			
+			public function GridRowNumber(oItem:Object, iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_ChronicMedication.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			//-- Tahir Alvi - Add more button click handler
+			//-- New RX Integration in Quick Input
+			
+			protected function id_AddMoreBtn_clickHandler(event:MouseEvent):void
+			{
+				if(id_AddMoreBtn.label == 'Add More') // when show New Rx Form
+				{
+					id_content.visible			=	true;
+					id_content.includeInLayout 	= 	true;
+					ShowStatusWindow( "Please wait while Loading NewRX." ); // show Waiting message.
+					id_AddMoreBtn.label 		= 	''; 
+					id_AddMoreBtn.label 		= 'Close';  
+					//--- add new RX
+					var usertype_dto:UserTypeDTO 						= new UserTypeDTO();
+					
+					var userTypeDTO:XML 								= <OwnerUserType />
+					userTypeDTO.IsClinicUser 							= usertype_dto.IsClinicUser?"true":"false";
+					userTypeDTO.IsProvider 								= usertype_dto.IsProvider?"true":"false";
+					userTypeDTO.UserTypeId 								= usertype_dto.ID;
+					userTypeDTO.UserTypeName 							= usertype_dto.Name;
+					
+					_ePrescription = new ePrescription();
+					
+					
+					
+					
+					(_ePrescription as ePrescription).userID 			= model.LoggedInUserId;
+					(_ePrescription as ePrescription).clinicBranchID 	= model.LoggedInUserSelectedBranchId;
+					(_ePrescription as ePrescription).templateId 		= "1";
+					(_ePrescription as ePrescription).encounterTypeId 	= "1";
+					(_ePrescription as ePrescription).userTypeDTO 		= userTypeDTO;
+					
+					_ePrescription.percentWidth 						= 100;
+					//_ePrescription.percentHeight 						= 100;
+					
+					
+					
+					id_content.addElement( _ePrescription );
+					_ePrescription.setNewRXView 						= true;
+					_ePrescription.isMedicationMode 					= true;
+					_ePrescription.id_newRX.loadSelectedPatientData(model.patientDTO, model.VisitID);
+					
+					_ePrescription.addEventListener(FlexEvent.CREATION_COMPLETE ,RemoveStatusWindow);
+					
+					
+				}
+				else if(id_AddMoreBtn.label == 'Close') // when hide New Rx Form
+				{
+					id_content.visible			=	false;
+					id_content.includeInLayout 	= false;
+					id_AddMoreBtn.label 		= ''; 
+					id_AddMoreBtn.label 		= 'Add More';  
+					//-- remove new RX
+					id_content.removeElement( _ePrescription );
+					_ePrescription = null;
+				}
+			}
+			// Tahir Alvi - reset Chronic Medical Panel to default state
+			public function resetMedicationForm():void
+			{
+				id_content.visible			= false;
+				id_content.includeInLayout 	= false;
+				id_AddMoreBtn.label 		= ''; 
+				id_AddMoreBtn.label 		= 'Add More';
+				
+				//-- remove new RX
+				if(_ePrescription)
+				{
+					id_content.removeElement( _ePrescription );
+					_ePrescription = null;
+				}
+			}
+			
+			private var StatusWindow:PopupWindow ;
+			public function ShowStatusWindow(statusMessage :String ):void
+			{
+				StatusWindow = UtilityFunctions.ShowStatusMessage( statusMessage, this );
+			}
+			
+			public function RemoveStatusWindow(event:FlexEvent):void
+			{
+				if( StatusWindow )
+					StatusWindow.removePopup();
+				
+				StatusWindow = null;				
+			}
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="6" paddingBottom="6" paddingRight="6" paddingLeft="6"/>
+		</s:layout>
+		
+		<s:Group id="id_content" width="100%" height="100%"  visible="false"  includeInLayout="false"/>
+		
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button id="id_AddMoreBtn" 
+					  click="id_AddMoreBtn_clickHandler(event)" label="Add More"
+					  skinClass="{id_AddMoreBtn.label=='Close' ? closeCrossButton : AddMoreAllergiesBtn}"
+					  toolTip="{id_AddMoreBtn.label=='Close' ? 'Close Chronic Medication Form' :'Add Chronic Medication'}" 
+					  useHandCursor="true" buttonMode="true" tabIndex="0"/>
+			<!--click="dispatchEvent( new SelectSection('SelectSection','id_QIMedicationPanel', true, true) )"-->
+			<s:Button label="Next"  tabIndex="1"
+					  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" toolTip="Next Section"
+					  click="dispatchEvent( new SelectSection('SelectSection','id_ChronicmedicationPanel', true, true) )" buttonMode="true"/>
+		</s:HGroup>
+		
+		<components1:LabelDataGrid id="id_ChronicMedication" width="100%" maxHeight="100" useRollOver="false" 
+								  horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
+								  rowCount="{id_ChronicMedication.dataProvider.length?id_ChronicMedication.dataProvider.length:0}" 
+								  visible="{id_ChronicMedication.dataProvider.length ? true : false}" 
+								  includeInLayout="{id_ChronicMedication.visible}" 
+								  dataProvider="{model.medicationDTOList}"
+								  columnWidths="{[25, '20%', '20%','20%', '20%', '10%']}" >
+			<components1:columns>
+				<mx:DataGridColumn headerText="Sr.#" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="GridRowNumber"/>
+				<mx:DataGridColumn headerText="Medicine Name Strength (Generic Name)" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="drugName"/>
+				<mx:DataGridColumn headerText="Dose" dataField="Dose" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+				<mx:DataGridColumn headerText="Quantity" dataField="Quantity" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+				<mx:DataGridColumn headerText="NDC" dataField="NDCCODE" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+				<mx:DataGridColumn headerText="No. of Refills"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="getRefillData"/>
+			</components1:columns>
+		</components1:LabelDataGrid>
+		
+		<s:Label id="id_lbl" color="#FFFFFF" text="No Chronic Medications" visible="{(!id_ChronicMedication.dataProvider.length)}" includeInLayout="{id_lbl.visible}" fontFamily="Calibri" fontSize="14" width="100%" textAlign="center"/>
+		
+		
+	</s:SkinnableContainer>
+</s:Group>

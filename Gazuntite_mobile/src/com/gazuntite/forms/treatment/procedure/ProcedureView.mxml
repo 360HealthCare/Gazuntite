@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:treatment="com.gazuntite.forms.treatment.*" 
+		 xmlns:controls="com.gazuntite.components.controls.*" xmlns:procedure="com.gazuntite.forms.treatment.procedure.*"
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.coverflow.TreatmentDualPanel;
+			import com.gazuntite.events.ArrangeByEvent;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.Treatment.ProcedureDTO;
+			
+			[Bindable]
+			protected var editObject:Object;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int =id_ListView.selectedIndex;
+						sharedModel.procedureAC.setItemAt(event.payload, i);
+						editObject = sharedModel.procedureAC.getItemAt(i) as ProcedureDTO;
+					}
+					else
+					{
+						sharedModel.procedureAC.addItem(event.payload);
+						sharedModel.procedureAC.addItem(event.payload);
+					}
+					
+				} 
+				
+				invalidateDisplayList();
+				
+			}
+			
+			protected function arrangebycalloutbutton2_arrangeByHandler(event:ArrangeByEvent):void
+			{
+				
+				
+				/* switch(event.field)
+				{
+				case "Associated With":
+				id_ListView.itemRenderer = new ClassFactory(DiagnosisIRAssociatedWith);
+				break;
+				case "ICD":
+				id_ListView.itemRenderer = new ClassFactory(DiagnosisIRICD);
+				break;
+				case "Chronic":
+				id_ListView.itemRenderer = new ClassFactory(DiagnosisIRChronic);
+				break;
+				} */
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<procedure:ProcedureForm width="100%"
+							 height="100%"
+							 saveFormData="saveFormDataHandler(event)" />
+	
+	
+	
+</s:Group>

@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:superbill="com.gazuntite.provider.live.services.billing.view.superbill.*" 
+					  xmlns:view="com.gazuntite.provider.live.services.billing.superBill.view.*"
+					  xmlns:procedure="com.gazuntite.provider.live.services.billing.superBill.view.procedure.*" 
+					  xmlns:diagnosis="com.gazuntite.provider.live.services.billing.superBill.view.diagnosis.*"
+					  creationComplete="cc()"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.EncounterTypeDTO;
+			import com.gazuntite.common.dto.PlaceOfServiceTypeDTO;
+			import com.gazuntite.common.dto.StateCodeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.CMS1500DTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillPatientInsuranceDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillProcedureInfoDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.event.LoadAllPendingBillsbyProviderIdEvent;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			private var _showENM:Boolean = false;			
+			
+			[Bindable]
+			private var PrimaryInsurance:String = "Sprint";			
+			[Bindable]
+			private var PrimaryCopay:String = "N/A";
+			
+			[Bindable]
+			private var SecondaryInsurance:String = "N/A";
+			[Bindable]
+			private var SecondaryCopay:String = "N/A";
+			
+			[Bindable]
+			private var selectedPOS:PlaceOfServiceTypeDTO = null;
+			[Bindable]
+			private var selectedTOS:EncounterTypeDTO = null;
+			[Bindable]
+			private var selectedMOP:Object = null;
+			
+			[Bindable]
+			public function get showENM():Boolean
+			{
+				return _showENM;
+			}
+			
+			public function set showENM(value:Boolean):void
+			{
+				_showENM = value;
+				if(value && !id_enm.isDataInitialized)
+					id_enm.initializeData();
+			}
+			
+			
+			[Bindable]	private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			private function loadVisitBill():void
+			{				
+				var pbe:LoadAllPendingBillsbyProviderIdEvent = new LoadAllPendingBillsbyProviderIdEvent(0,model.LoggedInUserSelectedBranchId,8,String(model.VisitID),model.VisitProviderID,initializeData);
+				CairngormEventDispatcher.getInstance().dispatchEvent(pbe);
+			}
+			
+			
+			protected function cc():void
+			{
+				model.canSaveSupderBill = false;
+				model.isSupderBillUpdated = false;
+				//model.isENMCodeUsed = false;
+				loadVisitBill();				
+			}
+			
+			private function initializeData():void
+			{		
+				model.TotalCharges = 0;
+				model.PatientBalance = 0;
+				model.PrimaryResponsibility = 0;
+				model.BillingDisallowed = 0;
+				model.SecondaryResponsibility = 0;
+				model.AdditionalPayment = 0;
+				model.WriteOff = 0;
+				
+				model.Copay = 0.00;
+				model.ReceivedCopay = "";
+				model.DisplayCopay = "0";
+				model.IsPercentCopay = false;
+				if(model.VisitSuperBill.PatientInfo.PatientInsuranceInfo != null && model.VisitSuperBill.PatientInfo.PatientInsuranceInfo.length > 0 )
+				{
+					for(var i:int = 0; i < model.VisitSuperBill.PatientInfo.PatientInsuranceInfo.length; i++)
+					{
+						var insDTO:SuperBillPatientInsuranceDTO = model.VisitSuperBill.PatientInfo.PatientInsuranceInfo[i];
+						if(insDTO.InsuranceTypeName == "Primary")
+						{
+							PrimaryInsurance = insDTO.InsuranceName;
+							PrimaryCopay = insDTO.Copay;
+							if(UtilityFunctions.IsNullOrEmpty(insDTO.Copay) == false)
+							{
+								if(insDTO.Copay.indexOf("%") > -1)
+								{
+									model.IsPercentCopay = true;
+									model.Copay = parseInt(insDTO.Copay.replace("%",""));
+									model.ReceivedCopay = insDTO.Copay;
+									model.DisplayCopay = insDTO.Copay;
+								}
+								else
+								{
+									model.IsPercentCopay = false;
+									model.Copay = parseInt(insDTO.Copay);
+									model.ReceivedCopay = insDTO.Copay;
+									model.DisplayCopay = insDTO.Copay;
+								}
+							}
+						}
+						else if(insDTO.InsuranceTypeName == "Secondary")
+						{
+							SecondaryInsurance = insDTO.InsuranceName;
+							SecondaryCopay = insDTO.Copay;
+						}
+					}
+					/* if(PrimaryInsurance == null)
+					PrimaryInsurance = new SuperBillPatientInsuranceDTO();
+					if(SecondaryInsurance == null)
+					SecondaryInsurance = new SuperBillPatientInsuranceDTO(); */
+					
+					if( model.VisitSuperBill.IsSavedSuperBill == true &&  UtilityFunctions.IsNullOrEmpty(model.VisitSuperBill.Copay) == false)
+					{
+						if(model.VisitSuperBill.Copay.indexOf("%") > -1)
+						{
+							model.IsPercentCopay = true;
+							model.Copay = parseInt(model.VisitSuperBill.Copay.replace("%",""));							
+							model.DisplayCopay =model.VisitSuperBill.Copay;
+						}
+						else
+						{
+							model.IsPercentCopay = false;
+							model.Copay = parseInt(model.VisitSuperBill.Copay);							
+							model.DisplayCopay = model.VisitSuperBill.Copay;
+						}
+					}					
+				}
+				
+				model.TotalProcedureCharges = 0;
+				for(var j:int = 0; j < model.procedureDTOList.length; j++ )
+				{
+					var CPTdto:SuperBillProcedureInfoDTO = model.procedureDTOList[j];
+					if(CPTdto.Fee != null && CPTdto.Fee != "")
+					{
+						model.TotalCharges +=  (Number(CPTdto.Fee) * Number(CPTdto.Unit));
+						model.TotalProcedureCharges +=  (Number(CPTdto.Fee) * Number(CPTdto.Unit));
+					}
+				}					
+				model.PatientBalance = 0;
+				model.PrimaryResponsibility = Number(model.VisitSuperBill.PrimaryResponsibility);
+				model.BillingDisallowed = Number(model.VisitSuperBill.BillingDisallowed);
+				model.SecondaryResponsibility = Number(model.VisitSuperBill.SecondaryResponsibility);
+				model.AdditionalPayment = Number(model.VisitSuperBill.AdditionalPayment);
+				model.WriteOff = Number(model.VisitSuperBill.WriteOff);
+				model.CalculateSuperBill();	
+				
+				if(UtilityFunctions.IsNullOrEmpty(model.VisitSuperBill.ServiceTypeID) || model.VisitSuperBill.ServiceTypeID == "0" )
+					model.VisitSuperBill.ServiceTypeID = "10";
+				
+				for each (var pos:PlaceOfServiceTypeDTO in model.PlaceOfServiceTypeList) 
+				{
+					if(pos.ServiceTypeID == model.VisitSuperBill.ServiceTypeID)
+					{
+						selectedPOS = pos;
+						break;
+					}
+				}
+				
+				if(UtilityFunctions.IsNullOrEmpty(model.VisitSuperBill.EncounterTypeID) || model.VisitSuperBill.EncounterTypeID == "0" )
+					model.VisitSuperBill.EncounterTypeID = "10";
+				
+				for each (var tos:EncounterTypeDTO in model.EncounterTypeList) 
+				{
+					if(tos.EncounterTypeID == model.VisitSuperBill.EncounterTypeID)
+					{
+						selectedTOS = tos;
+						break;
+					}
+				}
+				
+				selectedMOP = new Object();
+				
+				switch(model.VisitSuperBill.PaymentTypeID)
+				{
+					case "1":
+					{
+						selectedMOP.label = "Check";
+						break;
+					}
+					case "3":
+					{
+						selectedMOP.label = "Credit Card";
+						break;
+					}
+					default:
+					{
+						selectedMOP.label = "Cash";
+						break;
+					}
+				}
+				
+				//***********following code will be used in pending bill's super bill****************
+				
+				//id_WRS.initializeData();
+				
+				if(model.isFromPendingBills && model.VisitSuperBill.HCFA != null && model.VisitSuperBill.IsSavedSuperBill == true)
+				{
+					model.CMS1500Info = new CMS1500DTO();
+					model.CMS1500Info.CMSID = model.VisitSuperBill.HCFA.CMSID;
+					model.CMS1500Info.ClaimID = model.VisitSuperBill.HCFA.ClaimID;
+					model.CMS1500Info.Block10A = model.VisitSuperBill.HCFA.Block10A;
+					model.CMS1500Info.Block10B = model.VisitSuperBill.HCFA.Block10B;
+					model.CMS1500Info.Block10C = model.VisitSuperBill.HCFA.Block10C;
+					model.CMS1500Info.Block20 = model.VisitSuperBill.HCFA.Block20;
+					model.CMS1500Info.Block20Charges = model.VisitSuperBill.HCFA.Block20Charges;
+					model.CMS1500Info.Block22 = model.VisitSuperBill.HCFA.Block22;
+					model.CMS1500Info.Block22RefNumber = model.VisitSuperBill.HCFA.Block22RefNumber;
+					model.CMS1500Info.Block24B = model.VisitSuperBill.HCFA.Block24B;
+					model.CMS1500Info.Block32 = model.VisitSuperBill.HCFA.Block32;					
+					model.CMS1500Info.BlockBStateCode = model.VisitSuperBill.HCFA.BlockBStateCode;	
+					
+					if(model.CMS1500Info.BlockBStateCode.length > 0)
+					{
+						for(var k:int = 0; k < model.StateCodeList.length; k++)
+						{
+							var state:StateCodeDTO = model.StateCodeList[k] as StateCodeDTO
+							if(state.StateCode == model.CMS1500Info.BlockBStateCode)
+							{
+								model.CMS1500StateCodeIndex = k;
+								break;
+							}
+						}
+					}
+					else
+					{
+						model.CMS1500StateCodeIndex = -1;
+					}
+					
+					if(model.VisitSuperBill.HCFA.Block16DateFrom != null && model.VisitSuperBill.HCFA.Block16DateFrom.indexOf("1901") == -1)
+						model.CMS1500Info.Block16DateFrom = model.VisitSuperBill.HCFA.Block16DateFrom;
+					if(model.VisitSuperBill.HCFA.Block16DateTo != null && model.VisitSuperBill.HCFA.Block16DateTo.indexOf("1901") == -1)
+						model.CMS1500Info.Block16DateTo = model.VisitSuperBill.HCFA.Block16DateTo;
+					if(model.VisitSuperBill.HCFA.Block18DateFrom != null && model.VisitSuperBill.HCFA.Block18DateFrom.indexOf("1901") == -1)
+						model.CMS1500Info.Block18DateFrom = model.VisitSuperBill.HCFA.Block18DateFrom;
+					if(model.VisitSuperBill.HCFA.Block18DateTo != null && model.VisitSuperBill.HCFA.Block18DateTo.indexOf("1901") == -1)
+						model.CMS1500Info.Block18DateTo = model.VisitSuperBill.HCFA.Block18DateTo;
+					
+				}
+				else
+				{
+					model.CMS1500Info = new CMS1500DTO();
+					model.CMS1500Info.CMSID = "0";
+					model.CMS1500Info.ClaimID = "0";
+					model.CMS1500Info.Block10A = "false";
+					model.CMS1500Info.Block10B = "false";
+					model.CMS1500Info.Block10C = "false";
+					model.CMS1500Info.Block20 = "false";
+					model.CMS1500Info.Block20Charges = "0";
+					model.CMS1500Info.Block22 = "";
+					model.CMS1500Info.Block22RefNumber = "";
+					model.CMS1500Info.Block24B = "";
+					model.CMS1500Info.Block32 = "";
+					model.CMS1500Info.BlockBStateCode = "";
+				}
+			} 
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>	
+	
+	<s:layout>
+		<s:VerticalLayout paddingRight="0" paddingLeft="0" />
+	</s:layout>
+	
+	<s:VGroup width="100%" gap="0">
+		<!-- *************************  HEADER of BILLING ****************************** -->
+		<s:SkinnableContainer buttonMode="true" useHandCursor="true"			  
+							  skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBetailBGSkin" height="25" width="100%">
+			<s:layout>
+				<s:HorizontalLayout />
+			</s:layout>
+			<s:HGroup  verticalAlign="middle" width="50%" paddingLeft="8" height="100%">
+				
+				<s:RichText color="#294C6F" fontFamily="CalibriCFFBold" fontSize="15" tabStops="S0 S50" text="{model.VisitSuperBill.Patient.toUpperCase()}" />
+				<s:RichText color="#333333" fontFamily="CalibriCFFBold" fontSize="15" tabStops="S0 S50" 
+							text="{'('+ model.VisitSuperBill.QuivusId +') ' + UtilityFunctions.CalculateAge(model.VisitSuperBill.PatientInfo.DateOfBirth) + ' ' + model.VisitSuperBill.PatientInfo.Gender.substring(0,1) }" />
+				
+				<s:Button skinClass="com.gazuntite.skins.controls.button.input.GreenDotBtnSkin" buttonMode="true" useHandCursor="true" toolTip="Ready to Bill"/>
+				
+			</s:HGroup>
+			<s:HGroup  verticalAlign="middle" width="50%" paddingRight="5" horizontalAlign="right" height="25">
+				<s:Image source="@Embed('com/gazuntite/provider/live/services/billing/view/assets/progressbar.png')" toolTip="35%"/>
+				<s:Button skinClass="com.gazuntite.skins.controls.button.input.InfoButtonSkin" buttonMode="true" useHandCursor="true" toolTip="Information" />
+				<s:ToggleButton label="E/M" click="showENM = !showENM " buttonMode="true" useHandCursor="true" toolTip="Evaluation and Management"
+								skinClass="com.gazuntite.skins.superBill.EmTBSkin"/>
+				<s:ToggleButton skinClass="com.gazuntite.skins.controls.button.eLab.ExpandButtonSkin" toolTip="Expand" buttonMode="true" useHandCursor="true" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+		<!-- *************************  HEADER of BILLING ****************************** -->
+		
+		<s:BorderContainer width="100%" includeInLayout="{showENM}" visible="{showENM}" borderWeight="3" borderColor="0x000000" backgroundColor="0xB7C4D7">
+			<s:layout>
+				<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+			</s:layout>
+			<view:SuperBillENMInfo id="id_enm" width="100%" includeInLayout="{showENM}" visible="{showENM}"  />
+		</s:BorderContainer>
+		
+		<view:SuperBillEncounterInfo width="100%" height="85" 
+									 selectedPOS="{selectedPOS}" selectedTOS="{selectedTOS}" selectedMOP="{selectedMOP}"
+									 PrimaryInsurance="{PrimaryInsurance}" PrimaryCopay="{PrimaryCopay}"
+									 SecondaryInsurance="{SecondaryInsurance}" SecondaryCopay="{SecondaryCopay}"
+									 skinClass="com.gazuntite.skins.superBill.InfoBGSkin"/>
+	</s:VGroup>	
+	
+	<s:VGroup width="100%" height="100%" paddingLeft="3" paddingRight="3" gap="0">			
+		<procedure:SuperBillProcedureInputView width="100%" />
+		<procedure:SuperBillProcedureListView width="100%" />
+	</s:VGroup>	
+	
+	<s:VGroup width="100%" height="100%" paddingLeft="3" paddingRight="3" gap="0">
+		<diagnosis:SuperBillDiagnosisInputView width="100%" />
+		<diagnosis:SuperBillDiagnosisListView width="100%" />
+	</s:VGroup>	
+	
+	<!--<s:VGroup width="100%" paddingLeft="3" paddingRight="3">
+	<view:WorkRelatedServices id="id_WRS"  width="100%" />
+	</s:VGroup>	
+	
+	<s:VGroup width="100%" paddingLeft="3" paddingRight="3" gap="0">
+	<s:SkinnableContainer width="100%" height="25" skinClass="com.gazuntite.skins.superBill.SummaryHeaderSkin"  buttonMode="true"  >
+	<s:RichText left="5" color="#FFFFFF" fontFamily="CalibriCFFBold" fontSize="15"
+	tabStops="S0 S50" text="BILLING SUMMARY" verticalCenter="0"/>
+	</s:SkinnableContainer>
+	
+	<view:SuperBillSummary width="100%"/>
+	</s:VGroup>	-->
+	
+	<s:VGroup width="100%" paddingLeft="3" paddingRight="3" gap="0">
+		<s:SkinnableContainer width="100%" height="20" skinClass="com.gazuntite.skins.superBill.SummaryHeaderSkin"  buttonMode="true"  >
+			<s:RichText left="5" color="#FFFFFF" fontFamily="CalibriCFFBold" fontSize="15"
+						tabStops="S0 S50" text="INSTRUCTIONS" verticalCenter="0"/>
+		</s:SkinnableContainer>
+		<view:SuperBillInstructions width="100%" />	
+	</s:VGroup>	
+</s:SkinnableContainer>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.document.dto.DocomentDTO;
+			import com.gazuntite.document.dto.DocomentSearchedDTO;
+			import com.gazuntite.document.dto.PatientSearchedDTO;
+			import com.gazuntite.document.model.DMModelLocator;
+			import com.gazuntite.document.view.event.DocomentListEvent;
+			import com.gazuntite.document.view.event.patientListEvent;
+			
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			public var DMmodel : DMModelLocator = DMModelLocator.getInstance();
+			
+			private var _ListDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+			
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+				
+				if(null != value)
+				{
+					ListDataProvider = sort(ListDataProvider,uiSortDropdown.selectedItem.label,false);
+				}
+			}
+			
+			protected function id_outBoxList_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				
+			}
+			
+			
+			protected function id_list_changeHandler(event:IndexChangeEvent):void
+			{
+				if(event.currentTarget.dataProvider[event.newIndex] is PatientSearchedDTO)
+				{
+					trace('patient DTO');
+					var ev:patientListEvent = new patientListEvent(patientListEvent.PATIENT_LIST_CLICKED);
+					ev.userID = event.currentTarget.dataProvider[event.newIndex].id;
+					ev.patientName = event.currentTarget.dataProvider[event.newIndex].Name;
+					ev.docomentCount = event.currentTarget.dataProvider[event.newIndex].docomentCount;
+					dispatchEvent(ev);
+				}
+				else if(event.currentTarget.dataProvider[event.newIndex] is DocomentSearchedDTO)
+				{
+					var eve:DocomentListEvent = new DocomentListEvent(DocomentListEvent.DOCOMENT_LIST_CLICKED,true);
+					eve.Docomentdto = event.currentTarget.dataProvider.getItemAt(event.newIndex) as DocomentSearchedDTO;
+					dispatchEvent(eve);
+					trace('Docoment DTO');
+				}
+			}
+			
+			public static function sort(arrayCollection:ArrayCollection, sortBy:String, numericSort:Boolean):ArrayCollection 
+			{ 
+				
+				var dataSortField:SortField        = new SortField(); 
+				dataSortField.name                = sortBy; 
+				dataSortField.numeric            = numericSort; 
+				
+				var dataSort:Sort    = new Sort(); 
+				dataSort.fields        = [dataSortField]; 
+				
+				/* Set the ArrayCollection object's sort property to our 
+				custom sort, and refresh the ArrayCollection. */ 
+				
+				dataSortField.descending = false
+				arrayCollection.sort = dataSort; 
+				arrayCollection.refresh(); 
+				
+				/* Return the collection */ 
+				return arrayCollection; 
+			} 
+			
+			protected function uiSortDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				ListDataProvider = sort(ListDataProvider,uiSortDropdown.selectedItem.label,false);
+				
+				lbl_selected.text = uiSortDropdown.selectedItem.label;
+			}
+			
+			protected function id_list_renderHandler(event:Event):void
+			{
+				if(id_list.selectedIndex == -1)
+				{
+					dispatchEvent(new Event("ResetListDesprictionView",true));
+				}
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Group width="100%" height="100%" >
+		<s:layout>
+			<s:VerticalLayout  gap="2" />
+		</s:layout>
+		
+		<s:SkinnableContainer  width="99%" height="25" 
+							   skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBgSkin"
+							  click="uiSortDropdown.openDropDown()" useHandCursor="true" buttonMode="true"
+							  >
+			
+			<s:HGroup width="100%" height="100%" verticalAlign="middle" paddingLeft="8" paddingRight="2" gap="4">
+				<s:Label text="Arrange By:" fontSize="12" fontFamily="CalibriCFF"/>
+				<s:Label id="lbl_selected" 
+						 fontFamily="CalibriCFFBold"
+						 width="100%" maxDisplayedLines="1" text="Name"/>
+				<s:Button skinClass="com.gazuntite.skins.controls.combobox.StepperComboOpenButtonSkin"/>
+			</s:HGroup>
+			
+			<s:ComboBox id="uiSortDropdown"
+						selectedIndex="0" top="24" width="100%" height="1"
+						toolTip="{'Arrange By: '+uiSortDropdown.selectedItem.label}"
+						change="uiSortDropdown_changeHandler(event)"
+						itemRenderer="com.gazuntite.document.view.itemRenderer.DDItemrederer"
+						skinClass="com.gazuntite.skins.controls.combobox.cmbHolderSkin"
+						> 
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="Name" />
+						<fx:Object label="Gender" />
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:ComboBox>
+			
+		</s:SkinnableContainer>
+		
+		<s:List id="id_list"
+				width="100%" height="100%"
+				allowMultipleSelection="false"
+				borderVisible="false"
+				verticalScrollPolicy="on"
+				change="id_list_changeHandler(event)"
+				horizontalScrollPolicy="off"
+				render="id_list_renderHandler(event)"
+				dataProvider="{ListDataProvider}"
+				creationComplete="id_outBoxList_creationCompleteHandler(event)"
+				itemRenderer="com.gazuntite.document.view.itemRenderer.PatientListIR"
+				skinClass="com.gazuntite.skins.controls.scrollbar.communication.ProviderListSkin"
+				/>
+	</s:Group>
+</s:Group>

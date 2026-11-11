@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var viewModel:PatientInputAssessmentLabOutViewModel = PatientInputAssessmentLabOutViewModel.getInstance();
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_ITEM_EDIT_KEY_UP_EVENT, 
+					patientInputLabOutItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_EDIT_EVENT, 
+					managePatientLabHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_DELETE_EVENT, 
+					managePatientLabHandler, false, 0, true);
+			}
+			
+			private function patientInputLabOutItemEditKeyUpHandler(event:PatientInputAssessmentLabOutEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadLabTestForHistoryView(event.searchString, event.testTypeID, event.searchType);
+			}
+			
+			private function managePatientLabHandler(event:PatientInputAssessmentLabOutEvent):void
+			{
+				viewModel.managePatientLab(QIConstants.HISTORY_VIEW);
+				
+				dispatchEvent(new PatientInputAssessmentFollowUpEvent(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, true));
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.labDTOHistoryList && model.labDTOHistoryList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.labDTOHistoryList = UtilityFunctions.SortArrayCollection(model.labDTOHistoryList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.labDTOHistoryList = UtilityFunctions.SortArrayCollection(model.labDTOHistoryList,'label',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.labDTOHistoryList" destination="DataList_changeHandler" />
+	<s:layout>
+		<s:VerticalLayout paddingLeft="2" paddingRight="2" paddingTop="10" paddingBottom="2" gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+		<s:DropDownList id="uiSortDropDown" skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+						selectedIndex="0" buttonMode="true" toolTip="Sort List"
+						change="SortDataList()">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Recently Added"/>
+					<fx:Object label="Test Name"/>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Spacer width="100%"/>
+	</s:SkinnableContainer>
+	
+	<s:List id="labOutHistoryList" 
+			width="100%" height="100%" allowMultipleSelection="false"
+			skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+			borderVisible="false" dataProvider="{model.labDTOHistoryList}"
+			itemRenderer="com.gazuntite.input.view.inputsections.assessment.plan.labOut.LabOutListItemRenderer"/>
+</s:Group>

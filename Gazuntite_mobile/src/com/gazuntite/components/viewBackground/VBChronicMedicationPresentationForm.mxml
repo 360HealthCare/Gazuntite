@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%" height="100%"
+		 creationComplete="init(event)" 
+		 xmlns:controls="com.gazuntite.components.controls.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			[Bindable]
+			protected var _selectedRecord:ObjectProxy;
+			
+			public function get selectedRecord():ObjectProxy
+			{
+				return _selectedRecord;
+			}
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xf3f3f3"/>
+				<s:GradientEntry color="0xffffff"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		<s:Label text="{'ICD Code: ' + _selectedRecord.icdCode}" styleName="vbTitle" />
+		<s:Label text="{'ICD Description: ' + _selectedRecord.description}" styleName="vbSubtitle" />
+		<s:Label text="{'OnSet: ' + _selectedRecord.onSet}" styleName="vbGraytxt" />
+		
+		
+	</s:BorderContainer>
+	
+	
+	
+</s:Group>

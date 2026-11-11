@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						xmlns:itemrenderer="com.adobe.gazuntite.view.controls.custom.patientExamView.quickInput.assessment.diagnosis.itemrenderer.*" 
+						cornerRadius="10" 
+						xmlns:CheckBoxGrid1="com.gazuntite.controls.extended.components.CheckBoxGrid.*"
+						xmlns:components1="com.gazuntite.controls.extended.components.*" 
+						>
+	<fx:Metadata>
+		[Event(name="labInAdded", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.InHouseLabDTO;
+			import com.gazuntite.patient.visit.dto.InHouseLabTestTypeDTO;
+			import com.gazuntite.patient.visit.event.physical.labin.ManagePatientInHouseLabsEvents;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.view.events.LoadInHouseLabTestTypeByClinicIdEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.object_proxy;
+			
+			import spark.events.TextOperationEvent;
+			import spark.skins.spark.TitleWindowSkin;
+			
+			/* import valueObjects.InHouseLabDTO;
+			import valueObjects.InHouseLabTestTypeDTO;
+			import valueObjects.PhysicalDTO; */
+			
+			
+			[Bindable] 
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable] private var searchType:ArrayCollection = new ArrayCollection([{label:"Test Code"},{label:"Test Name"}]);
+			[Bindable] private var inHouseLabList:ArrayCollection; 
+			private var val:Boolean = false;
+			
+			//Search and load records on basis search term from form
+			public function searchAndLoadLabIn(_searchTerm:String, index:uint):void
+			{
+				id_SearchCombo.selectedIndex = index;
+				id_searchText.text 			 = _searchTerm;
+				id_SearchButton.enabled		 = true;
+				searchLabCode();
+			}
+			private function saveInHouseLab(_val:Boolean):void
+			{
+				/* if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_LAB_IN ) )
+				{ */
+					if(id_DataGrid.selectedItems.length == 0){
+						Alert.show('Please select a record for Save.','No record selected');
+						return;
+					}
+					val = _val;
+					addrecord();
+				/* } */
+			}
+			
+			// Add records on the Add & Add and Close Button Click
+			protected function addrecord():void
+			{
+				for(var i:uint = 0; i< id_DataGrid.selectedItems.length; i++)
+				{
+					var inHouseLabDTO:InHouseLabDTO 	= new InHouseLabDTO ();
+					inHouseLabDTO.InHouseLabTestType 	= id_DataGrid.selectedItems[i].InHouseLabTestTypeDTO;
+					inHouseLabDTO.TestResult 			= id_DataGrid.selectedItems[i].TestResult;
+				
+					if(inHouseLabDTO.TestResult == null) // if result is not present in the DTO.
+						inHouseLabDTO.TestResult = '';
+					
+					inHouseLabDTO.CreatedAt 			= new Date();
+					inHouseLabDTO.CreatedBy 			= model.LoggedInUserId;
+					inHouseLabDTO.DictationID 			= Constants.GUID_FORMAT;
+					inHouseLabDTO.ModifiedAt 			= Constants.NULL_DATE;
+					
+					if( model.VisitID)
+					{
+						inHouseLabDTO.VisitDate 		= model.VisitDate;
+						inHouseLabDTO.VisitID 			= model.VisitID;
+					}
+										
+					inHouseLabDTO.PatientID 			= model.patientID;
+					inHouseLabDTO.IsDirty  = true;
+					
+			
+					
+					if(model.inHouseLabList== null)
+						model.inHouseLabList = new ArrayCollection();
+					
+					model.inHouseLabList.addItem(inHouseLabDTO); 
+				}
+				
+				var managePIH : ManagePatientInHouseLabsEvents = new ManagePatientInHouseLabsEvents();
+				CairngormEventDispatcher.getInstance().dispatchEvent( managePIH );
+				
+				if(inHouseLabList)
+					inHouseLabList.removeAll(); inHouseLabList = null;
+				
+				dispatchEvent( new Event( "labInAdded", true, false ) );
+				
+				//If Clicked is Add and Close
+				if(val)
+					removePopup();
+			}
+			//Close Alert and disaptach the event for saving records in DB Directly
+			private function alertSaveDBListener(eventObj:CloseEvent):void 
+			{
+				if (eventObj.detail == Alert.YES) 
+				{
+					addrecord();
+				}
+			}
+			private function searchLabCode():void
+			{
+				var labEvent : LoadInHouseLabTestTypeByClinicIdEvent = new LoadInHouseLabTestTypeByClinicIdEvent(id_searchText.text ,loadData);
+				CairngormEventDispatcher.getInstance().dispatchEvent( labEvent );
+			}
+			
+			//############### Seach and load data in Grid ###########################			
+			//Search and load ICD code on Buton Click
+			public function searchLabCodes():void
+			{
+				if(id_searchText.text.length < 3){
+					id_message.visible 	= true;
+					id_message.text 	= 'Please enter search term before click';
+				}else{
+					if(inHouseLabList)
+						inHouseLabList.removeAll(); inHouseLabList = null;
+					
+					searchLabCode();
+				}
+			}
+			public  function loadData(val:* = null):void
+			{
+				 if(model.LabInStaticDataList != null)
+				{
+					if(model.LabInStaticDataList.length)
+					{
+						if(inHouseLabList == null)
+							inHouseLabList = new ArrayCollection();
+						
+						for(var i:uint = 0; i < model.LabInStaticDataList.length; i++)
+						{
+							var obj:Object 						= new Object();
+							obj.InHouseLabTestTypeDTO			= model.LabInStaticDataList[i];
+							
+							if(model.inHouseLabList == null)
+								model.inHouseLabList = new ArrayCollection();
+							
+							 if(model.inHouseLabList != null && model.inHouseLabList.length > 0 )
+							{
+								if( hasDuplicateValues( obj.InHouseLabTestTypeDTO  as InHouseLabTestTypeDTO  ) )
+									continue;
+								else
+									inHouseLabList.addItem(obj);
+							}else
+							{
+								inHouseLabList.addItem(obj);
+							} 
+						}
+					
+					}else
+					{
+						id_message.visible  = true;
+						id_message.text 	= 'No InHouseLab found, try different.';
+					}
+				} 
+			}
+			
+			private function hasDuplicateValues(dto: InHouseLabTestTypeDTO ):Boolean
+			{
+				 for(var j:uint =0; j < model.inHouseLabList.length; j++)
+				{
+					var labDTO: InHouseLabDTO  = model.inHouseLabList[j] as InHouseLabDTO ; 
+					
+					if(dto.ID == labDTO.InHouseLabTestType.ID)
+						return true;
+				}
+				
+				return false;
+			}
+			
+			private function id_searchText_changeHandler(event:TextOperationEvent):void
+			{
+				if(id_searchText.text.length >= 3){
+					id_SearchButton.enabled = true;
+					id_message.visible 		= false;
+				}else{
+					id_SearchButton.enabled = false;
+					id_message.visible 		= false;
+				}
+			} 
+			private function resetFields():void
+			{
+				id_SearchCombo.selectedIndex = -1;
+				id_message.visible			 = false;
+				id_searchText.text			 = '';
+				id_SearchButton.enabled		 = false;
+			}
+			
+			//Close this popup
+			public override function removePopup():void
+			{
+				super.removePopup();
+				resetFields();
+			}
+		]]>
+	</fx:Script>
+	<!--<fx:Binding source="model.LabInStaticDataList" destination="inHouseLabList" />-->
+	
+	
+	<components1:layout>
+		<s:VerticalLayout horizontalAlign="center"/>
+	</components1:layout>
+	
+	<s:HGroup width="95%" height="5%" verticalAlign="middle">
+		<s:DropDownList id="id_SearchCombo" 
+						prompt="Select Type" dataProvider="{searchType}"
+						width="150" skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.DDLSkin" />
+		<s:Group enabled="{id_SearchCombo.selectedIndex != -1 ? true:false}" width="200">
+			<components1:LabelTextInput id="id_searchText"
+									   restrict="0-9 A-Z a-z" maxChars="30" width="200" prompt="Search labIn"
+									   change="id_searchText_changeHandler(event)" left="0" />
+			<s:Button id="id_SearchButton" 
+					  enabled="false" styleName="orangeSearchButtonSkin" width="23"
+					  toolTip="InHouse Lab Search" buttonMode="true"
+					  click="searchLabCodes()" left="176"  top="2" height="{id_searchText.height}"/>
+		</s:Group>
+		<s:Label id="id_message" color="#DE2626"  visible="false"/>
+	</s:HGroup >
+	
+	<CheckBoxGrid1:CheckBoxDataGrid id="id_DataGrid"
+								   width="95%" height="90%"  allowMultipleSelection="true" editable="true"
+								   dataProvider="{inHouseLabList}"
+								   draggableColumns="false" 
+								   useRollOver="false"
+								   rowCount="{id_DataGrid.dataProvider.length + 1}"
+								   columnWidths="{[20,'10%','25%', '25%','30%']}">
+		<CheckBoxGrid1:columns>
+			<mx:DataGridColumn dataField="" 
+							   headerText="" 
+							   rendererIsEditor="true"
+							   sortable="false" 
+							   itemRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxRenderer" 
+							   headerRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxHeaderRenderer" 
+							   editorDataField="selected" 
+							   />
+			<mx:DataGridColumn headerText="Test Code" 		dataField="InHouseLabTestTypeDTO.Code" 	editable="false" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Test Name" 		dataField="InHouseLabTestTypeDTO.Name" 	editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Result"    		dataField="TestResult" editable="true"      itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Normal Range"   	dataField="InHouseLabTestTypeDTO.NormalRange" 	editable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+		</CheckBoxGrid1:columns>
+	</CheckBoxGrid1:CheckBoxDataGrid>
+	
+	<s:HGroup width="95%" horizontalAlign="center" height="5%" verticalAlign="middle" paddingBottom="4">
+		<s:Button buttonMode="true" toolTip="Add InHouse Lab and close popup" label="Add  &amp; Close" click="saveInHouseLab(true)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+		<s:Button buttonMode="true" toolTip="Add Inhouse Lab" label="Add" click="saveInHouseLab(false)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+		<s:Button buttonMode="true" toolTip="Close popup" label="Cancel" click="removePopup()" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+	</s:HGroup>
+	
+</components1:PopupWindow>

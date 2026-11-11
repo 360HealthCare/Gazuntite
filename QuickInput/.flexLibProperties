@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.gazuntite.patient.visit.view.pmh.PMHView"/>
+    <classEntry path="com.gazuntite.patient.visit.view.QuickInputPanel"/>
+    <classEntry path="com.gazuntite.view.temp"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 title="Lab Orders/Results" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.checkboxCollapsiblePanelSkin" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+				super.isSelected = value;
+				
+				model.reviewHistroy.IsLabOrderReviewed = value;
+			}
+			
+			private function getVisitDate(oItem:Object, iCol:int):String
+			{
+				var result:String = '';
+				if(oItem.hasOwnProperty('VisitDate'))
+				{
+					if(oItem.VisitDate)
+						result = df.format(oItem.VisitDate)
+				}
+				return result;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="-1"/>
+	</components1:layout>
+	<components1:LabelDataGrid id="id_LabIn" horizontalScrollPolicy="off" verticalScrollPolicy="auto" width="100%" dataProvider="{model.inHouseLabList}" 
+							  rowCount="{id_LabIn.dataProvider.length ? id_LabIn.dataProvider.length : 1}" verticalGridLines="false" >
+		<components1:columns>
+			<mx:DataGridColumn  headerText="Visit Date" itemRenderer="mx.controls.Label"  dataField="VisitDate" headerRenderer="mx.controls.Label" labelFunction="getVisitDate"/>
+			<mx:DataGridColumn  headerText="Test" itemRenderer="mx.controls.Label"  headerRenderer="mx.controls.Label"  dataField="InHouseLabTestType.Name"  />
+			<mx:DataGridColumn  headerText="Test Code" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="InHouseLabTestType.Code"  />
+			<mx:DataGridColumn  headerText="Laboratory" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+		</components1:columns>
+	</components1:LabelDataGrid>
+	<components1:LabelDataGrid id="id_LabOut" horizontalScrollPolicy="off" verticalScrollPolicy="off" width="100%" dataProvider="{model.laboutDTOList}" 
+							  rowCount="{id_LabOut.dataProvider.length ? id_LabOut.dataProvider.length : 1}" verticalGridLines="false" headerHeight="0"  >
+		<components1:columns>
+			<mx:DataGridColumn  headerText="Visit Date" itemRenderer="mx.controls.Label"  dataField="VisitDate" headerRenderer="mx.controls.Label" labelFunction="getVisitDate"/>
+			<mx:DataGridColumn  headerText="Test" itemRenderer="mx.controls.Label"  headerRenderer="mx.controls.Label"  dataField="LabTestType.Name"  />
+			<mx:DataGridColumn  headerText="Test Code" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="LIONICLabTestType.testNum"  />
+			<mx:DataGridColumn  headerText="Laboratory" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="LabType.Name"/>
+		</components1:columns>
+	</components1:LabelDataGrid>
+</components1:CollapsiblePanel>
+

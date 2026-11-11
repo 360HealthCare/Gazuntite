@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" 
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.assessment.diagnosis.ICDCodeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.MedicalHistoryDTO;
+			import com.gazuntite.common.event.visit.LoadDiagnosisICDCodeEvent;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.event.visit.pmh.comphistory.LoadMedicalHistoryByPatientIdEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.SaveMedicalHistoryEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ToolTipEvent;
+			import mx.utils.StringUtil;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	protected var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var labelWidth:Number = 70;
+			[Bindable]	public var medicalHistoryDto:MedicalHistoryDTO;
+			
+			[Bindable]
+			public var availableIcdCodeList:ArrayCollection = null;
+			
+			private function id_ICDCode_KeyUpHandler():void
+			{
+				var selectedIcdCodeDTO:ICDCodeDTO;
+				var serachTerm:String = id_ICDCode.text;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				if(serachTerm.length >=3)
+				{
+					selectedIcdCodeDTO = null;
+					var icdEvent : LoadDiagnosisICDCodeEvent = new LoadDiagnosisICDCodeEvent(serachTerm,model.LoggedInUserSessionID,model.LoggedInUserId, ICDCodeloadResult);
+					CairngormEventDispatcher.getInstance().dispatchEvent( icdEvent );
+				}
+				else
+				{
+					id_Description.selectedItem = null;
+					id_ICDCode.selectedItem = null;
+					selectedIcdCodeDTO = null;
+				} 
+			}
+			
+			private function ICDCodeloadResult(icdCodeList:ArrayCollection):void
+			{
+				availableIcdCodeList = icdCodeList;
+				model.icdCodeDTOList = icdCodeList;
+			}
+			
+			protected function id_ICDCode_changeHandler(event:IndexChangeEvent):void
+			{
+				return;
+				if( id_ICDCode.selectedItem )
+				{
+					var item:ICDCodeDTO 		= id_ICDCode.selectedItem;
+					id_Description.selectedItem = item;
+					//					selectedIcdCodeDTO 			= item;
+					uiIsActive.selected = item.IsActive;
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				}
+				else
+				{
+					Alert.show("please select ICD from list. for custom ICD add custom discription","invalid input");
+				} 
+			}
+			private function id_Description_KeyUpHandler():void
+			{
+				var serachTerm:String = id_Description.text;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				if(serachTerm.length >=3)
+				{
+					var icdEvent : LoadDiagnosisICDCodeEvent = new LoadDiagnosisICDCodeEvent(serachTerm,model.LoggedInUserSessionID,model.LoggedInUserId, ICDCodeloadResult);
+					CairngormEventDispatcher.getInstance().dispatchEvent( icdEvent );
+				}
+				else
+				{
+					id_ICDCode.selectedItem = null;					
+					id_Description.selectedItem = null;					
+				}
+			}
+			protected function id_Description_changeHandler(event:Event):void
+			{
+				if( id_Description.selectedItem )
+				{
+					img_description.source = QIConstants.IMG_GREEN;
+					var item:ICDCodeDTO 		= id_Description.selectedItem as ICDCodeDTO;
+					id_ICDCode.selectedItem = item;
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				}
+				
+				/* if( id_Description.text.length > 3 )
+				{
+				var item:ICDCodeDTO;
+				if( id_Description.selectedIndex >= 0 )
+				{
+				item = id_Description.selectedItem as ICDCodeDTO;
+				id_ICDCode.selectedItem 	= item;
+				}
+				else 
+				{
+				item = new ICDCodeDTO();
+				item.IcdCodeDescription = id_Description.text;
+				}
+				
+				dispatchEvent( new Event("ICD_Change", true, true ) );
+				}  */
+			}
+			protected function handleSave(event:MouseEvent):void
+			{				
+				saveForm();				
+			}
+			
+			private function saveForm():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(id_Description.text))
+				{				
+					Alert.show("Please select ICD Code or enter ICD description.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_ICDCode.setFocus();
+							}
+						});
+					return;		
+				}
+				
+				if(checkDuplicate())
+				{
+					Alert.show("This record already exist in " + medicalHistoryDto.medicalhistorytype.Name + " history" ,"Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{								
+								id_Description.setFocus();
+							}
+						});
+					return;	
+				}
+				
+				medicalHistoryDto.ICDDTO = id_ICDCode.selectedItem as ICDCodeDTO;
+				if(medicalHistoryDto.ICDDTO == null && StringUtil.trim(id_Description.text).length > 0)
+				{
+					medicalHistoryDto.ICDDTO = new ICDCodeDTO();
+					medicalHistoryDto.ICDDTO.IcdCodeDescription = id_Description.text;
+				}
+				
+				if(id_Onset.selectedDate || StringUtil.trim(id_Onset.text).length)
+				{
+					//medicalHistoryDto.OnSet  = UtilityFunctions.FormatDate(id_Onset.selectedDate);
+					medicalHistoryDto.OnSet  = id_Onset.text;
+				}
+				
+				medicalHistoryDto.isActive = uiIsActive.selected;
+				
+				medicalHistoryDto.ICDDTO.Notes 	= medicalHistoryDto.Note;
+				
+				medicalHistoryDto.ModifiedBy = model.LoggedInUserId;
+				medicalHistoryDto.ModifiedAt = new Date();				
+				medicalHistoryDto.isActive = uiIsActive.selected;
+				
+				if(null != model.GeneralHistoryList)
+					model.GeneralHistoryList.removeAll();
+				else
+					model.GeneralHistoryList = new ArrayCollection();
+				
+				model.GeneralHistoryList.addItem(medicalHistoryDto);	
+				
+				saveGeneralHistory();
+			}
+			
+			private function checkDuplicate():Boolean
+			{
+				var duplicate:Boolean = false;
+				for each (var hdto:MedicalHistoryDTO in model.PreviousGeneralMedicalHistoryList) 
+				{
+					if(hdto == medicalHistoryDto) continue;
+					if(medicalHistoryDto.medicalhistorytype.ID == hdto.medicalhistorytype.ID 
+						&& hdto.OnSet == hdto.OnSet 
+						&& (id_ICDCode.selectedItem && hdto.ICDDTO.IcdCodeName == (id_ICDCode.selectedItem  as ICDCodeDTO).IcdCodeName))
+					{
+						duplicate = true;
+						break;
+					}
+				}
+				
+				return duplicate;
+			}
+			
+			private function saveGeneralHistory():void
+			{
+				var medicalHistoryRecord:MedicalHistoryDTO = new MedicalHistoryDTO();
+				if( null != model.GeneralHistoryList && model.GeneralHistoryList.length)
+				{
+					medicalHistoryRecord = model.GeneralHistoryList.getItemAt(0) as MedicalHistoryDTO;
+				}
+				var evt:SaveMedicalHistoryEvent = new SaveMedicalHistoryEvent( model.patientDTO.ID, model.LoggedInUserSelectedBranchId, medicalHistoryRecord, clearGeneralHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			private function clearGeneralHistory():void
+			{
+				//update skins for icons....
+				dispatchEvent(new Event("clearNotesEvent",true, true ));
+				
+				//update controls
+				dispatchEvent( new Event("data_added", true, true) );			
+				
+				loadMedicalHistory();
+				dispatchEvent( new Event( 'saveStatus', true ) );
+				
+			}
+			private function loadMedicalHistory():void
+			{
+				var loadMedicalHistoryByPatientIdEvent:LoadMedicalHistoryByPatientIdEvent = new LoadMedicalHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( loadMedicalHistoryByPatientIdEvent );
+			}
+			
+			[Bindable]
+			public var lableWidth:Number = 70;
+			
+			protected function id_Onset_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_Onset.toolTip = id_Onset.value || StringUtil.trim(id_Onset.text).length ? id_Onset.text : 'Date';
+			}
+			
+			protected function id_ICDCode_selectedItemChangeHandler(event:Event):void
+			{
+				if( id_ICDCode.selectedItem )
+				{
+					img_ICD.source = QIConstants.IMG_GREEN;
+					var item:ICDCodeDTO 		= id_ICDCode.selectedItem as ICDCodeDTO;
+					id_Description.selectedItem = item;
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				}
+			}
+			
+			// TA - hide whole view of notes & dictation 
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+					viewModel.visible = false;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			protected function textClearedHandler(event:Event):void
+			{
+				img_description.source = QIConstants.IMG_RED
+				img_ICD.source = QIConstants.IMG_RED
+				id_ICDCode.selectedItem = null;
+				id_ICDCode.text = "";
+				id_Description.selectedItem = null;				
+				id_Description.text = "";				
+			}
+			
+			protected function combokeyDownHandler(event:KeyboardEvent):void
+			{
+				var cmb:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if((cmb.id == "id_ICDCode" && StringUtil.trim(id_ICDCode.text).length == 0) || (cmb.id == "id_Description" && StringUtil.trim(id_Description.text).length == 0) )
+				{
+					img_description.source = QIConstants.IMG_RED
+					img_ICD.source = QIConstants.IMG_RED
+					id_ICDCode.selectedItem = null;
+					id_ICDCode.text = "";
+					id_Description.selectedItem = null;				
+					id_Description.text = "";	
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="2"/>
+	</s:layout>
+	
+	<s:VGroup width="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="0"   >		
+		<s:HGroup width="100%"  >
+			<s:VGroup width="50%">
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:BitmapImage id="img_description" source="{QIConstants.IMG_RED}"/>
+					<autoComplete:AutoComplete id="id_Description" 
+											   toolTip="{id_Description.selectedItem ? id_Description.selectedItem.IcdCodeDescription : 'Description/Diagnosis'}"
+											   prompt="Description/Diagnosis" width="100%" height="25" 
+											   dataProvider="{availableIcdCodeList}"
+											   keyUp="id_Description_KeyUpHandler()" 
+											   selectedItemChange="id_Description_changeHandler(event)" 
+											   labelField="IcdCodeDescription"
+											   tabIndex="0"
+											   textCleared="textClearedHandler(event)"
+											   keyDown="combokeyDownHandler(event)"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:Spacer width="11"/>
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" >
+						<components:LabelDateField id="id_Onset" 
+												   prompt="Date" width="100%" toolTipStart="id_Onset_toolTipShowHandler(event)"
+												   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+												   selectableRange="{{rangeEnd : new Date()}}" 
+												   IsEditAllow="true" editable="true"
+												   styleName="coverDateField"
+												   tabIndex="2"
+												   />
+					</s:SkinnableContainer>
+				</s:HGroup>	
+			</s:VGroup>
+			<s:VGroup width="50%">
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:BitmapImage id="img_ICD" source="{QIConstants.IMG_RED}"/>
+					<autoComplete:AutoComplete id="id_ICDCode" 
+											   width="100%" height="25" labelField="IcdCodeName" 
+											   prompt="ICD"
+											   toolTip="{id_ICDCode.selectedItem ? id_ICDCode.selectedItem.IcdCodeName : 'ICD'}" 
+											   dataProvider="{availableIcdCodeList}"
+											   keyUp="id_ICDCode_KeyUpHandler()"
+											   selectedItemChange="id_ICDCode_selectedItemChangeHandler(event)"
+											   tabIndex="1"
+											   textCleared="textClearedHandler(event)"
+											   keyDown="combokeyDownHandler(event)"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   />
+				</s:HGroup>	
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:Spacer width="11"/>
+					<s:ToggleButton id="uiIsActive" toolTip="{uiIsActive.selected ? 'Active' : 'Inactive'}" buttonMode="true" useHandCursor="true"
+									skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ActiveInactiveTBSkin" tabIndex="3"/>
+				</s:HGroup>
+			</s:VGroup>				  
+		</s:HGroup>		
+	</s:VGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:ToggleButton id="id_btnDictation"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						skinClass="{medicalHistoryDto.DictationID &amp;&amp; medicalHistoryDto.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+						/>
+		
+		<s:ToggleButton id="id_btnNote"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inNoteMode}"
+						toolTip="Record Level Notes"
+						skinClass="{medicalHistoryDto.Note.length? NotesRedButtonSkin : com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin}"
+						/>
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  toolTip="Save"  click="handleSave(event)"
+				  right="0" verticalCenter="0"
+				  tabIndex="5"
+				  />
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{medicalHistoryDto.Note}" IsDictaionEditMode="true"
+										 note="@{medicalHistoryDto.Note}" DictationID="@{medicalHistoryDto.DictationID}"	ShowSaveButton="false"/>
+	
+</s:SkinnableContainer>

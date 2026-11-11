@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.bmiNumericStepperBG">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:NumberFormatter id="bmiFormatter" precision="3"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			/* import com.adobe.Quivus.view.controls.skins.SkinnableContainers.bmiNumericStepperBG; */
+			
+			import mx.states.OverrideBase;
+			private var _label:String;
+			private var _labelChanged:Boolean;
+			
+			private var _value:Number;
+			private var _valueChanged:Boolean;
+			
+			public function get label():String
+			{
+				return _label;
+			}
+
+			public function set label(value:String):void
+			{
+				if (value != _label)
+				{
+					_label = value;
+					_labelChanged = true;
+					
+					invalidateProperties();
+				}
+			}
+			
+			public function get value():Number
+			{
+				return _value;
+			}
+			
+			public function set value(value:Number):void
+			{
+				if (value != _value)
+				{
+					value = Number(bmiFormatter.format(value));
+					
+					_value = value;
+					_valueChanged = true;
+					
+					invalidateProperties();
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (_labelChanged)
+				{
+					_labelChanged = false;
+					
+					id_Label.text = _label;
+				}
+				
+				if (_valueChanged)
+				{
+					_valueChanged = false;
+					
+					id_Value.text = String(_value);
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" paddingTop="7" paddingLeft="2" paddingRight="2"/>
+	</s:layout>
+	<s:VGroup width="100%">
+		<s:Label id="id_Label" fontFamily="calibri" fontSize="11" textAlign="center" width="100%"/>
+		
+		<s:Group width="100%">
+			<!--<s:Rect width="100%" height="100%" radiusX="4" radiusY="4">
+				<s:stroke>
+					<s:SolidColorStroke>
+						<s:color>#E2E3E3</s:color>
+					</s:SolidColorStroke>
+				</s:stroke>
+			</s:Rect>-->
+			<s:Rect height="21" id="rect2" radiusX="2" width="100%">
+					<s:fill>
+						<!--- @private
+						Defines the background fill of the NumericStepper component's background. -->
+						<s:SolidColor id="bgFill" color="0xFFFFFF" />
+					</s:fill>
+				</s:Rect>
+
+			<s:Label id="id_Value" width="100%" textAlign="center" height="18" verticalAlign="middle" fontFamily="calibri" fontSize="11" color="#000000"/>
+		</s:Group>
+	</s:VGroup>
+</s:SkinnableContainer>

@@ -1,0 +1,136 @@
+<RecentPatientRespose xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.RecentPatient" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<MostRecentPatientsResponseData xmlns:a="http://schemas.datacontract.org/2004/07/QuivusModel.RecentPatient">
+<a:FirstRecord>0</a:FirstRecord>
+<a:LastRecord>0</a:LastRecord>
+<a:RecentPatientList xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.RecentPatient">
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>1</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>2012-06-04T00:00:00</b:PatientDOB>
+<b:PatientId>48391</b:PatientId>
+<b:PatientName>Tom Cruse</b:PatientName>
+<b:PatientUserID>48516</b:PatientUserID>
+<b:QuivusId>Qa-043769</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>42757</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>2</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>1989-07-30T00:00:00</b:PatientDOB>
+<b:PatientId>48241</b:PatientId>
+<b:PatientName>Lilly James Potter</b:PatientName>
+<b:PatientUserID>48344</b:PatientUserID>
+<b:QuivusId>Qa-043619</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>41639</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>3</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>2012-06-11T00:00:00</b:PatientDOB>
+<b:PatientId>48393</b:PatientId>
+<b:PatientName>Bugs test</b:PatientName>
+<b:PatientUserID>48518</b:PatientUserID>
+<b:QuivusId>Qa-043771</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>41222</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>4</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>2012-06-01T00:00:00</b:PatientDOB>
+<b:PatientId>48436</b:PatientId>
+<b:PatientName>Test for Data</b:PatientName>
+<b:PatientUserID>48564</b:PatientUserID>
+<b:QuivusId>Qa-043814</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>41135</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>5</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>2012-06-13T00:00:00</b:PatientDOB>
+<b:PatientId>48433</b:PatientId>
+<b:PatientName>tera test</b:PatientName>
+<b:PatientUserID>48560</b:PatientUserID>
+<b:QuivusId>Qa-043811</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>40791</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+<b:RecentPatientDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AllowEmailCommunication>true</b:AllowEmailCommunication>
+<b:ClinicBranchId>7</b:ClinicBranchId>
+<b:Index>6</b:Index>
+<b:IsChatIdAvailable>false</b:IsChatIdAvailable>
+<b:IsEmailIdAvailable>true</b:IsEmailIdAvailable>
+<b:IsPhoneNoAvailable>false</b:IsPhoneNoAvailable>
+<b:IsSMSNoAvalable>false</b:IsSMSNoAvalable>
+<b:IsSnailIdAvailable>false</b:IsSnailIdAvailable>
+<b:LastVisitDate>-</b:LastVisitDate>
+<b:PatientDOB>2012-05-01T00:00:00</b:PatientDOB>
+<b:PatientId>48365</b:PatientId>
+<b:PatientName>TOM CRUSE Orignal</b:PatientName>
+<b:PatientUserID>48483</b:PatientUserID>
+<b:QuivusId>Qa-043743</b:QuivusId>
+<b:UserId>48546</b:UserId>
+<b:UserRecentPatientId>40043</b:UserRecentPatientId>
+</b:RecentPatientDTO>
+</a:RecentPatientList>
+<a:TotalRecords>6</a:TotalRecords>
+</MostRecentPatientsResponseData>
+</RecentPatientRespose>
+

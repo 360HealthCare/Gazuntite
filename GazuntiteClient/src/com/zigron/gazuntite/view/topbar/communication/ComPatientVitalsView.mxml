@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   xmlns:view="com.gazuntite.webRTC.view.*"
+					   width="100%" height="100%"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.zigron.gazuntite.view.event.SaveVitalsEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
+			
+			private var _patientName:String;
+			
+			private var _vitalDTO:VitalsDTO;
+			
+			[Bindable]
+			public function get vitalDTO():VitalsDTO
+			{
+				return _vitalDTO;
+			}
+
+			public function set vitalDTO(value:VitalsDTO):void
+			{
+				_vitalDTO = value;
+			}
+
+			[Bindable]
+			public function get patientName():String
+			{
+				return _patientName;
+			}
+			
+			public function set patientName(value:String):void
+			{
+				_patientName = value;
+			}
+			
+			private var _patientDOB:String;
+			
+			[Bindable]
+			public function get patientDOB():String
+			{
+				return _patientDOB;
+			}
+			
+			public function set patientDOB(value:String):void
+			{
+				_patientDOB = value;
+			}
+			
+			private var _patientAge:String;
+			
+			[Bindable]
+			public function get patientAge():String
+			{
+				return _patientAge;
+			}
+			
+			public function set patientAge(value:String):void
+			{
+				_patientAge = value;
+			}
+			
+			protected function onSaveClick(event:MouseEvent):void
+			{
+				var dto:VitalsDTO = new VitalsDTO();
+				
+				dto.BPDys 			= uiInfoBar.id_BP.text;
+				dto.BPSys			= uiInfoBar.id_BP.text;
+				dto.Note  			= id_notes.text;
+				dto.Respiration 	= uiInfoBar.id_resp.text;
+				dto.Temperature 	= uiInfoBar.id_temp.text;
+				dto.sugarLevel 		= uiInfoBar.id_sugarLevel.text;
+				dto.Respiration 	= uiInfoBar.id_resp.text;
+				
+				var ev:SaveVitalsEvent = new SaveVitalsEvent(dto);
+				dispatchEvent(ev);
+			}
+			
+			protected function onCancelClick(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("cancel") );
+			}
+			
+			public function CleanVitals():void
+			{
+				uiInfoBar.ClearVitals();
+			}
+			
+			protected function labeltextarea1_changeHandler(event:TextOperationEvent):void
+			{
+				vitalDTO.Note = event.currentTarget.text;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:ArrayCollection id="acVisitLevel">
+			<fx:Array id="myArray">
+				<fx:String>99201-Office/other outpatient services</fx:String>
+				<fx:String>99202-Office/other outpatient services</fx:String>
+				<fx:String>99203-Office/other outpatient services</fx:String>
+				<fx:String>99204-Office/other outpatient services</fx:String>
+				<fx:String>99205-Office/other outpatient services</fx:String>
+				<fx:String>99211-Office/other outpatient services</fx:String>
+				<fx:String>99212-Office/other outpatient services</fx:String>
+				<fx:String>99213-Office/other outpatient services</fx:String>
+				<fx:String>99214-Office/other outpatient services</fx:String>
+				<fx:String>99215-Office/other outpatient services</fx:String>
+				<fx:String>99241-Consultation for New/Est. outpatient services</fx:String>
+				<fx:String>99242-Consultation for New/Est. outpatient services</fx:String>
+				<fx:String>99243-Consultation for New/Est. outpatient services</fx:String>
+				<fx:String>99244-Consultation for New/Est. outpatient services</fx:String>
+				<fx:String>99245-Consultation for New/Est. outpatient services</fx:String>
+			</fx:Array> 
+		</s:ArrayCollection>
+	</fx:Declarations>
+	
+	<s:BorderContainer width="100%" height="100%"  backgroundColor="#FFFFFF" borderVisible="false">
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="0" paddingLeft="3" paddingRight="3" paddingTop="3" horizontalAlign="center" gap="2"/>
+		</s:layout>
+		
+		<s:VGroup width="100%" gap="0">
+			
+			<s:SkinnableContainer width="100%" height="32" skinClass="com.gazuntite.skins.controls.container.Communication.ComVitalHeaderSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" horizontalAlign="center"/>
+				</s:layout>
+				
+				<s:Label text="Creating Virtual Encounter for:" fontFamily="CalibriCFF" fontSize="14"  />
+				<s:Label text="{patientName} " fontFamily="CalibriCFFBold" fontSize="17"  />
+			</s:SkinnableContainer>
+			
+			<s:Group width="100%" >
+				<s:layout>
+					<s:HorizontalLayout gap="6"/>
+				</s:layout>
+				
+				<s:SkinnableContainer width="386" top="40" height="135" skinClass="com.gazuntite.skins.controls.button.communication.VitalsBgSkin">
+					<s:layout>
+						<s:VerticalLayout paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="5" />
+					</s:layout>
+					
+					<!-- PLEASE CHANGE VideoChatInfoBar SUCH THAT SKINS ARE SEPERATED ... THERE IS SKIN CODE INSIDE THE COMPONENT NOW-->
+					<s:VGroup width="100%" height="100%" paddingBottom="4" paddingLeft="10" paddingRight="5">
+						
+						<s:HGroup width="100%" verticalAlign="middle" height="20" >
+							<s:Label width="120" color="#FFFFFF" fontFamily="CalibriCFF" text="Visit Level"/>
+							<s:ComboBox dataProvider="{acVisitLevel}" 
+										width="100%" height="100%" 
+										prompt="Select Visit level"
+										skinClass="com.gazuntite.skins.IPEControls.IPECmbWhiteTextSkin"
+										/> 
+						</s:HGroup>
+						
+						<s:HGroup width="100%" verticalAlign="middle" height="20">
+							<s:Label width="120" color="#FFFFFF" fontFamily="CalibriCFF" text="Encounter Type"/>
+							<s:Label width="100%" color="#FFFFFF" fontFamily="CalibriCFFBold" fontWeight="bold"
+									 text="Virtual"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" verticalAlign="top" height="100%">
+							<s:Label width="120" color="#FFFFFF" fontFamily="CalibriCFF" text="Notes"/>
+							<components:LabelTextArea id="id_notes" height="100%" width="100%"
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  prompt="Enter Notes......."
+													  text="{vitalDTO.Note}"
+													  change="labeltextarea1_changeHandler(event)"
+													  maxChars="500" restrict="[a-z A-Z 0-9.,-_/]"
+													  skinClass="com.gazuntite.controls.skins.LabelTextAreaRoundedSkin"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" horizontalAlign="right"  verticalAlign="middle">
+							<s:Button label="Save" 
+									  click="onSaveClick(event)"
+									  skinClass="com.gazuntite.skins.controls.button.eLab.ProcessBlackButton"
+									  toolTip="Save" useHandCursor="true" buttonMode="true" width="100" />
+							<s:Button label="Cancel" 
+									  click="onCancelClick(event)" 
+									  skinClass="com.gazuntite.skins.controls.button.eLab.ProcessBlackButton"
+									  toolTip="Cancel" useHandCursor="true" buttonMode="true" width="100"/>
+						</s:HGroup>
+					</s:VGroup>
+				</s:SkinnableContainer>
+			</s:Group>
+		</s:VGroup>
+		<view:VideoChatVitalPanel vitalDto="@{vitalDTO}" id="uiInfoBar" width="100%" height="100%" enableNotesBtn="false"/>
+	</s:BorderContainer>
+</components:PopupGroup>

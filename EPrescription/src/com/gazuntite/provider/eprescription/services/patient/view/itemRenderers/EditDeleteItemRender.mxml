@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.controls.extended.components.LabelDataGrid;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.DataGridActionEvent;
+			
+			private var headerField:String;			
+			private var statusFunction:Function;
+			
+			private var section:String;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;	
+				
+				if(data)
+				{
+					id_Edit.enabled = true;
+					id_Delete.enabled =true;
+				}
+			}
+			
+			private function deriveComplexData(field:String):*	
+			{
+				var currentObj:*;
+				
+				if (field)
+				{
+					var arr:Array = [field];
+					
+					if (field.indexOf(".") != -1)
+					{
+						arr = field.split(".");
+						field = arr[arr.length - 1];
+					}
+					
+					currentObj = data
+					
+					if (currentObj)
+					{
+						for (var i:int = 0; i < arr.length; i++)
+						{
+							currentObj = currentObj[arr[i]];
+						}
+					}
+				}
+				return currentObj;
+			}
+			
+			private function onEditClick(event:MouseEvent):void
+			{
+				dispatchEvent(new DataGridActionEvent(DataGridActionEvent.EDIT_RECORD_CLICK, true));
+			}
+			
+			private function onDeleteClick(event:MouseEvent):void	
+			{
+				dispatchEvent(new DataGridActionEvent(DataGridActionEvent.DELETE_RECORD_CLICK, true));
+			}
+			
+			protected function id_SaveBtn_clickHandler(event:MouseEvent):void
+			{
+				var g:LabelDataGrid = this.parent.parent as LabelDataGrid;
+				if( g.editable )
+				{
+					id_SaveBtn.visible 	= false;
+					id_Edit.visible 	= true;
+					g.editable 			= false;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:HGroup  verticalAlign="top">		
+		<!--<s:Button id="id_Edit"  click="onEditClick(event)"
+				   styleName="editButtonSkin"
+				  buttonMode="true" toolTip="Edit" width="18"/>
+		<s:Button id="id_Delete"  click="onDeleteClick(event)"
+				  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.deleteButton"
+				  buttonMode="true" toolTip="Delete"/>-->		
+		<s:Button id="id_Edit" width="12" height="12" click="onEditClick(event)" 
+				  styleName="editButtonSkin"
+				  buttonMode="true" toolTip="Edit" includeInLayout="{id_Edit.visible}" />
+		
+		<s:Button id="id_SaveBtn" width="12" height="12" click="id_SaveBtn_clickHandler(event)" 
+				  styleName="saveButtonSkin" 
+				  buttonMode="true" useHandCursor="true" toolTip="Save" visible="false" includeInLayout="{id_SaveBtn.visible}"/>
+		
+		<s:Button id="id_Delete" width="12" height="12" click="onDeleteClick(event)"
+				  buttonMode="true" toolTip="Delete"/>
+	</s:HGroup>
+</s:MXDataGridItemRenderer>
+

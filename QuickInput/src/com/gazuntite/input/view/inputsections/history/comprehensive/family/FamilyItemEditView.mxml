@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:general="com.gazuntite.input.view.inputsections.history.comprehensive.general.*" 
+					  xmlns:family="com.gazuntite.input.view.inputsections.history.comprehensive.family.*"
+					  creationComplete="CC(event)" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:components1="com.gazuntite.common.view.components.*" 
+					  
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			private var _heartDataSelected:Boolean = false;
+			[Bindable]	public var curTab:String = TAB_HEART;
+			
+			public const TAB_HEART:String = "TAB_HEART";
+			public const TAB_HYPERTENSION:String = "TAB_HYPERTENSION";
+			public const TAB_DIABETES:String = "TAB_DIABETES";
+			public const TAB_CANCER:String = "TAB_CANCER";
+			public const TAB_OTHER:String = "TAB_OTHER";
+			
+			[Bindable]
+			private var isTabSelected:Boolean = false;
+			
+			[Bindable]
+			public var currentTabState:int = 0;
+			
+			// clear the old data provider and assign new one 	
+			private function setTypeOfDisease(dp:ArrayCollection):void
+			{
+				if(id_Family.id_TypeOfDisease)
+				{
+					if(id_Family.id_TypeOfDisease.dataProvider)
+					{
+						id_Family.id_TypeOfDisease.dataProvider 	= null;
+						id_Family.id_TypeOfDisease.selectedItem 	= null;
+						id_Family.id_TypeOfDisease.text 			= "";
+						id_Family.id_ICDCode.selectedItem 			= null;
+						id_Family.id_ICDCode.text 					= "";
+						id_Family.id_Relation.selectedItem 			= null;
+						id_Family.id_Relation.text 					= "";
+						
+						id_Family.img_description.source = QIConstants.IMG_RED;
+						id_Family.img_ICD.source = QIConstants.IMG_RED;
+					}
+					id_Family.id_TypeOfDisease.dataProvider = dp;
+				}
+			}
+			public function selectTab(selectedTab:String):void
+			{
+				isTabSelected = true;
+				
+				curTab = selectedTab;
+				
+				switch (curTab)
+				{
+					case TAB_HEART:							
+						id_Family.familyHistoryDTO = QIUtilityFunctions.getFamilyHistoryDTO(QIConstants.FAMILY_HEART_DISEASE_MODULE_NAME );
+						if(id_Family.id_TypeOfDisease)							
+							setTypeOfDisease(model.heartDiseaseDiseaseTypesDTOList);
+						break;
+					case TAB_HYPERTENSION:
+						id_Family.familyHistoryDTO = QIUtilityFunctions.getFamilyHistoryDTO(  QIConstants.FAMILY_HYPERTENSION_MODULE_NAME );
+						setTypeOfDisease(model.hypertensionDiseaseTypesDTOList);
+						break;
+					case TAB_DIABETES:
+						id_Family.familyHistoryDTO = QIUtilityFunctions.getFamilyHistoryDTO(  QIConstants.FAMILY_DIABETES_MODULE_NAME );
+						setTypeOfDisease(model.diabetesDiseaseTypesDTOList);
+						break;
+					case TAB_CANCER:
+						id_Family.familyHistoryDTO = QIUtilityFunctions.getFamilyHistoryDTO(  QIConstants.FAMILY_CANCER_MODULE_NAME);
+						setTypeOfDisease(model.cancerDiseaseTypesDTOList);
+						break;
+					case TAB_OTHER:
+						id_Family.familyHistoryDTO = QIUtilityFunctions.getFamilyHistoryDTO(  QIConstants.FAMILY_OTHER_MODULE_NAME );
+						setTypeOfDisease(model.otherDiseaseTypesDTOList);
+						break;
+					default:
+						Alert.show("Unknown Tab", "Error");
+				}
+			}
+			
+			public function clearFamilyInputView():void
+			{
+				if(!id_Family) return;
+					
+				id_Family.clearFamilyHistory(false);
+				
+				if(id_Family && id_Family.id_TypeOfDisease) 					
+					id_Family.id_TypeOfDisease.dataProvider 	= null;
+				
+				id_heart.uiToggleButton.selected = false;
+				id_heart.id_yes.selected = false;
+				id_heart.id_no.selected = false;
+				id_hypertension.uiToggleButton.selected = false;
+				id_hypertension.id_yes.selected = false;
+				id_hypertension.id_no.selected = false;
+				id_diabetes.uiToggleButton.selected = false;
+				id_diabetes.id_yes.selected = false;
+				id_diabetes.id_no.selected = false;
+				id_cancer.uiToggleButton.selected = false;
+				id_cancer.id_yes.selected = false;
+				id_cancer.id_no.selected = false;
+				id_other.uiToggleButton.selected = false;
+				id_other.id_yes.selected = false;
+				id_other.id_no.selected = false;
+				
+				id_heart.id_container.right = 7;
+				id_hypertension.id_container.right = 7;
+				id_diabetes.id_container.right = 7;
+				id_cancer.id_container.right = 7;
+				id_other.id_container.right = 7;
+				
+				isTabSelected = false;
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				
+				if(id_Family.id_TypeOfDisease)
+					id_Family.id_TypeOfDisease.dataProvider 	= null;
+				
+				id_heart.uiToggleButton.selected = false;
+				id_hypertension.uiToggleButton.selected = false;
+				id_diabetes.uiToggleButton.selected = false;
+				id_cancer.uiToggleButton.selected = false;
+				id_other.uiToggleButton.selected = false;
+				
+				id_heart.id_container.right = 7;
+				
+				addEventListener("switchHXFamilyCategory",switchCategory);
+			}
+			
+			private function switchCategory(event:GeneralEvent):void
+			{	
+				switch(event.value)
+				{					
+					case 1:
+					{						
+						selectTab(TAB_HYPERTENSION);
+						id_hypertension.onTabSelectionChange(null);
+						break;
+					}
+					case 2:
+					{
+						selectTab(TAB_DIABETES);
+						id_diabetes.onTabSelectionChange(null);
+						break;
+					}
+					case 3:
+					{							
+						selectTab(TAB_CANCER);
+						id_cancer.onTabSelectionChange(null);
+						break;
+					}
+					case 4:
+					{							
+						selectTab(TAB_OTHER);
+						id_other.onTabSelectionChange(null);
+						break;
+					}
+					
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout	gap="-2" horizontalAlign="left"	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="2" />
+	</s:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup gap="0"	width="150"	>
+		<skins:SideTabButton id="id_heart"
+								label="Heart Disease" width="100%"
+								 tabSelected="{curTab==TAB_HEART}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_HEART)"
+								 />
+		<skins:SideTabButton id="id_hypertension"
+							 label="Hypertension" width="100%"
+								 tabSelected="{curTab==TAB_HYPERTENSION}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_HYPERTENSION)"
+								 />
+		<skins:SideTabButton id="id_diabetes"
+							 label="Diabetes" width="100%"
+								 tabSelected="{curTab==TAB_DIABETES}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_DIABETES)"
+								 />
+		<skins:SideTabButton id="id_cancer"
+							 label="Cancer" width="100%"
+								 tabSelected="{curTab==TAB_CANCER}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_CANCER)"
+								 />
+		<skins:SideTabButton id="id_other"
+							 label="Other" width="100%"
+								 tabSelected="{curTab==TAB_OTHER}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_OTHER)"
+								 />
+	</s:VGroup>
+	
+	<s:BorderContainer	width="100%" height="150"	backgroundColor="0x83A3FE" borderVisible="false" left="0" top="0" right="0" bottom="0" cornerRadius="3" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="2" strength="1"/>
+		</s:filters>
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+		</s:layout>
+		<s:Group width="100%" includeInLayout="{!isTabSelected}" visible="{!isTabSelected}" >			
+			<components1:PleaseSelectView label="Select a category to view" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+		</s:Group>
+		<family:FamilyItemEditDetailView id="id_Family"			
+										  width="100%" height="100%"
+										  includeInLayout="{isTabSelected}"
+										  visible="{isTabSelected}" isTabSelected="{isTabSelected}"
+										  setTabState="{currentTabState}"
+										 />
+	</s:BorderContainer>
+</s:SkinnableContainer>

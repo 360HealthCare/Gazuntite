@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:components="com.gazuntite.controls.extended.components.*"
+						closing="popupwindow1_closingHandler(event)"
+						skinClass="com.gazuntite.controls.extended.skins.CamPopupWindowSkin"
+						>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			
+			
+			public var myvideo:Video;
+			public var cam:Camera;
+			
+			private var _ImageSourceFromWebCam:BitmapData = null;
+			
+			public function get ImageSourceFromWebCam():BitmapData
+			{
+				return _ImageSourceFromWebCam;
+			}
+			
+			public function set ImageSourceFromWebCam(value:BitmapData):void
+			{
+				_ImageSourceFromWebCam = value;
+			}
+			
+			public function getCamera():void
+			{
+				cam = null;				
+				cam = Camera.getCamera();
+				//this.title. = "Take Picture";
+				if(Camera.names.length > 0 && cam)
+				{					
+					cam.setMode(360, 270, 15);
+					cam.setQuality(0, 0);
+					
+					myvideo = new Video(360,270);
+					myvideo.attachCamera(cam);
+					myVideo.addChild(myvideo);
+					id_takePicture.enabled = true;	
+				}
+				else
+				{
+					//this.title = "Camera not pluged in.";					
+					id_takePicture.enabled = false;					
+				}
+			}
+			
+			private function takePicture(event:MouseEvent):void 
+			{		
+				if(id_takePicture.label == "Take Picture" )
+				{
+					var bmd:BitmapData = new BitmapData(320,240);
+					bmd.draw(myVideo);				
+					imagen.source = new Bitmap(bmd);	
+					myVideo.visible = false;
+					imagen.visible = true;
+					id_takePicture.label = "Reset Camera";
+					ImageSourceFromWebCam = bmd;
+					id_uploadBtn.enabled = true;
+				}
+				else
+				{
+					myVideo.visible = true;
+					imagen.visible = false;
+					id_takePicture.label = "Take Picture"
+					id_uploadBtn.enabled = false;
+				}
+			}
+			
+			protected function id_refresh_clickHandler(event:MouseEvent):void
+			{
+				getCamera();
+			}
+			
+			protected function popupwindow1_closingHandler(event:Event):void
+			{
+				if(null == myvideo)
+					return;
+				
+				myvideo.attachCamera(null);
+				myvideo = null;
+				cam = null;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" horizontalAlign="center" horizontalCenter="0">
+		<s:Group width="100%" horizontalCenter="0" verticalCenter="0">
+			<s:VideoDisplay id="myVideo" width="360" height="270" horizontalCenter="0"/>
+			<s:Image id="imagen" width="360" height="270" visible="false" includeInLayout="false"/>
+		</s:Group>
+		
+		<s:HGroup width="100%" horizontalAlign="center" paddingRight="10" paddingLeft="10">
+			<!--<s:Button id="id_refresh" click="id_refresh_clickHandler(event)" label="Refresh" toolTip="Refresh" 
+			skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" height="24" width="80"/>-->
+			<s:Button id="id_takePicture" click="takePicture(event)" label="Take a Snap" toolTip="{id_takePicture.label}"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" height="24" width="90"/>
+			<s:Button id="id_uploadBtn" label="Set as Profile Picture" enabled="false" toolTip="Set as Profile Picture" 
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" height="24" width="150"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+</components:PopupWindow>

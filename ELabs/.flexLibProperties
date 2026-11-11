@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.provider.live.services.elab.appController.ELabsController"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.LoadPatientLabsByClinicIdCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.LoadPatientLabsByClinicIdDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.util.ELabsServiceMethods"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.ELabEventString"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.eLabsView"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.renderers.EditButtonRenderer"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.LoadeLabsStaticDataEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.LoadeLabsStaticDataDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.lab.eLabsResultGridView"/>
+    <classEntry path="com.zigron.provider.live.services.elab.dto.ResultDTO"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.lab.ProcessOrder"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.ProcessLabOrderEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.ProcessLabOrderDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.ProcessLabOrderCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.lab.ProcessResult"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.SearchLabsByClinicCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.SearchLabsByClinicDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.Filters.ElabDoOnlyView"/>
+    <classEntry path="com.zigron.provider.live.services.elab.dto.LaboratoryListDTO"/>
+    <classEntry path="com.zigron.provider.live.services.elab.dto.LabTypeDTO"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.ListOnlyLabsEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.ListOnlyLabsCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.ListOnlyLabsDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.ProcessLabOrderByCriteriaCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.ProcessLabOrderByCriteriaDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.ProcessLabOrderByCriteriaEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.view.renderers.ResultButtonRenderer"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.ManageLabsCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.ManageLabsDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.ManageLabsEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.command.LoadTestTypeByNameCommand"/>
+    <classEntry path="com.zigron.provider.live.services.elab.delegate.LoadTestTypeByNameDelegate"/>
+    <classEntry path="com.zigron.provider.live.services.elab.event.LoadTestTypeByNameEvent"/>
+    <classEntry path="com.zigron.provider.live.services.elab.dto.TestTypeDTO"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

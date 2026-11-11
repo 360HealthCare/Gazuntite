@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:quickInput="com.gazuntite.provider.live.services.diabetes.view.quickInput.*" 
+		 xmlns:advanceCare="com.gazuntite.provider.live.services.diabetes.view.quickInput.advanceCare.*" 
+		 creationComplete="cc(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			[Bindable] public var TempRecordLevelNote:String = '';
+			
+			
+			private var _dictationNoteViewModel:PatientDictationNoteViewModel;
+			
+			[Bindable]
+			public function get dictationNoteViewModel():PatientDictationNoteViewModel
+			{
+				return _dictationNoteViewModel;
+			}
+			
+			public function set dictationNoteViewModel(value:PatientDictationNoteViewModel):void
+			{
+				_dictationNoteViewModel = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			public function ClearAdvanceCareView():void
+			{
+				// all Clean Up operation will be here.
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Scroller width="100%" height="100%" 
+				horizontalScrollPolicy="off" 
+				verticalScrollPolicy="auto" 
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group  width="100%" height="100%" >
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="right" paddingBottom="2" paddingTop="2"/>
+			</s:layout>
+			
+			<advanceCare:AdvanceCareSectionView width="100%" dictationNoteViewModel="{dictationNoteViewModel}"/>
+			<advanceCare:AdvancecareListView width="100%" height="100%" minHeight="200"/>
+		</s:Group>
+	</s:Scroller>
+	
+</s:Group>

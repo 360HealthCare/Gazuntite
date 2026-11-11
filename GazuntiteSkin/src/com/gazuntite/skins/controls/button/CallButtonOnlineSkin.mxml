@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="18" height="18">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect x="0" y="0" width="18" height="18" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#99C594" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#4AC052" ratio="0.49411764705882355"/>
+				<s:GradientEntry alpha="1.0" color="#0EB81D" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#0DA021" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage x="4" y="4" smooth="true" source="@Embed('/assets/images/callimg.png')"/>
+</s:Skin>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="init()" 
+					   xmlns:components="com.gazuntite.components.*" 
+					   xmlns:actionBars="com.gazuntite.components.actionBars.*"
+					   xmlns:sf="http://www.spicefactory.org/parsley" 
+					   frameRate="24" 
+					   applicationDPI="160"
+					   width="100%" height="100%"
+					   xmlns:controls="com.gazuntite.components.controls.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			
+			import flash.events.NativeWindowBoundsEvent;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init():void
+			{
+				// Center main AIR app window on the screen
+				//nativeWindow.x = 0;
+				//nativeWindow.y = 20;
+				
+				//this.width = Capabilities.screenResolutionX / 2; //screen.width;
+				//this.height = Capabilities.screenResolutionY - 70;
+				
+				setApplicationVersion();
+				
+				loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onUncaughtError);
+			}
+			
+			protected function setApplicationVersion():void 
+			{ 
+				var appXML:XML = NativeApplication.nativeApplication.applicationDescriptor; 
+				var ns:Namespace = appXML.namespace(); 
+				sharedModel.versionNumber = "Version:" + appXML.ns::versionNumber;
+			}
+			
+			private function onUncaughtError(e:UncaughtErrorEvent):void
+			{
+				// Do something with your error.
+				if (e.error is Error)
+				{
+					var error:Error = e.error as Error;
+					trace(error.errorID, error.name, error.message);
+				}
+				else
+				{
+					var errorEvent:ErrorEvent = e.error as ErrorEvent;
+					trace(errorEvent.errorID);
+				}
+			}
+			
+			private function onCauseError(e:MouseEvent):void
+			{
+				var foo:String = null;
+				try
+				{
+					trace(foo.length);
+				}
+				catch (e:TypeError)
+				{
+					trace("This error is caught.");
+				}
+				
+				// Since this error isn't caught, it will cause the global error handler to fire.
+				//trace(foo.length);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:ContextBuilder config="Config"/>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+		
+	</fx:Declarations>
+	
+	<fx:Style source="style.css"/>
+	
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<!-- Main container -->
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.MainBGSkin" 
+						  width="100%" 
+						  height="100%">
+		
+		<s:layout>
+			<s:VerticalLayout paddingRight="5" 
+							  paddingLeft="5"
+							  paddingBottom="45"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		<!-- Patient Profile -->
+		<actionBars:CommunicationActionBar/>
+		
+		<!-- QI and VB -->
+		<s:SkinnableContainer width="100%" 
+							  height="100%"
+							  skinClass="com.gazuntite.skins.PatientExamSkin">
+			
+			<s:layout>
+				<s:VerticalLayout paddingRight="10" 
+								  paddingLeft="10"
+								  paddingBottom="0"
+								  paddingTop="10"
+								  gap="10"/>
+			</s:layout>
+			
+			<!-- Action bars -->
+			<actionBars:ViewBackgroundActionBar/>
+			<actionBars:QuickInputActionBar/>
+			
+		</s:SkinnableContainer>
+		
+	</s:SkinnableContainer>
+	
+	<!-- Live Provider Service -->
+	<actionBars:LiveProviderServiceActionBar left="7" right="7" bottom="10"/>
+	
+</s:Application>

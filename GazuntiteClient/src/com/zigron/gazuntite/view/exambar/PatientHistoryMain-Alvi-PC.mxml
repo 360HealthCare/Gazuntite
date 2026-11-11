@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:itemrenderer="com.zigron.gazuntite.view.exambar.itemrenderer.*" xmlns:view="com.gazuntite.history.view.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.view.MaxRestorePopupManager;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.history.event.LoadPatientVisitsByPatientIdAndClinicIdEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.history.view.views.popUps.HistoryOptionsPopUp;
+			import com.gazuntite.input.view.viewmodel.PatientInputEvent;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.events.CloseEvent;
+			
+			[Bindable]	protected var viewModel:PatientViewModel = PatientViewModel.getInstance();
+			[Bindable] private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			private var historyOptionPopUp:HistoryOptionsPopUp;
+			
+			protected function historyHeaderClickEventHandler(event:Event):void
+			{
+				/* 
+				if (MaxRestorePopupManager.curView == this)
+				{
+				return;
+				}
+				viewModel.expandMainHistory = !viewModel.expandMainHistory;
+				*/
+			}
+			
+			private function historyHeaderOptionClickHandler(event:Event):void
+			{
+				loadPatientEncounterList();
+				
+				historyOptionPopUp = new HistoryOptionsPopUp();
+				historyOptionPopUp.ShowPopup(this);
+				
+				var pt:Point = id_HistoryHeader.localToGlobal(new Point(id_HistoryHeader.x, id_HistoryHeader.y));
+				historyOptionPopUp.move(10, pt.y + id_HistoryHeader.height);
+				
+				historyOptionPopUp.onPopUpCloseCallback = closeHistoryOptionsCallback;
+				historyOptionPopUp.width = id_HistoryHeader.width;
+				historyOptionPopUp.addEventListener(CloseEvent.CLOSE, onCloseHistoryOptionsPopup);
+			}
+			
+			private function onCloseHistoryOptionsPopup(e:Event):void
+			{
+				historyOptionPopUp = null;
+				id_HistoryHeader.id_Options.visible = true;
+			}
+			
+			private function closeHistoryOptionsCallback():void
+			{
+				id_HistoryHeader.id_Options.visible = true;
+			}
+			
+			private function loadPatientEncounterList():void
+			{
+				if (!viewModel.selectedPatient)
+					return;
+				
+				if (!model.userSelectedClinicBranchDTO)
+					return;
+				
+				if (!model.userSelectedClinicBranchDTO.ClinicBranch)
+					return;
+				
+				if (!viewModel.selectedPatient.Gender)
+					return;
+				
+				HistoryModelLocator.getInstance().isMale = viewModel.selectedPatient.Gender.toLowerCase().charAt(0) != 'f';
+				
+				var patientID:int = viewModel.selectedPatient.ID;
+				var clinicBranchID:int = model.userSelectedClinicBranchDTO.ClinicBranch.ClinicBranchIdSeq;
+				var userID:int = model.LoggedInUserSessionDTO.UserID;
+				var providerTypeID:int = model.LoggedInUserSessionDTO.UserTypeID;
+				var sessionID:String = model.LoggedInUserSessionDTO.SessionID;
+				
+				var encounterListEv:LoadPatientVisitsByPatientIdAndClinicIdEvent = new LoadPatientVisitsByPatientIdAndClinicIdEvent(patientID, clinicBranchID, false,
+					userID, providerTypeID, sessionID);
+				
+				CairngormEventDispatcher.getInstance().dispatchEvent(encounterListEv);
+				
+				//addEventListener(PatientInputEvent.REFRESH_PATIENT_ENCOUNTER_LIST, refreshPatientEncounterList, false, 0, true);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer width="100%" height="100%"
+					   borderColor="#B25816" borderVisible="false"
+					   backgroundColor="#B25816" 
+					   >
+		<s:layout>
+			<s:VerticalLayout  />
+		</s:layout>
+		
+		<itemrenderer:PatientHistoryHeader id="id_HistoryHeader"
+			HistoryHeaderClickEvent="historyHeaderClickEventHandler(event)" 
+			HistoryHeaderOptionClickEvent="historyHeaderOptionClickHandler(event)"
+			width="100%" maximizeView="{this}"
+			/>
+		<!--<s:Label text="Patient History" color="#cccccc" fontSize="24" horizontalCenter="0" verticalCenter="0"/>-->
+		
+		
+		<view:HistoryView width="100%" height="100%" />
+		
+		
+	</s:BorderContainer>
+</s:Group>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			  xmlns:s="library://ns.adobe.com/flex/spark" 
+			  xmlns:mx="library://ns.adobe.com/flex/mx" 
+			  xmlns:exambar="com.zigron.gazuntite.view.exambar.*" 
+			  xmlns:patient="com.gazuntite.view.patient.*"
+			  visible="{viewModel.showMainProfileTab || viewModel.showMainHistoryTab || viewModel.showMainInputTab}"
+			  includeInLayout="{viewModel.showMainProfileTab || viewModel.showMainHistoryTab || viewModel.showMainInputTab}"
+			  resize="onResize(event)"
+			  gap="4" paddingTop="0"
+			  minHeight="0" xmlns:view="com.gazuntite.input.view.*" 
+			  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.PatientViewModel;
+			
+			import mx.events.ResizeEvent;
+			[Bindable]
+			protected var viewModel:PatientViewModel = PatientViewModel.getInstance();
+			
+			protected function onResize(event:ResizeEvent):void
+			{
+				viewModel.patientMainContainerHeight = this.height;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<exambar:PatientProfileMain 
+		width="100%" height="100%" minHeight="50"
+		visible="{viewModel.showMainProfileTab}"
+		includeInLayout="{viewModel.showMainProfileTab}"
+		/>
+	<exambar:PatientHistoryMain
+		width="100%" height="100%" minHeight="50"
+		visible="{viewModel.showMainHistoryTab}"
+		includeInLayout="{viewModel.showMainHistoryTab}"
+		/>
+	<view:PatientInputMain 
+		id="id_patientInputMain"
+		width="100%" height="100%" minHeight="50"
+		visible="{viewModel.showMainInputTab}"
+		includeInLayout="{viewModel.showMainInputTab}"
+		/>
+	
+</s:VGroup>

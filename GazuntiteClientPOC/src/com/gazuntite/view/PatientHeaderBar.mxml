@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:sf="http://www.spicefactory.org/parsley"
+		 width="100%" height="100%"
+		 creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ChangePatientEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init(event:FlexEvent):void
+			{
+				//trace("sharedModel.videoOn = " + sharedModel.videoOn);
+			}
+			
+			protected function patientOptionsButtonClicked(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				sharedModel.patientProfileOptionsVisible = true;
+			}
+			
+			[MessageHandler]
+			public function changeSelectedUser(event:ChangePatientEvent):void
+			{
+				nameTxt.text = sharedModel.selectedProvider.FirstName + " " + sharedModel.selectedProvider.LastName;
+				emailTxt.text = sharedModel.selectedProvider.UserEmail;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:BorderContainer width="100%"
+					   height="45"
+					   borderWeight="1"
+					   borderColor="0xb4b4b4"
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="1">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xfcfcfc" ratio=".3"/>
+				<s:GradientEntry color="0xe0e0e0" ratio=".7"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" 
+								paddingBottom="5"
+								paddingTop="5"
+								paddingLeft="3"
+								paddingRight="3"/>
+		</s:layout>
+		
+		<s:Image source="assets/patientProfileImg.png" />
+		
+		<s:VGroup width="100%" height="100%" verticalAlign="middle">
+			<s:Label id="nameTxt" styleName="patientNameTitle"/>
+			<s:Label id="emailTxt" styleName="patientNameSubTitle"/>
+		</s:VGroup>
+		
+		
+		<s:HGroup width="100%" height="100%" 
+				  horizontalAlign="right"
+				  verticalAlign="middle">
+			
+			<s:Image source="assets/inProgressButton.png"
+					 visible="{sharedModel.videoOn}"
+					 includeInLayout="{sharedModel.videoOn}"/>
+			
+			<s:Button skinClass="com.gazuntite.skins.PatientProfileOptionsButtonSkin"
+					  right="4" verticalCenter="0"
+					  visible="{!sharedModel.patientProfileOptionsVisible}"
+					  includeInLayout="{!sharedModel.patientProfileOptionsVisible}"
+					  click="patientOptionsButtonClicked(event)"/>
+			
+			<s:Button skinClass="com.gazuntite.skins.PatientProfileOptionsButtonInsetSkin"
+					  right="4" verticalCenter="0"
+					  visible="{sharedModel.patientProfileOptionsVisible}"
+					  includeInLayout="{sharedModel.patientProfileOptionsVisible}"
+					  click="patientOptionsButtonClicked(event)"/>
+			
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	
+</s:Group>

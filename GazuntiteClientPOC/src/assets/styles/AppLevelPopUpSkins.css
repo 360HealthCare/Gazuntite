@@ -1,0 +1,37 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Popups
+/*Black background popups*/
+
+.blackBGPopUpSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.popUpSkins.blackBGPopUp");
+}
+
+.jetBlackBGPopUpSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.popUpSkins.jetBlackBGPopUp");
+}
+
+.dictationPopUpSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.popUpSkins.dictationPopUp");
+}
+
+.whitePopUpSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.popUpSkins.whitePopUp");
+}
+
+.reviewAllWindowSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.titleWindowSkins.reviewAllWindowSkin");
+}
+
+.reviewAllLargeSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.titleWindowSkins.reviewAllWindowLargeSkin");
+}

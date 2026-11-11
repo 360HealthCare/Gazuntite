@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						width="490"	height="425"
+						title="Summary View"
+						>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.provider.eprescription.services.patient.event.SaveNewRXEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.UpdateGaxenIDEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			private var _securityHeaderXML:XML;
+			private var _insuranceCol:XML;
+			private var _gaxenPatiendId:String;
+			private var _sendOnly:Boolean;
+			private var _isChronic:Boolean;
+			private var _SPI:String;
+			public var Frequency:String;
+			public var DosageCode:String;
+			public var StrengthId:String;
+			public var EncounterId:String;
+			public var QuantityForm:String;
+			public var Route:String;
+			public var isPRN:String;
+			public var visitDate:String; 
+			public var isActive:String;
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			
+			[Bindable]
+			public function get gaxenPatiendId():String
+			{
+				return _gaxenPatiendId;
+			}
+			
+			public function set gaxenPatiendId(value:String):void
+			{
+				_gaxenPatiendId = value;
+			}
+			
+			[Bindable]
+			public function get isChronic():Boolean
+			{
+				return _isChronic;
+			}
+			
+			public function set isChronic(value:Boolean):void
+			{
+				_isChronic = value;
+			}
+			
+			[Bindable]
+			public function get sendOnly():Boolean
+			{
+				return _sendOnly;
+			}
+			
+			public function set sendOnly(value:Boolean):void
+			{
+				_sendOnly = value;
+			}
+			
+			[Bindable]
+			public function get insuranceCol():XML
+			{
+				return _insuranceCol;
+			}
+			
+			public function set insuranceCol(value:XML):void
+			{
+				_insuranceCol = value;
+			}
+			
+			[Bindable]
+			public function get SPI():String
+			{
+				return _SPI;
+			}
+			
+			public function set SPI(value:String):void
+			{
+				_SPI = value;
+			}
+			private var _patientID:int;			
+			
+			
+			[Bindable]
+			public function get patientID():int
+			{
+				return _patientID;
+			}
+			
+			public function set patientID(value:int):void
+			{
+				_patientID = value;
+			}
+			
+			
+			protected function id_cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				closePopup();
+			}
+			public function closePopup():void
+			{
+				this.removePopup();
+			}
+			
+			protected function id_OkBtn_clickHandler(event:MouseEvent):void
+			{
+				var SaveNewRXXML_:XML = <Messages />;				
+				//SaveNewRXXML_.appendChild(securityHeaderXML);
+				//var SubscriberXML:XML = <Prescriber />;				
+				if(gaxenPatiendId == '')
+					SaveNewRXXML_.@GaxenPatientID		= model.patientGaxenID;
+				else
+					SaveNewRXXML_.@GaxenPatientID		= gaxenPatiendId;
+				
+				SaveNewRXXML_.@NDCCODE					= id_ndc.text;
+				SaveNewRXXML_.@Strength					= StrengthId; //id_strength.text;
+				SaveNewRXXML_.@Dose						= id_dose.text?id_dose.text:"0";
+				SaveNewRXXML_.@DoseForm					= DosageCode; //id_dosageForm.text;
+				SaveNewRXXML_.@Quantity					= id_quantity.text?id_quantity.text:"0";
+				SaveNewRXXML_.@QuantityForm				= QuantityForm; // id_quantityForm.text;
+				SaveNewRXXML_.@frequency				= Frequency; //id_frequency.text;
+				SaveNewRXXML_.@Route					= Route; //id_route.text;
+				SaveNewRXXML_.@Duration					= id_duration.text;
+				SaveNewRXXML_.@isPRN					= isPRN;
+				
+				if(isPRN == "true")
+				{
+					SaveNewRXXML_.@Refill					= "0";				
+				}
+				else
+				{
+					SaveNewRXXML_.@Refill					= id_refills.text;
+				}
+				SaveNewRXXML_.@Substitution				= id_substitution.text;				
+				SaveNewRXXML_.@EncounterID				= EncounterId; //id_associatedVisit.text
+				SaveNewRXXML_.@SIG						= id_sig.label; //id_sig.text;
+				SaveNewRXXML_.@NCPDPID					= id_NPCDID.text;
+				SaveNewRXXML_.@ReferenceNumber			= "";
+				SaveNewRXXML_.@WrittenDate				= AppUtils.getToday(); //"1985-01-28T00:00:00";
+				SaveNewRXXML_.@MessageTypeID			= "1";
+				SaveNewRXXML_.@LastName					= id_PatientLName.text;
+				SaveNewRXXML_.@FirstName				= id_PatientName.label;
+				SaveNewRXXML_.@Gender					= id_gender.text;
+				SaveNewRXXML_.@DOB						= id_dob.text;
+				SaveNewRXXML_.@Phone					= id_phone.text;
+				SaveNewRXXML_.@Address					= id_address.label; //id_address.text;
+				SaveNewRXXML_.@UserName					= "TESTUSER";
+				SaveNewRXXML_.@UserPassord				= "TESTPASS";
+				SaveNewRXXML_.@ClinicID					= "sad";
+				SaveNewRXXML_.@DrugName					= id_medicine.text;
+				SaveNewRXXML_.@isActive					= isActive;
+				SaveNewRXXML_.@VisitDate				= visitDate;
+				
+				if(sendOnly)
+					SaveNewRXXML_.@MessageStatus			= "2";  //2 for send
+				else
+					SaveNewRXXML_.@MessageStatus			= "1";  //1 for save
+				
+				if(isChronic) //add more
+				{
+					SaveNewRXXML_.@isChronic				= "true";
+					SaveNewRXXML_.@MessageStatus			= "3";
+					SaveNewRXXML_.@Type						= id_type.text;//id_type.selectedItem;					
+				}
+				else
+				{
+					SaveNewRXXML_.@isChronic				= "false";
+					SaveNewRXXML_.@Type						= "e-Prescribed" ;//id_type.selectedItem;
+				}
+				
+				SaveNewRXXML_.@SPI						= SPI; 
+				SaveNewRXXML_.appendChild(insuranceCol);
+				
+				var rpEvent : SaveNewRXEvent = new SaveNewRXEvent(NewRXSaved,false);
+				rpEvent.data = SaveNewRXXML_;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent );
+				
+				ShowStatusWindow('Wait while record is saving.....')
+			}
+			private var StatusWindow:PopupWindow ;
+			// show waiting popup while saving
+			public function ShowStatusWindow(statusMessage :String ):void
+			{
+				StatusWindow = UtilityFunctions.ShowStatusMessage( statusMessage, this );
+			}
+			// remove waiting popup when saved
+			public function RemoveStatusWindow():void
+			{
+				if( StatusWindow )
+					StatusWindow.removePopup();
+				
+				StatusWindow = null;
+			}
+			// -- call back of SaveNewRXEvent
+			public function NewRXSaved(response:XML):void
+			{
+				RemoveStatusWindow()
+				var gaxenId:String = response.@GaxenPatientID;
+				var msg:String = response.@Description;
+				var status:String = response.@status;
+				
+				if(status == "false")
+				{
+					var alert:Alert = Alert.show(msg, "New RX Status", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						closePopup();
+					});
+					return;
+				}
+				
+				if(gaxenId.length > 0)
+				{
+					model.patientGaxenID = gaxenId;
+					//	trace("SAVing GaxenID: "+gaxenId+" for patient "+patientID.toString() );
+					var gEvent : UpdateGaxenIDEvent = new UpdateGaxenIDEvent(patientID.toString(), gaxenId, GaxenIdCallBack);					
+					CairngormEventDispatcher.getInstance().dispatchEvent( gEvent );
+				}
+				
+				var alert:Alert = Alert.show(msg, "New RX Status", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+					//(parent as NewRX).resetForm();
+					
+					dispatchEvent(new Event("NewRXSuccessful", true, true));
+					closePopup();
+				});
+			}
+			
+			public function GaxenIdCallBack():void				
+			{
+				trace("gaxen Id saved ");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="6" paddingTop="4" paddingRight="6" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<s:HGroup width="100%">
+		<s:VGroup width="85%">
+			<s:RichText color="#333333" fontSize="14"  id="richtext15" kerning="off" lineHeight="225%" 
+						text="PATIENT DETAILS" typographicCase="uppercase" whiteSpaceCollapse="preserve" x="0" y="0" fontFamily="Calibri" fontWeight="bold"/>
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="2" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+					<s:Button id="id_PatientName" fontFamily="Calibri" color="#333333" />
+					<s:Label id="id_PatientLName" fontFamily="Calibri" color="#333333" text="" visible="false" includeInLayout="false"/>
+				</s:HGroup>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="GID" width="60"/>
+					<s:Label id="id_quivusId" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">	
+					<s:Label fontFamily="Calibri" color="#666666" text="DOB" width="60"/>
+					<s:Label id="id_dob" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Gender" width="60"/>
+					<s:Label id="id_gender" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60"/>
+					<s:Label id="id_phone" fontFamily="Calibri" color="#333333" text="" toolTip="{ValidationUtils.setPhoneNumberMasking(id_phone.text)}" maxWidth="145" maxDisplayedLines="1"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+					<!--<s:Label id="id_address" fontFamily="Calibri" color="#333333" text="" toolTip="{id_address.text}" maxWidth="145" maxDisplayedLines="1"/>	-->				
+					<s:Button width="100%" id="id_address" fontFamily="Calibri" color="#333333" toolTip="{id_address.label}"	  />
+				</s:HGroup>
+			</s:SkinnableContainer>
+			<s:Spacer height="5" />
+			<s:HGroup width="100%">
+				<s:RichText color="#333333" fontSize="14"  kerning="off" lineHeight="225%" 
+							text="PHARMACY DETAILS" typographicCase="uppercase" whiteSpaceCollapse="preserve" x="0" y="0" fontFamily="Calibri" fontWeight="bold"/>
+			</s:HGroup>
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+					<s:Label id="id_PharmacyName" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="NCPDP ID" width="60"/>
+					<s:Label id="id_NPCDID" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">	
+					<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60"/>
+					<s:Label id="id_pharmacyPhone" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+					<s:Label id="id_pharmacyAddress" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Notes" width="60"/>
+					<!--<s:Label id="id_pharmacyNotes" fontFamily="Calibri" color="#333333" text="" toolTip="{id_pharmacyNotes.text}" maxDisplayedLines="1" maxWidth="145" />-->
+					<s:Button width="100%" id="id_pharmacyNotes" fontFamily="Calibri" color="#333333" toolTip="{id_pharmacyNotes.label}"/>
+				</s:HGroup>
+			</s:SkinnableContainer>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:RichText color="#333333" fontSize="14"  kerning="off" lineHeight="225%" 
+							text="Medication" typographicCase="uppercase" whiteSpaceCollapse="preserve" x="0" y="0" fontFamily="Calibri" fontWeight="bold"/>
+			</s:HGroup>
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Medicine" width="80" />
+					<s:Label id="id_genericName" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Strength" width="80"/>
+					<s:Label id="id_strength" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				<s:HGroup width="100%">	
+					<s:Label fontFamily="Calibri" color="#666666" text="Generic Name" width="80"/>
+					<s:Label id="id_medicine" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="NDC" width="80"/>
+					<s:Label id="id_ndc" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Dose" width="80"/>
+					<s:Label id="id_dose" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Dosage Form" width="80"/>
+					<s:Label id="id_dosageForm" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Quantity" width="80"/>
+					<s:Label id="id_quantity" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Quantity Form" width="80"/>
+					<s:Label id="id_quantityForm" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Frequency" width="80"/>
+					<s:Label id="id_frequency" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Route" width="80"/>
+					<s:Label id="id_route" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Duration" width="80"/>
+					<s:Label id="id_duration" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="# Refills" width="80"/>
+					<s:Label id="id_refills" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Substitutions" width="80"/>
+					<s:Label id="id_substitution" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Type" width="80"/>
+					<s:Label id="id_type" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Associated Visit" width="80"/>
+					<s:Label id="id_associatedVisit" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="SIG" width="80"/>
+					<!--	<s:Label id="id_sig" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1" />	-->
+					<s:Button width="100%" id="id_sig" fontFamily="Calibri" color="#333333" toolTip="{id_sig.label}"  />
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			<s:HGroup width="100%" horizontalAlign="right" paddingRight="5" gap="5">
+				<s:Button id="id_OkBtn"  label="Ok" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Ok" click="id_OkBtn_clickHandler(event)" />
+				<s:Button id="id_cancelBtn" label="Cancel" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Cancel" click="id_cancelBtn_clickHandler(event)" />
+			</s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
+</components:PopupWindow>

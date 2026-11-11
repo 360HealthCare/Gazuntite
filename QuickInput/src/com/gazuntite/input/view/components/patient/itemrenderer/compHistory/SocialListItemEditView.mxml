@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  creationComplete="CC(event)"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryAddictionDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryMediumTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryUsageAmountTypeDTO;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.input.event.visit.pmh.comphistory.LoadSocialHistoryByPatientIdEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.ManagePatientSocialHistoryEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ToolTipEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var socialHistoryAddictionDTO:SocialHistoryAddictionDTO;
+			[Bindable]
+			public var socialHistoryDTO:SocialHistoryDTO;
+			
+			protected function handleSave(event:MouseEvent):void
+			{				
+				saveForm();
+			}
+			
+			private function saveForm():void
+			{
+				if(id_TypeCmbo.selectedIndex < 0)
+				{				
+					Alert.show("Please select Type.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_TypeCmbo.setFocus();
+							}
+						});
+					return;					
+				}
+				
+				
+				socialHistoryDTO.Amount = id_AmountCmbo.textInput.text;
+				socialHistoryDTO.Type = id_TypeCmbo.textInput.text;
+				
+				if(id_Onset.selectedDate)
+					socialHistoryDTO.OnSet = UtilityFunctions.FormatDate(id_Onset.text);
+				
+				if( id_EndDate.visible && id_EndDate.selectedDate)
+					socialHistoryDTO.EndDate = UtilityFunctions.FormatDate(id_EndDate.text);
+				
+				if(id_educated.selected)
+					socialHistoryDTO.Educated = "Yes";
+				else
+					socialHistoryDTO.Educated = "No";
+				
+				if(id_pastPresent.selected)
+					socialHistoryDTO.Current = "Yes";
+				else 
+					socialHistoryDTO.Current = "No";
+				//-------------------------------------------------------------------
+				
+				if(socialHistoryDTO.SocialHistoryAddictionList == null)
+					socialHistoryDTO.SocialHistoryAddictionList = new ArrayCollection();
+				
+				socialHistoryDTO.SocialHistoryAddictionList.addItem(socialHistoryAddictionDTO);
+				
+				saveSocialHistory();
+				
+			}
+			
+			private function saveSocialHistory():void
+			{							
+				socialHistoryDTO.ModifiedAt = new Date();
+				socialHistoryDTO.ModifiedBy = model.LoggedInUserId;
+				
+				model.socialHistoryDTO = socialHistoryDTO; 
+				
+				
+				var evt:ManagePatientSocialHistoryEvent = new ManagePatientSocialHistoryEvent( model.LoggedInUserSelectedBranchId, model.patientDTO.ID, model.LoggedInUserSessionID, clearSocialHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			//----------------- clear social history form -------------------
+			private function clearSocialHistory():void
+			{				
+				loadSocialHistory();
+			}
+			
+			//------- loadSocialHistory data -------------------------------------
+			private function loadSocialHistory():void
+			{
+				var loadSocialHistoryEvent : LoadSocialHistoryByPatientIdEvent = new LoadSocialHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( loadSocialHistoryEvent );
+			}
+			
+			private var _Type:ArrayCollection	 = new ArrayCollection();
+			private var _Amount:ArrayCollection	 = new ArrayCollection();
+			
+			
+			
+			[Bindable]
+			public function get Amount():ArrayCollection
+			{
+				return _Amount;
+			}
+			
+			public function set Amount(value:ArrayCollection):void
+			{
+				_Amount = value;
+			}
+			
+			[Bindable]
+			public function get Type():ArrayCollection
+			{
+				return _Type;
+			}
+			
+			public function set Type(value:ArrayCollection):void
+			{
+				_Type = value;
+			}
+			
+			public function selectType( typeId:int ):void
+			{
+				if( null == model.historyMediumTypesDTOList ) return;
+				
+				Type.removeAll();
+				
+				for(var i:int = 0; i < model.historyMediumTypesDTOList.length; i ++ )
+				{
+					var dto:SocialHistoryMediumTypeDTO= model.historyMediumTypesDTOList.getItemAt( i ) as SocialHistoryMediumTypeDTO;
+					if( dto.Addication == typeId )
+					{
+						Type.addItem(dto);						
+					}
+				}   
+			}
+			
+			public function selectUsageAmount( UsageAmountId:int ):void
+			{
+				if( null == model.usageAmountTypeDTOList ) return;
+				
+				Amount.removeAll();
+				
+				for(var i:int = 0; i < model.usageAmountTypeDTOList.length; i ++ )
+				{
+					var dto:SocialHistoryUsageAmountTypeDTO = model.usageAmountTypeDTOList.getItemAt( i ) as SocialHistoryUsageAmountTypeDTO;
+					if( dto.AddictionID == UsageAmountId )
+					{
+						Amount.addItem(dto);
+					}
+				} 
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				addListener();
+				
+				for each (var amt:SocialHistoryUsageAmountTypeDTO in Amount) 
+				{
+					if (amt.Name == socialHistoryDTO.Amount)
+					{
+						id_AmountCmbo.selectedItem = amt;
+					}
+				}
+				
+				for each (var type:SocialHistoryMediumTypeDTO in Type) 
+				{
+					if (type.Name == socialHistoryDTO.Type)
+					{
+						id_TypeCmbo.selectedItem = type;
+					}
+				}
+				
+				id_AmountCmbo.textInput.text = socialHistoryDTO.Amount;
+				id_TypeCmbo.textInput.text = socialHistoryDTO.Type;
+				
+				if (UtilityFunctions.IsNotNullOrEmpty(socialHistoryDTO.OnSet))
+				{
+					socialHistoryAddictionDTO.OnSet = socialHistoryDTO.OnSet;
+					id_Onset.text = socialHistoryDTO.OnSet;
+				}
+				
+				if (UtilityFunctions.IsNotNullOrEmpty(socialHistoryDTO.EndDate))
+				{
+					socialHistoryAddictionDTO.EndDate = socialHistoryDTO.EndDate;
+					id_EndDate.text = socialHistoryDTO.EndDate;
+				}
+				if (socialHistoryDTO.Educated == "Yes")
+				{
+					socialHistoryAddictionDTO.IsEducated = "true";
+					id_educated.selected = true;
+				}
+				else
+				{
+					socialHistoryAddictionDTO.IsEducated = "false";
+					id_educated.selected = false;
+				}
+				
+				if (socialHistoryDTO.Current == "Yes")
+				{
+					socialHistoryAddictionDTO.IsPresentSelected = "true";
+					id_pastPresent.selected = false;
+				}
+				else 
+				{
+					socialHistoryAddictionDTO.IsPresentSelected = "false";
+					id_pastPresent.selected = true;
+				}
+			}
+			
+			private function addListener():void
+			{
+				id_pastPresent.addEventListener(MouseEvent.CLICK, OnPastPresentClick);	
+				id_TypeCmbo.addEventListener(IndexChangeEvent.CHANGE, 			OnIndexChangeEvent);
+				id_Onset.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_EndDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_AmountCmbo.addEventListener(IndexChangeEvent.CHANGE, 			OnIndexChangeEvent);
+				id_educated.addEventListener(MouseEvent.CLICK, OnEducatedClick);			
+			}
+			
+			private function OnIndexChangeEvent(event:IndexChangeEvent):void
+			{
+				if (event.currentTarget.id == "id_AmountCmbo" && event.currentTarget.selectedItem is SocialHistoryUsageAmountTypeDTO)
+				{					
+					socialHistoryAddictionDTO.UsageAmountID = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+				}
+				else if (event.currentTarget.id == "id_AmountCmbo")
+				{
+					socialHistoryAddictionDTO.UsageAmountID = -1;
+				}
+				else if (event.currentTarget.id == "id_TypeCmbo" && event.currentTarget.selectedItem is SocialHistoryMediumTypeDTO)
+				{
+					socialHistoryAddictionDTO.MediumTypeID = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).ID;
+				}
+				else if (event.currentTarget.id == "id_TypeCmbo")
+				{
+					socialHistoryAddictionDTO.MediumTypeID = -1;
+				}				
+				
+				socialHistoryAddictionDTO.IsDirty = true;
+			}
+			
+			private function OnDateChange(event:CalendarLayoutChangeEvent):void
+			{
+				socialHistoryAddictionDTO.IsDirty = true;
+				
+				if( event.currentTarget.id == "id_Onset" && event.currentTarget.selectedDate )
+				{
+					socialHistoryAddictionDTO.OnSet = event.currentTarget.text;
+				}
+				else if( event.currentTarget.id == "id_EndDate" && event.currentTarget.selectedDate )
+				{
+					socialHistoryAddictionDTO.EndDate = event.currentTarget.text;
+				}
+			}
+			
+			private function OnEducatedClick(event:MouseEvent):void
+			{
+				socialHistoryAddictionDTO.IsDirty = true;
+				
+				if((event.currentTarget as ToggleButton).selected )
+				{
+					socialHistoryAddictionDTO.IsEducated = "true";
+				}
+				else
+				{
+					socialHistoryAddictionDTO.IsEducated = "false";
+				}
+				
+			}
+			
+			private function OnPastPresentClick(event:MouseEvent):void
+			{
+				socialHistoryAddictionDTO.IsDirty = true;
+				
+				if((event.currentTarget as ToggleButton).selected )
+				{
+					socialHistoryAddictionDTO.IsPresentSelected = "false";
+				}
+				else
+				{
+					socialHistoryAddictionDTO.IsPresentSelected = "true";
+				}
+			}
+			
+			protected function id_EndDate_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_EndDate.toolTip = id_EndDate.value || ValidationUtils.isValidDateString(id_EndDate.text)? id_EndDate.text : 'End Date';
+			}
+			
+			protected function id_Onset_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_Onset.toolTip = id_Onset.value  || ValidationUtils.isValidDateString(id_Onset.text) ? id_Onset.text : 'OnSet';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout paddingLeft="8" paddingRight="8" paddingTop="5" paddingBottom="8"/>
+	</s:layout>
+	
+	<s:VGroup width="50%" gap="2">	
+		<s:HGroup verticalAlign="middle" width="100%"
+				  >
+			<s:ToggleButton id="id_pastPresent" skinClass="com.gazuntite.input.view.skins.PastPresentToggleButtonSkin"
+							toolTip="{id_pastPresent.selected ? 'Present' : 'Past'}"
+							/>
+			<s:Rect width="20"/>
+			<s:HGroup verticalAlign="middle" width="100%"
+					  >
+				<s:VGroup width="100%" verticalAlign="middle" >
+					<s:Label text="OnSet:" styleName="patientFormLabel" height="20" />
+					<components:LabelDateField id="id_Onset" height="20" 
+											   prompt="Onset" width="150" 
+											   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+											   selectableRange="{{rangeEnd : new Date()}}" 
+											   IsEditAllow="false" editable="false"
+											   layoutDirection="rtl"
+											   toolTipStart="id_Onset_toolTipShowHandler(event)"
+											   />
+				</s:VGroup>			
+				<s:Rect width="20"/>
+				<s:VGroup width="100%" verticalAlign="middle" >
+					<s:Label text="End Date:" styleName="patientFormLabel" height="20" visible="{ ! id_pastPresent.selected}" />
+					<components:LabelDateField id="id_EndDate" visible="{ ! id_pastPresent.selected}"
+											   prompt="Onset" width="150" height="20"
+											   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+											   selectableRange="{{rangeEnd : new Date()}}" 
+											   IsEditAllow="false" editable="false"
+											   layoutDirection="rtl"
+											   toolTipStart="id_EndDate_toolTipShowHandler(event)"
+											   />
+				</s:VGroup>
+				
+			</s:HGroup>
+		</s:HGroup>
+		<s:HGroup verticalAlign="middle" width="100%"
+				  >
+			<s:Label text="Amount:" width="60"/>
+			<s:ComboBox id="id_AmountCmbo" width="225"  prompt="Amount" dataProvider="{Amount}" 
+						labelField="Name" skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"
+						toolTip="{id_AmountCmbo.selectedItem ? id_AmountCmbo.selectedItem.Name : 'Amount'}"
+						/>			
+		</s:HGroup>
+		<s:HGroup verticalAlign="middle" width="100%"
+				  >
+			<s:Label text="Type" width="60"/>
+			<s:ComboBox id="id_TypeCmbo" width="225" prompt="Type" dataProvider="{Type}"
+						labelField="Name" skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"
+						toolTip="{id_TypeCmbo.selectedItem ? id_TypeCmbo.selectedItem.Name : 'Type'}"
+						/>
+			<s:Rect width="3"/>
+			<s:Label text="Educated:"/>
+			<s:ToggleButton id="id_educated" skinClass="com.gazuntite.input.view.skins.YesNoToggleButtonSkin"
+							toolTip="{id_educated.selected ? 'Yes' : 'No'}"
+							/>
+		</s:HGroup>
+		<!--<s:HGroup verticalAlign="middle" width="100%"
+		>			
+		<s:Label text="Educated:"/>
+		<s:ToggleButton id="id_educated" skinClass="com.gazuntite.view.patient.component.YesNoToggleButtonSkin"
+		toolTip="{id_educated.selected ? 'Yes' : 'No'}"
+		/>
+		</s:HGroup>-->
+		
+	</s:VGroup>
+	
+	<s:HGroup height="100%" width="100%" verticalAlign="bottom" horizontalAlign="right">
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  toolTip="Save"
+				  click="handleSave(event)"
+				  />		
+	</s:HGroup>
+</s:SkinnableContainer>

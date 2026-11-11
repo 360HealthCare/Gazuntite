@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="19" radiusX="2" width="19" x="0" y="0" visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#676767" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#353535" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" blurX="4.0" hideObject="false" blurY="4.0" distance="1" inner="true" color="0x000000" strength="1" alpha="1" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="3" width="11" x="4" y="8">
+		<s:fill>
+			<s:SolidColor color="#B0B0B0"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#333333" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+</s:Skin>

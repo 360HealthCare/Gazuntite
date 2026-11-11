@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LabIn xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Tests>
+		<Test Symptom="3 on a Scale of 1 to 5" testCode="001" />
+		<Test Symptom="Cough med helps" testCode="002" />
+		<Test Symptom="Foot rash" testCode="003" />
+		<Test Symptom="hard to breathe" testCode="004" />
+		<Test Symptom="headache" testCode="005" />
+		<Test Symptom="Flu" testCode="006" />
+	</Tests>
+</LabIn>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				implements="com.gazuntite.history.view.itemRenderer.IHistoryIR"
+				height="80" width="100%" creationComplete="cc(event)" xmlns:view="com.gazuntite.history.view.*" xmlns:views="com.gazuntite.history.view.views.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.presprection.PresprectionRXDTO;
+			
+			import mx.events.FlexEvent;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private var _isactiveOrNot:String;
+			
+			
+			[Bindable]
+			public function get isactiveOrNot():String
+			{
+				return _isactiveOrNot;
+			}
+			
+			public function set isactiveOrNot(value:String):void
+			{
+				_isactiveOrNot = value;
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			private function onMouseOver():void
+			{
+				id_Header.setStyle('backgroundColor', 0xFFD08F);
+			}
+			private function onMouseOut():void
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+			}
+			
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value; 
+				
+				if(data != null && data is PresprectionRXDTO)
+				{
+					if (data.isActive)
+						isactiveOrNot = 'Active';
+					else
+						isactiveOrNot = 'InActive';
+				}
+			}
+			
+			
+			public function deselectAllButton():void
+			{
+				id_listBtnBar.deselectAllButton();
+			}
+			
+			public function get listButtonBar():HistoryListButtons
+			{
+				
+				return id_listBtnBar;
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+	</s:states>
+	
+	<s:BorderContainer id="id_Header" 
+					   width="100%" height="100%" 
+					   useHandCursor="true" buttonMode="true"  borderVisible="false" 
+					   mouseOver="onMouseOver()" mouseOut="onMouseOut()"
+					   >
+		
+		<s:layout>
+			<s:HorizontalLayout gap="1" paddingLeft="3" paddingBottom="3" paddingTop="3"  verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:VGroup width="80%" toolTip="{'Medicine: ' + data.DrugName + ' ('+isactiveOrNot+')' }">
+			<s:Label width="100%" 
+					 text="{'Medicine: ' + data.DrugName + ' ('+isactiveOrNot+')' }"
+					 maxDisplayedLines="1" 
+					 showTruncationTip="true"
+					 fontSize="14"
+					 color="0x333333"
+					 fontFamily="CalibriCFFBold"  
+					 />
+			<s:Label width="100%" 
+					 text="{'Pharmacy: ' + data.PharmName  }"
+					 color="0x666666"
+					 showTruncationTip="true"
+					 maxDisplayedLines="1"/>
+			<s:Label width="100%" 
+					 text="{'Dose : ' + data.Dose}"
+					 color="0x666666"
+					 showTruncationTip="true"
+					 maxDisplayedLines="1"/>
+			<s:Label width="100%" 
+					 text="{'Refills : ' + data.Refill}"
+					 color="0x666666"
+					 showTruncationTip="true"
+					 maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Group right="0" width="70">
+			<views:HistoryListButtons id="id_listBtnBar" width="100%" data="{data}" itemrenderer="{this}" />
+		</s:Group>
+	</s:BorderContainer>
+	
+	<!--
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+		<s:State name="selected" />
+	</s:states>
+	
+	<s:BorderContainer id="id_Header" 
+					   width="100%" height="100%" 
+					   useHandCursor="true" buttonMode="true"  borderVisible="false" 
+					   skinClass.selected="com.gazuntite.skins.controls.container.dmg.DMGSelectedPatientSkin"
+					   mouseOver="onMouseOver()" mouseOut="onMouseOut()"
+					   >
+		
+		<s:layout>
+			<s:HorizontalLayout gap="1" paddingLeft="3" paddingBottom="3" paddingTop="3"  verticalAlign="middle"/>
+		</s:layout>
+		<s:VGroup width="80%" toolTip="{'Medicine: ' + data.DrugName + ' ('+isactiveOrNot+')' }">
+			
+			<s:Label width="100%" text="{'Medicine: ' + data.DrugName + ' ('+isactiveOrNot+')' }"
+					 maxDisplayedLines="1" showTruncationTip="true"
+					 fontSize="14"
+					 color.selected="0xFFFFFF"
+					 color="0x333333"
+					 fontFamily="CalibriCFFBold"  />
+			<s:Label width="100%" text="{'Pharmacy: ' + data.PharmName  }"
+					 maxDisplayedLines="1" showTruncationTip="true"
+					 fontSize="14"
+					 color.selected="0xFFFFFF"
+					 color="0x333333"
+					 fontFamily="CalibriCFFBold"  />
+			<s:Label width="100%" text="{'Dose : ' + data.Dose}"
+					 color="0x666666"
+					 color.selected="0xFFFFFF"
+					 showTruncationTip="true"/>
+			<s:Label width="100%" text="{'Refills : ' + data.Refill}"
+					 color="0x666666"
+					 color.selected="0xFFFFFF"
+					 showTruncationTip="true"/>
+			
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Group right="0" width="70">
+			<view:HistoryListButtons id="id_listBtnBar" width="100%" data="{data}" itemrenderer="{this}" />
+		</s:Group>
+	</s:BorderContainer>
+	-->
+</s:ItemRenderer>

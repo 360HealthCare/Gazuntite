@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						 xmlns:s="library://ns.adobe.com/flex/spark"    
+						 skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.reviewAllWindowSkin"
+						 xmlns:mx="library://ns.adobe.com/flex/mx" 
+						 height="{(Capabilities.screenResolutionY)-110}" 
+						 width="{(Capabilities.screenResolutionX / 2)-21}"
+						 xmlns:reviewcomponents1="com.gazuntite.patient.visit.view.reviewcomponents.*" 
+						 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.event.visit.SaveReviewHistroyEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.formatters.DateFormatter;
+			
+			//import valueObjects.VisitDTO;
+			
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			protected function id_ReviewBtn_clickHandler(event:MouseEvent):void
+			{
+				id_CheckAll.selected    = IsSelectedAll();
+				var savereviewhistroyxml:XML = model.reviewHistroy.toXML();
+				var savereviewhistroyevent :SaveReviewHistroyEvent = new SaveReviewHistroyEvent(model.LoggedInUserSessionID,model.VisitID,model.LoggedInUserId,savereviewhistroyxml,callBackFunction) ;
+				CairngormEventDispatcher.getInstance().dispatchEvent(savereviewhistroyevent) ; 
+				return;
+			}
+			
+			private function IsSelectedAll():Boolean
+			{
+				var selected :Boolean = false ;
+				if(id_FamilyHistroyComponent.isSelected == true  && id_MedicalHistroyComponent.isSelected == true  && id_SocialHistroyComponent.isSelected  == true
+					&& id_AllergiesComponent.isSelected == true  && id_ChronicMedicationComponent.isSelected == true  && id_ImmunizationComponent.isSelected  == true 
+					&& id_LabOrdersComponent.isSelected  == true)
+					selected = true ;
+				return selected ;
+				
+			}
+			
+			public function callBackFunction():void
+			{
+				UtilityFunctions.ShowMessage("Histroy Reviewed Successfully","Info");
+				//Alert.show("Histroy Reviewed Successfully","Info",4,FlexGlobals.topLevelApplication.mainContainer);
+				removePopup();
+			}
+			
+			public function allSelected():void
+			{
+				if(model.reviewHistroy.IsAllReviewed)
+					id_ReviewBtn.enabled 					= false ;
+				if( model.reviewHistroy.VisitReviewID  !="0")
+				{
+					id_ReviewedBy.visible 		= true;
+					id_PhyName.text				= model.reviewHistroy.UserName ;
+					id_ReviewDate.text			= model.reviewHistroy.date;
+				}
+				id_FamilyHistroyComponent.isSelected 		= model.reviewHistroy.IsFamilyReviewed;
+				id_MedicalHistroyComponent.isSelected 		= model.reviewHistroy.IsMedicalReviewed;
+				id_SocialHistroyComponent.isSelected 		= model.reviewHistroy.IsSocialReviewed
+				id_AllergiesComponent.isSelected			= model.reviewHistroy.IsAllergiesReviewed;
+				id_ChronicMedicationComponent.isSelected	= model.reviewHistroy.IsChornicMedicationReviewed;
+				id_ImmunizationComponent.isSelected 		= model.reviewHistroy.IsImmunizationReviewed;
+				id_LabOrdersComponent.isSelected			= model.reviewHistroy.IsLabOrderReviewed; 
+				id_CheckAll.selected						= model.reviewHistroy.IsAllReviewed;
+				
+			}
+			
+			protected function id_CheckAll_clickHandler(event:MouseEvent):void
+			{
+				if(id_CheckAll.selected)
+				{
+					
+					id_FamilyHistroyComponent.isSelected 		= true;
+					id_MedicalHistroyComponent.isSelected 		= true;
+					id_SocialHistroyComponent.isSelected 		= true;
+					id_AllergiesComponent.isSelected			= true;
+					id_ChronicMedicationComponent.isSelected	= true;
+					id_ImmunizationComponent.isSelected 		= true;
+					id_LabOrdersComponent.isSelected			= true; 
+					
+				}
+					
+				else 
+				{
+					id_FamilyHistroyComponent.isSelected 		= false;
+					id_MedicalHistroyComponent.isSelected 		= false;
+					id_SocialHistroyComponent.isSelected 		= false;
+					id_AllergiesComponent.isSelected			= false;
+					id_ChronicMedicationComponent.isSelected	= false;
+					id_ImmunizationComponent.isSelected 		= false;
+					id_LabOrdersComponent.isSelected			= false;
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="3"/>
+	</components1:layout>
+	
+	<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.miniLightBlueBGContainer"  height="28" width="100%" >
+		<s:layout>
+			<s:HorizontalLayout  paddingLeft="5" paddingRight="5" verticalAlign="middle"/>
+		</s:layout>
+		<s:Label text="Select" fontFamily="Calibri" fontSize="12"/>
+		<s:CheckBox label="All" id="id_CheckAll" selected="{IsSelectedAll()}" click="id_CheckAll_clickHandler(event)"/>
+	</s:SkinnableContainer>
+	<s:Scroller height="{(Capabilities.screenResolutionY)-230}" width="{(Capabilities.screenResolutionX / 2)-40}"  >
+		<s:VGroup width="100%" height="100%">
+			<reviewcomponents1:FamilyHistroy id="id_FamilyHistroyComponent" width="100%" />
+			<reviewcomponents1:MedicalHistroy  id="id_MedicalHistroyComponent" width="100%" />
+			<reviewcomponents1:SocialHistroy id="id_SocialHistroyComponent" width="100%"/>
+			<reviewcomponents1:Allergies id="id_AllergiesComponent" width="100%"/>
+			<reviewcomponents1:ChronicMedication id="id_ChronicMedicationComponent" width="100%"/>
+			<reviewcomponents1:Immunization id="id_ImmunizationComponent" width="100%"/>
+			<reviewcomponents1:LabOrders id="id_LabOrdersComponent" width="100%"/>
+		</s:VGroup>
+	</s:Scroller>
+	<s:HGroup  horizontalAlign="center" width="100%">
+		<s:Button label="OK I have reviewed" id="id_ReviewBtn" styleName="blackButtonSkin" width="130" click="id_ReviewBtn_clickHandler(event)" buttonMode="true" useHandCursor="true"/>
+	</s:HGroup>
+	<s:HGroup gap="5" id="id_ReviewedBy" visible="false" includeInLayout="{id_ReviewedBy.visible}" horizontalAlign="center" width="100%" >
+		<s:Label text="Reviewed by:" fontFamily="Calibri" fontSize="12" color="#ffffff" />
+		<s:Label id="id_PhyName" fontFamily="Calibri" fontSize="12" color="#ffffff" />
+		<s:Label text="Reviewed on:" fontFamily="Calibri" fontSize="12" color="#ffffff" />
+		<s:Label id="id_ReviewDate" fontFamily="Calibri" fontSize="12" color="#ffffff" />
+	</s:HGroup>
+	
+</components1:PopupWindow>

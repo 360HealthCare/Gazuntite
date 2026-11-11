@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="79" height="22">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0.5" y="0.5" width="78" height="21" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1" color="0x6DA3F3" ratio="0"/>
+				<s:GradientEntry alpha="1" color="0x2B5CB4" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="270"
+									weight="1">
+				<s:GradientEntry alpha="1.0" color="#4887E0" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#1C4799" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect x="40" y="1" width="38" height="20" radiusX="2"
+			x.disabledAndSelected="1"
+			x.downAndSelected="1"
+			x.overAndSelected="1"
+			x.upAndSelected="1">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1" color="0xF8F8F8" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#DBD9D9" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:RichText x="5" y="7" color="#FFFFFF" fontFamily="Calibri" fontSize="10" fontWeight="bold"
+				tabStops="S0" text="English"
+				visible.disabledAndSelected="false"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false"/>
+	<s:RichText x="46" y="7" color="#999999" fontFamily="Calibri" fontSize="10" fontWeight="bold"
+				tabStops="S0" text="Metric"
+				visible.disabledAndSelected="false"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false"/>
+	<s:RichText includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" x="5" y="7" color="#999999" fontFamily="CalibriCFF"
+				fontSize="10" fontWeight="bold" tabStops="S0" text="English"/>
+	<s:RichText includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" x="46" y="7" color="#FFFFFF" fontFamily="CalibriCFF"
+				fontSize="10" fontWeight="bold" tabStops="S0" text="Metric"/>
+</s:Skin>

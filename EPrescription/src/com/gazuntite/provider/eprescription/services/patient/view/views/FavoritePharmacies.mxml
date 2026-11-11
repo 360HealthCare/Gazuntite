@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						title="Favorite Pharmacies"
+						width="580"	  height="200"
+						creationComplete="popupwindow1_creationCompleteHandler(event)"
+						>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPatientPharmEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.RemoveFavoritePharmaciesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.FavPharmacySelectedEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var _patientID:int;
+			
+			
+			
+			[Bindable]
+			public function get patientID():int
+			{
+				return _patientID;
+			}
+			
+			public function set patientID(value:int):void
+			{
+				_patientID = value;
+			}
+			
+			public function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				//REMOVE 
+				trace (id_favoritePharmacyGrid.selectedItem );
+				
+				if(!item)
+				{
+					item = new Object();
+				}
+				
+				Alert.show("Do you want to remove?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					if( event.detail == Alert.YES )
+					{
+						item = (id_favoritePharmacyGrid.dataProvider as ArrayCollection).getItemAt(id_favoritePharmacyGrid.selectedIndex);							
+						
+						var npcdid:String = (item.NCPDPID as String);
+						
+						var getPharmacy: RemoveFavoritePharmaciesEvent = new RemoveFavoritePharmaciesEvent(patientID, npcdid, function():void
+						{
+							trace("pharmacy removed ");			
+						});
+						CairngormEventDispatcher.getInstance().dispatchEvent(getPharmacy);
+						
+						
+						//REMOVE from grid
+						(id_favoritePharmacyGrid.dataProvider as ArrayCollection).removeItemAt(id_favoritePharmacyGrid.selectedIndex);
+					}
+					
+				});
+				
+				/* Alert.show("Do you want to remove?", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+				{
+				
+				
+				}); */
+				
+				
+				
+				
+				
+			} 
+			
+			public var item:Object;
+			
+			public function linkbutton2_clickHandler(event:MouseEvent):void
+			{
+				trace (id_favoritePharmacyGrid.selectedItem );
+				
+				if(!item)
+				{
+					item = new Object();
+				}
+				
+				item = (id_favoritePharmacyGrid.dataProvider as ArrayCollection).getItemAt(id_favoritePharmacyGrid.selectedIndex);
+				
+				
+				var evt:FavPharmacySelectedEvent = new FavPharmacySelectedEvent( FavPharmacySelectedEvent.PHARMACY_SELECTED);
+				this.dispatchEvent( evt );
+				
+				
+				/* 		 (this.parent as NewRX).id_PharmacyName.text 	= (item.Name as String);
+				(this.parent as NewRX).id_pharmacyPhone.text 	= item.Phone as String;
+				(this.parent as NewRX).id_pharmacyAddress.text = item.Address as String; */
+				
+			} 
+			
+			protected function popupwindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+				var getPharmacy: GetPatientPharmEvent = new GetPatientPharmEvent(patientID, pharmaciesLoaded);				
+				//getPharmacy.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getPharmacy); 
+			}
+			
+			public function pharmaciesLoaded(pharmaciesXML:XML):void
+			{
+				trace("favorite pharmacies loaded");
+				trace(pharmaciesXML.toXMLString());
+				
+				
+				pharmaciesXML = AppUtils.removeDefaultNamespaceFromXML(pharmaciesXML);
+				
+				var favArrayCol:ArrayCollection = new ArrayCollection();
+				
+				trace("fav pharmacies length for user "+patientID+" "+pharmaciesXML.Pharmacy.PatientFavouritePharmDTO.length());
+				for(var i:int=0; i<pharmaciesXML.Pharmacy.PatientFavouritePharmDTO.length(); i++)
+				{
+					
+					
+					var fp_obj:Object = new Object();
+					
+					
+					
+					trace(pharmaciesXML.Pharmacy.PatientFavouritePharmDTO.StoreName[i].toString());
+					
+					fp_obj.Name 		= pharmaciesXML.Pharmacy.PatientFavouritePharmDTO[i].StoreName.toString();
+					fp_obj.NCPDPID		= pharmaciesXML.Pharmacy.PatientFavouritePharmDTO[i].NCPDPID.toString();
+					fp_obj.Address 		= pharmaciesXML.Pharmacy.PatientFavouritePharmDTO[i].Address.toString();
+					fp_obj.Phone 		= pharmaciesXML.Pharmacy.PatientFavouritePharmDTO[i].Phone.toString();
+					fp_obj.Notes 		= pharmaciesXML.Pharmacy.PatientFavouritePharmDTO[i].Notes.toString();
+					
+					favArrayCol.addItem(fp_obj);
+					
+				}
+				id_favoritePharmacyGrid.dataProvider = favArrayCol; 
+				//id_dosageForm.labelField = "Term";
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingTop="1" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	
+	
+	
+	<mx:DataGrid id="id_favoritePharmacyGrid"  width="{this.width - 10}" height="100%" 
+				 styleName="dataGridStyle" rowHeight="24"
+				 
+				 headerStyleName="MyDataGridStyleHeader"
+				 verticalGridLines="false"
+				 verticalScrollBarStyleName="VScrollBar"
+				 >
+		<mx:columns>
+			<mx:DataGridColumn width="80" dataField="Name" headerText="Name" />
+			<mx:DataGridColumn width="70" dataField="NCPDPID" headerText="NCPDP ID" />					
+			<mx:DataGridColumn width="70" dataField="Phone" headerText="Phone" />
+			<mx:DataGridColumn width="90" dataField="Address" headerText="Address" />
+			<!--	<mx:DataGridColumn width="100" dataField="Notes" headerText="Notes" />-->
+			<mx:DataGridColumn width="140" headerText="">
+				<mx:itemRenderer>
+					<fx:Component>	
+						
+						<mx:HBox width="100%" paddingBottom="2" horizontalAlign="center" verticalAlign="middle">													
+							
+							<s:Button width="65"  styleName="blackButtonSkin" label="Select" click="outerDocument.linkbutton2_clickHandler(event)"
+									  buttonMode="true" useHandCursor="true" toolTip="Select"/>
+							
+							<s:Button width="65" click="outerDocument.linkbutton1_clickHandler(event)"  styleName="blackButtonSkin" label="Remove"
+									  buttonMode="true" useHandCursor="true" toolTip="Remove"/>
+							
+							
+							
+						</mx:HBox>
+						
+					</fx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns> 
+	</mx:DataGrid> 
+	
+	
+	
+</components:PopupWindow>

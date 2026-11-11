@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+ADOBE SYSTEMS INCORPORATED
+Copyright 2008 Adobe Systems Incorporated
+All Rights Reserved.
+
+NOTICE: Adobe permits you to use, modify, and distribute this file
+in accordance with the terms of the license agreement accompanying it.
+
+-->
+
+<!--- The default skin class for the Spark Button component.  
+
+@see spark.components.Button
+
+@langversion 3.0
+@playerversion Flash 10
+@playerversion AIR 1.5
+@productversion Flex 4
+-->
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+			 xmlns:fb="http://ns.adobe.com/flashbuilder/2009" minWidth="21" minHeight="20" alpha.disabled="0.5">
+	
+	<!-- host component -->
+	<fx:Metadata>
+		<![CDATA[ 
+		/** 
+		* @copy spark.skins.spark.ApplicationSkin#hostComponent
+		*/
+		[HostComponent("spark.components.Button")]
+		]]>
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!--<s:Group width="100%" >-->
+	<s:Rect id="background" radiusX="2" width="100%"			
+			height="19"
+			>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#7F7F7F" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0.7215686274509804"/>
+				<s:GradientEntry alpha="1.0" color="#E1E1E1" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Path data="M 6.27 5.45 L 0.03 5.45 3.15 0.04 Z " rotation="180" height="5" id="path1"  width="9"  y="13"  right="5">
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+	</s:Path>
+	<s:Line id="line1" x="1" y="3.5" yTo="13" right="17">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#7F7F7F" joints="miter" miterLimit="4" weight="1" />
+		</s:stroke>
+	</s:Line>
+</s:SparkSkin>

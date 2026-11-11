@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:social="com.gazuntite.patient.visit.view.pmh.compHistory.social.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 xmlns:notes="com.gazuntite.patient.visit.view.notes.*" 
+		 creationComplete="group1_creationCompleteHandler(event)" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerNotes;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryAddictionDTO;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryMediumTypeDTO;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryUsageAmountTypeDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.controls.extended.components.LabelComboBox;
+			
+			import mx.collections.ArrayList;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var m_sLabel2:String = "";
+			
+			private var m_sLabel:String = "Press Yes or No";
+			private var m_bIsSelected:Boolean 		= false;
+			
+			
+			private var m_oSocialHistoryAddictionDto:SocialHistoryAddictionDTO = new SocialHistoryAddictionDTO();
+			[Bindable]
+			public function get Label2():String
+			{
+				return m_sLabel2;
+			}
+
+			public function set Label2(value:String):void
+			{
+				m_sLabel2 = value;
+			}
+
+			[Bindable]
+			public function get SocialHistoryAddictionDto():SocialHistoryAddictionDTO
+			{
+				return m_oSocialHistoryAddictionDto;
+			}
+
+			public function set SocialHistoryAddictionDto(value:SocialHistoryAddictionDTO):void
+			{
+				m_oSocialHistoryAddictionDto = value;
+				LoadForm();
+				/* if( ! model.isNewVisitCreated && value )
+				{
+					
+				}  */
+			}
+
+			[Bindable]
+			public function get Label():String
+			{
+				return m_sLabel;
+			}
+			
+			public function set Label(value:String):void
+			{
+				m_sLabel = value;
+			}
+			
+			[Bindable]
+			public function set IsSelected(value:Boolean):void
+			{
+				m_bIsSelected = value;
+			}
+			
+			public function get IsSelected():Boolean
+			{
+				return m_bIsSelected;
+			}
+			
+			private function LoadForm():void
+			{
+				if( SocialHistoryAddictionDto )
+				{
+					id_DetailsView.id_PastBtn.selected 			= SocialHistoryAddictionDto.IsPresentSelected == Constants.STRING_TRUE;
+					id_DetailsView.id_PresentBtn.selected 		= SocialHistoryAddictionDto.IsPresentSelected == Constants.STRING_FALSE;
+					
+					id_DetailsView.id_Yes.selected				= SocialHistoryAddictionDto.IsEducated == Constants.STRING_TRUE;
+					id_DetailsView.id_No.selected				= SocialHistoryAddictionDto.IsEducated == Constants.STRING_FALSE;
+					
+					id_DetailsView.id_OnsetDate.text 	= SocialHistoryAddictionDto.OnSet;
+					if( SocialHistoryAddictionDto.EndDate && SocialHistoryAddictionDto.EndDate.length > 0 )
+						id_DetailsView.id_EndDate.visible = true;
+					id_DetailsView.id_EndDate.text 		= SocialHistoryAddictionDto.EndDate;
+					
+					id_DetailsView.selectType( SocialHistoryAddictionDto.SocialHistoryAddictionTypeID );
+					id_DetailsView.selectUsageAmount( SocialHistoryAddictionDto.SocialHistoryAddictionTypeID );					
+					
+					if( SocialHistoryAddictionDto.AddictionNotes )
+						id_NotesView.id_TextArea.text = SocialHistoryAddictionDto.AddictionNotes;
+				} 
+				
+			}
+			
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_DetailsView.id_AmountCmbo.addEventListener(IndexChangeEvent.CHANGE, 			OnIndexChangeEvent);
+				id_DetailsView.id_TypeCmbo.addEventListener(IndexChangeEvent.CHANGE, 			OnIndexChangeEvent);
+				id_DetailsView.id_OnsetDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_DetailsView.id_EndDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_DetailsView.id_OnsetDate.addEventListener(FocusEvent.FOCUS_OUT, OnDateFocusOut);
+				id_DetailsView.id_EndDate.addEventListener(FocusEvent.FOCUS_OUT, OnDateFocusOut);
+				id_DetailsView.id_header.id_NotesBtn.addEventListener(MouseEvent.CLICK, 		OnNotesClick);
+				
+				id_DetailsView.id_PastBtn.addEventListener(MouseEvent.CLICK, OnPastPresentClick);
+				id_DetailsView.id_PresentBtn.addEventListener(MouseEvent.CLICK, OnPastPresentClick);
+
+				id_DetailsView.id_Yes.addEventListener(MouseEvent.CLICK, OnEducatedClick);
+				id_DetailsView.id_No.addEventListener(MouseEvent.CLICK, OnEducatedClick);
+				
+				
+				addEventListener('clearNotesEvent', function(event:Event):void
+				{
+					id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+					id_header.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+					
+				}); 
+				
+			}
+			
+			
+			private function OnEducatedClick(event:MouseEvent):void
+			{
+				SocialHistoryAddictionDto.IsDirty = true;
+				
+				 if(event.currentTarget.id == "id_No" )
+				{
+					SocialHistoryAddictionDto.IsEducated	= "false";
+					id_DetailsView.id_Yes.selected 			= false;
+				}
+				else
+				{
+					SocialHistoryAddictionDto.IsEducated	= "true";
+					id_DetailsView.id_No.selected  			= false;
+				} 
+				
+			}
+			
+			private function OnPastPresentClick(event:MouseEvent):void
+			{
+				SocialHistoryAddictionDto.IsDirty = true;
+				
+				 if(event.currentTarget.id == "id_PastBtn" )
+				{
+					SocialHistoryAddictionDto.IsPresentSelected	= "false";
+					id_DetailsView.id_PresentBtn.selected 		= false;
+					
+					id_DetailsView.id_EndDate.visible			= true;
+				}
+				else
+				{
+					SocialHistoryAddictionDto.IsPresentSelected = "true";
+					id_DetailsView.id_PastBtn.selected  		= false;
+					
+					id_DetailsView.id_EndDate.visible			= false;
+				} 
+				
+			}
+			
+			private function OnNotesClick(event:MouseEvent):void
+			{
+			 	id_Views.selectedIndex 							 = 2; //select notes 
+				id_header.id_SpinerList.currIndex  				 = 1;
+				id_DetailsView.id_header.id_SpinerList.currIndex = 1; 
+				
+			}
+			
+			private function OnIndexChangeEvent(event:IndexChangeEvent):void
+			{
+				if (!event.currentTarget)
+					return;
+				
+				var curTar:LabelComboBox;
+				if (event.currentTarget is LabelComboBox)
+					curTar = event.currentTarget as LabelComboBox;
+				
+				if (!curTar)
+					return;
+				
+				if( curTar.id == "id_AmountCmbo" && curTar.selectedItem is SocialHistoryUsageAmountTypeDTO)
+				{
+					SocialHistoryAddictionDto.UsageAmountID = ( curTar.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+				}
+				else if (curTar.id == "id_AmountCmbo")
+				{
+					SocialHistoryAddictionDto.UsageAmountID = -1;
+					SocialHistoryAddictionDto.UsageAmount = curTar.textInput.text;
+				}
+				else if (curTar.id == "id_TypeCmbo" && curTar.selectedItem is SocialHistoryMediumTypeDTO)
+				{
+					SocialHistoryAddictionDto.MediumTypeID = (curTar.selectedItem as SocialHistoryMediumTypeDTO).ID;
+				}
+				else if (curTar.id == "id_TypeCmbo")
+				{
+					SocialHistoryAddictionDto.MediumTypeID = -1;
+					SocialHistoryAddictionDto.MediumType = curTar.textInput.text;
+				}
+				
+				/* if( event.currentTarget.id == "id_AmountCmbo" && event.currentTarget.selectedItem is SocialHistoryUsageAmountTypeDTO)
+				{
+					SocialHistoryAddictionDto.UsageAmountID = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+				}
+				else if(event.currentTarget.id == "id_AmountCmbo")
+				{
+					SocialHistoryAddictionDto.UsageAmountID = -1;
+					SocialHistoryAddictionDto.UsageAmount = event.currentTarget.
+				}
+				else if( event.currentTarget.id == "id_TypeCmbo" && event.currentTarget.selectedItem is SocialHistoryMediumTypeDTO)
+				{
+					SocialHistoryAddictionDto.MediumTypeID = ( event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).ID; 
+					
+				}
+				else if(event.currentTarget.id == "id_TypeCmbo")
+				{
+					SocialHistoryAddictionDto.MediumTypeID = -1;
+				} */
+				
+				 SocialHistoryAddictionDto.PatientID = model.patientID;
+				 SocialHistoryAddictionDto.VisitID = model.VisitID;
+				 
+				SocialHistoryAddictionDto.IsDirty = true;
+			}
+			
+			private function OnDateChange(event:CalendarLayoutChangeEvent):void
+			{
+				SocialHistoryAddictionDto.IsDirty = true;
+				
+				 if( event.currentTarget.id == "id_OnsetDate" /*&& event.currentTarget.selectedDate */)
+				{
+					SocialHistoryAddictionDto.OnSet = event.currentTarget.text;//selectedDate;
+				}
+				else if( event.currentTarget.id == "id_EndDate" /*&& event.currentTarget.selectedDate */)
+				{
+					SocialHistoryAddictionDto.EndDate = event.currentTarget.text;//selectedDate; 
+				} 
+			}
+	
+			private function OnDateFocusOut(event:FocusEvent):void
+			{
+				SocialHistoryAddictionDto.IsDirty = true;
+				
+				if( event.currentTarget.id == "id_OnsetDate")
+				{
+					SocialHistoryAddictionDto.OnSet = event.currentTarget.text;
+				}
+				else if( event.currentTarget.id == "id_EndDate")
+				{
+					SocialHistoryAddictionDto.EndDate = event.currentTarget.text; 
+				} 
+			}
+
+			protected function id_NotesView_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* if( SocialHistoryAddictionDto )
+				{ */
+				
+					//id_NotesView.id_TextArea.addEventListener(TextOperationEvent.CHANGE, OnNotesChange);
+					//id_NotesView.id_TextArea.addEventListener( "textChanged", OnNotesChange);
+				/* } */
+			}
+			
+			private function OnNotesChange(event:Event):void
+			{
+				/* if( SocialHistoryAddictionDto )
+					SocialHistoryAddictionDto.AddictionNotes = id_NotesView.id_TextArea.text; */
+			}
+
+
+			protected function YesNoLabel_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_DetailsView.id_header.id_SpinerList.DataProvider = new ArrayList( ["Form","Notes"] );
+				id_DetailsView.id_header.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				
+				id_DetailsView.id_header.id_SpinerList.id_minBtn.toolTip = "Switch to Notes";
+				id_DetailsView.id_header.id_SpinerList.id_MaxBtn.toolTip = "Switch to Notes";
+				
+				id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+				id_DetailsView.id_header.id_SpinerList.id_DDList.selectedIndex = 0;
+				
+				id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+				id_NotesView.id_BoxHeader.visible 			= false;
+				id_NotesView.id_BoxHeader.includeInLayout 	= false;
+				id_NotesView.id_notesBorder.height = 100;
+				
+				//for notes component only, to make single header view....
+				id_header.id_SpinerList.DataProvider = new ArrayList( ["Form","Notes"] );
+				id_header.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				
+				//id_header.id_SpinerList.currIndex = 1;
+				id_header.id_SpinerList.id_minBtn.toolTip = "Switch to Form";
+				id_header.id_SpinerList.id_MaxBtn.toolTip = "Switch to Form"; 
+				
+				/*
+				id_DetailsView.id_header.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler1, false, 0, true);
+				id_header.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler2, false, 0, true);*/
+			}
+			
+			
+			/* private var dictationPopUp:DictationPopup;
+			private function voiceBtnClickHandler1(event:MouseEvent):void
+			{
+				var dictationDTO:ModuleDictationDTO = new ModuleDictationDTO();
+				
+				if (SocialHistoryAddictionDto)
+					dictationDTO.DictationID = SocialHistoryAddictionDto.DictationId;
+				
+				dictationPopUp = QIDictationManager.show(id_DetailsView.id_header.id_VoiceBtn.parent, dictationPopUp, dictationDTO, id_DetailsView.id_header.id_VoiceBtn);
+				QIPopUpManager.addPopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				
+				
+				dictationPopUp.move( dictationPopUp.x - 81, dictationPopUp.y);
+				
+				dictationPopUp.id_closeBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					if (dictationDTO && SocialHistoryAddictionDto)
+					{
+						SocialHistoryAddictionDto.DictationId = dictationDTO.DictationID;
+					}
+					QIPopUpManager.removePopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+					
+					if(dictationDTO && dictationDTO.DictationID!=null && dictationDTO.DictationID != Constants.GUID_FORMAT)
+					{
+						id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+						id_DetailsView.id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+					}
+					
+				});
+				
+				//, false, 0, true
+			} */
+			
+			/* private function voiceBtnClickHandler2(event:MouseEvent):void
+			{
+				var dictationDTO:ModuleDictationDTO = new ModuleDictationDTO();
+				var comId:String = this.id;
+				
+				
+				if(this.id == "id_WorkStatus")
+				{
+					if(model.socialHistoryDTO!=null && model.socialHistoryDTO.WorkStatusDictationID!=null)
+					{
+						dictationDTO.DictationID = model.socialHistoryDTO.WorkStatusDictationID;
+					}
+				}
+				else if(this.id == "id_Other")
+				{
+					if(model.socialHistoryDTO!=null && model.socialHistoryDTO.OtherDictationID !=null)
+					{
+						dictationDTO.DictationID = model.socialHistoryDTO.OtherDictationID ;
+					}
+				}
+				
+				dictationPopUp = QIDictationManager.show(id_header.id_VoiceBtn.parent, dictationPopUp, dictationDTO, id_header.id_VoiceBtn);
+				QIPopUpManager.addPopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				dictationPopUp.move( dictationPopUp.x - 81, dictationPopUp.y);
+				
+				
+				dictationPopUp.id_closeBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					
+					
+					if(dictationDTO && dictationDTO.DictationID!=null && dictationDTO.DictationID != Constants.GUID_FORMAT)
+					{
+						id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+						id_DetailsView.id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+					}
+					
+					if (dictationDTO && comId == "id_Other")
+					{
+						if(dictationDTO.DictationID!=null)
+						{
+							model.socialHistoryDTO.OtherDictationID = dictationDTO.DictationID;
+						}else
+						{
+							model.socialHistoryDTO.OtherDictationID = Constants.GUID_FORMAT;
+						}
+												
+					}
+					else if(dictationDTO && comId == "id_WorkStatus")
+					{
+						if(dictationDTO.DictationID!=null)
+						{
+							model.socialHistoryDTO.WorkStatusDictationID = dictationDTO.DictationID;
+						}
+						else
+						{
+							model.socialHistoryDTO.WorkStatusDictationID = Constants.GUID_FORMAT;
+						}
+					}
+					
+					
+					QIPopUpManager.removePopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				});
+			} */
+			
+			private function OnNotesCloseClick(event:MouseEvent):void
+			{
+				//this.ShowNotes = false;
+				id_Views.selectedIndex = 0;
+				id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+				event.stopImmediatePropagation();
+			}
+			
+			private function OnHeaderClick(event:IndexChangeEvent):void
+			{
+				
+				id_Views.selectedIndex = event.newIndex == 1 ? 2:1;
+				id_header.id_SpinerList.currIndex  				 	= event.newIndex;
+				id_DetailsView.id_header.id_SpinerList.currIndex 	= event.newIndex;
+				event.stopImmediatePropagation();
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="id_DetailsView.id_header.id_SpinerList.currIndex" destination="id_header.id_SpinerList.currIndex" twoWay="true" />
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" />
+	</s:layout>
+	<mx:ViewStack id="id_Views" width="100%" height="120" resizeToContent="true" creationPolicy="all" selectedIndex="{IsSelected ? 1:0}">
+		<s:NavigatorContent width="100%">
+			<s:SkinnableContainer width="100%" height="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIInnerYesNoBG"
+								  creationComplete="YesNoLabel_creationCompleteHandler(event)"
+								  >
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+				</s:layout>
+					
+				<s:RichText id="id_label1" text="{Label}" color="#000000" fontFamily="Calibri Bold" fontSize="13"/>
+				
+				<s:RichText id="id_label" text="{Label2}" color="#0000a0"  fontFamily="Calibri Bold" fontSize="14"/>
+				
+			</s:SkinnableContainer>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent width="100%">
+			<social:socialDetails id="id_DetailsView" width="100%" height="120" />
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent width="100%" height="120" creationComplete="id_NotesView_creationCompleteHandler(event)">
+			<!--<notes:NotesBox id="id_NotesView" width="100%" creationComplete="id_NotesView_creationCompleteHandler(event)"/>-->
+			<s:VGroup width="100%" gap="-1">
+				<family:DetailViewHeader id="id_header" width="100%" />
+				<notes:NotesBox id="id_NotesView" width="100%" creationComplete="id_NotesView_creationCompleteHandler(event)" />
+			</s:VGroup>
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	
+	
+</s:Group>

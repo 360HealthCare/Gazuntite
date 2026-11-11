@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientDictationNoteViewSkin"
+					  visible="{viewModel.visible}"
+					  includeInLayout="{viewModel.visible}" height="150" 
+					  xmlns:dictation="com.gazuntite.dictation.view.dictation.*" 
+					  xmlns:view="com.gazuntite.dictation.view.*" 
+					  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*" >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.skins.controls.button.patient.DictationToggleButtonRedSkin;
+			import com.gazuntite.skins.controls.button.patient.DictationToggleButtonSkin;
+			import com.gazuntite.skins.controls.button.patient.WriteNoteRedTBSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable] public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable] public var note:String = "";
+			[Bindable] public var dictationTooltip:String = "Section Level Dictation";
+			[Bindable] public var noteTooltip:String = "Section Level Notes";
+			private var _isCloseButtonVisible:Boolean = true;	
+			private var _isSectionLevel:Boolean		  = false;
+			[Bindable] public var ShowSaveButton:Boolean		  = false;
+			private var _isSaveButtonVisible:Boolean  = true;
+			
+			[Bindable]
+			public function get isCloseButtonVisible():Boolean
+			{
+				return _isCloseButtonVisible;
+			}
+			
+			public function set isCloseButtonVisible(value:Boolean):void
+			{
+				_isCloseButtonVisible = value;
+			}
+			
+			[Bindable]
+			public function get isSectionLevel():Boolean
+			{
+				return _isSectionLevel;
+			}
+			
+			public function set isSectionLevel(value:Boolean):void
+			{
+				_isSectionLevel = value;
+			}
+			
+			[Bindable]
+			public function get isSaveButtonVisible():Boolean
+			{
+				return _isSaveButtonVisible;
+			}
+			
+			public function set isSaveButtonVisible(value:Boolean):void
+			{
+				_isSaveButtonVisible = value;
+				//M:8Nov2013
+				//this.uiDictationContainer.IsEditable = value;
+			}
+			
+			//M:8Nov2013
+			
+			private var _dictationID:String;
+			
+			[Bindable]
+			public function get DictationID():String
+			{
+				
+				return _dictationID;
+				/* if( null == this.uiDictationContainer )
+				return "porp is NULL";
+				return this.uiDictationContainer.DictationID; */
+			}
+			
+			public function set DictationID(value:String):void
+			{
+				_dictationID = value;
+			}
+			
+			private var _isEditable:Boolean = false;
+			/* public function set IsDictaionEditMode(value:Boolean):void
+			{
+			this.uiDictationContainer.IsEditable = value;				
+			} */
+			
+			[Bindable]
+			public function get IsDictaionEditMode():Boolean
+			{
+				return _isEditable;
+			}			
+			
+			public function set IsDictaionEditMode(value:Boolean):void
+			{
+				_isEditable = value;				
+			}
+			
+			public function set updateState(param:*):void
+			{
+				if (viewModel.inDictationMode)
+				{
+					this.currentState = viewModel.inlineEditing?'dictationInline':'dictationNew';
+				}
+				else if (viewModel.inNoteMode)
+				{
+					this.currentState =  viewModel.inlineEditing?'noteInline':'noteNew';
+				}
+				else
+				{
+					this.currentState = 'default';
+				}
+				if (uiDictationContainer!=null)
+				{
+					uiDictationContainer.invalidateDisplayList();
+				}
+				if (uiNoteContainer!=null)
+				{
+					uiNoteContainer.invalidateDisplayList();
+				}
+			}
+			
+			private function saveDictationNoteClickHandler():void
+			{
+				var ev:PatientDictationNoteViewEvent = new PatientDictationNoteViewEvent(
+					PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, true);
+				
+				if (viewModel.inDictationMode)
+				{
+					ev.isNoteSave = false;
+					ev.data = DictationID;
+				}				
+				else if (viewModel.inNoteMode)
+				{
+					ev.isNoteSave = true;
+					ev.data = note;
+				}
+				dispatchEvent(ev);
+			}
+			
+			/* [Bindable]
+			private function get IsDictationRecorded():Boolean
+			{
+			if(UtilityFunctions.IsNullOrEmpty(DictationID) || DictationID == DictationConstants.GUID_FORMAT)
+			{
+			return false;
+			}
+			return true;
+			} */
+			public function resetToDefault():void
+			{
+				if(uiDictationContainer)
+					uiDictationContainer.resetToDefault();
+				
+				if(uiDictation)
+					uiDictation.setStyle("skinClass", DictationToggleButtonSkin);
+				if(DictationID)
+					DictationID = DictationConstants.GUID_FORMAT;
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="{viewModel.inDictationMode}" destination="updateState"/>
+	<fx:Binding source="{viewModel.inNoteMode}" destination="updateState"/>
+	
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="dictationInline" stateGroups="dictation"/>
+		<s:State name="dictationNew" stateGroups="dictation"/>
+		<s:State name="noteInline" stateGroups="note"/>
+		<s:State name="noteNew" stateGroups="note"/>
+	</s:states>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" horizontalAlign="left" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"/>
+	</s:layout>
+	
+	<s:Rect width="100%" includeIn="default"/>
+	
+	<s:ToggleButton id="uiDictationLeft" 
+					selected="@{viewModel.inDictationMode}" 
+					skinClass="{ (DictationID &amp;&amp; DictationID != DictationConstants.GUID_FORMAT) ? DictationToggleButtonRedSkin:DictationToggleButtonSkin }"
+					includeIn="noteNew" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{dictationTooltip}"
+					/>
+	
+	<view:DictationView id="uiDictationContainer" 
+						viewModel="{viewModel}" IsEditable="{IsDictaionEditMode}" DictationID="@{DictationID}"
+						/>
+	
+	<s:SkinnableContainer id="uiNoteContainer"
+						  includeIn="note" width="100%" height="100%"
+						  skinClass="com.gazuntite.skins.controls.container.DictationNoteHightSkin"
+						  >
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+		</s:layout>
+		
+		<s:TextArea id="id_notesText"
+					height="120"
+					width="100%"  maxChars="1000"
+					text="@{note}" styleName="patientFormText" color="#333333"
+					minHeight="24" skinClass="com.gazuntite.input.view.inputsections.history.comprehensive.social.SocialNoteTextSkin" />
+		<s:ToggleButton id="uiNoteLive" 
+						selected="@{viewModel.inNoteMode}" 
+						visible="{!viewModel.inlineEditing}"
+						includeInLayout="{!viewModel.inlineEditing}"
+						skinClass="com.gazuntite.skins.controls.button.patient.WriteNoteToggleButtonSkin"
+						buttonMode="true" toolTip="{noteTooltip}"
+						/>
+	</s:SkinnableContainer>
+	
+	<s:ToggleButton id="uiDictation"
+					selected="@{viewModel.inDictationMode}" 
+					skinClass="{ (DictationID &amp;&amp; DictationID != DictationConstants.GUID_FORMAT) ? DictationToggleButtonRedSkin:DictationToggleButtonSkin }"
+					includeIn="default" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{dictationTooltip}"
+					/>
+	<s:ToggleButton id="uiNote" 
+					selected="@{viewModel.inNoteMode}" 
+					skinClass="{note &amp;&amp; note.length > 0? WriteNoteRedTBSkin:WriteNoteToggleButtonSkin}"
+					includeIn="default, dictationNew" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{noteTooltip}"
+					/>
+	
+	<!--<s:VGroup height="100%" verticalAlign="bottom" paddingRight="2" gap="0">-->
+	<s:Button id="uiSaveButton" 
+			  visible="false" 
+			  includeInLayout="false"
+			  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+			  toolTip="Save"
+			  click="saveDictationNoteClickHandler()"
+			  enabled="{((uiNote.selected &amp;&amp; note.length >= 1) || (uiDictation.selected &amp;&amp; IsDictaionEditMode &amp;&amp; (DictationID &amp;&amp; DictationID != DictationConstants.GUID_FORMAT))) ? true : false}"
+			  />
+	<!--</s:VGroup>-->
+	
+</s:SkinnableContainer>
+

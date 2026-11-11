@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			
+			import mx.events.FlexEvent;
+			
+			private var _selectedPatient:PatientDTO;
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+			}
+			
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			[Bindable]
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+			
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				
+			}
+			
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	
+	<s:Label text="Rx for {selectedPatient.FullName}, {selectedPharmacy.StoreName}" width="100%" />
+	
+</s:Group>

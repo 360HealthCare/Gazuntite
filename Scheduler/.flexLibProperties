@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.calendayTodayBtnSkin"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.calendarSearchBtnSkin"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.calendarViewBarSkin"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.crossBtnSkin"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.newAppointmentBtns"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.newAppointmentSectionBGSkin"/>
+    <classEntry path="com.zigron.provider.live.services.scheduler.view.skins.calendarSkinBG"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

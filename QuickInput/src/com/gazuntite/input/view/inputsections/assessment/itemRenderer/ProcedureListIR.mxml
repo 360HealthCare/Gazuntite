@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*" 
+				xmlns:diagnosis="com.gazuntite.input.view.inputsections.assessment.diagnosis.*"
+				xmlns:procedure="com.gazuntite.input.view.inputsections.assessment.treatment.procedure.*"
+				xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+				autoDrawBackground="false"
+				width="100%" 
+				initialize="init()" 
+				>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.procedure.ProcedureDTO;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.view.inputsections.assessment.treatment.procedure.PatientInputAssessmentProcedureEvent;
+			import com.gazuntite.input.view.inputsections.assessment.treatment.procedure.ProcedureItemEditView;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.skins.controls.container.input.RecordEditPopupSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			[Bindable]  private var isEditViewOpen:Boolean = false;
+			
+			[Bindable]	
+			public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			private var procedureDTO:ProcedureDTO;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				procedureDTO = data as ProcedureDTO;
+				
+				
+				if (value == null || null == procedureDTO) //value as AllergyDTO fails somw how ... why object is being passed here in place of AllergyDTO ?
+					return;
+				
+				setDictationNoteButtonMode();
+				//	isEditViewOpen = false;
+				//	removeEditView();
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+				
+				invalidateDisplayList();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function init():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			// section 1 is Expand View & section 2 for Edit view
+			protected function toggleEditView(sectionNo:int):void
+			{
+				if (!procedureDTO)
+					return;
+				
+				if(sectionNo == 2 )
+				{
+					if(id_btnEdit.selected)
+					{
+						procedureDTO.inEditMode = false;
+						isEditViewOpen = true;
+						openEditView();
+						showGlow();
+						return;
+					}else
+					{
+						removeEditView();
+						glowAnimation.play(null, true);
+						glow1.alpha = 0;
+						isEditViewOpen 								= false;
+						id_btnEdit.selected 						= false;
+						return;
+					}
+				}else
+				{
+					removeEditView();
+					if(id_btnEdit.selected)
+						id_btnEdit.selected = false;
+					isEditViewOpen = false;
+				}
+				
+				procedureDTO.inEditMode = !procedureDTO.inEditMode;
+				setDictationNoteButtonMode();
+				showGlow();
+			}
+			
+			private function setDictationNoteButtonMode():void
+			{
+				if (!procedureDTO.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+				}else if(procedureDTO.inEditMode)
+				{
+					id_ItemExpandView.viewModel.visible = false;
+				}
+				showGlow();
+			}
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!procedureDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					procedureDTO.IsDirty = true;
+					procedureDTO.IsDeleted = true;
+					
+					var ev:PatientInputAssessmentProcedureEvent = new PatientInputAssessmentProcedureEvent(
+						PatientInputAssessmentProcedureEvent.PATIENT_INPUT_PROCEDURE_DELETE_EVENT, true);
+					
+					ev.procedureDTO = procedureDTO;
+					
+					dispatchEvent(ev);
+				});
+				
+				event.stopPropagation();
+			}
+			
+			private function showGlow():void
+			{
+				if (procedureDTO.inEditMode || isEditViewOpen)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+					id_ItemExpandView.viewModel.visible 	= false;
+				}
+			}
+			protected function openEditView():void
+			{
+				if(!id_btnEdit.selected)
+					return;
+				else if(id_editExpandView.numChildren > 0)
+					removeEditView();
+				
+				var editor:ProcedureItemEditView						= new ProcedureItemEditView();
+				editor.procedureDTO 									= procedureDTO;
+				editor.width  											= id_editExpandView.width - 5;
+				
+				editor.setStyle('skinClass', RecordEditPopupSkin);
+				
+				id_editExpandView.addElement(editor);
+				
+				if (procedureDTO.cptmedicalDTO)
+				{
+					editor.id_ProcedureCmbo.text = procedureDTO.cptmedicalDTO.ProcedureDescription;
+					editor.id_CptCmbo.text = procedureDTO.cptmedicalDTO.ProcedureCode;
+					editor.toolTipChanged = true;
+				}
+				
+			}
+			
+			private function removeEditView():void
+			{
+				if(id_editExpandView)
+				{
+					if(id_editExpandView.numChildren > 0)
+						id_editExpandView.removeAllElements();
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="-4" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="{this.width - 7}" height="26" >
+		
+		<s:HGroup left="0" right="70" top="0" bottom="0"
+				  horizontalAlign="left"
+				  verticalAlign="middle"
+				  paddingLeft="8" paddingRight="8" gap="6"
+				  buttonMode="true" toolTip="Open/Close Details"
+				  click="toggleEditView(1)"
+				  >
+			<s:Label color="#333333" fontFamily="CalibriCFF" fontSize="14" maxDisplayedLines="1"
+					 text="{itemIndex + 1  +' . '+ procedureDTO.label}"
+					 toolTip="{procedureDTO.label}" />
+		</s:HGroup>
+		<s:HGroup right="5" gap="4" verticalCenter="0" height="100%" verticalAlign="middle" horizontalAlign="right">
+			<s:Image buttonMode="true" source="@Embed('assets/images/new.png')"	 useHandCursor="true"/>
+			<s:ToggleButton id="id_btnEdit"
+							click="toggleEditView(2)"
+							buttonMode="true" toolTip="Edit the Record"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.EditRecordArrowTBSkin"
+							/>
+			<s:Button click="deleteClickHandler(event)"
+					  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+					  toolTip="Delete Procedure"
+					  />
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 5}"  visible="{procedureDTO.inEditMode}" includeInLayout="{procedureDTO.inEditMode}" >
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		<procedure:ProcedureItemExpandView id="id_ItemExpandView"  width="100%" procedureDTO="{procedureDTO}"/>
+	</s:Group>
+	
+	<s:Group id="id_editExpandView" width="{id_Header.width - 5}" top="21"  visible="{id_btnEdit.selected}" includeInLayout="{id_btnEdit.selected}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+	</s:Group>
+</s:ItemRenderer>

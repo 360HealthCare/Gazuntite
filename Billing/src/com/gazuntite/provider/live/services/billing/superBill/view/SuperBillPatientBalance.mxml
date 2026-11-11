@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 skinClass="com.gazuntite.skins.superBill.PatientBalanceSkin"
+		 >
+	<fx:Script>
+		<![CDATA[
+			
+			[Bindable]
+			public var PatientBalance:String = "0";
+			
+		]]>
+	</fx:Script>
+	
+	<s:RichText  color="#000000" fontFamily="Calibri" textAlign="center"
+				fontSize="18" fontWeight="bold" tabStops="S0" text="$ {PatientBalance}"
+				bottom="15" horizontalCenter="0" right="10" left="10" maxDisplayedLines="1" showTruncationTip="true"
+				useHandCursor="true" buttonMode="true" toolTip="$ {PatientBalance}"/>
+</s:SkinnableContainer>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				width="100%" creationComplete="init()">
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			protected function init():void
+			{
+				setStyle("rollOverColor", 0x73A7F8);
+				setStyle("selectionColor", 0x6C8DF1);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="1" verticalAlign="middle" />
+	</s:layout>
+	
+	<s:HGroup id="id_PatientSearchRenderer" width="100%" paddingLeft="5" paddingRight="5" toolTip="{'Name: '+data.FirstName + ' ' + data.MiddleName + ' ' + data.LastName +'  DOB: '+formatDateTime.format(data.DOB)}" useHandCursor="true" buttonMode="true">
+		
+		<s:Label id="id_Name" 
+				 color.normal="#000000" 
+				 color.hovered="#FFFFFF" 
+				 color.selected="#FFFFFF" 
+				 text="{data.FirstName +' '+ data.MiddleName +' '+ data.LastName}" 
+				 fontFamily="CalibriCFF" fontSize="14" verticalAlign="middle" 
+				 maxDisplayedLines="1"  left="5" right="5"/>
+		
+		<s:Spacer width="100%"/>
+		
+		<s:Label id="id_DOB"
+				 color.normal="#000000" 
+				 color.hovered="#FFFFFF" 
+				 color.selected="#FFFFFF" 
+				 text="{formatDateTime.format(data.DOB) }" 
+				 fontFamily="CalibriCFF" fontSize="14" verticalAlign="middle" 
+				 maxDisplayedLines="1"  right="5" left="5"/>
+	</s:HGroup>
+	
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xCCCCCC" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+</s:ItemRenderer>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.input.model.QIModelLocator;
+			
+			public static const IMPORT_CHRONIC_DAGNOSIS_IMPORT_EVENT:String = "importChronicDiagnosisImport";
+			public static const IMPORT_CHRONIC_DIAGNOSIS_CANCEL_EVENT:String = "importChronicDiagnosisCancel";
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private function checkAllClickHandler():void
+			{
+				if (!id_ImportDiagnosisList.dataProvider)
+					return;
+				
+				var found:Boolean;
+				
+				for (var i:int = 0; i < id_ImportDiagnosisList.dataProvider.length; i++)
+				{
+					var diagnosisDTO:DiagnosisDTO = id_ImportDiagnosisList.dataProvider[i] as DiagnosisDTO;
+					
+					if (diagnosisDTO)
+					{
+						if (diagnosisDTO.isSelected != checkAll.selected)
+						{
+							diagnosisDTO.isSelected = checkAll.selected;
+						}
+					}
+				}
+				
+				id_ImportDiagnosisList.invalidateProperties();
+			}
+			
+			private function importClickHandler():void
+			{
+				var ev:Event = new Event(ImportChronicDiagnosisView.IMPORT_CHRONIC_DAGNOSIS_IMPORT_EVENT, true);
+				dispatchEvent(ev);
+			}
+			
+			private function cancelClickHandler():void
+			{
+				var ev:Event = new Event(ImportChronicDiagnosisView.IMPORT_CHRONIC_DIAGNOSIS_CANCEL_EVENT, true);
+				dispatchEvent(ev);
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout gap="10" paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+	</s:layout>
+	
+	<s:VGroup width="100%" gap="0">
+		<s:SkinnableContainer id="id_ListHeader" width="100%" height="26" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="10"/>
+			</s:layout>
+			<s:CheckBox id="checkAll" 
+						width="20" click="checkAllClickHandler()" 
+						skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+						buttonMode="true" useHandCursor="true"/>
+			
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Sr.#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+			</s:HGroup>
+			
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Visit Date" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Onset Date" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="ICD Code" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				<s:Label width="100%" text="Diagnosis" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:List id="id_ImportDiagnosisList" 
+				width="100%"
+				borderVisible="false" dataProvider="{model.diagnosisDTOChronicHistoryList}"
+				skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+				itemRenderer="com.gazuntite.input.view.inputsections.assessment.itemRenderer.ImportChronicDiagnosisListIR">
+			<s:layout>
+				<s:VerticalLayout gap="0" requestedRowCount="3"/>
+			</s:layout>
+		</s:List>
+		
+		<s:HGroup width="100%" horizontalAlign="right" paddingTop="10">
+			<s:Button id="id_Import" label="Import" skinClass="com.gazuntite.skins.controls.button.eLab.ProcessBlackButton"
+					  width="65" click="importClickHandler()"/>
+			<s:Button id="id_Cancel" label="Cancel" skinClass="com.gazuntite.skins.controls.button.eLab.ProcessBlackButton"
+					  width="65" click="cancelClickHandler()"/>
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+</s:SkinnableContainer>

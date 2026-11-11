@@ -1,0 +1,7 @@
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<baseurl>http://quivus.com/QuivusAirDev/QuivusAirDownload/</baseurl>
+	<updates>true</updates>
+</configuration>
+
+
+

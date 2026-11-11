@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:superbill="com.gazuntite.provider.live.services.billing.view.superbill.*" 
+					  xmlns:view="com.gazuntite.provider.live.services.billing.superBill.view.*"
+					  borderVisible="false" backgroundColor="0xFFFFFF" cornerRadius="3"
+					  creationComplete="bordercontainer1_creationCompleteHandler(event)"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var superBillmodel:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+						
+			
+			protected function bordercontainer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				superBillmodel.isFromPendingBills = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="0"/>
+	</s:layout>
+	
+	<s:Scroller width="100%" height="100%" 	horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group width="100%" height="100%">
+			<s:Label text="Coming Soon............" width="100%"/>
+		</s:Group>			
+	</s:Scroller>
+	
+	<view:SuperBillButtonBar width="100%" />	
+	
+</s:BorderContainer>

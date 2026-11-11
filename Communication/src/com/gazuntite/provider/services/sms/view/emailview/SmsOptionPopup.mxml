@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="cc(event)" 
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.services.email.event.EmailOptionEvent;
+			
+			import mx.collections.IList;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+//			private var logger : ILogger = LoggingUtil.getLogger( this );
+						
+			private var _dataProvider:IList;
+			
+			[Bindable]
+			public function get dataProvider():IList
+			{
+				return _dataProvider;
+			}
+
+			public function set dataProvider(value:IList):void
+			{
+				_dataProvider = value;
+			}
+
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						var e:Event = new Event('smsClosePopup', true);
+						dispatchEvent( e);
+					}
+				});
+				
+			}
+			
+			protected function option_clickHandler(event:IndexChangeEvent):void
+			{
+//				logger.debug( "selected View, Index: " + event.currentTarget.selectedItem.id + ", " + event.currentTarget.selectedIndex );
+				var ev:EmailOptionEvent=new EmailOptionEvent(EmailOptionEvent.EMAIL_OPTION_CHANGE,true);
+				ev.content = dataProvider.getItemAt(event.newIndex).label;
+					
+//				var e:Event = new Event(ev, true);
+				dispatchEvent( ev);
+				
+				var ce:Event = new Event('smsClosePopup', true);
+				dispatchEvent( ce);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:SkinnableContainer height="100%" skinClass="com.gazuntite.skins.controls.container.SmsOptionBarSkin">
+		
+		<s:layout>
+			<s:HorizontalLayout 
+				horizontalAlign="left" verticalAlign="bottom" 
+				paddingLeft="28" paddingBottom="5"/>
+		</s:layout>
+		
+		
+		<s:TabBar dataProvider="{dataProvider}" labelField="label" change="option_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.tabbar.SmsOptionPopTabBarSkin"
+				  verticalCenter="3"
+				  
+		>
+		</s:TabBar>
+		
+		
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="56" height="55">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect includeIn="disabled,up" x="0.5" y="0.5" width="54" height="54" radiusX="3"
+			x.up="1.5">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#676767" ratio="0"
+								 color.up="#859DBC"/>
+				<s:GradientEntry alpha="1.0" color="#353535" ratio="0.5254901960784314"
+								 color.up="#5978A3"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0.5294117647058824"
+								 color.up="#486A9A"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="1"
+								 color.up="#4A6C9B"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="up" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke alpha="0.75" caps="none" color="#333333" joints="miter"
+								miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect height="54" includeIn="over" radiusX="3" width="54" x="0.5" y="0.5">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#C68475" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#64281A" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#491B11" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#491B11" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.75" angle="93.81407483429037" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke alpha="0.75" caps="none" color="#333333" joints="miter"
+								miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect alpha="0.85" height="54" includeIn="down" radiusX="3" width="54" x="0.5" y="0.5">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#C68475" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#64281A" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#491B11" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#491B11" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.89" angle="90" blurX="5" blurY="5" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke alpha="0.75" caps="none" color="#333333" joints="miter"
+								miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:RichText x="12" y="36" fontFamily="Calibri" fontSize="15" lineHeight="0" paddingBottom="0"
+				paddingLeft="0" paddingRight="0" paddingTop="0" tabStops="S0" text="Send"
+				trackingRight="0%"
+				color.disabled="#FFFFFF"
+				color.down="#FFFFFF"
+				color.over="#FFFFFF"
+				color.up="#000000">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	<s:BitmapImage includeIn="up" x="18" y="9" smooth="true"
+				   source="@Embed('/assets/images/send_icon.png')">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+	<s:BitmapImage includeIn="disabled,down,over" x="18" y="9" smooth="true"
+				   source="@Embed('/assets/images/send_icon.png')">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#FFFFFF" inner="true"
+						  knockout="false" quality="3" strength="10"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

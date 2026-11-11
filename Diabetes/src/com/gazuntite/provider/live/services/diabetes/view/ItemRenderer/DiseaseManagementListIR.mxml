@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				creationComplete="cc(event)" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			import mx.events.FlexEvent;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" buttonMode="true" useHandCursor="true" height="30">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" />
+		</s:layout>
+		
+		<s:HGroup width="100%" height="100%" verticalAlign="middle"> 
+			<s:Label width="6%" text="{data.serialNumber}"  paddingLeft="6" fontFamily="Calibri" maxDisplayedLines="1" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="18%" text="{data.Guideline}"  maxDisplayedLines="1" fontFamily="Calibri" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="18%" text="{data.Age}"  maxDisplayedLines="1" fontFamily="Calibri" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="9%" text="{data.Gender}"  maxDisplayedLines="1" fontFamily="Calibri" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="18%" text="{data.Type}"  maxDisplayedLines="1" fontFamily="Calibri" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="18%" text="{data.Status}"  maxDisplayedLines="1" fontFamily="Calibri" fontWeight="bold" />
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			
+			<s:Button width="3.5%" toolTip="Edit" label="Edit" 
+					  buttonMode="true" useHandCursor="true"
+					  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton"/>
+			<s:Button width="3.5%" toolTip="Delete" label="Delete" 
+					  buttonMode="true" useHandCursor="true"
+					  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"/>
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="32" height="92">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect includeIn="down,downAndSelected,overAndSelected,up,upAndSelected" y="0" height="92"
+			radiusX="3"
+			visible.down="false" x.down="9" width.down="23"
+			x.downAndSelected="0" width.downAndSelected="32"
+			x.overAndSelected="0" width.overAndSelected="32"
+			visible.up="false" x.up="9" width.up="23"
+			x.upAndSelected="0" width.upAndSelected="32">
+		<s:fill>
+			<s:LinearGradient rotation="0">
+				<s:GradientEntry alpha="1.0"
+								 color.down="#FFFFFF" ratio.down="0"
+								 color.downAndSelected="#6D87AD"
+								 ratio.downAndSelected="0.4235294117647059"
+								 color.overAndSelected="#6D87AD"
+								 ratio.overAndSelected="0.4235294117647059"
+								 color.up="#DDE7F6" ratio.up="0"
+								 color.upAndSelected="#6D87AD"
+								 ratio.upAndSelected="0.4235294117647059"/>
+				<s:GradientEntry includeIn="down,up" alpha="1.0" color="#AAC5F4"
+								 ratio="0.44313725490196076"
+								 color.down="#9CC0FF" ratio.down="0.4627450980392157"/>
+				<s:GradientEntry includeIn="down,up" alpha="1.0" color="#93B1E6"
+								 ratio="0.4470588235294118"
+								 color.down="#799CD8" ratio.down="0.4666666666666667"/>
+				<s:GradientEntry alpha="1.0" color="#BFCFEA" ratio="1"
+								 color.down="#A8C8FF"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="downAndSelected,overAndSelected,up,upAndSelected"
+								alpha="0.75" angle="180" blurX="7" blurY="7" color="#000000"
+								distance="2" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="2"/>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="2" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" alpha="1" angle="90" blurX="4" blurY="4"
+								color="#000000" distance="2" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect includeIn="down,over" x="9" y="0" width="23" height="92" radiusX="5">
+		<s:fill>
+			<s:LinearGradient rotation="180">
+				<s:GradientEntry alpha="1.0" color="#BA8072" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#C46E58" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#D89584" ratio="0.5098039215686274"/>
+				<s:GradientEntry alpha="1.0" color="#FFBCAD" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="3" blurY="3" color="0x000000"
+								distance="0" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:RichText x="12" bottom="33" fontSize="20" lineHeight="100%"
+				rotation="-90" tabStops="S0" text="{hostComponent.label}" trackingRight="1%"
+				color.disabled="#666666"
+				color.disabledAndSelected="#666666"
+				color.down="#000000"
+				color.downAndSelected="#000000"
+				color.over="#000000"
+				color.overAndSelected="#000000"
+				color.up="#000000"
+				color.upAndSelected="#000000" fontFamily="Calibri" fontWeight="bold">
+	</s:RichText>
+	<s:BitmapImage x="12" y="65" smooth="true" source="@Embed('/assets/images/arrows.png')"
+				   transformX="8" transformY="7"
+				   alpha.disabled="0.5"
+				   rotation.disabledAndSelected="180"
+				   rotation.downAndSelected="180"
+				   rotation.overAndSelected="180"
+				   rotation.upAndSelected="180">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" inner="true" knockout="false"
+						  quality="2" strength="5"
+						  color.disabled="#2B4381"
+						  color.disabledAndSelected="#2B4381"
+						  color.down="#333333"
+						  color.downAndSelected="#2B4381"
+						  color.over="#333333"
+						  color.overAndSelected="#2B4381"
+						  color.up="#2B4381"
+						  color.upAndSelected="#2B4381"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

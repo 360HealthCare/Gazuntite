@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="600" xmlns:numericstepper="com.gazuntite.controls.numericstepper.*">
+	<fx:Script>
+		<![CDATA[
+			[Bindable]	public var inItemRenderer:Boolean = false;
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer width="100%" height="100%"
+					   borderWeight="1" borderColor="#BBBBBB"
+					   backgroundColor="#DAD9D9"
+					   cornerRadius="4"
+					   >
+		<s:layout>
+			<s:VerticalLayout
+				paddingLeft="0" paddingRight="0" paddingTop="4" paddingBottom="2" gap="4"
+				/>
+		</s:layout>
+		<s:HGroup width="100%" horizontalAlign="left" verticalAlign="bottom"
+				  paddingLeft="8" paddingRight="4" gap="4"
+				  >
+			<numericstepper:SingleNumericStepper label="Height (Inch)" value="90"/>
+			<numericstepper:SingleNumericStepper label="Weight (Lbs)" value="90"/>
+			<numericstepper:SingleNumericStepper label="Temp (F)" value="90"/>
+			
+			<s:Rect width="100%"/>
+			<s:Group width="90"
+					 >
+				<s:Rect left="1" right="1" height="48" radiusX="4"
+						>
+					<s:fill>
+						<s:LinearGradient rotation="270">
+							<s:GradientEntry alpha="1.0" color="#000000" ratio="0"/>
+							<s:GradientEntry alpha="1.0" color="#111212" ratio="0.48627450980392156"/>
+							<s:GradientEntry alpha="1.0" color="#252525" ratio="0.49019607843137253"/>
+							<s:GradientEntry alpha="1.0" color="#6D6D6D" ratio="1"/>
+						</s:LinearGradient>
+					</s:fill>
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4"
+											weight="1"/>
+					</s:stroke>
+					<s:filters>
+						<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+											distance="1" hideObject="false" inner="false" knockout="false"
+											quality="3" strength="1"/>
+					</s:filters>
+				</s:Rect>
+				<s:RichText x="13" color="#FFFFFF" fontFamily="Calibri"
+							fontSize="16" fontWeight="bold" tabStops="S0" text="BMI"
+							y="15"/>
+				<s:RichText x="51" color="#FFF3AF" fontFamily="Calibri"
+							fontSize="18" fontWeight="bold" tabStops="S0" text="6.77"
+							y="14"/>
+			</s:Group>
+			
+			
+			
+		</s:HGroup>
+		
+		<s:Group width="100%" height="32">
+			<s:Rect left="4" right="4" height="32" radiusX="4"
+					>
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#565656" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.48627450980392156"/>
+						<s:GradientEntry alpha="1.0" color="#292929" ratio="0.49019607843137253"/>
+						<s:GradientEntry alpha="1.0" color="#444444" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+				<s:filters>
+					<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+										distance="1" hideObject="false" inner="true" knockout="false"
+										quality="3" strength="1"/>
+				</s:filters>
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#6A6B6B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Rect>
+			<s:HGroup left="20" right="20" height="100%" verticalAlign="middle">
+				<s:RichText color="#ffb4c2" fontFamily="Calibri" 
+							text="Height (cm):"
+							fontSize="13" whiteSpaceCollapse="preserve"
+							/>
+				<s:RichText color="#ffffff" fontFamily="Calibri" fontWeight="bold" 
+							text="228.6" 
+							fontSize="13" whiteSpaceCollapse="preserve" />
+				<s:RichText color="#ffb4c2" fontFamily="Calibri" 
+							text="Weight (Kg):"
+							fontSize="13" whiteSpaceCollapse="preserve"
+							/>
+				<s:RichText color="#ffffff" fontFamily="Calibri" fontWeight="bold" 
+							text="35.4" 
+							fontSize="13" whiteSpaceCollapse="preserve" />
+				<s:RichText color="#ffb4c2" fontFamily="Calibri" 
+							text="Temp (C):"
+							fontSize="13" whiteSpaceCollapse="preserve"
+							/>
+				<s:RichText color="#ffffff" fontFamily="Calibri" fontWeight="bold" 
+							text="228.6" 
+							fontSize="13" whiteSpaceCollapse="preserve" />
+			</s:HGroup>
+			
+			
+			
+		</s:Group>
+		
+		<s:Line width="100%"
+				>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#ADADAD" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Line>
+		
+		
+		<s:HGroup width="100%" horizontalAlign="left"
+				  paddingLeft="8" paddingRight="8"
+				  paddingTop="2"
+				  >
+			<numericstepper:SingleNumericStepper label="Pulse (Min)" value="90"/>
+			<numericstepper:SingleNumericStepper label="Resp. (Min)" value="90"/>
+			<numericstepper:DoubleNumericStepper label="BP (Sys/Dys)" leftValue="90" rightValue="90"/>
+			<numericstepper:DoubleNumericStepper label="O2 (%)" leftValue="90" rightValue="90"/>
+		</s:HGroup>
+		<s:Line width="100%"
+				>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#ADADAD" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Line>
+		<s:HGroup width="100%" verticalAlign="bottom" horizontalAlign="right"
+				  paddingRight="2" paddingTop="-2"
+				  >
+			<s:Button buttonMode="true"
+					  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+					  toolTip="Save"
+					  />
+			<s:Button buttonMode="true"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+					  label="Next"
+					  toolTip="Next"
+					  visible="{!inItemRenderer}"
+					  includeInLayout="{!inItemRenderer}"
+					  />
+		</s:HGroup>
+	</s:BorderContainer>
+</s:Group>

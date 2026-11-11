@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.EncounterTypeDTO;
+			import com.gazuntite.common.dto.PlaceOfServiceTypeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			[Bindable]
+			public var PrimaryInsurance:String;			
+			[Bindable]
+			public var PrimaryCopay:String;
+			
+			[Bindable]
+			public var SecondaryInsurance:String;
+			[Bindable]
+			public var SecondaryCopay:String;
+			
+			[Bindable]
+			public var selectedPOS:PlaceOfServiceTypeDTO;			
+			[Bindable]
+			public var selectedTOS:EncounterTypeDTO;
+			[Bindable]
+			public var selectedMOP:Object;
+			
+			private function SetService(event:IndexChangeEvent):void
+			{
+				var cmb:ComboBox = event.currentTarget as ComboBox;
+				if(cmb.id == "id_POSTypes" && id_POSTypes.selectedIndex > -1)
+				{
+					//model.VisitSuperBill.HCFA.Block24B = (id_POSTypes.selectedItem as PlaceOfServiceTypeDTO).POSCode;
+					model.VisitSuperBill.ServiceTypeID = (id_POSTypes.selectedItem as PlaceOfServiceTypeDTO).ServiceTypeID;
+				}
+				else if(cmb.id == "id_TOSTypes" && id_TOSTypes.selectedIndex > -1)
+					model.VisitSuperBill.EncounterTypeID = (id_TOSTypes.selectedItem as EncounterTypeDTO).EncounterTypeID;
+			}
+			
+			protected function SetFocus(event:FocusEvent):void
+			{
+				var cmb:ComboBox = event.currentTarget as ComboBox;
+				if(cmb.id == "id_POSTypes" && id_POSTypes.selectedIndex > -1)
+				{
+					model.VisitSuperBill.HCFA.Block24B = (id_POSTypes.selectedItem as PlaceOfServiceTypeDTO).POSCode;
+					model.VisitSuperBill.ServiceTypeID = (id_POSTypes.selectedItem as PlaceOfServiceTypeDTO).ServiceTypeID;
+				}
+				else if(cmb.id == "id_TOSTypes" && id_TOSTypes.selectedIndex > -1)
+					model.VisitSuperBill.EncounterTypeID = (id_TOSTypes.selectedItem as EncounterTypeDTO).EncounterTypeID;
+			}
+			
+			protected function id_Copay_focusOutHandler(event:FocusEvent):void
+			{
+				
+				/* if(UtilityFunctions.IsNullOrEmpty(id_Copay.text) == true )
+				{ 
+				id_Copay.text = model.ReceivedCopay.toString(); 
+				
+				}
+				
+				if(id_Copay.text.indexOf("%") > -1)
+				{
+				model.IsPercentCopay = true;
+				model.Copay = parseInt(id_Copay.text.replace("%",""));					
+				model.DisplayCopay = id_Copay.text;
+				}
+				else
+				{
+				model.IsPercentCopay = false;
+				model.Copay = parseInt(id_Copay.text);					
+				model.DisplayCopay = id_Copay.text;
+				}				
+				
+				model.CalculateSuperBill();  */
+			}
+			
+			protected function id_CheckNo_focusOutHandler(event:FocusEvent):void
+			{
+				
+				if(UtilityFunctions.IsNullOrEmpty(id_CheckNo.text) == false && id_modeTypes.selectedIndex == 1)
+					model.VisitSuperBill.CheckNumber = id_CheckNo.text;
+			}
+			
+			protected function id_modeTypes_changeHandler(event:IndexChangeEvent):void
+			{
+				id_CheckNo.visible = false;
+				id_checkLabel.visible = false;
+				
+				switch(id_modeTypes.selectedIndex)
+				{
+					case 0:
+						model.VisitSuperBill.PaymentTypeID = "2";
+						model.ModeOfPayment = 'Cash';
+						break;
+					case 1:
+						model.VisitSuperBill.PaymentTypeID = "1";
+						id_CheckNo.visible = true;
+						id_checkLabel.visible = true;
+						model.ModeOfPayment = 'Check';
+						break;
+					case 2:
+						model.VisitSuperBill.PaymentTypeID = "3";
+						model.ModeOfPayment = 'Credit Card';
+						break;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	
+	<s:VGroup width="16%" height="100%">
+		<s:Group width="100%" height="21">
+			<s:Label text="Visit Date:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Primary Plan:" color="#666666" verticalCenter="0" fontFamily="CalibriCFF"  fontSize="11"  width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Secondary Plan:" color="#666666" verticalCenter="0" fontFamily="CalibriCFF"  fontSize="11"  width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<!--<s:Group width="100%" height="21">
+		<s:Label text="Copay:" color="#666666" verticalCenter="0" fontFamily="CalibriCFF"  fontSize="11"  width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>-->
+		
+	</s:VGroup>
+	
+	<s:VGroup width="16%" height="100%">
+		<s:Group width="100%" height="21">
+			<s:Label text="{model.VisitSuperBill.VisitDate}" verticalCenter="0" width="100%"  fontFamily="CalibriCFFBold"  
+					 toolTip="{'Visit Date: ' + model.VisitSuperBill.VisitDate}"
+					 fontSize="11" color="#333333" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="{PrimaryInsurance}" verticalCenter="0" width="100%"  fontFamily="CalibriCFFBold"  
+					 toolTip="{'Primary Plan: ' + PrimaryInsurance}"
+					 fontSize="11" color="#333333" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="{SecondaryInsurance}" verticalCenter="0" width="100%"  fontFamily="CalibriCFFBold"  
+					 toolTip="{'Secondary Plan: ' + SecondaryInsurance}"
+					 fontSize="11" color="#333333" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<!--<s:TextInput id="id_Copay" 
+		restrict="[0-9]\." text="{model.DisplayCopay}" width="100%" height="21" focusOut="id_Copay_focusOutHandler(event)"  color="#333333" fontFamily="Calibri"  fontSize="11"
+		toolTip="{'Copay: ' + model.DisplayCopay }" skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>-->
+	</s:VGroup>
+	
+	<s:VGroup width="16%" height="100%">
+		<s:Group width="100%" height="21">
+			<s:Label text="Mode of Payment:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Primary Copay:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Secondary Copay:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+	</s:VGroup>
+	
+	<s:VGroup width="16%" height="100%">
+		<s:Group width="100%" height="21">
+			<s:ComboBox id="id_modeTypes"  toolTip="{id_modeTypes.selectedItem? 'Payment Mode: ' + id_modeTypes.selectedItem.label:'Payment Mode'}"
+						width="100%" height="21" selectedItem="{selectedMOP}" includeInLayout="{model.isFromPendingBills}" visible="{model.isFromPendingBills}"
+						prompt="Select Payment Mode" skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"  
+						change="id_modeTypes_changeHandler(event)">
+				<s:ArrayList>
+					<fx:Object label="Cash" />
+					<fx:Object label="Check" />
+					<fx:Object label="Credit Card" />
+				</s:ArrayList>
+			</s:ComboBox>
+			
+			<s:Label text="{id_modeTypes.selectedItem.label}" verticalCenter="0" fontFamily="CalibriCFFBold"  fontSize="11" 
+					 width="100%" maxDisplayedLines="1" showTruncationTip="true" includeInLayout="{!model.isFromPendingBills}" visible="{!model.isFromPendingBills}"
+					 toolTip="{id_modeTypes.selectedItem? 'Payment Mode: ' + id_modeTypes.selectedItem.label:'Payment Mode'}"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="{PrimaryCopay}" verticalCenter="0" width="100%"  fontFamily="CalibriCFFBold"  
+					 toolTip="{'Primary Copay: ' + PrimaryCopay}"
+					 fontSize="11" color="#333333" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="{SecondaryCopay}" verticalCenter="0" width="100%"  fontFamily="CalibriCFFBold"  
+					 toolTip="{'Secondary Copay: ' + SecondaryCopay}"
+					 fontSize="11" color="#333333" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		
+	</s:VGroup>
+	
+	<s:VGroup width="16%" height="100%">
+		<!--<s:Group width="100%" height="21">
+		<s:Label text="Mode of Payment:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>-->
+		<s:Group width="100%" height="21">
+			<s:Label text="Billing Provider:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Primary Provider:"  verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<s:Group width="100%" height="21"  visible="false" includeInLayout="false">
+			<s:Label text="Encounter Type:"  verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:Label text="Place of Service:"  verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" maxDisplayedLines="1" showTruncationTip="true" />
+		</s:Group>
+		<s:Group width="100%" height="21" visible="false" includeInLayout="false">
+			<s:Label id="id_checkLabel" text="Check #:" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" width="100%" visible="false"/>
+		</s:Group>
+	</s:VGroup>
+	
+	<s:VGroup width="16%" height="100%" >
+		
+		<s:Group width="100%" height="21">
+			<s:Label id="billingProvider" text="{model.VisitSuperBill.BillingProviderInfo.FirstName + ' ' + model.VisitSuperBill.BillingProviderInfo.LastName}"
+					 toolTip="{'Billing Provider: ' +model.VisitSuperBill.BillingProviderInfo.FirstName + ' ' + model.VisitSuperBill.BillingProviderInfo.LastName}"
+					 width="100%" verticalCenter="0" color="#333333" fontFamily="Calibri"  fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		
+		<s:Group width="100%" height="21"  visible="false" includeInLayout="false">
+			<s:Label text="{selectedTOS.EncounterTypeName}" verticalCenter="0" color="#666666" fontFamily="CalibriCFF"  fontSize="11" 
+					 width="100%" maxDisplayedLines="1" showTruncationTip="true" includeInLayout="{!model.isFromPendingBills}" visible="{!model.isFromPendingBills}"
+					 toolTip="{id_TOSTypes.selectedItem? 'Type of Service: ' + id_TOSTypes.selectedItem.EncounterTypeName:'Type of Service'}"/>
+			
+			<s:ComboBox id="id_TOSTypes"  selectedItem="{selectedTOS}" 
+						labelField="EncounterTypeName" width="100%" height="21" dataProvider="{model.EncounterTypeList}"	
+						change="SetService(event)" focusOut="SetFocus(event)" includeInLayout="{model.isFromPendingBills}" visible="{model.isFromPendingBills}" 
+						toolTip="{id_TOSTypes.selectedItem? 'Type of Service: ' + id_TOSTypes.selectedItem.EncounterTypeName:'Type of Service'}"
+						prompt="Type of Service" skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"   />
+		</s:Group>
+		
+		<s:TextInput  id="id_CheckNo" prompt="Check #" width="50%" height="21" visible="false" includeInLayout="false"
+					  focusOut="id_CheckNo_focusOutHandler(event)" toolTip="{'Check #: ' + id_CheckNo.text}"
+					  maxChars="50"	skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"	/>
+		<s:Group width="100%" height="21">
+			<s:Label id="primaryProvider" text="{model.VisitSuperBill.BillingProviderInfo.FirstName + ' ' + model.VisitSuperBill.BillingProviderInfo.LastName}"
+					 toolTip="{'Primary Provider: ' +model.VisitSuperBill.BillingProviderInfo.FirstName + ' ' + model.VisitSuperBill.BillingProviderInfo.LastName}"
+					 width="100%" verticalCenter="0" color="#333333" fontFamily="Calibri"  fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:Group>
+		<s:Group width="100%" height="21">
+			<s:ComboBox id="id_POSTypes"  selectedItem="{selectedPOS}" 
+						labelField="POSDescription" width="100%" height="21" dataProvider="{model.PlaceOfServiceTypeList}"
+						change="SetService(event)" focusOut="SetFocus(event)" includeInLayout="{model.isFromPendingBills}" visible="{model.isFromPendingBills}"
+						toolTip="{id_POSTypes.selectedItem? 'Place of Service: ' + id_POSTypes.selectedItem.POSDescription:'Place of Service'}"
+						prompt="Place of Service" skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"  />
+			
+			<s:Label text="{selectedPOS.POSDescription}" verticalCenter="0" fontFamily="CalibriCFFBold"  fontSize="11" 
+					 width="100%" maxDisplayedLines="1" showTruncationTip="true" includeInLayout="{!model.isFromPendingBills}" visible="{!model.isFromPendingBills}"
+					 toolTip="{id_POSTypes.selectedItem? 'Place of Service: ' + id_POSTypes.selectedItem.POSDescription:'Place of Service'}"/>
+		</s:Group>
+	</s:VGroup>
+	
+</s:SkinnableContainer>

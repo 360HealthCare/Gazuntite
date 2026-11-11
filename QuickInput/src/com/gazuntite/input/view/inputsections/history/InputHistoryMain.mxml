@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:history="com.gazuntite.input.view.inputsections.history.*" 
+		 xmlns:chronic="com.gazuntite.input.view.inputsections.history.chronic.*" 
+		 xmlns:Immunization="com.gazuntite.input.view.inputsections.history.Immunization.*" 
+		 xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+		 xmlns:allergy="com.gazuntite.input.view.inputsections.history.allergy.*" 
+		 xmlns:supportclass1="com.gazuntite.input.view.supportclass.*"
+		 creationComplete="cc(event)"
+		 >
+	
+	<s:layout>
+		<s:HorizontalLayout	paddingLeft="0" paddingRight="0" paddingBottom="0" paddingTop="0"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]	public var viewModel:PatientInputPhysicalViewModel = PatientInputPhysicalViewModel.getInstance();
+			[Bindable]	private var NavItems:ArrayCollection = new ArrayCollection([{label:"Allergies", NavMainTitle:"History"}, {label:"Comprehensive HX"}, {label:"Chronic Medication"}, {label:"Immunization"} ]);
+			
+			
+			//TA - 7 oct, 2013
+			// Clear the Input Form in all section before new patient load
+			public function clearPMHInputForms():void
+			{
+				if(id_AllergyInputView)
+					id_AllergyInputView.clearAllergyInputView();
+				
+				if(id_ImmunizationInputView)
+					id_ImmunizationInputView.clearImmunizationInputView();
+				
+				if(id_chronicMedInputView)
+					id_chronicMedInputView.ClearChronicInputView();
+				
+				if(id_compInputView)
+					id_compInputView.ClearCompInputView();
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				addEventListener(SelectSection.SelectSelectionEvent,function (event:SelectSection):void
+				{
+					MoveToSection(event.SectionID);
+				});
+			}
+			
+			public function MoveToSection(Section_menuLabel:String):void
+			{
+				viewModel.selectedViewLabel = Section_menuLabel;
+				
+				if("Comprehensive HX" == Section_menuLabel && id_compInputView && id_compInputView.uiViewStack)
+					id_compInputView.uiViewStack.selectedIndex = 0;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<supportclass1:PatientSubViewContainer id="uiViewContainer" width="100%" height="100%">
+		<supportclass1:inputViews>
+			<supportclass1:FlipViewContainer menuLabel="Allergies">
+				<supportclass1:flipViews>
+					<allergy:AllergyInputView id="id_AllergyInputView" NavItems="{NavItems}"/>
+					<allergy:AllergyHistoryView NavItems="{NavItems}"/>
+				</supportclass1:flipViews>
+			</supportclass1:FlipViewContainer>
+			<supportclass1:FlipViewContainer menuLabel="Comprehensive HX" >
+				<supportclass1:flipViews>
+					<comprehensive:CompInputView id="id_compInputView" NavItems="{NavItems}"/>
+					<comprehensive:CompHistoryView id="id_compHistory" NavItems="{NavItems}"/>
+				</supportclass1:flipViews>
+			</supportclass1:FlipViewContainer>
+			<supportclass1:FlipViewContainer menuLabel="Chronic Medication">
+				<supportclass1:flipViews>
+					<chronic:ChronicInputView id="id_chronicMedInputView" NavItems="{NavItems}"/>
+					<chronic:ChronicHistoryView NavItems="{NavItems}"/>
+				</supportclass1:flipViews>
+			</supportclass1:FlipViewContainer>
+			<supportclass1:FlipViewContainer menuLabel="Immunization">
+				<supportclass1:flipViews>
+					<Immunization:ImmunizationInputView id="id_ImmunizationInputView" NavItems="{NavItems}"/>
+					<Immunization:ImmunizationHistoryView NavItems="{NavItems}"/>
+				</supportclass1:flipViews>
+			</supportclass1:FlipViewContainer>
+		</supportclass1:inputViews>
+	</supportclass1:PatientSubViewContainer>
+	
+</s:Group>

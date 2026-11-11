@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="32" height="32">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect includeIn="disabled,disabledAndSelected,up" x="0" y="0" width="32"
+			height="32" radiusX="5">
+		<s:fill>
+			<s:LinearGradient rotation="90"
+							  rotation.up="270">
+				<s:GradientEntry alpha="1.0" ratio="0"
+								 color.disabled="#999999"
+								 color.disabledAndSelected="#999999"
+								 color.up="#000000"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect includeIn="down,downAndSelected,over,overAndSelected,upAndSelected" x="0" y="0"
+			width="32" height="32" radiusX="5">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#511607" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D58674" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:BitmapImage x="5" y="10" smooth="true" source="@Embed('/assets/images/ePrescription/preview.png')"/>
+</s:Skin>

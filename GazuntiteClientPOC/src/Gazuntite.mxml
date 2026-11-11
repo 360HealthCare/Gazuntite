@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="init()" 
+					   xmlns:components="com.gazuntite.components.*" 
+					   xmlns:actionBars="com.gazuntite.view.actionBars.*"
+					   xmlns:sf="http://www.spicefactory.org/parsley" 
+					   showStatusBar="false"
+					   frameRate="24"
+					   xmlns:controls="com.gazuntite.view.controls.*" 
+					   xmlns:callouts="com.gazuntite.view.controls.callouts.*" 
+					   xmlns:email="com.zigron.provider.services.email.appController.*" 
+					   xmlns:sms="com.zigron.provider.services.sms.appController.*"
+					   xmlns:login="com.gazuntite.view.login.*"
+					   displayStateChange="windowedapplication1_displayStateChangeHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.view.controls.callouts.DoctorAddressSearchCallout;
+			import com.gazuntite.view.login.LoginView;
+			
+			import flash.events.NativeWindowBoundsEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.PopUpEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init():void
+			{
+				// Center main AIR app window on the screen
+				nativeWindow.x = 5;
+				nativeWindow.y = 25;
+				
+				this.width              = Capabilities.screenResolutionX / 2;
+				this.height          = Capabilities.screenResolutionY - 40;
+				
+				this.percentWidth = 50;
+				
+				// portrait layout
+				//this.width = Capabilities.screenResolutionX / 2;
+				//this.height = Capabilities.screenResolutionY - 50;
+				
+				// landscape layout
+				/* this.width = Capabilities.screenResolutionX * .8;
+				this.height = Capabilities.screenResolutionY * .9; */
+				
+				setApplicationVersion();
+				
+				addEventListener(MouseEvent.CLICK, handleMouseClick);
+				
+			}
+			
+			protected function minimizeWindow():void 
+			{
+				this.stage.nativeWindow.minimize();
+			}
+			
+			protected function maximizeWindow():void 
+			{
+				this.stage.nativeWindow.maximize();
+			}
+			
+			protected function closeWindow():void 
+			{
+				this.stage.nativeWindow.close();
+			}
+			
+			protected function moveWindow(event:MouseEvent):void 
+			{
+				this.stage.nativeWindow.startMove();
+			}    
+			
+			protected function handleMouseClick(event:MouseEvent):void
+			{
+				// new method to shut off ALL visible blue callouts
+				sharedModel.doctorSearchVisible = false;
+				sharedModel.doctorStatusVisible = false;	
+				sharedModel.patientProfileOptionsVisible = false;
+			}
+			
+			protected function setApplicationVersion():void 
+			{ 
+				var appXML:XML = NativeApplication.nativeApplication.applicationDescriptor; 
+				var ns:Namespace = appXML.namespace(); 
+				sharedModel.versionNumber = "VER " + appXML.ns::versionNumber;
+			}
+			
+			protected function windowedapplication1_displayStateChangeHandler(event:NativeWindowDisplayStateEvent):void
+			{
+				/* if( event.afterDisplayState == "maximized")
+				{
+					this.percentWidth = 100;
+					this.top = 5;
+				}
+				else
+				{
+					this.percentWidth = 50;
+				} */
+				
+				//this.percentWidth = 50;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:ContextBuilder config="Config"/>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+		
+		<email:EmailController />
+		<sms:SMSController />
+	</fx:Declarations>
+	
+	<fx:Style source="assets/styles/style.css"/>
+	<fx:Style source="assets/styles/AppLevelSkins.css"/>
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<!-- Main container -->
+	<s:SkinnableContainer id="mainContainer" 
+						  skinClass="com.gazuntite.skins.MainBGSkin" 
+						  width="100%" 
+						  height="100%">
+		
+		<s:layout>
+			<s:VerticalLayout paddingRight="5" 
+							  paddingLeft="5"
+							  paddingBottom="45"
+							  paddingTop="5"
+							  gap="0"/>
+		</s:layout>
+		
+		<!-- Patient Profile -->
+		<actionBars:CommunicationActionBar/>
+		
+		<!-- QI and VB -->
+		<s:SkinnableContainer width="100%" 
+							  height="100%"
+							  skinClass="com.gazuntite.skins.PatientExamSkin">
+			
+			<s:layout>
+				<s:VerticalLayout paddingRight="10" 
+								  paddingLeft="10"
+								  paddingBottom="0"
+								  paddingTop="10"
+								  gap="10"/>
+			</s:layout>
+			
+			<!-- Action bars -->
+			<!--<actionBars:ViewBackgroundActionBar/>
+			<actionBars:QuickInputActionBar/>-->
+			
+		</s:SkinnableContainer>
+		
+	</s:SkinnableContainer>
+	
+	<!-- These are all the callouts in the app. To make sure they're absolutely positioned, we put them on the entry point page -->
+	
+	<callouts:DoctorAddressSearchCallout id="doctorAddressSearchCallout" 
+										 top="25" 
+										 horizontalCenter="0"/>
+	
+	<callouts:DoctorStatusView id="statusView"
+							   width="240" 
+							   height="75"
+							   right="35"
+							   top="80"/>
+	
+	<callouts:PatientProfileOptionsCallout id="patientProfileOptionsCallout"
+										   right="5"
+										   top="140"/>
+	
+	<!-- Live Provider Service -->
+	<!--<actionBars:LiveProviderServiceActionBar left="7" right="7" bottom="10"/>-->
+	
+	<login:LoginView width="100%" 
+					 height="100%"
+					 visible="{!sharedModel.providerLoggedIn}"
+					 includeInLayout="{!sharedModel.providerLoggedIn}"/>
+	
+	<!-- Chrome buttons -->
+	<s:Group width="100%" 
+			 height="3">
+		
+		<s:Button mouseDown="moveWindow(event)" 
+				  alpha="0" 
+				  width="100%"
+				  height="3"/>
+		
+		<s:VGroup top="5" 
+				  right="5" 
+				  horizontalAlign="right"
+				  height="100%">
+			<s:HGroup gap="1">
+				<s:Button skinClass="com.gazuntite.skins.MinimizeBtnSkin"
+						  click="minimizeWindow()" useHandCursor="true"  buttonMode="true"
+						  toolTip="Minimize window"/>
+				<!--<s:Button skinClass="com.gazuntite.skins.MaximizeBtnSkin"
+				click="maximizeWindow()"
+				toolTip="Maximize window"/>-->
+				<s:Button skinClass="com.gazuntite.skins.CloseBtnSkin"
+						  click="closeWindow()" useHandCursor="true"  buttonMode="true"
+						  toolTip="Close window"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:Group>
+	
+</s:WindowedApplication>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 paddingLeft="6"
+		 creationComplete="onCreated(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			[Bindable]
+			public var viewModel:PatientInputViewModel = PatientInputViewModel.getInstance();
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+				/* this.stage.addEventListener(MouseEvent.MOUSE_DOWN, onStageClick); */
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						viewModel.showInputHistoryGuide = false;
+					}
+				});
+			
+			}
+			
+			/* protected function onStageClick(event:MouseEvent):void
+			{
+				if (!this.hitTestPoint(event.stageX, event.stageY))
+				{
+					viewModel.showInputHistoryGuide = false;
+				} 
+			}*/
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:SkinnableContainer 
+		width="100%" height="100%" 
+		skinClass="com.gazuntite.skins.controls.button.bar.GuideBarSkin" 
+		backgroundAlpha="0"
+		buttonMode="true" toolTip="Close Guide"
+		click="viewModel.showInputHistoryGuide = false"
+		>
+		<s:layout>
+			<s:VerticalLayout gap="6" verticalAlign="top" horizontalAlign="center"/>
+		</s:layout>
+		<s:HGroup width="100%"
+				  horizontalAlign="center" verticalAlign="middle" paddingTop="4" paddingBottom="4"
+				  >
+			<s:Label text="GUIDE" fontSize="17" fontFamily="CalibriCFFBold" fontWeight="bold" paddingTop="3" color="#FFFFFF"/>
+			<s:BitmapImage smooth="true" source="@Embed('/assets/images/arrows.png')" rotation="180">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#333333"
+										distance="1" hideObject="false" inner="false" knockout="false"
+										quality="3" strength="1"/>
+				</s:filters>
+			</s:BitmapImage>
+		</s:HGroup>
+	</s:SkinnableContainer>
+</s:HGroup>

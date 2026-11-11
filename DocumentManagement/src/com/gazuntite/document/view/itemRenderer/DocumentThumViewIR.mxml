@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.document.dto.DocomentDTO;
+			import com.gazuntite.document.view.event.DocomentPreviewEvent;
+			
+			[Bindable]	protected var tooltip:String;
+			
+			protected function image1_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new DocomentPreviewEvent(DocomentPreviewEvent.DOCOMENT_EVENT, data as DocomentDTO ,true));
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if(null != value)
+				{
+					tooltip = "Doc Name:        <b>" + data.DocumentName +"</b><br>Uploaded By:    <b>"+data.UploadedByUserFullName + "</b>";
+				}
+			}
+			
+			private function onMouseOver():void
+			{
+				id_Header.setStyle('borderColor', 0xF2910A);
+			}
+			private function onMouseOut():void
+			{
+				id_Header.setStyle('borderColor', 0xFFFFFF);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="id_Header" width="60" height="70" buttonMode="true" borderWeight="3" 
+					   mouseOver="onMouseOver()" mouseOut="onMouseOut()" borderColor="0xFFFFFF" cornerRadius="3" 
+					   >
+		<s:Image  source="@Embed('../assets/docimg.png')" 
+				  horizontalCenter="0" verticalCenter="0"
+				  width="54" height="63"
+				  click="image1_clickHandler(event)" toolTip="{tooltip}" 
+				  />
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*"
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc()"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.Allergy.AllergyDTO;
+			import com.gazuntite.common.event.QSAllergyEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import spark.events.DropDownEvent;
+			
+			[Bindable]	public var viewModel:PatientInputHistoryAllergyViewModel = PatientInputHistoryAllergyViewModel.getInstance();
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]  public var NavItems:ArrayCollection;
+			
+			protected function cc():void
+			{
+				//addEventListener(AllergyDeleteEvent.ALLERGY_DELETE_EVENT, onAllergyDeleteEvent);
+				addEventListener(PatientInputHistoryAllergyEvent.PATIENT_INPUT_ALLERGY_DELETE_EVENT, patientInputAllergyDeleteHandler, false, 0, true);
+			}
+			
+			private function patientInputAllergyDeleteHandler(event:PatientInputHistoryAllergyEvent):void
+			{
+				if (event.gaxenAllergyID != "")
+				{
+					UtilityFunctions.AskMessage("Do you want to delete selected Allergy ?", function():void
+					{
+						var IDsXml:XML = <DeleteAllergies  />
+						IDsXml.@GaxenAllergyIDS = "'"+ event.gaxenAllergyID +"'";
+						
+						callQSAllergyEvent(4, IDsXml, afterDelStatus);
+					});
+				}
+			}
+			
+			private function afterDelStatus(response:XML):void
+			{
+				if (UtilityFunctions.IsNotNullOrEmpty(model.patientDTO.GAXENID))
+				{
+					callQSAllergyEvent(2, model.patientDTO.GAXENID, callBackAllergy);
+				}
+			}
+			
+			private function callQSAllergyEvent(param1:int, param2:*, param3:Function = null):void
+			{
+				var alEvent:QSAllergyEvent = new QSAllergyEvent(param1, param2, param3);
+				CairngormEventDispatcher.getInstance().dispatchEvent( alEvent ); 
+			}
+			
+			private function callBackAllergy(arrAllergy:ArrayCollection):void
+			{
+				if(model.QIAllergyDTOList)
+					model.QIAllergyDTOList.removeAll();
+				else
+					model.QIAllergyDTOList = new ArrayCollection();
+				
+				model.QIAllergyDTOList.addAll(arrAllergy);
+				
+				for (var ser:Number = 0; ser<model.QIAllergyDTOList.length; ser++)
+				{
+					var allergy:AllergyDTO = model.QIAllergyDTOList.getItemAt(ser) as AllergyDTO;
+					allergy.seriesNumber = ser+1;
+				}
+				
+				if (model.QIAllergyDTOList.length > 0)
+				{					
+					var allergyDto:AllergyDTO = new AllergyDTO();
+					allergyDto			= model.QIAllergyDTOList.getItemAt(0) as AllergyDTO;
+					//TA - Set Third Section data && NKDA LAbel Flag
+					
+					if(!allergyDto.isNKDA)
+					{
+						model.AllergyNKDAFlag 	= false;
+					}
+					else if(allergyDto.isNKDA)
+					{
+						model.AllergyNKDAFlag 	= true;
+					}
+				}				
+			}
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				// TODO Auto-generated method stub
+				uiSortDropdown.dropDown.x = uiSortDropdown.x + 24 ; //add container left padding, should convert to global if we really want perfect
+			}
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.QIAllergyDTOList && model.QIAllergyDTOList.length)
+				{
+					switch (uiSortDropdown.selectedIndex)
+					{
+						case 0:
+							model.QIAllergyDTOList = UtilityFunctions.SortArrayCollection(model.QIAllergyDTOList,'OnSet',true,false);
+							break;
+						case 1: 
+							model.QIAllergyDTOList = UtilityFunctions.SortArrayCollection(model.QIAllergyDTOList,'AllergyName',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropdown)
+						uiSortDropdown.selectedIndex = 0;
+				}
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.QIAllergyDTOList" destination="DataList_changeHandler" />
+	
+	<s:layout>
+		<s:VerticalLayout	gap="0" paddingBottom="10"	/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" label="ALLERGIES" sectionNumber="1" maxSectionCounter="4" showHistoryPart="true"  
+									  MainSectionLabel="History"
+									  NextSectionLabel="Comprehensive HX"
+									  NavItems="{NavItems}"
+									  dictationNoteViewModel="{viewModel.allergyDictationNoteHistoryViewModel}"/>
+	<dictation2:PatientDictationNoteHistoryView width="100%"
+											   viewModel="{viewModel.allergyDictationNoteHistoryViewModel}"
+											   dictationNoteDataProvider="{model.allergyDictationNoteHistoryDTOList}"/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+				<s:DropDownList id="uiSortDropdown"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+								buttonMode="true"
+								selectedIndex="0"
+								toolTip="{uiSortDropdown.selectedItem.label}"
+								open="onSortDropdownOpen(event)"
+								change="SortDataList()"
+								>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Allergy Name" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%" />
+			</s:SkinnableContainer>
+			<s:List id="uiInboxList"
+					width="100%" allowMultipleSelection="true"
+					height="100%"
+					minHeight="50"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false"
+					dataProvider="{model.QIAllergyDTOList}"
+					visible="{model.visitCount > 0 ? true : false}" includeInLayout="{uiInboxList.visible}"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.allergy.AllergyListItemRenderer"/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

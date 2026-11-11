@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				creationComplete="init()">
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function init():void
+			{
+				setStyle("rollOverColor", 0x73A7F8);
+				setStyle("selectionColor", 0x6C8DF1);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="1" verticalAlign="middle" />
+	</s:layout>
+	
+	<s:Group   width="100%" toolTip="{'GenericName: '+ data.Product.GenericName + '  Strength: '+ data.STRENGTH_DESCRIPTION}" useHandCursor="true" buttonMode="true">
+		<s:Label text="{data.Drug.DrugName +' ('+ data.Product.GenericName+ ' )'+', '+ data.STRENGTH_DESCRIPTION}"  
+				 color.normal="#000000" 
+				 color.hovered="#FFFFFF" 
+				 color.selected="#FFFFFF" 
+				 fontFamily="CalibriCFF" fontSize="14" verticalAlign="middle" 
+				 maxDisplayedLines="1"  width="100%" left="5" right="5"/>
+	</s:Group>
+	
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xCCCCCC" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+</s:ItemRenderer>

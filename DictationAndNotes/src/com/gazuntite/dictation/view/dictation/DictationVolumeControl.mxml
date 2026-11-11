@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 width="28" height="21"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			
+			private var _Volume:Number = 0;
+			
+			public function get Volume():Number
+			{
+				return _Volume;
+			}			
+			
+			public function set Volume(value:Number):void
+			{
+				_Volume = value;
+				SetVolumeLevel();
+			}
+			
+			private function SetVolumeLevel():void
+			{
+				vol1.selected = true;
+				vol2.selected = true;
+				vol3.selected = true;
+				vol4.selected = true;
+				vol5.selected = true;
+				
+				if(_Volume <= 0)
+				{
+					vol1.selected = false;
+					vol2.selected = false;
+					vol3.selected = false;
+					vol4.selected = false;
+					vol5.selected = false;
+				}
+				else if(_Volume <= 20)
+				{
+					vol1.selected = true;
+					vol2.selected = false;
+					vol3.selected = false;
+					vol4.selected = false;
+					vol5.selected = false;
+				}
+				else if(_Volume <= 40)
+				{
+					vol1.selected = true;
+					vol2.selected = true;
+					vol3.selected = false;
+					vol4.selected = false;
+					vol5.selected = false;
+				}
+				else if(_Volume <= 60)
+				{
+					vol1.selected = true;
+					vol2.selected = true;
+					vol3.selected = true;
+					vol4.selected = false;
+					vol5.selected = false;
+				}
+				else if(_Volume <= 80)
+				{
+					vol1.selected = true;
+					vol2.selected = true;
+					vol3.selected = true;
+					vol4.selected = true;
+					vol5.selected = false;
+				}
+				else if(_Volume <= 100)
+				{
+					vol1.selected = true;
+					vol2.selected = true;
+					vol3.selected = true;
+					vol4.selected = true;
+					vol5.selected = true;
+				}
+			}
+			
+			protected function vol1_clickHandler(event:MouseEvent):void
+			{				
+				Volume = 20;	
+				dispatchEvent(new Event("setVolume", true ) );
+			}
+			
+			protected function vol2_clickHandler(event:MouseEvent):void
+			{			
+				Volume = 40;		
+				dispatchEvent(new Event("setVolume", true ) );
+			}
+			
+			protected function vol3_clickHandler(event:MouseEvent):void
+			{			
+				Volume = 60;	
+				dispatchEvent(new Event("setVolume", true ) );
+			}
+			
+			protected function vol4_clickHandler(event:MouseEvent):void
+			{			
+				Volume = 80;	
+				dispatchEvent(new Event("setVolume", true ) );
+			}
+			
+			protected function vol5_clickHandler(event:MouseEvent):void
+			{						
+				Volume = 100;	
+				dispatchEvent(new Event("setVolume", true ) );
+			}
+			
+			public function resetToDefault():void
+			{
+				if(Volume)
+					Volume = 60;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="State1"/>
+		<s:State name="State2"/>
+		<s:State name="State3"/>
+		<s:State name="State4"/>
+		<s:State name="State5"/>
+		<s:State name="Disabled"/>
+	</s:states>
+	
+	<s:Rect x="16" y="0" width="12" height="21">
+		<s:fill>
+			<s:SolidColor color="#000000"
+						  color.Disabled="#666666"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:ToggleButton id="vol1"
+					x="17" y="17" skinClass="com.gazuntite.skins.controls.button.patient.DictationVolumeButtonSkin"
+					selected.Disabled="false"
+					selected.State1="true"
+					selected.State2="true"
+					selected.State3="true"
+					selected.State4="true"
+					selected.State5="true" 
+					click="vol1_clickHandler(event)" buttonMode="true"/>
+	
+	<s:ToggleButton id="vol2" 
+					x="17" y="13" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationVolumeButtonSkin"
+					selected.Disabled="false"
+					selected.State1="false"
+					selected.State2="true"
+					selected.State3="true"
+					selected.State4="true"
+					selected.State5="true" 
+					click="vol2_clickHandler(event)" buttonMode="true"/>
+	
+	<s:ToggleButton id="vol3" 
+					x="17" y="9" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationVolumeButtonSkin"
+					selected.Disabled="false"
+					selected.State1="false"
+					selected.State2="false"
+					selected.State3="true"
+					selected.State4="true"
+					selected.State5="true" 
+					click="vol3_clickHandler(event)" buttonMode="true"/>
+	
+	<s:ToggleButton id="vol4" 
+					x="17" y="5" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationVolumeButtonSkin"
+					selected.Disabled="false"
+					selected.State1="false"
+					selected.State2="false"
+					selected.State3="false"
+					selected.State4="true"
+					selected.State5="true" 
+					click="vol4_clickHandler(event)" buttonMode="true"/>
+	
+	<s:ToggleButton id="vol5" 
+					x="17" y="1" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationVolumeButtonSkin"
+					selected.Disabled="false"
+					selected.State1="false"
+					selected.State2="false"
+					selected.State3="false"
+					selected.State4="false"
+					selected.State5="true" 
+					click="vol5_clickHandler(event)" buttonMode="true"/>
+	
+	<s:Path x="1.19" y="0.606" width="10" height="20"
+			data="M 16.21 18.77 L -0.02 9.40 16.21 0.03 Z ">
+		<s:fill>
+			<s:SolidColor color="#000000"
+						  color.Disabled="#666666"/>
+		</s:fill>
+	</s:Path>
+	<s:Rect x="0" y="7" width="6" height="8">
+		<s:fill>
+			<s:SolidColor color="#000000"
+						  color.Disabled="#666666"/>
+		</s:fill>
+	</s:Rect>	
+	
+</s:Group>

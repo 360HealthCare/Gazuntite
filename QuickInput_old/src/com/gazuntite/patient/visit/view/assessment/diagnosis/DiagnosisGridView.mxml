@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc()" 
+		 preinitialize="preInitialize()" 
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*"
+		 xmlns:itemEditors1="com.gazuntite.patient.visit.view.commons.itemEditors.*" 
+		 xmlns:validators="com.gazuntite.common.util.validators.*" 
+		 xmlns:itemEditors2="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YY" />
+		<validators:ComboValidator id="comboValidator"/>
+	</fx:Declarations>
+	<fx:Binding source="model.patientDiagnosisDTOListByPatientId" destination="diagnosisCollection" />
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.itemEditors.SparkComboBoxItemEditor;
+			import com.gazuntite.controls.extended.components.LabelComboBox;
+			import com.gazuntite.patient.visit.dto.PatientDiagnosisDTO;
+			import com.gazuntite.patient.visit.event.assessment.diagnosis.LoadDiagnosisICDCodeEvent;
+			import com.gazuntite.patient.visit.event.assessment.diagnosis.ManagePatientDiagnosisEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.view.commons.itemEditors.SparkDateFieldEditor;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Label;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.core.UIComponent;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.DataGridEvent;
+			import mx.events.ValidationResultEvent;
+			
+			import spark.components.supportClasses.ItemRenderer;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _diagnosisCollection:ArrayCollection;
+			
+			[Bindable]
+			public var deleteColumnData:Object;
+			
+			private var _hasViewChanged:Boolean;
+			private var _hasGridChanged:Boolean;
+			
+			private function cc():void
+			{
+				id_DiagnosisGrid.addEventListener(DataGridActionsEvent.SAVE_RECORD_CLICK, saveRecordClickHandler, false, 0, true);
+				id_DiagnosisGrid.addEventListener(DataGridActionsEvent.EDIT_RECORD_CLICK, editRecordClickHandler, false, 0, true);
+				id_DiagnosisGrid.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true);
+				
+				
+				id_DiagnosisGrid.addEventListener(DataGridEvent.ITEM_EDIT_BEGIN, diagnosisGridItemEditBeginHandler, false, 0, true);
+				id_DiagnosisGrid.addEventListener(DataGridEvent.ITEM_EDIT_END, diagnosisGridItemEditEndHandler, false, 0, true);
+				
+				id_DiagnosisGrid.addEventListener(Event.CHANGE, dataGridProviderChangeHandler, false, 0, true);
+				id_DiagnosisGrid.addEventListener(DataGridActionsEvent.ITEM_EDIT_KEY_UP, itemEditKeyUpHandler, false, 0, true);
+			}
+			
+			private function preInitialize():void
+			{
+				if (!deleteColumnData)
+					deleteColumnData = {};
+				
+				deleteColumnData["noteDataFields"] = {subject: "NoteSubject", note: "Note", header: "IcdDto.IcdCodeDescription"};
+				deleteColumnData["dictationDataField"] = "DictationID";
+				deleteColumnData["recordIDField"] = "ID";
+				deleteColumnData["section"] = QIPopUpManager.DIAGNOSIS;
+			}
+			
+			private function saveRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var patientDiagnosisDTO:PatientDiagnosisDTO;
+				
+				if (event.data is PatientDiagnosisDTO)
+					patientDiagnosisDTO = event.data as PatientDiagnosisDTO;
+				
+				if (!patientDiagnosisDTO)
+					return;
+				
+				if (!patientDiagnosisDTO.IsDirty)
+					return;
+				
+				if (model && model.patientDiagnosisDTOListByPatientId)
+				{
+					model.patientDiagnosisDTOListByPatientId.removeAll();
+					model.patientDiagnosisDTOListByPatientId.addAll(diagnosisCollection);
+					
+					var mpdEvent : ManagePatientDiagnosisEvent = new ManagePatientDiagnosisEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( mpdEvent );
+					
+					id_DiagnosisGrid.editable = false;
+				}
+			}
+			
+			private function editRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var patientDiagnosisDTO:PatientDiagnosisDTO;
+				
+				if (event.data is PatientDiagnosisDTO)
+					patientDiagnosisDTO = event.data as PatientDiagnosisDTO;
+				
+				if (!patientDiagnosisDTO)
+					return;
+				
+				if (!patientDiagnosisDTO.IsRecordEditable)
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+				
+				var rowIndex:int = findRecordNumber(patientDiagnosisDTO);
+				
+				id_DiagnosisGrid.editable = true;
+				var itemToSetInEditableMode:IListItemRenderer = id_DiagnosisGrid.indexToItemRenderer(rowIndex);
+				var ev:DataGridEvent 	= new DataGridEvent(DataGridEvent.ITEM_EDIT_BEGINNING, true);
+				ev.columnIndex 			= 2;
+				ev.rowIndex 			= rowIndex;
+				ev.itemRenderer 		= itemToSetInEditableMode;
+				ev.dataField 			= "OnSet";
+				id_DiagnosisGrid.dispatchEvent(ev);
+			}
+			
+			private function findRecordNumber(patientDiagnosisDTO:PatientDiagnosisDTO):int
+			{
+				var rowIndex:int = -1;
+				
+				if (!patientDiagnosisDTO)
+					return rowIndex;
+				
+				
+				if (!id_DiagnosisGrid.dataProvider)
+					return rowIndex;
+				
+				for (var i:uint=0; i < id_DiagnosisGrid.dataProvider.length; i++)
+				{
+					if (patientDiagnosisDTO == id_DiagnosisGrid.dataProvider[i])
+					{
+						rowIndex = i;
+						break;
+					}
+				}
+				
+				if (rowIndex >= id_DiagnosisGrid.dataProvider.length)
+					rowIndex = -1;
+				
+				return rowIndex;
+			}
+			
+			private function deleteRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var patientDiagnosisDTO:PatientDiagnosisDTO;
+				
+				if (event.data is PatientDiagnosisDTO)
+					patientDiagnosisDTO = event.data as PatientDiagnosisDTO;
+				
+				if (!patientDiagnosisDTO)
+					return;
+				
+				UtilityFunctions.AskMessage(  "Do you want to delete selected record", function():void
+				{
+					patientDiagnosisDTO.IsDeleted = true;
+					patientDiagnosisDTO.IsDirty = true;
+					
+					hasViewChanged = _hasGridChanged = true;
+					
+					var mpdEvent : ManagePatientDiagnosisEvent = new ManagePatientDiagnosisEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( mpdEvent );
+				});
+			}
+			
+			private function dataGridProviderChangeHandler(event:Event):void
+			{
+				if (!id_DiagnosisGrid.dataProvider)
+					return;
+				
+				if (!id_DiagnosisGrid.dataProvider.hasOwnProperty("length"))
+					return;
+				
+				
+				var recordsCount:int = id_DiagnosisGrid.dataProvider.length;
+				
+				if (recordsCount > 10)
+				{
+					id_DiagnosisGrid.rowCount = 10;
+					id_DiagnosisGrid.verticalScrollPolicy = "on";
+				}
+				else
+				{
+					id_DiagnosisGrid.rowCount = id_DiagnosisGrid.dataProvider.length;
+					id_DiagnosisGrid.verticalScrollPolicy = "off";
+				}
+			}
+			
+			private function itemEditKeyUpHandler(event:DataGridActionsEvent):void
+			{
+				
+				var lblFld:String = event.dataField;
+				var ldicd:LoadDiagnosisICDCodeEvent;
+				var searchStr:String = event.searchString;
+				
+				if (searchStr.length == 3 )
+				{
+					if (lblFld == "IcdDto.IcdCodeName")
+					{
+						ldicd = new LoadDiagnosisICDCodeEvent(searchStr);
+					}
+					else if (lblFld == "IcdDto.IcdCodeDescription")
+					{
+						ldicd = new LoadDiagnosisICDCodeEvent(searchStr);
+					}
+					
+					if (ldicd)
+						CairngormEventDispatcher.getInstance().dispatchEvent(ldicd);
+				}
+				
+			}
+			
+			private function diagnosisGridItemEditBeginHandler(event:DataGridEvent):void
+			{
+				if( event.itemRenderer.data && !event.itemRenderer.data.IsRecordEditable )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					id_DiagnosisGrid.destroyItemEditor();
+					return;
+				}
+				
+				id_DiagnosisGrid.createItemEditor(event.columnIndex, event.rowIndex);
+			}
+			
+			private function diagnosisGridItemEditEndHandler(event:DataGridEvent):void
+			{
+				if (!id_DiagnosisGrid.itemEditorInstance || !id_DiagnosisGrid.selectedItem )
+					return;
+				
+				var validationRes:ValidationResultEvent;
+				var editable:Boolean = PatientDiagnosisDTO(id_DiagnosisGrid.selectedItem).IsRecordEditable;
+				
+				if( editable == false )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					id_DiagnosisGrid.destroyItemEditor();
+				}
+				
+				var dateEditorInstance:SparkDateFieldEditor;
+				
+				if (event.dataField == "OnSet")
+				{
+					dateEditorInstance = event.target.itemEditorInstance as SparkDateFieldEditor;
+					if (dateEditorInstance && event.itemRenderer && event.itemRenderer.data && event.itemRenderer.data.hasOwnProperty("OnSet"))
+					{
+						event.itemRenderer.data.OnSet = dateEditorInstance.text;
+					}
+					
+					event.itemRenderer.data.IsDirty = true;
+					
+					hasViewChanged = _hasGridChanged = true;
+				}
+				
+				else if (event.dataField == "IcdDto.IcdCodeName" || event.dataField == "IcdDto.IcdCodeDescription")
+				{
+					var editor:LabelComboBox = SparkComboBoxItemEditor(id_DiagnosisGrid.itemEditorInstance).id_ComboEditor;
+					
+					comboValidator.error = "Invalid diagnosis";
+					comboValidator.source = editor;
+					comboValidator.property = "selectedItem";
+					
+					validationRes = comboValidator.validate(editor.selectedItem);
+					
+					if (validationRes && !validationRes.results)
+					{
+						event.itemRenderer.data.IcdDto = editor.selectedItem;
+						event.itemRenderer.data.IcdDto.IcdCodeName = editor.selectedItem.IcdCodeName;
+						event.itemRenderer.data.IsDirty = true;
+						
+						hasViewChanged = _hasGridChanged = true;
+					}
+				}
+				
+				else if (event.dataField == "IsChronic")
+				{
+					/*event.itemRenderer.data.IsChronic = YesNoItemEditor(id_DiagnosisGrid.itemEditorInstance).isYes;
+					
+					event.itemRenderer.data.IsDirty = true;*/
+					
+					hasViewChanged = _hasGridChanged = true;
+				}
+				
+				id_DiagnosisGrid.destroyItemEditor();
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			[Bindable]
+			public function get diagnosisCollection():ArrayCollection
+			{
+				return _diagnosisCollection;	
+			}
+			
+			public function set diagnosisCollection(value:ArrayCollection):void
+			{
+				if (_diagnosisCollection)
+					_diagnosisCollection.removeAll();
+				
+				_diagnosisCollection = null;
+				_diagnosisCollection = new ArrayCollection();
+				
+				_diagnosisCollection.addAll(model.patientDiagnosisDTOListByPatientId);
+				
+				if (_diagnosisCollection && _diagnosisCollection.length > 0)
+				{	
+					hasViewChanged = true;
+				}
+				
+				if( value.length > 0 )
+				{
+					hasViewChanged = _hasGridChanged = true;
+				}
+			}
+			
+			public function displayRowNum(oItem:Object,iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_DiagnosisGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			public function displayVisitDate(oItem:Object,iCol:int):String
+			{
+				var strVisitDate:String = '';
+				
+				if (oItem && oItem.VisitDate)
+				{
+					var dateRecieved:Date = new Date(Date.parse(oItem.VisitDate));
+					strVisitDate = formatDateTime.format(dateRecieved);
+					var nullDate:Date = Constants.NULL_DATE;
+					
+					if (dateRecieved.getFullYear() <= nullDate.getFullYear() && dateRecieved.getMonth() <= nullDate.getMonth())
+						strVisitDate = "";
+					
+					if(oItem.IsNA)
+						strVisitDate = 'N/A';
+				}
+				return strVisitDate;
+			}
+			
+			public function chronicLabelFunction(oItem:Object,iCol:int):String
+			{
+				var label:String = ""; 
+				if (oItem.hasOwnProperty("IsChronic"))
+				{
+					if (oItem.IsChronic)
+						label = "Yes";
+					else
+						label = "No";
+				}
+				
+				return label;
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+		]]>
+	</fx:Script>
+	<components1:LabelDataGrid id="id_DiagnosisGrid"
+							  rowCount="{id_DiagnosisGrid.dataProvider.length ? id_DiagnosisGrid.dataProvider.length + 1 :  1}"
+							  width="100%" minHeight="70" maxHeight="250" editable="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+							  columnWidths="{[25, '13%', '15%', '15%', '25%', '12%', 100]}"
+							  visible="{id_DiagnosisGrid.dataProvider.length > 0? true: false}" includeInLayout="{id_DiagnosisGrid.dataProvider.length > 0? true: false}"
+							  dataProvider="{diagnosisCollection}">
+		<components1:columns>
+			
+			<mx:DataGridColumn headerText="Sr.#" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" editable="false" labelFunction="displayRowNum" />
+			<mx:DataGridColumn headerText="Visit Date" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="VisitDate" editable="false" labelFunction="displayVisitDate"/>
+			<mx:DataGridColumn headerText="On Set" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="OnSet" editorDataField="text" >
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors1:SparkDateFieldEditor width="100%" dateField="OnSet" selectableRange="{{rangeEnd : new Date()}}" editable="true" yearNavigationEnabled="true"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="ICD Code" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="IcdDto.IcdCodeName" editorDataField="editorText">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors2:SparkComboBoxItemEditor width="100%" labelField="IcdCodeName" isFieldRequired="true" 
+															 dataProvider="{outerDocument.model.icdCodeDTOList}"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Diagnosis"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="IcdDto.IcdCodeDescription" editorDataField="editorText" >
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors2:SparkComboBoxItemEditor width="100%" labelField="IcdCodeDescription" isFieldRequired="true" 
+															 dataProvider="{outerDocument.model.icdCodeDTOList}"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Chronic" dataField="IsChronic"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" editorDataField="isYes" labelFunction="chronicLabelFunction">
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor height="100%" property="IsChronic"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<commons:DataGridColumnEx headerText="" editable="false" data="{deleteColumnData}" dataField="Note" property="ID" section="{QIPopUpManager.DIAGNOSIS}" itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DeleteRecordRenderer" />
+		</components1:columns>
+	</components1:LabelDataGrid>
+</s:Group>

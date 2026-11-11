@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:extended="com.adobe.Quivus.view.controls.extended.*" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="popupgroup1_creationCompleteHandler(event)"
+					   >
+	<fx:Metadata>
+		[Event(name="PatientSelected", type="com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent")]
+		[Event(name="CloseSearchBox", type="mx.events.CloseEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		
+	</fx:Script>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.provider.search.services.patient.model.SearchPatientModelLocator;
+			import com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : SearchPatientModelLocator = SearchPatientModelLocator.getInstance();
+			
+			private var m_sSearchString:String
+			
+			
+			public function get SearchString():String
+			{
+				return m_sSearchString;
+			}
+			
+			public function set SearchString(value:String):void
+			{
+				m_sSearchString = value;
+			}
+			
+			public function closeHandler( event:MouseEvent = null ):void
+			{
+				//this.removePopup();
+				id_outValue.text = '';
+				var e:CloseEvent = new CloseEvent( "CloseSearchBox", true );
+				dispatchEvent( e );
+			}
+			
+			public function getListLength():Number{
+				
+				if(id_SearchList && id_SearchList.dataProvider.length < 5)
+				{
+					trace( "list hieght: " + id_SearchList.dataProvider.length * 10);
+					return id_SearchList.dataProvider.length * 10;					
+				}
+				else
+				{
+					return 115;
+				}
+			} 
+			
+			public function refreshList(query:String):void
+			{
+				if( null == model.SearchPatientResults ) 
+				{
+					trace("model.SearchPatientResults is null");
+					return;
+				}
+				SearchString = query;
+			}
+			
+			public function setListHeight():void
+			{
+				
+				/* if(id_SearchList && id_SearchList.dataProvider && id_SearchList.dataProvider.length < 5)
+				{
+					trace( "list hieght: " + id_SearchList.dataProvider.length * 25);
+					id_SearchList.height= id_SearchList.dataProvider.length * 25;
+					id_listBorder.height = (id_SearchList.dataProvider.length * 25) + 15;
+				}
+				else
+				{
+					id_SearchList.height= 115;
+					id_listBorder.height = 130;
+				} */
+			}
+			
+			protected function id_SearchList_creationCompleteHandler(event:FlexEvent):void
+			{
+			//	setListHeight();
+				
+				id_SearchList.setStyle("useRollOver", true);
+				id_SearchList.setStyle("backgroundColor", 0xFFFFFF );
+				id_SearchList.setStyle( "rollOverColor", 0xF7C174 );
+				id_SearchList.setStyle( "textRollOverColor", 0x333333 );
+				id_SearchList.setStyle( "selectionColor", 0x7c632c ); 
+			}
+			
+			private function filterForData(item:Object):Boolean
+			{
+				var retValue:Boolean;
+				var arr:Array;
+				var dto:PatientDTO = item as PatientDTO;
+				
+				if( SearchString.indexOf( ',' ) != -1 )
+				{
+					arr = SearchString.split( "," );
+				}
+				else if ( SearchString.indexOf( ' ' ) != -1 ) // its a Name 
+				{
+					arr = SearchString.split( ' ' );
+				}
+				
+				if( ! UtilityFunctions.IsNullOrEmpty( arr ) )
+				{
+					var i:int;
+					var token:String;
+					for( i = 0; i < arr.length; i++ )
+					{
+						token = arr[1];
+						retValue = filterPatient( dto, token );
+					}
+				}
+				else if( SearchString )
+				{
+					retValue = filterPatient( dto, SearchString )
+				}
+				/* else
+				{
+				return true;
+				} */
+				
+				return retValue;
+			}
+			
+			private function filterPatient( dto:PatientDTO, criteria:String ):Boolean
+			{
+				var retValue:Boolean;
+				if(retValue == false && dto.FirstName!=null && dto.FirstName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.LastName!=null && dto.LastName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.MiddleName!=null && dto.MiddleName.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.QuivusID!=null && dto.QuivusID.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				if(retValue == false && dto.SSN!=null && dto.SSN.toLowerCase().search( criteria.toLowerCase() ) != -1 )
+				{
+					retValue = true;
+				}
+				
+				trace("PatientSearchList::filterPatient -- > retValue =", retValue, "Patient Name: ", dto.FullName );
+				return retValue;
+			}
+			
+			protected function id_SearchList_clickHandler(event:MouseEvent):void
+			{
+				if( event.target.id == "id_PatientSearchRenderer" || 
+					event.target.id == "id_Name" || 
+					event.target.id == "id_DOB" )
+				{
+					setOutValue();
+					
+					var evt:PatientSelectedEvent = new PatientSelectedEvent( PatientSelectedEvent.PATIENT_SELECTED );
+					this.dispatchEvent( evt );
+					closeHandler(); 
+				}
+				
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				/*  FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+				{
+					closeHandler()
+				});  */
+			}
+			
+			protected function id_OK_clickHandler(event:MouseEvent):void
+			{
+				/* var evt:PatientSelectedEvent = new PatientSelectedEvent( PatientSelectedEvent.PATIENT_SELECTED );
+				this.dispatchEvent( evt );
+				closeHandler();  */
+				
+			}
+			
+			protected function id_SearchList_valueCommitHandler(event:FlexEvent):void
+			{
+				setOutValue();
+			}
+			
+			private function setOutValue():void
+			{
+				if( null != id_SearchList.selectedItem )
+				{
+					id_outValue.text = id_SearchList.selectedItem.FirstName; 
+					id_outValue.text += " "+ id_SearchList.selectedItem.MiddleName; 
+					id_outValue.text += " "+ id_SearchList.selectedItem.LastName;
+					id_outValue.text += "    "+ id_df.format(id_SearchList.selectedItem.DOB);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="id_df" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingTop="0" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.PatientSearchListSpinnerBG" >
+		<s:layout>
+			<s:VerticalLayout gap="3" verticalAlign="top" horizontalAlign="left" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+		</s:layout>
+			
+			<s:List id="id_SearchList"
+					width="100%" height="82" left="7" right="7" top="10" bottom="24"
+					dataProvider="{model.SearchPatientResults.Patients}" borderVisible="false"
+					click="id_SearchList_clickHandler(event)" 
+					valueCommit="id_SearchList_valueCommitHandler(event)"
+					creationComplete="id_SearchList_creationCompleteHandler(event)" 
+					skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+					itemRenderer="com.gazuntite.provider.search.services.patient.view.search.itemRenderer.PatientSearchListRenderer" 
+					/>	
+		
+		<s:Group width="100%" visible="false" includeInLayout="false">
+			<s:Label id="id_outValue" text="# of Rec(s) : {model.SearchPatientResults.Patients.length}" fontFamily="CalibriCFF" fontSize="13" color="#FFFFFF" right="50" left="0" maxDisplayedLines="1" verticalCenter="0"/>
+			
+			<s:Button id="id_OK" 
+					  click="id_OK_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton" 
+					  toolTip="Select Patient" verticalCenter="0" right="25"/>
+			<s:Button id="id_CloseBtn" 
+					  click="closeHandler(event)"
+					 buttonMode="true" useHandCursor="true" toolTip="Close Patient Search" right="0" verticalCenter="0"  
+					 skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"/>
+		</s:Group>
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

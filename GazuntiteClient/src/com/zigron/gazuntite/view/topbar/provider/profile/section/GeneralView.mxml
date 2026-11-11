@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.ProfileContainerSkin" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]
+			protected var labelWidth:Number = 150;
+			
+			[Bindable]
+			protected var formGap:Number = 8;
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingTop="0" verticalAlign="top" gap="10" />
+	</s:layout>
+	
+	<s:Scroller width="100%" height="100%" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">	
+		<s:VGroup width="100%" paddingTop="16" verticalAlign="top" gap="10" >
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="First Name:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.FirstName}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Middle Name:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.MiddleName}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Last Name:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.LastName}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Email:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.UserEmail}" styleName="profileFormText" width="100%" color="#0000FF"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="User ID:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.userID == 0 ? '':model.SearchProviderDetailsResults.userID}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Address:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.Address}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Web:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.HomePage}" styleName="profileFormText" width="100%" color="#0000FF"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Notes:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.Notes}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Map:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.GMapPage}" styleName="profileFormText" width="100%" color="#0000FF"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" styleName="profileFormItemContainer" gap="{formGap}">
+				<s:Label text="Last Updated on:" styleName="profileFormLabel" width="{labelWidth}" textAlign="right"/>
+				<s:Label text="{model.SearchProviderDetailsResults.LastUpdated}" styleName="profileFormText" width="100%"/>
+			</s:HGroup>
+			
+			
+		</s:VGroup>
+	</s:Scroller>
+	
+
+</s:SkinnableContainer>

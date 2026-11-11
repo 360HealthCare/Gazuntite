@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:components="com.gazuntite.controls.extended.components.*"
+				   xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+				   creationComplete="cc(event)"
+				   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.eprescription.services.patient.dto.MedicineDTO;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.MedicineSelectedEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			
+			private var _selectedMedicine:MedicineDTO;
+			
+			[Bindable]
+			public function get selectedMedicine():MedicineDTO
+			{
+				return _selectedMedicine;
+			}
+			
+			public function set selectedMedicine(value:MedicineDTO):void
+			{
+				_selectedMedicine = value;
+				toggleView();
+				/*  if(value)
+				dispatchEvent(new FlipViewEvent());  */
+			}
+			
+			
+			private function toggleView():void
+			{
+				var toggleView:Boolean = id_selectMedicineVS.selectedIndex == 0;
+				
+				if( null != selectedMedicine && toggleView)
+				{
+					id_selectMedicineVS.selectedIndex = 1;
+				}
+				else
+				{
+					id_selectMedicineVS.selectedIndex = 0;
+				}
+			}
+			
+			protected function selectionView_clickHandler(event:MouseEvent):void
+			{
+				toggleView();
+			}
+			
+			protected function whenMedicineSelected(event:MedicineSelectedEvent):void
+			{
+				selectedMedicine = event.selection as MedicineDTO;
+				
+				toggleView();
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					
+					id_medicineInputView.clearSearchResults();
+					
+					if(null != selectedMedicine)
+					{
+						id_selectMedicineVS.selectedIndex = 1;
+					}
+					else
+					{
+						id_selectMedicineVS.selectedIndex = 0;
+					}
+					
+					/* if(null != selectedMedicine)
+					{
+						id_medicineInputView.clearSearchResults();	
+						id_selectMedicineVS.selectedIndex = 1;
+					} */
+				});				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:LabelViewStack id="id_selectMedicineVS" width="100%" height="100%"  borderVisible="false" backgroundAlpha="0">
+		<s:ArrayList>
+			<newrx:SearchMedicationView id="id_medicineInputView" width="100%" height="100%" click="selectionView_clickHandler(event)" MedicineSelected="whenMedicineSelected(event)" />
+			
+			<s:Group width="100%" height="100%" click="selectionView_clickHandler(event)" 
+							   toolTip="{'med '+ selectedMedicine.Drug.DrugName +' ('+ selectedMedicine.Product.GenericName +'), '+ selectedMedicine.STRENGTH_DESCRIPTION}"
+							   >
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="5"/>
+				</s:layout>
+				
+				<s:Label text="med "  fontWeight="bold" fontFamily="CalibriCFFBold" fontSize="15" color="#666666"/>
+				<s:Label text="{selectedMedicine.Drug.DrugName +' ('+ selectedMedicine.Product.GenericName +'), '+ selectedMedicine.STRENGTH_DESCRIPTION}"
+						 fontWeight="bold" fontFamily="CalibriCFFBold" 
+						 fontSize="15" width="100%"  color="#000000" maxDisplayedLines="1" />
+			</s:Group>
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+</s:Group>

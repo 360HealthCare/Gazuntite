@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="21" height="21">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="20" radiusX="3" width="20" visible.over="false" visible.down="false" x="0.5" y="0.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#666666" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#D9D9D9" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="20" includeIn="down,over,up" radiusX="3" width="20" visible.up="false" x="0.5" y="0.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#454545" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#565656" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#292929" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#737373" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#999999" inner="true" knockout="false" quality="3" strength="1" includeIn="up"/>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="2" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="94.39870535499551"/>
+		</s:filters>
+	</s:Rect>
+	<s:Ellipse x="6" y="6" width="10" height="10">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#EF222F" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#8C1111" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Ellipse>
+</s:Skin>

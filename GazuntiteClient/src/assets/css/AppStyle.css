@@ -1,0 +1,362 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+global 
+{
+	modal-transparency        : 0;
+	modal-transparency-blur	  : 0.5;
+	focusColor 				  : #007FFF; 
+	focusThickness			  : 2;
+	/*focusedTextSelectionColor : #FFFFFF; */
+}
+
+/* ----------Start------------- Alert Global Skin --------------------------------- */
+.infoTip 
+{ 
+	color				: #FFFFFF; 
+	fontSize			: 11; 
+	shadowColor			: #000000; 
+	borderColor			: #16871B; 
+	borderStyle			: "errorTipAbove"; /* "errorTipRight", "errorTipAbove", or "errorTipBelow" */
+	paddingBottom		: 4; 
+	paddingLeft			: 8; 
+	paddingRight		: 8; 
+	paddingTop			: 4; 
+	textAlign 			: center;
+}
+.errorString
+{
+	color 			: #FF2A00;
+	fontFamily 		: CalibriCFF;
+	fontSize 		: 13;
+}
+
+mx|Alert
+{
+	buttonStyleName		: "alertButtonStyle" ;
+	messageStyleName	: "alertMessage";
+	backgroundColor		: #F6F6F6;
+	borderVisible		: false;
+	cornerRadius		: 8;
+	titleStyleName		: "alertTitleBar" ;
+	titleBackgroundSkin	: ClassReference("com.gazuntite.skins.controls.alert.TitleBackground");
+	dropShadowVisible	: true;
+}
+
+.alertTitleBar
+{
+	color				:  #ffffff;
+	fontFamily			: CalibriCFFDateField;
+	fontSize			: 13;
+}
+.alertButtonStyle
+{
+	letterSpacing		: 0;
+	fontSize			: 15;
+	cornerRadius		: 5;
+	textRollOverColor	: #ffffff;
+	color				: #ffffff;
+	skin				: ClassReference("com.gazuntite.skins.controls.alert.AlertButtonSkin");
+	emphasizedSkin		: ClassReference("com.gazuntite.skins.controls.alert.AlertButtonSkin");
+}
+
+.alertMessage 
+{
+	letterSpacing	: 0;
+	fontSize		: 13;
+	fontWeight		: normal;
+	color			: #000000;
+	fontFamily		: CalibriCFFDateField;
+	kerning			: on; 
+}
+/* ---------------- END ------- Alert Global Skin --------------------------------- */
+
+@font-face
+{
+	src : url("assets\fonts\CALIBRI.TTF") ;
+	fontFamily : CalibriCFF ;
+	embedAsCFF : true ;
+}
+
+
+@font-face
+{
+	src : url("assets\fonts\CALIBRI.TTF") ;
+	fontFamily : CalibriCFFDateField ;
+	embedAsCFF : false ;
+}
+@font-face
+{
+	src : url("assets\fonts\CALIBRIB.TTF") ;
+	fontFamily : CalibriCFFBold ;
+	embedAsCFF : true ;
+	
+}
+/* QI Record Title Style Name */
+.qiRecordTitle
+{
+	color 			: #333333; 
+	fontFamily		: CalibriCFF;	 
+	fontSize		: 14;
+	fontWeight		: normal;
+	fontSharpness 	: 1;
+}
+/* White Label Style Name */
+.whiteTitle
+{
+	color 			: #FFFFFF; 
+	fontFamily		: CalibriCFF;	 
+	fontSize		: 14;
+	fontWeight		: normal;
+	fontSharpness 	: 1;
+}
+.gazuntiteTitleSmall
+{
+	fontSize: 12px;
+	fontSharpness : 1;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #ffffff;
+}
+
+.drName
+{
+	paddingTop: 4px;
+	paddingLeft: 5px;
+	fontSize: 17px;
+	fontSharpness : 1;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #ffffff;
+	typographicCase: uppercase;/*capsToSmallCaps, default, lowercase, lowercaseToSmallCaps, uppercase */
+	
+}
+.patientName
+{
+	paddingTop: 4px;
+	paddingLeft: 5px;
+	fontSize: 20px;
+	fontSharpness : 1;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #ffffff;
+	/*typographicCase: uppercase;capsToSmallCaps, default, lowercase, lowercaseToSmallCaps, uppercase */
+	
+}
+.patientListItem
+{
+	fontSize: 14px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #333333;
+}
+.patientListItemSelected
+{
+	fontSize: 14px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #ffffff;
+}
+.patientListItemEmail
+{
+	fontSize: 12px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #666666;
+	textAlign:left;
+}
+.patientListItemEmailSelected
+{
+	fontSize: 12px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #ffffff;
+	textAlign:left;
+}
+.patientNameTitle
+{
+	fontSize: 16px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: bold;
+	color: #000000;
+}
+.patientNameSubTitle
+{
+	fontSize: 14px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #000000;
+}
+
+.patientFormLabel
+{
+	fontSize: 13px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: normal;
+	color: #000000;
+}
+.patientFormValue
+{
+	fontSize: 13px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #4B4B4B;
+}
+.patientFormText
+{
+	fontSize: 13px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #000000;
+}
+.hudViewTitle
+{
+	fontSize: 15px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: bold;
+	color: #333333;
+}	
+.hudViewSubTitle
+{
+	fontSize: 15px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: bold;
+	color: #294C6F;
+}
+
+.mainView
+{
+	cornerRadius:5px;
+	borderWeight:5px;
+	borderColor:#3194BE;
+	backgroundColor:#3194BE;
+}
+
+.communicationButtonSkin
+{
+	skinClass:ClassReference("com.gazuntite.skins.controls.button.EMailButtonSkin")
+}
+
+.emailInput
+{
+	skinClass:ClassReference("com.gazuntite.skins.controls.text.EmailFieldSkin")
+}
+.emailContent
+{
+	skinClass:ClassReference("com.gazuntite.skins.controls.text.EMailContentSkin")
+}
+
+.gradientGreyExtendedHeaderBGContainerSkin
+{
+	skinClass:ClassReference("com.gazuntite.skins.controls.container.EMailHeaderContainerSkin")
+}
+
+.emailOption
+{
+	fontSize: 15px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: bold;
+	color: #000000;
+}
+
+.emailInboxToolbarTitle
+{
+	fontSize: 15px;
+	fontFamily : CalibriCFFBold;
+	fontWeight: bold;
+	color: #ffffff;
+	
+}
+
+.emailInboxToolbarDelete
+{
+	skinClass:ClassReference("com.gazuntite.skins.controls.button.MailDeleteButtonSkin")
+}
+
+.profileFormLabel
+{
+	textAlign: right;
+	fontSize: 13px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #666666;
+}
+
+.profileFormText
+{
+	fontSize: 13px;
+	fontFamily : CalibriCFF;
+	fontWeight: normal;
+	color: #333333;
+}
+.profileFormItemContainer
+{
+	verticalAlign: baseline;
+}
+.blackButtonSkin
+{
+	skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.blackButton");
+}
+.popupCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.popupCloseButton");
+}
+/*Alvi 29July, 2013 - New date field skin apply here in CSS(Although the datefield is MX ) */
+.coverDateField
+{
+	skin: Embed("assets/images/calendar_icon.png");
+	rollOverColor			  : #1AA6F2;
+	text-input-style-name 	  : optionalDateTextBox ;
+	dateChooserStyleName      : dateChooserStyle;
+}
+.dateChooserStyle
+{
+	cornerRadius			: 0;
+	headerColors			: #1BADFC, #1583C0;
+	fillColors				: #E5E5E5, #F4F4F4;
+	headerStyleName			: dateHeaderStyle;
+	todayColor 				: #1AA6F2;
+	todayStyleName			: dateTodayStyleName;
+}
+.dateTodayStyleName
+{
+	color 					: #FFFFFF;
+	fontWeight 				: bold;
+}
+.dateHeaderStyle
+{
+	color : #FFFFFF;
+	fontWeight :bold;
+}
+.optionalDateTextBox
+{
+	font-size 	 : 12;
+	borderSkin	 : ClassReference("com.gazuntite.skins.controls.textInput.transparentTextInputSkin");
+}
+/*-------------------------------------- Default CSS for DATE FIELD --------------------------- */
+mx|DateField 
+{
+	skin: Embed("assets/images/calendar_icon.png");
+	/* null the skins defined in default.css */
+	upSkin: ClassReference(null);
+	overSkin: ClassReference(null);
+	downSkin: ClassReference(null);
+	disabledSkin: ClassReference(null);
+	focusColor 				  : #007FFF; 
+	focusThickness			  : 2;
+}
+
+/*-------------------------------------- Default CSS for HTMl Scroll Bar --------------------------- */
+.htmlVScroll
+{
+	up-arrow-skin: ClassReference(null);
+	down-arrow-skin: ClassReference(null);
+	trackSkin: Embed(source="assets/images/trackV.png" , scaleGridLeft="1", scaleGridTop="4", scaleGridRight="5", scaleGridBottom="16"); 
+	thumbSkin: Embed(source="assets/images/thumbV.png" , scaleGridLeft="1", scaleGridTop="4", scaleGridRight="5", scaleGridBottom="16"); 
+}
+mx|Slider
+{
+	thumbSkin: Embed(source="assets/images/thumb.png");
+}
+

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private function cc():void
+			{
+			}
+			
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.followUpDTOHistoryList && model.followUpDTOHistoryList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.followUpDTOHistoryList = UtilityFunctions.SortArrayCollection(model.followUpDTOHistoryList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.followUpDTOHistoryList = UtilityFunctions.SortArrayCollection(model.followUpDTOHistoryList,'FollowUpDate',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.followUpDTOHistoryList" destination="DataList_changeHandler" />
+	<s:layout>
+		<s:VerticalLayout paddingLeft="2" paddingRight="2" paddingTop="10" paddingBottom="2" gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+		<s:DropDownList id="uiSortDropDown" skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+						selectedIndex="0" buttonMode="true" toolTip="Sort List" change="SortDataList()">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Recently Added"/>
+					<fx:Object label="Follow-Up Type"/>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Spacer width="100%"/>
+	</s:SkinnableContainer>
+	
+	<s:List id="FollowUpHistoryList" width="100%" height="100%" allowMultipleSelection="false"
+			skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+			borderVisible="false" dataProvider="{model.followUpDTOHistoryList}"
+			itemRenderer="com.gazuntite.input.view.inputsections.assessment.itemRenderer.FollowUpListIR"/>
+</s:Group>

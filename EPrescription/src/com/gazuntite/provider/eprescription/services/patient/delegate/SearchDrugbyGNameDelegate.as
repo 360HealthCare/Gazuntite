@@ -1,0 +1,61 @@
+package com.gazuntite.provider.eprescription.services.patient.delegate
+{
+	import com.gazuntite.provider.eprescription.services.patient.util.EConstants;
+	
+	import mx.rpc.IResponder;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
+	
+	public class SearchDrugbyGNameDelegate
+	{
+		private var responder	:IResponder;
+		private var service		:HTTPService;
+		
+		public function SearchDrugbyGNameDelegate( responder : IResponder )
+		{
+			this.responder 		= responder;
+			
+			var url:String 		= EConstants.RESTFULL_SERVICE_BASE_URL + "SearchDrugbyGNamePost";
+			service 			= new HTTPService(url);
+			service.url 		= url;
+			
+			service.contentType = "Text/Xml";
+			service.method		= "POST";
+			
+			service.addEventListener(FaultEvent.FAULT,onFault);
+			service.addEventListener(ResultEvent.RESULT,onResult);
+		}
+		
+		public function GetMedicineList(data:XML, drugName:String="0", startno:String="0", tradeName:String="0", ndc:String="0"):void
+		{
+			if(drugName == null)
+				drugName = '0';
+			if(startno == null)
+				startno = '0';
+			if(tradeName == null)
+				tradeName = '0';
+			if(ndc == null)
+				ndc = '0';
+			
+			var SearchDrugCriteriasXml:XML = <SearchDrugCriterias/>;
+				SearchDrugCriteriasXml.@GENERICNAME 	= drugName;
+				SearchDrugCriteriasXml.@StartNumber 	= startno;
+				SearchDrugCriteriasXml.@productGenName 	= tradeName;
+				SearchDrugCriteriasXml.@NDC 			= ndc;
+				SearchDrugCriteriasXml.appendChild(data);
+				
+			service.send(SearchDrugCriteriasXml);	
+		}
+		
+		private function onResult(event:ResultEvent):void
+		{
+			responder.result(event);
+		}
+		
+		private function onFault(event:FaultEvent):void
+		{
+			responder.fault(event);			
+		}	
+	}
+}

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:spark="spark.skins.spark.*"
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:decoration="com.gazuntite.controls.custom.calendar.cal.decoration.*"
+					  styleName="blackTitleGreyBGContainerSkin"
+					  width="490" height="425"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.dto.AppointmentDTO;
+			import com.gazuntite.provider.live.services.scheduler.dto.PatientCompleteInfoDTO;
+			import com.gazuntite.provider.live.services.scheduler.dto.SearchPatientDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadPatientCompleteInfoEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadProviderWorkingHoursEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.SearchPatientEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.util.SchedulerConstant;
+			import com.gazuntite.provider.live.services.scheduler.view.event.RefreshCalendarAppoinmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.view.util.SchedularUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.utils.ObjectUtil;
+			import mx.utils.StringUtil;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			private var isValid:Boolean;
+			private var schedularUtils:SchedularUtils = new SchedularUtils();
+			private var obj_selectedAppointment:Object;
+			private static var counter:int;
+			
+			//******** Find Selected patient & Appointment *********************************************************************************			
+			public function loadAppointment(val:int):void
+			{
+				obj_selectedAppointment = new Object();
+				for(var i:uint = 0; i < model.ScheduledAppointmentList.length; i++ )
+				{
+					obj_selectedAppointment 			= model.ScheduledAppointmentList[i];
+					if(obj_selectedAppointment.ID == val)
+					{
+						counter = i;
+						loadPatientCompleteInfoEvent(model.ScheduledAppointmentList[i].Patient.ID);
+						populateFormData(model.ScheduledAppointmentList[i] as Object);
+					}
+				}
+			}
+			
+			// ********** Load Selected Patient Complete Info in EditAppointment View ******************************************************************
+			private function loadPatientCompleteInfoEvent(patientID:String):void
+			{
+				var lPCInfoEvent : LoadPatientCompleteInfoEvent = new LoadPatientCompleteInfoEvent(int(patientID), model.loggedInUserSelectedBranchId, model.loggedInUserId, model.loggedInUserSelectedStationId, loadCompleteInfo);
+				CairngormEventDispatcher.getInstance().dispatchEvent( lPCInfoEvent );
+				CursorManager.setBusyCursor();
+			}
+			private function loadCompleteInfo(val:*=null):void
+			{
+				btnSave.enabled = true;
+			}
+			// ******************* Load the Appointment data into Form ***********************************************
+			private function populateFormData(obj:Object):void
+			{
+				//Select Appointment Type
+				for(var i:uint = 0; i < model.StaticData.AppointmentTypesList.length; i ++){
+					var strType:String	= model.StaticData.AppointmentTypesList[i].Name;
+					if(obj.Type.Name == strType)	
+						cmbType.selectedIndex = i;
+				}
+				//Select Appointment Status
+				for(var k:uint = 0; k < model.StaticData.AppointmentCurrentStatusList.length; k ++){
+					var strStatus:String	= model.StaticData.AppointmentCurrentStatusList[k].Name;
+					if(obj.Action.Name == strStatus)	
+						cmbStatus.selectedIndex = k;
+				}
+				//Select Appointment Location
+				for (var a:uint = 0; a < model.StaticData.StationsByClinicIDList.length; a++ ){
+					var strLocation:String = model.StaticData.StationsByClinicIDList[a].Name;
+					if(obj.StationName == strLocation)
+						cmbLocation.selectedIndex = a;
+				}
+				//Select Provider
+				for(var p:uint =0; p < model.StaticData.ProviderByClinicIDList.length; p++){
+					var strProvider:String	= model.StaticData.ProviderByClinicIDList[p].UserID;
+					if(obj.UserID == strProvider)	
+						cmbProvider.selectedIndex = p;
+				} 
+				
+				//Selected Appointment Description / chief complaint
+				taCompleint.text = StringUtil.trim(obj.ChiefComplaint);
+				//Selected Appointment Date / Date on which Appointment is Created.
+				cmbDate.selectedDate = new Date(obj.Date);
+				
+				var strDate:String = obj.Date;
+				
+				//call Selected Provider Working Hours Service
+				var LPWHEvent:LoadProviderWorkingHoursEvent	= new LoadProviderWorkingHoursEvent(cmbProvider.selectedItem.UserID, cmbProvider.selectedItem.ID ,cmbProvider.selectedItem.StationID, dateFormatter.format(obj.Date), populateWorkingHours);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LPWHEvent);
+				CursorManager.setBusyCursor();
+				
+				
+			}
+			//********************** populate Working Hours in Form ****************************************************
+			private function populateWorkingHours(val:*=null):void
+			{
+				for(var s:uint =0; s <model.ProviderWorkingHourList.length; s++)
+				{
+					if(model.ScheduledAppointmentList[counter].StartTime == model.ProviderWorkingHourList[s].StartTime)
+						cmbStartTime.selectedIndex = s;
+					
+					if(model.ScheduledAppointmentList[counter].EndTime == model.ProviderWorkingHourList[s].EndTime)
+						cmbEndTime.selectedIndex = s;
+				}
+			}
+			// ********** Remove UpdateAppointment View ******************************************************************
+			private function removePopup():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			// ********** Open popup for Description ************************************************
+			protected function btnUpdate_clickHandler():void
+			{
+				var infoUpdate:InformationUpdateAlert = new InformationUpdateAlert();
+				PopUpManager.addPopUp(infoUpdate, this, true);
+				PopUpManager.centerPopUp(infoUpdate);  
+			}
+			
+			// ********** Appointment Form Methods *******************************************************////
+			protected function cmbProvider_changeHandler(event:IndexChangeEvent):void
+			{
+				cmbStartTime.enabled = true;		cmbEndTime.enabled = true;
+				cmbStartTime.selectedIndex = -1;	cmbEndTime.selectedIndex = -1; 
+				// Call ProviderWorkingHour Service
+				var LPWHEvent:LoadProviderWorkingHoursEvent	= new LoadProviderWorkingHoursEvent(cmbProvider.selectedItem.UserID, cmbProvider.selectedItem.ID ,cmbProvider.selectedItem.StationID, dateFormatter.format(cmbDate.text), populateWorkingHours);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LPWHEvent);
+				CursorManager.setBusyCursor();
+			}
+			
+			//******************** label Date Formater Function (label date Field)****************************			
+			private function doLabelDate(item:Date):String 
+			{
+				return dateFormatter.format(item);
+			}
+			//*********************** validate Form and call for Save Edit Appointment  ******************************************************
+			private function updateAppointment():void
+			{
+				validateAppointForm();
+				if(!isValid)
+				{
+					if(isAppTimeinValid()){
+						Alert.show('Start Time must before End Time', 'Invalid Appointment Time',4,FlexGlobals.topLevelApplication.mainContainer);
+						return;
+					}  
+					/* if(checkDuplicateAppointment(String(cmbProvider.selectedItem.UserID), String(model.SelectedPatient.ID), 
+						String(dateFormatter3.format(cmbDate.text)), String(cmbStartTime.selectedItem.StartTime), 
+						String(cmbEndTime.selectedItem.EndTime), String(cmbLocation.selectedItem.ID)))
+					{
+						Alert.show('Appointment is already created for this patient'+'\n'+ 'with same Provider', 'Already Scheduled Appointment');
+						return;
+					}  */
+					var date:Date = new Date();
+					var mAppointmentDto:AppointmentDTO = new AppointmentDTO();
+					
+					var obj:Object 			= new Object();
+					obj					 	= model.ScheduledAppointmentList[counter];
+					obj.StationID			= cmbLocation.selectedItem.ID;
+					obj.StationName			= cmbLocation.selectedItem.Name;
+					obj.UserID				= cmbProvider.selectedItem.UserID;
+					obj.FirstName			= cmbProvider.selectedItem.FirstName;
+					obj.LastName			= cmbProvider.selectedItem.LastName;
+					obj.MiddleName			= '';
+					obj.Date  				= dateFormatter2.format(cmbDate.text)+'T'+time.format(date);
+					obj.StartTime 			= cmbStartTime.selectedItem.StartTime;
+					obj.EndTime 			= cmbEndTime.selectedItem.EndTime;
+					obj.ChiefComplaint 		= StringUtil.trim(taCompleint.text);
+					obj.ModifiedBy 			= String(model.loggedInUserProviderId);
+					obj.ModifiedAt 			= dateFormatter2.format(date.toDateString())+'T'+time.format(date);
+					obj.Type.ID 			= cmbType.selectedItem.ID;
+					obj.Type.Name 			= cmbType.selectedItem.Name;
+					obj.Action.ID 			= cmbStatus.selectedItem.ID;
+					obj.Action.Name 		= cmbStatus.selectedItem.Name;
+					obj.Action.NextAction	= cmbStatus.selectedItem.NextAction;
+					
+					model.ScheduledAppointmentList[counter] = obj;
+					var appointmentXML:XML = mAppointmentDto.ToXML(model.ScheduledAppointmentList[counter] as Object)
+				///	trace('Edit Appointment XML ------ >>>>> ',appointmentXML.toXMLString());
+					
+					//call ManageAppointment Service
+					var MAPPEvent:ManageAppointmentEvent = new ManageAppointmentEvent(appointmentXML, cmbProvider.selectedItem.ID, cmbProvider.selectedItem.UserID, callRefeshAppointments );
+					CairngormEventDispatcher.getInstance().dispatchEvent(MAPPEvent);
+					CursorManager.setBusyCursor();
+					removePopup();
+				}else
+				{
+					shakeEffect.play();
+				}
+			}
+			//*************************** Refresh Appointments and Show update message *******************************
+			private function callRefeshAppointments(val:* = null):void
+			{
+				dispatchEvent(new RefreshCalendarAppoinmentsEvent('refreshCalendarAppoinmentsEvent'));
+				Alert.show('Appointment Update Successfully', 'Done',4,FlexGlobals.topLevelApplication.mainContainer);
+			}
+			
+			//************************* validation of Form **************************************************************	
+			private function validateAppointForm():void
+			{
+				isValid = false;
+				if(cmbType.selectedIndex == -1 || cmbDate.text.length == 0 || cmbProvider.selectedIndex == -1 || cmbLocation.selectedIndex == -1 
+					|| cmbStartTime.selectedIndex == -1 || cmbEndTime.selectedIndex == -1 || cmbStatus.selectedIndex == -1 ||taCompleint.text.length == 0)
+				{
+					isValid = true;
+				}
+			}
+			//************* validate for duplicate appointment ************************************************
+			private function checkDuplicateAppointment(userID:String, patientID:String, date:String, startTime:String, endTime:String, stationID:String):Boolean
+			{
+				var isMatched:Boolean = false;
+				if(model.AllAppointmentList.length > 1)
+				{
+					for(var i:uint =0; i< model.AllAppointmentList.length; i++)
+					{
+						var obj:Object = new Object();
+						obj		= model.AllAppointmentList[i];
+						var strDate:String  = obj.Date;
+						if( userID 		== obj.UserID && 
+							patientID 	== obj.Patient.ID &&
+							date		== strDate.substr(0,10)      &&
+							startTime  	== obj.StartTime  &&
+							endTime	 	== obj.EndTime    &&
+							stationID  	== obj.StationID)
+						{
+						trace(userID    +' == '+ obj.UserID ,
+							patientID 	+' == '+ obj.Patient.ID,
+							date 		+' == '+ strDate.substr(0,10),
+							startTime 	+' == '+ obj.StartTime,
+							endTime		+' == '+ obj.EndTime,
+							stationID  	+' == '+ obj.StationID)
+							isMatched =  true;
+						}
+					}
+				}
+				
+				return isMatched;
+			} 
+			//************************ validate start time and end time **************************************
+			private function isAppTimeinValid():Boolean
+			{
+				var strdate:String = cmbDate.text;
+				var arrdate:Array = new Array();
+				arrdate = strdate.split('-', strdate.length);
+				var strSTime:String = cmbStartTime.selectedItem.StartTime;
+				var strETime:String = cmbEndTime.selectedItem.EndTime;
+				var arrSTime:Array = new Array();
+				var arrETime:Array = new Array();
+				strSTime = strSTime.substr(0,5);
+				strETime = strETime.substr(0,5);
+				arrSTime = strSTime.split(':', 5);
+				arrETime = strETime.split(':', 5);
+				
+				var sD:Date = new Date(arrdate[2], arrdate[0], arrdate[1], arrSTime[0], arrSTime[1]);//Date(2011, 12, 20, 09, 15);
+				var eD:Date = new Date(arrdate[2], arrdate[0], arrdate[1], arrETime[0], arrETime[1]);
+				
+				return schedularUtils.comapreTime(sD, eD);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter" formatString="MM-DD-YYYY"/>
+		<mx:DateFormatter id="dateFormatter2" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+		<mx:DateFormatter id="dateFormatter3" formatString="MM/DD/YYYY"/>
+		
+		<s:Sequence id="shakeEffect" >
+			<s:Move duration="100" target="{this}" xFrom="{this.x}" xTo="{this.x - 50}" />
+			<s:Move duration="200" target="{this}" xFrom="{this.x-50}" xTo="{this.x + 100}" />
+			<s:Move duration="100" target="{this}" xFrom="{this.x + 100}" xTo="{this.x }" />
+		</s:Sequence >
+	</fx:Declarations>
+	
+	
+	<s:VGroup width="100%" height="378" gap="0">
+		<s:Group width="483" useHandCursor="true" buttonMode="true" mouseDown="this.startDrag()" mouseUp="this.stopDrag()">
+			<s:Label text="Update Appointment" color="#ffffff" fontSize="14" verticalAlign="middle" left="10" top="0"/>
+			<s:Button id="btnClose" label="X" right="5" styleName="popupCloseButtonSkin"
+					  click="removePopup()" y="-4"/>
+		</s:Group>
+		<s:HGroup width="475" height="161">
+			
+			<s:Group  width="250" height="160">
+				<s:Label y="8" text="Patient Details" color="#111111" fontSize="12" fontFamily="Calibri Bold" verticalAlign="middle" left="22"/>
+				<s:SkinnableContainer  width="229" styleName="beigeMultiShadeBGContainerSkin" x="10" y="27" height="130">
+					<s:Label y="6" text="Patient :" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri"/>
+					<s:Label y="2" fontFamily="Calibri Bold" color="#000000" fontSize="11" verticalAlign="middle" id="id_PatientName" right="2"	 text="{model.SelectedPatient.PatientName}"  width="150" height="15"/>
+					<!--<mx:HRule y="45" left="10" right="10"/>-->
+					<s:Label y="22" text="GID :" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri"/>
+					<s:Label y="18" color="#000000" fontSize="11" verticalAlign="middle" fontFamily="Calibri Bold" id="id_quivusId" right="2" text="{model.SelectedPatient.QuivusID}" width="150" height="16"/>
+					<!--<mx:HRule y="69" left="10" right="10"/>-->
+					<s:Label y="36" text="SSN #:" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri"/>
+					<s:Label y="37" color="#000000" fontFamily="Calibri Bold" fontSize="11" verticalAlign="middle" id="lblSSN" right="2"	 text="{model.SelectedPatient.SSN}" width="150" height="15"/>
+					<!--<mx:HRule y="95" left="10" right="10"/>-->
+					<s:Label y="57" text="DOB :" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri"/>
+					<s:Label y="53" color="#000000" fontSize="11" fontFamily="Calibri Bold"  verticalAlign="middle" fontWeight="normal" id="lblDOB" right="2"	 text="{model.SelectedPatient.DOB}" width="150" height="15"/>
+					<!--<mx:HRule y="118" left="10" right="10"/>-->
+					<s:Label y="72" text="Gender:" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri"/>
+					<s:Label y="72" color="#000000" fontFamily="Calibri Bold"  fontSize="11" verticalAlign="middle" id="id_gender" right="2"	 text="{model.SelectedPatient.GenderName}" width="150" height="15"/>
+					<!--<mx:HRule y="142" left="10" right="10"/>-->
+					<s:Label y="110" text="Phone :" color="#666666" fontFamily="Calibri" fontSize="11" verticalAlign="middle" left="10"/>
+					<s:Label y="107" color="#000000" fontFamily="Calibri Bold" fontSize="11" verticalAlign="middle" fontWeight="normal" id="lblPhone" right="4"	 width="150" height="15" text="{model.SelectedPatient.PhoneNumber}"/>
+					<!--<mx:HRule y="165" left="10" right="10"/>-->
+					<s:Label y="91" text="Prefrred Loc:" color="#666666" fontSize="11" verticalAlign="middle" left="10" fontFamily="Calibri Bold"/>
+					<s:Label y="89" color="#000000" fontSize="11" verticalAlign="middle" fontFamily="Calibri Bold"  right="2" text="{model.SelectedPatient.PreferredLocation}" width="150" height="15"/>
+				</s:SkinnableContainer>
+
+				<s:Button id="btnUpdate" styleName="updateInfoButtonSkin" width="25" click="btnUpdate_clickHandler()" x="99" y="5" enabled="false"/>
+				<s:Group  width="215" height="169" x="249" y="-3">
+					<s:Label text="Appointment Details" color="#111111" fontFamily="Calibri Bold" fontSize="12" verticalAlign="middle" left="15" top="8"/>
+					<components:LabelComboBox id="cmbType"  styleName="optionalComboBoxSkin" dataProvider="{model.StaticData.AppointmentTypesList}" labelField="Name" prompt="Select Type" left="0" top="24" width="105"/>
+					<components:LabelDateField fontFamily="calibri" id="cmbDate" prompt="Select Date" right="0" top="24" width="105" labelFunction="doLabelDate"
+											   disabledDays="[0,6]" selectableRange ="{{rangeStart: new Date(),  rangeEnd: new Date(2099,11,31)}}" height="19"/>
+					<components:LabelComboBox id="cmbStartTime"  styleName="optionalComboBoxSkin" dataProvider="{model.ProviderWorkingHourList}" labelField="StartTime" prompt="Select Start Time" left="0" top="73" width="105" />
+					<components:LabelComboBox id="cmbEndTime" styleName="optionalComboBoxSkin"   dataProvider="{model.ProviderWorkingHourList}" labelField="EndTime" prompt="Select End Time" right="0" top="72" width="106" />
+					<components:LabelComboBox id="cmbProvider" styleName="optionalComboBoxSkin"  dataProvider="{model.StaticData.ProviderByClinicIDList}" labelField="ProviderName" prompt="Select Provider" left="0" top="48" width="105" enabled="false"/>
+					<components:LabelComboBox id="cmbLocation" styleName="optionalComboBoxSkin"  dataProvider="{model.StaticData.StationsByClinicIDList}" labelField="Name" prompt="Select Location" right="0" top="47" width="106"/>
+					<components:LabelComboBox id="cmbStatus" styleName="optionalComboBoxSkin"   dataProvider="{model.StaticData.AppointmentCurrentStatusList}" labelField="Name" prompt="Select Status" left="0" right="0" top="98" />
+					<components:LabelTextArea id="taCompleint" styleName="optionalTextInputSkin"  prompt="Write Complaint Here" left="0" bottom="9" right="0" top="123" maxChars="500" />
+				</s:Group>
+			</s:Group>
+			
+		</s:HGroup>
+		
+		<s:Group width="100%" height="50%">
+			<s:Label text="Insurance Details" color="#111111" fontSize="12" fontFamily="Calibri Bold" verticalAlign="middle" left="22" top="0"/>
+			<s:SkinnableContainer width="229" top="15" left="13" 
+								  styleName="greyMultiShadeBGContainerSkin"  height="84">
+				<!--<s:BorderContainer x="4" width="270" backgroundColor="#F3F3EA" cornerRadius="5"  borderStyle="inset" borderWeight="1" borderColor="#939090" bottom="10" top="20" >-->
+				<s:Label text="Primary Insurance:" color="#666666" fontSize="11" left="10" top="3"/>
+				<s:Label x="10" y="37" text="Expiray Date:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="20" text="Policy #:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="56" text="Eligibility:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="72" text="Eligibility Check On:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label fontFamily="Calibri Bold" left="126" id="lblPrimaryInsurence" width="100" top="4" text="{model.SelectedPatient.InsuredName}" fontSize="11" height="15" color="#000000"/>
+				<s:Label fontFamily="Calibri Bold" y="20" left="126" id="lblPrimaryPolicyNo" width="100" fontSize="11" height="15" color="#000000"/>
+				<s:Label fontFamily="Calibri Bold" y="37" left="126" id="lblExpirayDate" width="100" text="{model.SelectedPatient.EndDate}" fontSize="11" height="15" color="#000000"/>
+				<s:Label  fontFamily="Calibri Bold" y="54" left="126" id="lblPrimaryEligibility" color="#00A700" width="100" text="{model.SelectedPatient.IsEligible}" fontSize="11" height="15"/>
+				<s:Label fontFamily="Calibri Bold" y="72" left="126" id="lblPrimaryCheckOn" width="100" text="{model.SelectedPatient.EligibilityCheckOn}" height="15" fontSize="11" color="#000000"/>
+			</s:SkinnableContainer>
+			<s:SkinnableContainer width="229" top="105" left="13"
+							  styleName="greyMultiShadeBGContainerSkin"  height="84">
+				<s:Label x="10" y="1" text="Secondary Insurance:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="32" text="Expiray Date:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="15" text="Policy #:" color="#666666" fontSize="11" height="15" fontFamily="Calibri"/>
+				<s:Label x="10" y="50" text="Eligibility:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label x="10" y="69" text="Eligibility Check On:" color="#666666" fontSize="11" fontFamily="Calibri"/>
+				<s:Label y="3"  left="126" id="lblSecondaryInsurence" width="100" text="{model.SelectedPatient.InsuredName}"  fontFamily="Calibri Bold" fontSize="11" color="#000000"/>
+				<s:Label y="13" left="126" id="lblSecondaryPolicyNo" width="100" height="15" fontSize="11" color="#000000" fontFamily="Calibri Bold"/>
+				<s:Label y="30" left="126" id="lblSecondaryExpirayDate"  color="#000000" fontFamily="Calibri Bold" width="100" text="{model.SelectedPatient.EndDate}" height="15" fontSize="11"/>
+				<s:Label y="50" left="126" color="#EE0202" id="lblSecondaryEligibility" width="100" text="{model.SelectedPatient.IsEligible}" fontSize="11"/>
+				<s:Label y="67" left="126" id="lblSecondaryCheckOn"  color="#000000" fontFamily="Calibri Bold" width="100" text="{model.SelectedPatient.EligibilityCheckOn}" fontSize="11"/>
+			</s:SkinnableContainer>
+
+			<s:Label text="Other Details" color="#111111" fontSize="12" fontFamily="Calibri Bold" verticalAlign="middle" left="265" top="0"/>
+			<s:SkinnableContainer width="215" top="0" height="190" right="17" styleName="greyMultiShadeExtendedBGContainerSkin">
+
+				<s:Label text="Active Alergy:" color="#666666" fontSize="11" top="18" left="8" fontFamily="Calibri"/>
+				<s:Label text="Primary Provider:" color="#666666" fontSize="11" top="49" left="10" fontFamily="Calibri"/>
+				<s:Label text="Referring Provider:" color="#666666" fontSize="11" top="70" left="8" fontFamily="Calibri"/>
+				<s:Label text="Chronic Diagnosis:" color="#666666" fontSize="11" top="35" left="8" fontFamily="Calibri"/>
+				<s:Label text="Next Visit" color="#666666" fontSize="11" top="94" left="8" fontFamily="Calibri"/>
+				<s:Label text="Patient Balance:" color="#666666" fontSize="11" top="142" left="8" fontFamily="Calibri"/>
+				<s:Label text="Insurence Balance:" color="#666666" fontSize="11" top="159" left="8" fontFamily="Calibri"/>
+				<s:Label text="Last Visit:" color="#666666" fontSize="11" top="121" left="8" fontFamily="Calibri"/>
+				<s:Label text="Rejected Claims:" color="#666666" fontSize="11" top="176" left="8" fontFamily="Calibri"/>
+				<s:Label color="#B71818" fontSize="11" fontFamily="Calibri Bold"  id="lblActiveAlergy" textAlign="left" left="110" width="100" top="15"  height="15"/>
+				<s:Label top="33"  fontSize="11" fontFamily="Calibri Bold" textAlign="left" left="110" color="#00A700"  id="lblChronicDisease" width="100" text="{model.SelectedPatient.IsChronicDiagnosis}"/>
+				<s:Label top="49" fontSize="11" fontFamily="Calibri Bold"  left="110"  id="lblPrimparyProvider" width="100" text="{model.SelectedPatient.PrimaryProvider}"/>
+				<s:Label top="94" fontSize="11" fontFamily="Calibri Bold" left="110"  width="100" text="{model.SelectedPatient.NextVisit}"/>
+				<s:Label top="68" left="110" text="{model.SelectedPatient.ReferringProvider}" width="100" fontFamily="Calibri Bold" fontSize="11"/>
+				<s:Label top="122" fontSize="11" fontFamily="Calibri Bold"  id="lblLastVisit" left="110" width="100" text="{model.SelectedPatient.LastVisit}"/>
+				<s:Label top="141" fontSize="11" fontFamily="Calibri Bold"  left="110" color="#B71818" id="lblPatientBalance" width="100" text="{model.SelectedPatient.PatientBalance}"/>
+				<s:Label top="157" fontSize="11" fontFamily="Calibri Bold"  left="110" color="#B71818" id="lblInsurnecbalance" width="100" text="{model.SelectedPatient.InsuranceBalance}" height="15" />
+				<s:Label top="175" fontSize="11" fontFamily="Calibri Bold"  left="110" id="lblrejectedClaims" color="#B71818"  width="100" text="{model.SelectedPatient.RejectedClaims}" height="15"/>
+				<!--	</s:BorderContainer>-->
+			</s:SkinnableContainer>
+			
+		</s:Group>
+	</s:VGroup>
+	<s:Group width="100%"  height="27" x="13" y="381">
+		<s:Button y="0" label="Add/Edit Insurence" width="124" left="15" fontWeight="normal" enabled="false" styleName="blackButtonSkin"/>
+		<s:Button y="0" label="Eligibility Check" width="124" left="150" enabled="false" styleName="blackButtonSkin"/>
+		<s:Button y="0" label="Cancel" right="16" width="60" click="removePopup()" styleName="blackButtonSkin"/>
+		<s:Button id="btnSave" y="0" label="Update" width="60" right="87" click="updateAppointment()" enabled="false" styleName="blackButtonSkin"/>
+	</s:Group>
+</s:SkinnableContainer>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				height="40" width="100%"
+				implements="com.gazuntite.history.view.itemRenderer.IHistoryIR"
+				creationComplete="cc(event)" xmlns:view="com.gazuntite.history.view.*" xmlns:views="com.gazuntite.history.view.views.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			private function getTabName(PatientSocialHistoryAddictionID:int):String
+			{
+				if(PatientSocialHistoryAddictionID == 0)
+					return 'Tobacco';
+				else if(PatientSocialHistoryAddictionID == 1)
+					return 'Alcohol';
+				else if(PatientSocialHistoryAddictionID == 2)
+					return 'Drugs';
+				else if(PatientSocialHistoryAddictionID == 3)
+					return 'Work status';
+				else if(PatientSocialHistoryAddictionID == 4)
+					return 'Marital';
+				else if(PatientSocialHistoryAddictionID == 4)
+					return 'Others';
+				else
+					return '';
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			private function onMouseOver():void
+			{
+				id_Header.setStyle('backgroundColor', 0xFFD08F);
+			}
+			private function onMouseOut():void
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+			}
+			
+			
+			public function deselectAllButton():void
+			{
+				id_listBtnBar.deselectAllButton();
+			}
+			
+			public function get listButtonBar():HistoryListButtons
+			{
+				
+				return id_listBtnBar;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hovered" />
+	</s:states>
+	
+	<s:BorderContainer id="id_Header" 
+					   width="100%" height="100%" 
+					   useHandCursor="true" buttonMode="true"  borderVisible="false" 
+					   mouseOver="onMouseOver()" mouseOut="onMouseOut()"
+					   >
+		
+		<s:layout>
+			<s:HorizontalLayout gap="1" paddingLeft="3" paddingBottom="3" paddingTop="3"  verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:VGroup width="80%" toolTip="{getTabName(data.patientSocialHistoryAddictionID) + ' ('+ data.Current + ')'}">
+			<s:Label width="100%" 
+					 text="{getTabName(data.patientSocialHistoryAddictionID) + ' ('+ data.Current + ')'}"
+					 maxDisplayedLines="1" 
+					 showTruncationTip="true"
+					 fontSize="14"
+					 color="0x333333"
+					 fontFamily="CalibriCFFBold"  
+					 />
+			<s:Label width="100%" 
+					 text="{'Onset : ' + data.OnSet}"
+					 color="0x666666"
+					 showTruncationTip="true"
+					 maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Group right="0" width="70">
+			<views:HistoryListButtons id="id_listBtnBar" width="100%" data="{data}" itemrenderer="{this}" />
+		</s:Group>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

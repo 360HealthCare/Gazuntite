@@ -1,0 +1,705 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.zigron.controls.extended.components.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 creationComplete="cc(event)" xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotesSelected;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.dto.HPIDetailsDTO;
+			import com.gazuntite.patient.visit.dto.HPI_CCDTO;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.event.physical.cchpi.LoadHPIStaticDataEvent;
+			import com.gazuntite.patient.visit.event.physical.cchpi.LoadPatientHPIByVisitIdEvent;
+			import com.gazuntite.patient.visit.event.physical.cchpi.ManagePatientHPIEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.managers.dictation.QIDictationManager;
+			import com.gazuntite.patient.visit.view.commons.dictation.DictationPopup;
+			import com.gazuntite.patient.visit.view.commons.notes.NotesPanel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable] 
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			public var recordNotesPanel:NotesPanel;
+			
+			import mx.collections.ArrayCollection;
+			
+			import spark.events.IndexChangeEvent;
+			private var _hasViewChanged:Boolean;
+			private var _isNotValid:Boolean = false;
+			private var recordGridNotesPopUp:NotesPanel;
+			private var section:String;
+			private var recordLevelDicPanel:DictationPopup;
+			private var recordNotesDTO:ModuleNoteDTO;
+			
+			[Bindable]
+			public function get isNotValid():Boolean
+			{
+				return _isNotValid;
+			}
+			
+			public function set isNotValid(value:Boolean):void
+			{
+				_isNotValid = value;
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			
+			private var _ccCollection:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public function get ccCollection():ArrayCollection
+			{
+				return _ccCollection;
+			}
+			
+			public function set ccCollection(value:ArrayCollection):void
+			{
+				_ccCollection = value;
+				
+				if (ccCollection)
+				{
+					if(ccCollection.length > 1)
+					{
+						if(hasViewChanged)
+							hasViewChanged = false;
+						
+						hasViewChanged = true;
+					}
+				}
+			}
+			
+			private function complaintChangeHandler(event : Event /* event:TextOperationEvent */):void
+			{
+				id_Add.enableAll = (id_ComplaintArea.text.length || id_Symptom.textInput.text.length) && !isNotValid;
+				
+				//calling isGetEdited() just to check whether to show check mark on complaint change or not
+				isGetEdited();
+			}
+			
+			private function onWriteNotesClick(event:Event):void
+			{
+				if (!recordGridNotesPopUp)
+					recordGridNotesPopUp = new NotesPanel();
+				
+				if (!recordGridNotesPopUp.isPanelShown)
+				{
+					var headingLabel:String = "";
+					
+					
+					
+					var addRecord:AddRecord = AddRecord(event.target);
+					
+					recordGridNotesPopUp 				= new NotesPanel();
+					recordGridNotesPopUp.width			= 250;
+					recordGridNotesPopUp.height			= 110;
+					recordGridNotesPopUp.HeadingLable 	= id_ComplaintArea.text;
+					recordGridNotesPopUp.VisitDateLable = UtilityFunctions.FormatDate(model.VisitDate, "MM-DD-YYYY");//model.FormatedVisitDate;new Date().toDateString();
+					recordGridNotesPopUp.ShowPopup(this);
+					
+					
+					
+					recordGridNotesPopUp.notesDTO		=  addRecord.notesDTO; //gridNotesDTO;
+					
+					QIPopUpManager.addPopUp(recordGridNotesPopUp, section);
+					
+					
+					var pt:Point = id_Add.localToGlobal(new Point(id_Add.id_WriteNotes.x ,id_Add.id_WriteNotes.y));
+					
+					recordGridNotesPopUp.move(pt.x - 195, pt.y + 20);
+					
+					
+					recordGridNotesPopUp.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+						
+					}, false, 0, true);
+					
+					recordGridNotesPopUp.id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						recordGridNotesPopUp.SaveNotes();
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);
+							
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+							
+						}
+						recordGridNotesPopUp.removeNotePanel();
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+					});
+					
+					
+					recordGridNotesPopUp.addEventListener("notesSaved", function(event:Event):void
+					{
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);								
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+						}
+					});
+				}
+			}
+			
+			private function writeDictationClickHandler(event:Event):void
+			{
+				var addRecord:AddRecord = AddRecord(event.target);
+				
+				recordLevelDicPanel = QIDictationManager.show(addRecord, recordLevelDicPanel, addRecord.dictationDTO, addRecord.id_WriteDictation);
+				QIPopUpManager.addPopUp(recordLevelDicPanel, QIPopUpManager.IMMUNIZATION);
+				
+				recordLevelDicPanel.move( recordLevelDicPanel.x - 81, recordLevelDicPanel.y);
+				
+				
+				recordLevelDicPanel.addEventListener(MouseEvent.CLICK, function():void
+				{
+					QIPopUpManager.removePopUp(recordLevelDicPanel, QIPopUpManager.IMMUNIZATION);
+					if(recordLevelDicPanel && recordLevelDicPanel.DictationID)
+					{
+						id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+					}
+					
+				}, true, 0, false);
+			}
+			
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				if( event.currentTarget.textInput.text.length < 2 || event.keyCode == Keyboard.DOWN || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.ENTER) 
+					return;
+				
+				var sectionName:String = null;
+				var searchString:String;
+				if( event.currentTarget == id_Symptom)
+				{
+					sectionName = QIConstants.SYMPTOM_MODULE_NAME;
+					id_Add.enableAll = (id_ComplaintArea.text.length || id_Symptom.textInput.text.length) && !isNotValid;
+					
+					isGetEdited();
+				}
+				else if( event.currentTarget == id_Duration )
+				{
+					sectionName = QIConstants.DURATION_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Exacerbating )
+				{
+					sectionName = QIConstants.EXACERBATING_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Location ) 
+				{
+					sectionName = QIConstants.LOCATION_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_ModifyingFactors )
+				{
+					sectionName = QIConstants.MODIFYINGFACTORS_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Progression )
+				{
+					sectionName = QIConstants.PROGRESSION_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Quality )
+				{
+					sectionName = QIConstants.QUALITY_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Radiation )
+				{
+					sectionName = QIConstants.RADIATION_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Severity )
+				{
+					sectionName = QIConstants.SEVERITY_MODULE_NAME;
+				}
+				else if( event.currentTarget == id_Context )
+				{
+					sectionName = QIConstants.CONTEXT_MODULE_NAME;
+				}
+				
+				if( sectionName != null )
+				{
+					searchString = event.currentTarget.textInput.text;
+					var ldsdEvent : LoadHPIStaticDataEvent = new LoadHPIStaticDataEvent(sectionName, searchString);
+					CairngormEventDispatcher.getInstance().dispatchEvent( ldsdEvent ); 
+				}
+			}
+			private function hpiFocusOutHandler(event:FocusEvent):void
+			{
+				
+			}
+			
+			private function comboChangeHandler(event:Event):void
+			{
+				var combo:LabelComboBox = LabelComboBox(event.currentTarget);
+				
+				id_Add.enabled = isGetEdited() && !isNotValid;
+				
+				switch(combo.id)
+				{
+					case "id_Symptom":
+						id_Add.enableAll = (id_ComplaintArea.text.length && id_Symptom.textInput.text.length || id_Symptom.selectedIndex != -1) && !isNotValid;
+						break;
+				}
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				var edited:Boolean = false;
+				
+				if (id_ComplaintArea.text.length || id_Symptom.textInput.text.length || id_Symptom.selectedIndex != -1 ||
+					id_OnSet.text.length || id_OnSet.selectedDate != null ||
+					id_Duration.textInput.text.length || id_Duration.selectedIndex != -1 ||
+					id_Location.textInput.text.length || id_Location.selectedIndex != -1 || 
+					id_Quality.textInput.text || id_Quality.selectedIndex != -1 ||
+					id_Severity.textInput.text.length || id_Severity.selectedIndex != -1 ||
+					id_ModifyingFactors.textInput.text.length || id_ModifyingFactors.selectedIndex != -1 || 
+					id_Progression.textInput.text || id_Progression.selectedIndex != -1 ||
+					id_Context.textInput.text.length || id_Context.selectedIndex != -1 ||
+					id_Exacerbating.textInput.text.length || id_Exacerbating.selectedIndex != -1 ||
+					id_Radiation.textInput.text.length || id_Radiation.selectedIndex != -1)
+					
+					edited = true;
+				
+				return edited;
+			}
+			
+			private function validateOnSet():void
+			{
+				id_Add.enabled = isGetEdited() && !isNotValid;
+			}
+			
+			public function resetFields():void
+			{
+				id_ComplaintArea.text = "";
+				id_Symptom.textInput.text = "";
+				id_Symptom.selectedIndex = -1;
+				
+				id_Context.textInput.text = "";
+				id_Context.selectedIndex = -1;
+				
+				id_Duration.textInput.text = "";
+				id_Duration.selectedIndex = -1;
+				
+				id_Exacerbating.textInput.text = "";
+				id_Exacerbating.selectedIndex = -1;
+				
+				id_Location.textInput.text = "";
+				id_Location.selectedIndex = -1;
+				
+				id_ModifyingFactors.textInput.text = "";
+				id_ModifyingFactors.selectedIndex = -1;
+				
+				id_OnSet.text = "";
+				id_OnSet.prompt = 'OnSet';
+				id_OnSet.selectedDate = null;
+				
+				id_Progression.textInput.text = "";
+				id_Progression.selectedIndex = -1;
+				
+				id_Quality.textInput.text = "";
+				id_Quality.selectedIndex = -1;
+				
+				id_Radiation.textInput.text = "";
+				id_Radiation.selectedIndex = -1;
+				
+				id_Severity.textInput.text = "";
+				id_Severity.selectedIndex = -1;
+				
+				id_Add.enableAll = false;
+				recordNotesDTO = new ModuleNoteDTO();
+				
+				if (id_Add.dictationDTO)
+					id_Add.dictationDTO = new ModuleDictationDTO();
+				
+				if (id_Add.notesDTO)
+					id_Add.notesDTO = new ModuleNoteDTO();
+				
+				if (recordNotesPanel)
+					recordNotesPanel.removePopup();
+			}
+			
+			
+			
+			private function addRecordClickHandler(event:Event):void
+			{
+				model.HPI_CCDTOList.addItemAt(getCCHPIDetails(), 0);
+				
+				var mphe:ManagePatientHPIEvent = new ManagePatientHPIEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( mphe );
+				
+				hasViewChanged  = true;
+				
+				resetFields();
+				
+				id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+				id_Add.id_WriteDictation.setStyle("skinClass", QIDictationBtn);
+			}
+			
+			protected function id_HPICheckBox_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			private function getCCHPIDetails():HPI_CCDTO
+			{
+				var hpi_ccDTO:HPI_CCDTO = new  HPI_CCDTO();
+				hpi_ccDTO.ChiefComplaint = id_ComplaintArea.text;
+				
+				//Moeen , to add new record
+				hpi_ccDTO.IsDirty = true;
+				hpi_ccDTO.IsRecordEditable = true;
+				hpi_ccDTO.PatientHPIID = 0;
+				hpi_ccDTO.ClinicBranchID = model.ClinicBranchIdSeq;
+				
+				
+				if(id_Add.notesDTO)
+				{
+					hpi_ccDTO.NoteSubject = id_Add.notesDTO.NoteSubject;
+					hpi_ccDTO.Note = id_Add.notesDTO.Note;
+				}
+				
+				if(null != recordLevelDicPanel)
+				{
+					if(recordLevelDicPanel.DictationID != Constants.GUID_FORMAT)
+						hpi_ccDTO.DictationID = recordLevelDicPanel.DictationID;
+				}
+				
+				
+				hpi_ccDTO.HPIFields = new HPIDetailsDTO();
+				
+				if(ValidationUtils.TrimString(id_Symptom.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Symptom 			= ValidationUtils.TrimString(id_Symptom.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Location.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Location 			= ValidationUtils.TrimString(id_Location.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Severity.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Severity 			= ValidationUtils.TrimString(id_Severity.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_ModifyingFactors.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.ModifyingFactors 	= ValidationUtils.TrimString(id_ModifyingFactors.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Progression.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Progression 		= ValidationUtils.TrimString(id_Progression.textInput.text);
+				
+				
+				if(id_OnSet.text != null)
+				{
+					hpi_ccDTO.HPIFields.Onset 			= id_OnSet.text;//selectedDate;
+				}									
+				
+				if(ValidationUtils.TrimString(id_Duration.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Duration 			= ValidationUtils.TrimString(id_Duration.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Quality.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Quality 			= ValidationUtils.TrimString(id_Quality.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Context.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Context 			= ValidationUtils.TrimString(id_Context.textInput.text);
+				
+				
+				if(ValidationUtils.TrimString(id_Exacerbating.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Exacerbating 		= ValidationUtils.TrimString(id_Exacerbating.textInput.text);
+				
+				if(ValidationUtils.TrimString(id_Radiation.textInput.text).length>0)
+					hpi_ccDTO.HPIFields.Radiation 			= ValidationUtils.TrimString(id_Radiation.textInput.text);
+				
+				//M these are to be initialized as well
+				hpi_ccDTO.DictationID = Constants.GUID_FORMAT;
+				hpi_ccDTO.CreatedAt = new Date();
+				hpi_ccDTO.ModifiedAt = Constants.NULL_DATE;
+				
+				hpi_ccDTO.CreatedBy = model.LoggedInUserId;		
+				
+				
+				
+				//hpi_ccDTO.ClinicBranchID				= model.userSelectedClinicBranchDTO.ClinicBranch.ClinicBranchIdSeq;
+				hpi_ccDTO.CreatedBy			= model.LoggedInUserId;//userSelectedRoleDTO.UserTypeRole.UserTypeId;
+				hpi_ccDTO.ModifiedBy		= model.LoggedInUserId;//userSelectedRoleDTO.UserTypeRole.UserTypeId;
+				
+				hpi_ccDTO.PatientID = model.patientID;
+				
+				if( model.VisitID)
+				{
+					hpi_ccDTO.VisitID 	= model.VisitID;
+					hpi_ccDTO.VisitDate = model.VisitDate;
+				}
+				/* else if(model.quickInputDTO!= null && model.quickInputDTO.Visit!=null)
+				{
+				hpi_ccDTO.VisitID 	= model.quickInputDTO.Visit.VisitId;
+				hpi_ccDTO.VisitDate = model.quickInputDTO.Visit.VisitDate;
+				} */
+				
+				if (id_Add.notesDTO)
+				{
+					/* hpi_ccDTO.Note = id_Add.notesDTO.Note;
+					hpi_ccDTO.NoteSubject = id_Add.notesDTO.NoteSubject; */
+				}
+				
+				//M need to add in model also
+				//model.quickInputDTO.Physical.HPI_CC.addItem(hpi_ccDTO);
+				//model.quickInputDTO.Physical.HPI_CC.addItem(hpi_ccDTO);
+				
+				
+				//if (!model.symptom.contains(id_Symptom.textInput.text))
+				if(ValidationUtils.TrimString(id_Symptom.textInput.text).length>0)
+					model.Symptoms.addItem(ValidationUtils.TrimString(id_Symptom.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Location.textInput.text).length>0)
+					model.Location.addItem(ValidationUtils.TrimString(id_Location.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Severity.textInput.text).length>0)
+					model.Severity.addItem(ValidationUtils.TrimString(id_Severity.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_ModifyingFactors.textInput.text).length>0)
+					model.ModifyingFactors.addItem(ValidationUtils.TrimString(id_ModifyingFactors.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Progression.textInput.text).length>0)
+					model.Progression.addItem(ValidationUtils.TrimString(id_Progression.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Duration.textInput.text).length>0)
+					model.Duration.addItem(ValidationUtils.TrimString(id_Duration.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Quality.textInput.text).length>0)
+					model.Quality.addItem(ValidationUtils.TrimString(id_Quality.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Context.textInput.text).length>0)
+					model.Context.addItem(ValidationUtils.TrimString(id_Context.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Exacerbating.textInput.text).length>0)
+					model.Exacerbating.addItem(ValidationUtils.TrimString(id_Exacerbating.textInput.text));
+				
+				if(ValidationUtils.TrimString(id_Radiation.textInput.text).length>0)
+					model.Radiation.addItem(ValidationUtils.TrimString(id_Radiation.textInput.text)); 
+				
+				return hpi_ccDTO;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				id_List.addEventListener(DataGridActionsEvent.SAVE_RECORD_CLICK, saveRecordClickHandler, false, 0, true);
+				id_List.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true);
+				id_List.addEventListener("NotesSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				id_List.addEventListener("DictationSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+			}
+			
+			private function saveRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var hpi_ccDTO:HPI_CCDTO;
+				
+				if (event.data is HPI_CCDTO)
+					hpi_ccDTO = event.data as HPI_CCDTO;
+				
+				if (!hpi_ccDTO)
+					return;
+				
+				if (!hpi_ccDTO.IsDirty)
+					return;
+				
+				if (model && model.HPI_CCDTOList)
+				{
+					//model.HPI_CCDTOList.removeAll();
+					//model.HPI_CCDTOList = ccCollection;
+					
+					var mphe:ManagePatientHPIEvent = new ManagePatientHPIEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( mphe );
+				}
+			}
+			
+			private function deleteRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var hpi_ccDTO:HPI_CCDTO;
+				
+				if (event.data is HPI_CCDTO)
+					hpi_ccDTO = event.data as HPI_CCDTO;
+				
+				if (!hpi_ccDTO)
+					return;
+				
+				
+				UtilityFunctions.AskMessage(  "Do you want to delete selected record", function():void
+				{
+					hpi_ccDTO.IsDeleted = true;
+					hpi_ccDTO.IsDirty = true;
+					
+					hasViewChanged = true;
+					
+					var mphe:ManagePatientHPIEvent = new ManagePatientHPIEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( mphe );
+				});
+			}
+			
+			protected function NotesDictationSavedFromGrid(event:Event):void
+			{
+				var mphe:ManagePatientHPIEvent = new ManagePatientHPIEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( mphe );
+			}
+			
+			protected function id_nextBtn_clickHandler(event:MouseEvent):void
+			{
+				
+				AllowMoveToNextPanel ( dispactchSelectSectionEvent );
+				
+				
+			}
+			
+			private function dispactchSelectSectionEvent():void
+			{
+				dispatchEvent( new SelectSection('SelectSection', 'id_CCPanel', true, true) );
+			}
+			
+			public function AllowMoveToNextPanel( callBack:Function ):void
+			{
+				if( id_Add.enableAll )
+				{
+					UtilityFunctions.AskMessage( "There are changes in the form, do you still want to leave form in current state?", function ():void
+					{
+						callBack(); 
+					}); 
+				}
+				else
+				{
+					callBack();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Binding source="model.HPI_CCDTOList"  destination="ccCollection"/>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		<s:SkinnableContainer id="id_cc" width="100%" >
+			<s:layout>
+				<s:VerticalLayout paddingLeft="3" paddingRight="3" paddingTop="5" paddingBottom="1" gap="8"/>
+			</s:layout>
+			
+			
+			<s:VGroup gap="1" width="100%">
+				<s:HGroup id="id_NotesArea" width="100%" paddingTop="0" />
+				<s:HGroup width="100%" gap="8" paddingTop="8">
+					<components1:LabelTextArea id="id_ComplaintArea" prompt="Complaint" width="100%" height="22" change="complaintChangeHandler(event)" paddingTop="2" paddingLeft="2"
+											  maxChars="250" color="#000000" skinClass="com.adobe.gazuntite.skins.textAreaReqSkin" tabIndex="1" toolTip="Enter Complaint"/>
+					<commons:AddRecord id="id_Add"  writeNotesClick="onWriteNotesClick(event)"  writeDictationClick="writeDictationClickHandler(event)" tabIndex="2" enabled="{id_Add.enableAll}"/> <!---->
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="100%">
+				<s:Label id="id_HPI" text="History of Present Illness" fontFamily="Calibri" fontSize="12" color="#D5DDEA"/>
+				<s:HGroup width="100%" >
+					<s:VGroup width="50%" gap="2">
+						<components1:LabelComboBox id="id_Symptom" prompt="Symptoms" width="100%"  dataProvider="{model.Symptoms}" 
+												  keyUp="comboKeyUpHandler(event)"  focusOut="hpiFocusOutHandler(event)" change="comboChangeHandler(event)"
+												  maxChars="350" skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" tabIndex="4"
+												  toolTip="Select Symptom"/>
+						<components1:LabelComboBox id="id_Location"  maxChars="220" fontFamily="Calibri" prompt="Location" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"  dataProvider="{model.Location}"
+												  change="comboChangeHandler(event)" tabIndex="7"
+												  toolTip="Select Location"/>
+						<components1:LabelComboBox id="id_Severity"  maxChars="220" fontFamily="Calibri" prompt="Severity" width="100%" 
+												  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.Severity}"
+												  change="comboChangeHandler(event)" tabIndex="9"
+												  toolTip="Select Severity"/>
+						<components1:LabelComboBox id="id_ModifyingFactors" maxChars="220"  fontFamily="Calibri" prompt="Modifying Factors" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.ModifyingFactors}"
+												  change="comboChangeHandler(event)" tabIndex="11"
+												  toolTip="Select Modifying Factors"/>
+						<components1:LabelComboBox id="id_Progression"  maxChars="220" fontFamily="Calibri" prompt="Progression" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.Progression}"
+												  change="comboChangeHandler(event)" tabIndex="13"
+												  toolTip="Select Progression"/>
+					</s:VGroup>
+					<s:VGroup width="50%" gap="2">
+						<s:HGroup width="100%">
+							<components1:LabelDateField id="id_OnSet" prompt="OnSet" width="50%"  editable="true" 
+													   keyUp="validateOnSet()" yearNavigationEnabled="true"
+													   change="validateOnSet()" restrict="[/ 0-9]"
+													   selectableRange="{{rangeEnd : new Date()}}" tabIndex="5" toolTip="Select Onset date"/>													
+							
+							<components1:LabelComboBox id="id_Duration" maxChars="220" fontFamily="Calibri " prompt="Duration" width="50%"  
+													  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.Duration}"
+													  change="comboChangeHandler(event)" tabIndex="6" toolTip="Select Duration"/>
+						</s:HGroup>
+						<components1:LabelComboBox id="id_Quality" maxChars="220" fontFamily="Calibri " prompt="Quality" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"    dataProvider="{model.Quality}"
+												  change="comboChangeHandler(event)" tabIndex="8" toolTip="Select Quality"/>
+						<components1:LabelComboBox id="id_Context" maxChars="220" fontFamily="Calibri " prompt="Context" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"    dataProvider="{model.Context}"
+												  change="comboChangeHandler(event)" tabIndex="10" toolTip="Select Context"/>
+						<components1:LabelComboBox id="id_Exacerbating" maxChars="220" fontFamily="Calibri" prompt="Exacerbating" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.Exacerbating}"
+												  change="comboChangeHandler(event)" tabIndex="12" toolTip="Select Exacerbating"/>
+						<components1:LabelComboBox id="id_Radiation" maxChars="220" fontFamily="Calibri " prompt="Radiation" width="100%"  
+												  keyUp="comboKeyUpHandler(event)"   dataProvider="{model.Radiation}"
+												  change="comboChangeHandler(event)" tabIndex="14" toolTip="Select Radiation"/>
+					</s:VGroup>
+				</s:HGroup>
+			</s:VGroup>
+			<s:HGroup width="100%">
+				<s:Button id="id_add" click="addRecordClickHandler(event)" width="135" buttonMode="true" useHandCursor="true" toolTip="Add Record"
+						  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreTooltipBtn" label="Add CC/HPI" tabIndex="15" enabled="{id_Add.enableAll}"/> <!-- -->
+				<s:SkinnableContainer width="229" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBG" visible="{!id_add.enabled}"  />
+				<!-- Tahir Alvi - Linking of HPI entries with already added complaint -->
+				<s:CheckBox id="id_HPICheckBox" label="Attach HPI with" change="id_HPICheckBox_changeHandler(event)" color="#FFFFFF" visible="false" includeInLayout="{id_HPICheckBox.visible}"/>
+				<components1:LabelComboBox id="id_SavedComplaint" prompt="Complaint...." width="120" enabled="{id_HPICheckBox.selected ? true : false}" visible="false" includeInLayout="{id_SavedComplaint.visible}"/>
+				<mx:Spacer width="100%"/>
+				<s:Button id="id_nextBtn" label="Next" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" buttonMode="true" 
+						  toolTip="Next Section" enabled="true" click="id_nextBtn_clickHandler(event)" />
+				
+			</s:HGroup>
+			
+			<s:List id="id_List"  width="100%" height="100%"  
+					itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.CCItemRendererMxml"
+					rollOverColor="#D5CFB8" selectionColor="#D5CFB8" verticalScrollPolicy="off" horizontalScrollPolicy="off"
+					dataProvider="{ccCollection}"
+					maxHeight="200"
+					visible="{id_List.dataProvider.length > 0}" includeInLayout="{id_List.visible}"
+					>
+				<s:layout>
+					<s:VerticalLayout requestedRowCount="{id_List.dataProvider.length}" requestedMinRowCount="0" 
+									  paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" gap="0"/>
+				</s:layout>
+			</s:List>      
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</s:Group>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:history="com.gazuntite.input.view.inputsections.history.*" 
+		 xmlns:chronic="com.gazuntite.input.view.inputsections.history.chronic.*" 
+		 xmlns:Immunization="com.gazuntite.input.view.inputsections.history.Immunization.*" 
+		 xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+		 xmlns:allergy="com.gazuntite.input.view.inputsections.history.allergy.*" 
+		 xmlns:vitals="com.gazuntite.input.view.inputsections.physical.vitals.*" 
+		 xmlns:reviewofsystem="com.gazuntite.input.view.inputsections.physical.reviewofsystem.*" 
+		 xmlns:chiefcomplaint="com.gazuntite.input.view.inputsections.physical.chiefcomplaint.*" 
+		 xmlns:inHouseLab="com.gazuntite.view.patient.input.physical.inHouseLab.*"
+		 xmlns:inhouselab="com.gazuntite.input.view.inputsections.physical.inhouselab.*" 
+		 xmlns:physical="com.gazuntite.input.view.inputsections.physical.physical.*" 
+		 xmlns:supportclass11="com.gazuntite.input.view.supportclass1.*" 
+		 xmlns:supportclass="com.gazuntite.input.view.supportclass.*" 
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.event.visit.physical.physical.LoadPhysicalCategoryTypesEvent;
+			import com.gazuntite.input.event.visit.physical.ros.LoadROSCategoryTypesEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var viewModel:PatientInputPhysicalViewModel = PatientInputPhysicalViewModel.getInstance();
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]  private var NavItems:ArrayCollection = new ArrayCollection([{label:"Vitals", NavMainTitle:"Physical"}, {label:"Chief Complaint/HPI"}, {label:"Review of System"}, {label:"Physical"}, {label:"In-House Lab"} ]);
+			
+			protected function uiViewContainer_viewSelectedHandler(event:Event):void
+			{
+				switch( viewModel.selectedViewLabel )
+				{
+					case "Review of System":
+						loadROS();
+						break;
+					case "Physical":
+						loadPhysical();
+						break;
+				}
+			}
+			
+			///////////////////////////// Review of System ////////////////////
+			
+			public function loadROS():void
+			{
+				if( null == model.rosDTOList || 0 == model.rosDTOList.length )
+				{
+					var lros:LoadROSCategoryTypesEvent = new LoadROSCategoryTypesEvent( model.patientDTO.Gender.toLowerCase().charAt(0) != 'f' );
+					CairngormEventDispatcher.getInstance().dispatchEvent( lros );
+				}
+			}
+			
+			public function loadPhysical():void
+			{
+				if( null == model.physicalDTOList || 0 == model.physicalDTOList.length )
+				{
+					var lphysical:LoadPhysicalCategoryTypesEvent = new LoadPhysicalCategoryTypesEvent( model.patientDTO.Gender.toLowerCase().charAt(0) != 'f' );
+					CairngormEventDispatcher.getInstance().dispatchEvent( lphysical );
+				}
+			}
+			
+			///////////////////////////// Review of System ////////////////////
+			
+			public function clearPhysicalsInputForms():void
+			{
+				if(id_vitalInputView)
+					id_vitalInputView.ClearVitalsInputForm();
+				
+				if(id_CCHPIInputFormView)
+					id_CCHPIInputFormView.ClearInputFormView();
+				
+				if(id_InHouseInputput)
+					id_InHouseInputput.ClearInputFormView();
+				
+				if( id_ROS )
+					id_ROS.ClearData();
+				
+				if( id_Physical )
+					id_Physical.ClearData();
+				
+				MoveToSection( "Vitals" ); // move to first section
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				addEventListener(SelectSection.SelectSelectionEvent,function (event:SelectSection):void
+				{
+					
+					/* if(event.SectionID ==  'Physical/ROS Panel') // this is the comman ponel , so we have to bring the moveToNext Section logic outside the panel
+					{
+						if(viewModel.selectedViewLabel == 'Review of System')
+							MoveToSection('Physical');
+						else 
+						{
+							MoveToSection('In-House Lab');
+						}
+					}
+						
+					else */
+						
+						MoveToSection(event.SectionID);
+				});
+			}
+			
+			public function MoveToSection(Section_menuLabel:String):void
+			{
+				viewModel.selectedViewLabel = Section_menuLabel;
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:HorizontalLayout	paddingLeft="4" paddingRight="4" paddingBottom="3" paddingTop="3"/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<supportclass:PatientSubViewContainer id="uiViewContainer" viewSelected="uiViewContainer_viewSelectedHandler(event)" 
+										  width="100%" height="100%">
+		<supportclass:inputViews>
+			<supportclass:FlipViewContainer menuLabel="Vitals" selected="false">
+				<supportclass:flipViews>
+					<vitals:VitalsInputView id="id_vitalInputView" NavItems="{NavItems}"/>
+					<vitals:VitalsHistoryView NavItems="{NavItems}"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="Chief Complaint/HPI" selected="false">
+				<supportclass:flipViews>
+					<chiefcomplaint:ChiefComplaintInputView id="id_CCHPIInputFormView" NavItems="{NavItems}"/>
+					<chiefcomplaint:ChiefComplaintHistoryView NavItems="{NavItems}"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="Review of System" selected="false">
+				<supportclass:flipViews>
+					<reviewofsystem:ReviewOfSystemInputView id="id_ROS" moduleName="{QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME}" NavItems="{NavItems}"/>
+					<reviewofsystem:ReviewOfSystemHistoryView moduleName="{QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME}" sectionNumber="3" NavItems="{NavItems}"  />
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="Physical" selected="false">
+				<supportclass:flipViews>
+					<physical:PhysicalsView id="id_Physical" moduleName="{QIConstants.PHYSICAL_MODULE_NAME}" width="100%" NavItems="{NavItems}"/>
+					<physical:PhysicalsHistoryView moduleName="{QIConstants.PHYSICAL_MODULE_NAME}" sectionNumber="4" NavItems="{NavItems}" />
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+			<supportclass:FlipViewContainer menuLabel="In-House Lab">
+				<supportclass:flipViews>
+					<inhouselab:InHouseLabInputView id="id_InHouseInputput" NavItems="{NavItems}"/>
+					<inhouselab:InHouseLabHistoryView NavItems="{NavItems}"/>
+				</supportclass:flipViews>
+			</supportclass:FlipViewContainer>
+		</supportclass:inputViews>
+	</supportclass:PatientSubViewContainer>
+	
+</s:Group>

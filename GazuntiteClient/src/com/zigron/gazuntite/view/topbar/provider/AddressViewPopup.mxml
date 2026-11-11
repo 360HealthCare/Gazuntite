@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:provider="com.zigron.gazuntite.view.topbar.provider.*"
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   xmlns:status="com.zigron.gazuntite.view.topbar.provider.status.*" 
+					   creationComplete="cc(event)" 
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+					//	removePopup();
+						var e:Event = new Event('closePopup', true);
+						dispatchEvent( e);
+					}
+				});
+				
+				id_AddressCombo.selectedItem = model.LoggedInProvider.UserSelectedClinicBranchDTO.UserSelectedStation;
+				
+			}
+			
+			protected function id_AddressCombo_changeHandler(event:IndexChangeEvent):void
+			{
+				if( ! (id_AddressCombo.selectedItem is String) ) // ignore user entered text string, we need selected item
+				{
+					model.LoggedInProvider.UserSelectedClinicBranchDTO.UserSelectedStation = id_AddressCombo.selectedItem ;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ActionBarSkin">
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="4"/>
+		</s:layout>
+		
+		<components:LabelComboBox id="id_AddressCombo" width="100%"  change="id_AddressCombo_changeHandler(event)"
+								  dataProvider="{model.LoggedInProvider.UserSelectedClinicBranchDTO.StationList}"
+								  labelField="StationName"
+								  skinClass="com.gazuntite.skins.controls.combobox.LabelComboSkin" />
+			<!--<components:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="95 South Main St."/>
+					<fx:Object label="123 Somewhereland"/>
+					<fx:Object label="456 Somewhereland"/>
+				</s:ArrayCollection>
+			</components:dataProvider>
+		</components:LabelComboBox>-->
+		
+		
+		<status:StatusView width="100%" height="100%" />
+		
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

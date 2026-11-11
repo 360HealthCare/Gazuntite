@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				
+				
+				
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.events.FlexEvent;
+			
+			
+			
+			protected function id_Active_changeHandler(event:Event):void
+			{
+
+			}
+			
+			
+			protected function hgroup1_mouseOverHandler(event:MouseEvent):void
+			{
+				id_rolloverbg.visible = true;
+			}
+			
+			
+			protected function hgroup1_mouseOutHandler(event:MouseEvent):void
+			{
+				id_rolloverbg.visible = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Rect id="id_rolloutbg" height="16" width="160" alpha="0.6">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#BEC4C6" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#AAAFB2" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#737373" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Rect id="id_rolloverbg" height="16" width="160" alpha="0.6" visible="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#DDD5B1" ratio="1"/> 
+			</s:LinearGradient>		
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#737373" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:HGroup width="95%" horizontalAlign="left"
+			  paddingRight="1" paddingLeft="2" paddingBottom="0" paddingTop="1" verticalAlign="middle" buttonMode="true"
+			  mouseOver="hgroup1_mouseOverHandler(event)" mouseOut="hgroup1_mouseOutHandler(event)">
+		<mx:Spacer width="1" />
+	
+		<s:VGroup width="95%" paddingTop="3" verticalAlign="middle">
+			<s:Label width="100%" fontFamily="Calibri" fontSize="11" color="#000000" text="{data.label}" toolTip="{data.description}"/>
+		</s:VGroup>
+	
+	</s:HGroup>
+	
+</s:ItemRenderer>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LoadAllergies xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<PatientAllergies>
+    <PatientAllergies GaxenPatientID="GXP-21" modNotesID="tsgv1" modDictationID="asdasd1" AllergyName="dfsdf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-1"/>
+    <PatientAllergies GaxenPatientID="GXP-22" modNotesID="tsgv2" modDictationID="asdasd2" AllergyName="df sdf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-2"/>
+    <PatientAllergies GaxenPatientID="GXP-23" modNotesID="tsgv3" modDictationID="asdasd3" AllergyName="dfs df" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-3"/>
+    <PatientAllergies GaxenPatientID="GXP-24" modNotesID="tsgv4" modDictationID="asdasd4" AllergyName="d fs df" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-4"/>
+    <PatientAllergies GaxenPatientID="GXP-25" modNotesID="tsgv5" modDictationID="asdasd5" AllergyName="dfs d f" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-5"/>
+    <PatientAllergies GaxenPatientID="GXP-26" modNotesID="tsgv6" modDictationID="asdasd6" AllergyName="df sdf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-6"/>
+    <PatientAllergies GaxenPatientID="GXP-27" modNotesID="tsgv7" modDictationID="asdasd7" AllergyName="dfsdsdf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-7"/>
+    <PatientAllergies GaxenPatientID="GXP-28" modNotesID="tsgv8" modDictationID="asdasd8" AllergyName="dfs  df" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-8"/>
+    <PatientAllergies GaxenPatientID="GXP-29" modNotesID="tsgv9" modDictationID="asdasd9" AllergyName="dfsdsddf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-9"/>
+    <PatientAllergies GaxenPatientID="GXP-30" modNotesID="tsgv0" modDictationID="asdasd0" AllergyName="df  dsdf" isNKDA="false" OnSet="2011-01-01T00:00:00" Reaction="" isActive="true" DictationID="" Notes="" GaxenAllergyID="GXA-10"/>
+</PatientAllergies>
+</LoadAllergies>

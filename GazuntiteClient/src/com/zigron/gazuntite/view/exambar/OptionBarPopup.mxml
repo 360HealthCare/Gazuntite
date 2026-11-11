@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   xmlns:exambar="com.zigron.gazuntite.view.exambar.*" 
+					   xmlns:communication="com.zigron.gazuntite.view.topbar.communication.*" 
+					   xmlns:common="com.zigron.gazuntite.view.common.*" 
+					   xmlns:view="com.gazuntite.provider.services.sms.view.*" 
+					   xmlns:view1="com.gazuntite.provider.services.email.view.*"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.LoggingUtil;
+			import com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.patient.RecentPatientList;
+			
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable] private var model : ApplicationModel = ApplicationModel.getInstance();
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			private var isRecentListLoaded:Boolean = false;
+			
+			public function patientSelectedHandler(event:PatientSelectedEvent):void
+			{
+				
+			}
+			
+			protected function id_buttonbar_changeHandler(event:IndexChangeEvent):void
+			{
+				if(id_buttonbar.selectedIndex == -1)
+				{
+					id_optionsView.visible = false;
+					return;
+				}
+				if(id_buttonbar.selectedIndex >= 0)
+				{
+					id_optionsView.visible = true;
+					
+					switch(id_buttonbar.selectedIndex)
+					{
+						case 0:
+						{
+							id_optionsView.selectedIndex = 0;
+							break;
+						}
+						case 1:
+						{
+							id_optionsView.selectedIndex = 1;
+							break;
+						}
+						case 2:
+						{
+							id_optionsView.selectedIndex = 2;
+							break;
+						}
+						case 3:
+						{
+							id_optionsView.selectedIndex = 3;
+							if( (null == model.recentPatientList || model.recentPatientList.ListAll.length == 0) && !isRecentListLoaded ) 
+							{
+								model.recentPatientList = new RecentPatientList();
+								model.recentPatientList.FromXML( RecentPatientList.recentPatientsXML );
+								logger.info( "Recent Patient Loaded." );
+								isRecentListLoaded = true;
+							}
+							break;
+						}
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<components:layout>
+		<s:VerticalLayout horizontalAlign="left" gap="-6" paddingLeft="0" paddingRight="0"/>
+	</components:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup  width="100%" horizontalAlign="right" paddingRight="50">
+		<s:SkinnableContainer width="190" height="50" skinClass="com.gazuntite.skins.controls.container.ActionBarSkin">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" horizontalAlign="right" paddingRight="15"/>
+			</s:layout>
+			
+			<s:ButtonBar id="id_buttonbar" 
+						 change="id_buttonbar_changeHandler(event)" 
+						 skinClass="com.gazuntite.skins.controls.buttonBar.bar.OptionButtonBar"
+						 selectedIndex="-1"
+						 >
+				<s:dataProvider>
+					<s:ArrayList>
+						<fx:Object label="Email"
+								   icon="@Embed('assets/images/email.png')" 
+								   enabled="{model.isPatientAlredayLoaded}"
+								   />
+						<fx:Object label="SMS"
+								   icon="@Embed('assets/images/message.png')" 
+								   enabled="{model.isPatientAlredayLoaded}"
+								   />
+						<fx:Object label="Video"
+								   icon="@Embed('assets/images/video.png')" 
+								   enabled="{model.isPatientAlredayLoaded}"
+								   />
+						<fx:Object label="Recent Patient"
+								   icon="@Embed('assets/images/recentpatientseen.png')" 
+								   enabled="true"
+								   />
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:ButtonBar>
+		</s:SkinnableContainer>
+	</s:HGroup>
+	<s:VGroup width="100%" paddingLeft="10" paddingRight="-15">
+		<components:LabelViewStack id="id_optionsView"  visible="false" includeInLayout="{id_optionsView.visible}" width="100%" height="100%"  borderVisible="false" backgroundAlpha="0">
+			<s:ArrayList>
+				
+				<s:SkinnableContainer width="100%" height="220" 
+									  skinClass="com.gazuntite.skins.controls.container.UpperArrowConatinerSkin"  >
+					<s:layout>
+						<s:VerticalLayout paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5"/>
+					</s:layout>
+					<view1:CommunicationView id="id_EmailView"	 width="100%" height="100%"	showHeader="false" />
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer width="100%" height="220" skinClass="com.gazuntite.skins.controls.container.UpperArrowConatinerSkin"	  >
+					<s:layout>
+						<s:VerticalLayout paddingTop="5" paddingLeft="5" paddingBottom="5" paddingRight="5"/>
+					</s:layout>
+					<view:SMSView  id="id_SMSView"	width="100%" height="100%" showHeader="false"/>
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer width="100%" height="220" skinClass="com.gazuntite.skins.controls.container.UpperArrowConatinerSkin"	  >
+					<common:ComingSoonView  id="id_VideoView" samlpeText="Video Coming Soon" width="100%" height="100%" />
+				</s:SkinnableContainer>
+				
+				<exambar:RecentPatientView id="id_RecentPatientView" 
+										   width="100%" height="100%" 
+										   PatientSelected="patientSelectedHandler(event)"
+										   />
+			</s:ArrayList>
+		</components:LabelViewStack>
+	</s:VGroup>
+</components:PopupGroup>

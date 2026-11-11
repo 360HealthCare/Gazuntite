@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms1:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%"
+		 height="100%" 
+		 xmlns:controls="com.gazuntite.view.controls.*" 
+		 xmlns:controls1="spark.tink.skins.controls.*" 
+		 xmlns:prescription="com.gazuntite.view.quickInput.forms.treatment.prescription.*" 
+		 xmlns:lists="com.gazuntite.view.lists.*"
+		 xmlns:spicefactory="http://www.spicefactory.org/parsley"
+		 xmlns:forms="com.gazuntite.forms.*" xmlns:forms1="com.gazuntite.view.quickInput.forms.*"
+		 >
+	
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.itemrenderers.Treatment.Prescription.PrescriptionIRDose;
+			import com.gazuntite.view.itemrenderers.Treatment.Prescription.PrescriptionIRFrequency;
+			import com.gazuntite.view.itemrenderers.Treatment.Prescription.PrescriptionIRMedicineName;
+			import com.gazuntite.view.itemrenderers.diagnosis.DiagnosisIRICD;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.view.quickInput.forms.MobileFormBase;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.Treatment.PrescriptionDTO;
+			
+			import mx.collections.ArrayCollection;
+			
+
+			private var _dataProvider:ArrayCollection;
+
+		
+
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+				
+			}
+			
+			protected function clearForm():void
+			{
+				/* 	id_AssociatedWith.selectedItemText 	= "";
+				id_ICDDescription.selectedItemText 	= "";
+				id_ICDCode.selectedItemText 		= "";
+				id_OnSetDate.selectedItemText 		= "";
+				id_IsChronic.selected		 		= undefined;
+				*/
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				return true;
+			}
+			
+			protected function Saveform(event:MouseEvent):void
+			{
+				
+				trace("prescription data saved");
+				if( validateEditForm() )
+				{
+					var prescription:PrescriptionDTO = new PrescriptionDTO();
+					
+					/* prescription.NcpdpID = id_prescriptionView.NCPDP;
+					prescription.pharmacyName =id_prescriptionView.Pharmacyname; */
+					prescription.dose = ID_Dose.selectedItemText;
+					prescription.MedicineName = ID_MedicineName.selectedItemText;
+					prescription.Frequency = ID_Frequency.selectedItemText;
+					
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = prescription; 
+					
+					dispatchEvent(e);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<forms:states>
+		<s:State name="normal"/>
+		<s:State name="presentation"/>
+	</forms:states>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" height="100%">
+		
+		
+		<s:BorderContainer borderVisible="false" width="100%" height="21%">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<prescription:PrescriptionView id="id_prescriptionView" width="100%" height="100%"/>
+		</s:BorderContainer>
+		
+		
+		<s:BorderContainer borderVisible="false" width="100%" height="100%">	
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" paddingLeft="4" paddingRight="4" paddingTop="4"/>
+			</s:layout>
+			
+			<s:VGroup width="100%">
+				<s:HGroup width="40%">		
+					<controls:ToggleSwitchLabel id="id_CreateNewVisit" 
+												styleName="subTitle"
+												label="Create New Visit:" 									
+												width="7%"
+												/>
+					
+					<!--<controls:ToggleSwitchLabel id="id_Avtive" 
+					styleName="subTitle"
+					label="Active:" 									
+					width="7%"/>-->
+					
+					<controls:ToggleSwitchLabel id="id_PRN" 
+												styleName="subTitle"
+												label="PRN:" 									
+												width="7%"
+												/>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:VGroup width="50%">
+						<controls:CalloutLabelText id="ID_MedicineName" 
+												   styleName="subTitle"
+												   dataProvider="{sharedModel.MedicationMedicineNameList}"
+												   labelField="Term" 
+												   buttonLabel="Medicine Name:"
+												   required="true" 
+												   width="100%" 
+												   />
+						
+						
+						<controls:CalloutLabelText id="ID_SelectAssociatedVisit" 
+												   styleName="subTitle"
+												   labelField="SelectAssociatedVisit" 
+												   buttonLabel="Select Associated Visit :"
+												   required="true" 
+												   width="100%" 
+												   />
+					</s:VGroup>
+					
+					<s:VGroup width="50%">
+						<controls:CalloutLabelText id="ID_Substitution" 
+												   styleName="subTitle"
+												   labelField="Substitution" 
+												   buttonLabel="Substitution :"
+												   required="true" 
+												   width="100%" 
+												   />
+					</s:VGroup>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:VGroup width="34%">
+						
+						<controls:CalloutLabelText id="ID_QualityFrom" 
+												   styleName="subTitle"
+												   labelField="Term" 
+												   buttonLabel="Quality Form :"
+												   required="true" 
+												   dataProvider="{sharedModel.MedicationQuantityFormList}"
+												   width="100%" 
+												   />
+						
+						<controls:CalloutLabelText id="ID_Frequency" 
+												   styleName="subTitle"
+												   labelField="Frequency" 
+												   buttonLabel="Frequency :"
+												   required="true" 
+												   width="100%" 
+												   />
+						<controls:CalloutLabelText id="ID_Quantity" 
+												   styleName="subTitle"
+												   labelField="Quantity" 
+												   buttonLabel="Quantity :"
+												   required="true" 
+												   width="100%" 
+												   />
+						<controls:CalloutLabelText id="ID_ReFills" 
+												   styleName="subTitle"
+												   labelField="ReFills" 
+												   buttonLabel="#ReFills :"
+												   required="true" 
+												   width="50%"
+												   />
+					</s:VGroup>
+					
+					<s:VGroup width="33%">
+						<controls:CalloutLabelText id="ID_GenericName" 
+												   styleName="subTitle"
+												   labelField="Term" 
+												   buttonLabel="Generic Name :"
+												   required="true" 
+												   dataProvider="{sharedModel.MedicationGenericnameList}"
+												   width="100%" 
+												   />		
+						<controls:CalloutLabelText id="ID_DosageForm" 
+												   styleName="subTitle"
+												   labelField="Term" 
+												   buttonLabel="Dosage Form :"
+												   required="true" 
+												   dataProvider="{sharedModel.MedicationDosageFormList}"
+												   width="100%"/>
+						
+						
+						<controls:CalloutLabelText id="ID_Duration" 
+												   styleName="subTitle"
+												   labelField="Duration" 
+												   buttonLabel="Duration :"
+												   required="true" 
+												   width="100%" 
+												   />
+						<controls:CalloutLabelText id="ID_type" 
+												   styleName="subTitle"
+												   labelField="type" 
+												   buttonLabel="Type :"
+												   required="true" 
+												   width="100%" 
+												   />
+					</s:VGroup>
+					
+					<s:VGroup width="33%">
+						<controls:CalloutLabelText id="ID_Dose" 
+												   styleName="subTitle"
+												   labelField="Dose" 
+												   buttonLabel="Dose :"
+												   required="true" 
+												   width="100%" 
+												   />
+						<controls:CalloutLabelText id="ID_strength" 
+												   styleName="subTitle"
+												   labelField="Strength" 
+												   buttonLabel="Strength :"
+												   required="true" 
+												   width="100%" 
+												   />
+						
+						<controls:CalloutLabelText id="ID_NDC" 
+												   styleName="subTitle"
+												   labelField="Term" 
+												   buttonLabel="NDC :"
+												   required="true" 
+												   dataProvider="{sharedModel.MedicationNDCList}"
+												   width="100%" 
+												   />
+						<controls:CalloutLabelText id="ID_Route" 
+												   styleName="subTitle"
+												   labelField="Route" 
+												   buttonLabel="Route :"
+												   required="true" 
+												   width="100%" 
+												   />
+						
+					</s:VGroup>
+					
+				</s:HGroup>	
+				<s:HGroup width="100%" horizontalAlign="left" paddingLeft="18">
+					
+					<s:Button id="ID_btnSave"
+							  styleName="button"
+							  label="Save"
+							  click="Saveform(event)"/>
+					<s:Button id="ID_btnSend"
+							  styleName="button"
+							  label="Send"
+							  visible="true"/>
+					<s:Button id="ID_btnPrint"
+							  styleName="button"
+							  label="Print"
+							  visible="true"/>
+					<s:Button id="ID_btnFax"
+							  styleName="button"
+							  label="Fax"
+							  visible="true"/>
+					
+					
+				</s:HGroup>
+				<s:HGroup height="10%" width="100%">
+					<s:TextArea  width="100%" height="100%" id="ID_pharmacyNotes" prompt="Pharmacy Notes" skinClass="spark.skins.mobile.TextInputSkin"/>
+				</s:HGroup>
+				<lists:SortableList id="id_SortableList" height="24%" width="100%" label="Prescription records added"
+									dataProvider="{dataProvider}" 
+									sortableIRList="{new ArrayCollection([{irClass:PrescriptionIRMedicineName, name:'Medicine Name'}, {irClass:PrescriptionIRDose, name:'Dose'}, {irClass:PrescriptionIRFrequency, name:'Frequency'}])}"
+									itemRenderer="com.gazuntite.view.itemrenderers.Treatment.Prescription.PrescriptionIRMedicineName" />
+			</s:VGroup>
+<!--									sortableFeildList="{new ArrayCollection(['Pharmacy Name','Ncpdp ID'])}"-->
+			
+		</s:BorderContainer>
+		
+		
+		
+	</s:VGroup>
+</forms1:MobileFormBase>

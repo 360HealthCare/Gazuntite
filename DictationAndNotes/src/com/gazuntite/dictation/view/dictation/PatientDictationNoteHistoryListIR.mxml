@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				width="100%" xmlns:components="com.gazuntite.components.*"
+				creationComplete="cc()" xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import flash.net.dns.AAAARecord;
+			
+			import mx.states.OverrideBase;
+			
+			[Bindable]
+			public var ExpandMode:Boolean = false;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (data.hasOwnProperty("hasDictation") && data.hasDictation)
+				{
+					uiDication.setStyle("skinClass", DictataionRedButtonSkin);
+				}
+				
+				if (data.hasOwnProperty("hasNotes") && data.hasNotes)
+				{
+					uiNote.setStyle("skinClass", NotesRedButtonSkin);
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				id_Header.setStyle("skinClass", itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function cc():void
+			{
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				if (!data)
+					return;
+				
+				if (!data.hasOwnProperty("ModuleTypeID"))
+					return;
+				
+				event.data = data;
+			}
+			
+			public function getFormattedVisitDate(dto:Object):String
+			{
+				if (!dto)
+					return "";
+				
+				if (!dto.hasOwnProperty("VisitDate"))
+					return "";
+				
+				if (!dto.VisitDate)
+					return "";
+				
+				return UtilityFunctions.FormatDate(dto.VisitDate, "MM/DD/YYYY");
+			}
+			
+			protected function id_Header_clickHandler(event:MouseEvent):void
+			{
+				ExpandMode = !ExpandMode;
+				showGlow();
+			}
+			
+			private function showGlow():void
+			{
+				if (!data)
+					return;
+				
+				if (ExpandMode)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha 								= 0;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	<s:layout >
+		<s:VerticalLayout horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0" gap="-4"/> 
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header"  width="{this.width - 7}" height="35" click="id_Header_clickHandler(event)">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Label id="SrNo" 
+				 text="{data.serialNumber.toString()}" fontFamily="CalibriCFF" fontSize="14" width="30"
+				 paddingLeft="6" maxDisplayedLines="1"/>
+		
+		<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="visitDate" 
+					 text="{getFormattedVisitDate(data)}" toolTip="{getFormattedVisitDate(data)}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup >
+		
+		
+		
+		<s:HGroup width="120" horizontalAlign="center" verticalAlign="middle" includeInLayout="false" visible="false">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:ToggleButton id="uiDication" 
+								skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+								buttonMode="true" useHandCursor="true" toolTip="Dictation" selected="@{data.dictationNoteViewModel.inDictationMode}"/>
+				<s:ToggleButton id="uiNote" 
+								skinClass="{id_PatientDictationNoteView.note.length > 0 ?  NotesRedButtonSkin : com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin}"
+								buttonMode="true" useHandCursor="true" toolTip="Notes" selected="@{data.dictationNoteViewModel.inNoteMode}"/>
+			</s:HGroup>
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	<s:Group id="gp" width="{id_Header.width - 5}" top="21"  visible="{ExpandMode}" includeInLayout="{ExpandMode}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer id="id_ItemExpandView" width="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin">
+			
+			<s:layout>
+				<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+			</s:layout>
+			
+			<s:VGroup width="100%" gap="10" >
+				<s:HGroup width="50%" gap="6">
+					<s:Label text="Note:     "	 styleName="patientFormLabel" width="100"/>
+					
+					<s:Spacer width="10" />
+					<s:Label text="{data.Note}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				</s:HGroup>
+				<s:HGroup width="50%" gap="6">
+					<s:Label text="Dictation:"	 styleName="patientFormLabel"  width="100"/>
+					<s:Spacer width="10" />
+					<s:Label text="{data.dictationNoteViewModel.inDictationMode ? 'Avaliable' : 'Not Avaliable'}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+				</s:HGroup>
+			</s:VGroup>
+			
+		</s:SkinnableContainer>
+			
+	</s:Group>
+	
+	<dictation:PatientDictationNoteView id="id_PatientDictationNoteView" width="100%" viewModel="{data.dictationNoteViewModel}" note="@{data.Note}" ShowSaveButton="false" IsNoteEditable="false"/>
+</s:ItemRenderer>

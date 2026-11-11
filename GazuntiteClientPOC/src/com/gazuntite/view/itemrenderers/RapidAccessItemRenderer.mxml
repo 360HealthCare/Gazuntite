@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				minHeight="40">
+	
+	<s:Rect left="0" right="0" top="0" bottom="0">                              
+		<s:fill>
+			<s:SolidColor color="0x000000"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:HGroup verticalAlign="middle" width="100%" height="100%">
+		
+		<s:Image source="{'assets/' + data.img}"/>
+		
+		<s:Label fontSize="13"
+				 fontWeight="bold"
+				 color="0xFFFFFF" 
+				 text="{data.name}"/>
+	</s:HGroup>
+	
+	<s:Line width="100%" bottom="0">
+		<s:stroke>
+			<s:SolidColorStroke color="0xffffff"/>
+		</s:stroke>
+	</s:Line>
+	
+</s:ItemRenderer>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Metadata>
+		[Event(name="signOut", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderStatusDTO;
+			import com.zigron.gazuntite.view.common.AlertHelper;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function signout_clickHandler(event:MouseEvent):void
+			{
+				var modified_views:ArrayCollection = PatientInputViewModel.getInstance().getDirtyViewList();
+				if (modified_views.length>0)
+				{
+					var msg:String = "The following views contain unsaved data:";
+					for each (var view_name:String in modified_views)
+					{
+						msg += "\n  "+view_name;
+					}
+					msg += "\nThe unsaved data will be lost. Do you want to continue?";
+					AlertHelper.showContinueQuestion(confirmedSignOut, msg);
+				}
+				else
+				{
+					confirmedSignOut();
+				}
+			}
+			protected function confirmedSignOut():void
+			{
+				var soe:Event = new Event( "signOut", true, false );
+				dispatchEvent( soe );
+			}
+			
+			protected function statusButton_clickHandler(event:MouseEvent):void
+			{
+				model.LoggedInProvider.Status = event.currentTarget.label.toLowerCase();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+	</s:layout>
+	
+	<s:HGroup width="100%" horizontalAlign="center" gap="5">
+		<s:ToggleButton label="{UtilityFunctions.TitleCase( ProviderStatusDTO.ONLINE )}" 
+						click="statusButton_clickHandler(event)" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.OnlineButton"
+						selected="{model.LoggedInProvider.Status == ProviderStatusDTO.ONLINE}"
+						buttonMode="true" useHandCursor="true" toolTip="Online"/>
+		<s:ToggleButton label="{UtilityFunctions.TitleCase( ProviderStatusDTO.AWAY )}" 
+						click="statusButton_clickHandler(event)"
+						selected="{model.LoggedInProvider.Status == ProviderStatusDTO.AWAY}" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.AwayButton"
+						buttonMode="true" useHandCursor="true" toolTip="Away"/>
+		<s:ToggleButton label="{UtilityFunctions.TitleCase( ProviderStatusDTO.BUSY )}" 
+						click="statusButton_clickHandler(event)"
+						selected="{model.LoggedInProvider.Status == ProviderStatusDTO.BUSY}" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.BusyButton"
+						buttonMode="true" useHandCursor="true" toolTip="Busy"/>
+		
+	</s:HGroup>
+	
+	<s:Button label="SIGN OUT" width="100%" skinClass="com.gazuntite.skins.controls.button.SignoutButton"
+			  click="signout_clickHandler(event)" toolTip="Sign Out" useHandCursor="true" buttonMode="true" />
+	
+</s:SkinnableContainer>

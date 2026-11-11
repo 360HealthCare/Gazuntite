@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components="com.gazuntite.components.*"
+					  xmlns:vitals="com.gazuntite.input.view.inputsections.physical.vitals.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*"
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc()"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.history.dictationNote.LoadModuleDictationNoteByPatientIDEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.LoadModuleNotesByVisitIdEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
+			
+			import spark.components.ToggleButton;
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]  public var RecordLevelNote:String = '';
+			
+			[Bindable]
+			public var viewModel:PatientInputPhysicalVitalsViewModel = PatientInputPhysicalVitalsViewModel.getInstance();
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			
+			protected function cc():void
+			{
+				addEventListener(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_ADD_EVENT, patientInputPhysicalVitalsAddHandler, false, 0, true);
+				addEventListener(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_EDIT_EVENT, patientInputPhysicalVitalsEditHandler, false, 0, true);
+				addEventListener(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_DELETE_EVENT, patientInputPhysicalVitalsDeleteHandler, false, 0, true);
+				
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				SaveSectionLevelNotes(); //just to save the section level notes independtly .By Moeen Mohsin 
+			}
+			
+			public function ClearVitalsInputForm():void
+			{
+				//id_vital.vitalsDTO = new VitalsDTO();
+				
+				
+				if(model.patientVitalsInputList)
+					model.patientVitalsInputList.removeAll();
+				
+				if( null != id_DictationNote )
+					id_DictationNote.RecordLevelNote = "";
+				
+				if(id_vital)
+				{
+					id_vital.ClearVitalsForm()
+					id_vital.uiEnglishMetric.selected = true;				
+				}
+				
+				if(id_DictationNote)
+					id_DictationNote.resetToDefault();
+				
+				
+			}
+			
+			private function patientInputPhysicalVitalsAddHandler(event:PatientInputPhysicalVitalsEvent):void
+			{
+				if (!event.vitalsDTO)
+					return;
+				
+				event.vitalsDTO.Note = id_DictationNote.RecordLevelNote;
+				
+				if(model.patientPreviousVitalsList && model.patientPreviousVitalsList.length > 0)
+				{
+					for each (var vital:VitalsDTO in model.patientPreviousVitalsList) 
+					{
+						if(vital.VisitID == model.VisitID)
+						{
+							event.vitalsDTO.ID = vital.ID;
+							break;
+						}
+					}
+				}
+				
+				if (!model.patientVitalsInputList)
+					model.patientVitalsInputList = new ArrayCollection();
+				
+				model.patientVitalsInputList.removeAll();
+				
+				event.vitalsDTO.SNo = "1";
+				model.patientVitalsInputList.addItem(event.vitalsDTO);
+				
+				viewModel.managePatientVitals(event.vitalsDTO, onVitalsSaved);
+				
+				//dictationNoteView.note = "";
+				viewModel.dictationNoteViewModel.inDictationMode = false;
+				viewModel.dictationNoteViewModel.inNoteMode = false;
+			}
+			
+			private function patientInputPhysicalVitalsEditHandler(event:PatientInputPhysicalVitalsEvent):void
+			{
+				if (!event.vitalsDTO)
+					return;
+				
+				//event.vitalsDTO.Note = dictationNoteView.note;
+				
+				if(model.patientPreviousVitalsList && model.patientPreviousVitalsList.length > 0)
+				{
+					for each (var vital:VitalsDTO in model.patientPreviousVitalsList) 
+					{
+						if(vital.VisitID == model.VisitID)
+						{
+							event.vitalsDTO.ID = vital.ID;
+							break;
+						}
+					}
+				}
+				
+				if (!model.patientVitalsInputList)
+					model.patientVitalsInputList = new ArrayCollection();
+				
+				model.patientVitalsInputList.removeAll();
+				
+				event.vitalsDTO.SNo = "1";
+				event.vitalsDTO.IsDirty = true;
+				model.patientVitalsInputList.addItem(event.vitalsDTO);
+				
+				viewModel.managePatientVitals(event.vitalsDTO, onVitalsSaved);
+			}
+			
+			private function patientInputPhysicalVitalsDeleteHandler(event:PatientInputPhysicalVitalsEvent):void
+			{
+				if (!event.vitalsDTO)
+					return;
+				
+				if (model.patientVitalsInputList)
+					model.patientVitalsInputList.removeAll();
+				
+				viewModel.managePatientVitals(event.vitalsDTO, onVitalsSaved);
+			}
+			
+			[Bindable]	protected var inputViewModel:PatientInputViewModel = PatientInputViewModel.getInstance();
+			
+			
+			private function SaveSectionLevelNotes():void
+			{
+				if(StringUtil.trim(id_DictationNote.SectionLevelNote).length > 0)
+				{
+					var notesDTO:ModuleNoteDTO =  new ModuleNoteDTO();
+					notesDTO.ModuleNoteId = 0
+					
+					notesDTO.Note = id_DictationNote.SectionLevelNote;
+					notesDTO.ManagedByUserId = model.LoggedInUserId;
+					notesDTO.CreatedBy = model.LoggedInUserId;
+					notesDTO.CreatedAt = new Date();
+					notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(QIConstants.PATIENT_VITAL_MODULE_NAME);
+					notesDTO.VisitID = model.VisitID;
+					notesDTO.PatientID = model.patientDTO.ID;
+					notesDTO.IsNewAdded = true;			
+					
+					inputViewModel.manageModuleNotes(notesDTO, QIConstants.PATIENT_VITAL_MODULE_NAME, moduleNotesStatus);
+				}
+			}
+			
+			private function onVitalsSaved(success:Boolean):void
+			{
+				if (!success)
+					return;
+				viewModel.loadPatientVitals();
+				
+				
+				//___Shahid Munir[08/28/2013] saving section level notes as per discussion with Tamjeed bhai & azka zafar__\\ 
+				/* if(StringUtil.trim(id_DictationNote.SectionLevelNote).length > 0)
+				{
+					var notesDTO:ModuleNoteDTO =  new ModuleNoteDTO();
+					notesDTO.ModuleNoteId = 0
+					
+					notesDTO.Note = id_DictationNote.SectionLevelNote;
+					notesDTO.ManagedByUserId = model.LoggedInUserId;
+					notesDTO.CreatedBy = model.LoggedInUserId;
+					notesDTO.CreatedAt = new Date();
+					notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(QIConstants.PATIENT_VITAL_MODULE_NAME);
+					notesDTO.VisitID = model.VisitID;
+					notesDTO.PatientID = model.patientDTO.ID;
+					notesDTO.IsNewAdded = true;			
+					
+					inputViewModel.manageModuleNotes(notesDTO, QIConstants.PATIENT_VITAL_MODULE_NAME,moduleNotesStatus);
+				} */
+				/* else
+				{
+					viewModel.loadPatientVitals();
+				} */
+				//_________________________________________________________________________________________________________//
+				//id_DictationNote.note = "";
+				//viewModel.loadPatientVitals();
+			}
+			
+			private function moduleNotesStatus(isSuccess:Boolean,sectionName:String):void
+			{
+				if(isSuccess)
+				{
+					//Alert.show("Notes Saved.", "Info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+					viewModel.dictationNoteViewModel.visible = false;
+					
+					switch (sectionName)
+					{
+						case QIConstants.INPUT_VIEW:
+							
+							var NV:LoadModuleNotesByVisitIdEvent = new LoadModuleNotesByVisitIdEvent();
+							CairngormEventDispatcher.getInstance().dispatchEvent(NV);
+							
+							break;
+					}
+					
+					var ev:LoadModuleDictationNoteByPatientIDEvent = new LoadModuleDictationNoteByPatientIDEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				}
+				
+				viewModel.loadPatientVitals();
+			}
+			
+			
+			protected function id_vital_clickHandler(event:MouseEvent):void
+			{
+				id_vital.IsViewDirty = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="10"/>
+	</s:layout>
+	<skins:PatientSubViewTitleBar id="id_titleBar" width="100%" label="VITALS" 
+								  NextSectionLabel="Chief Complaint/HPI"
+								  NavItems="{NavItems}"
+								  sectionNumber="1" maxSectionCounter="5" showInputPart="true" inputCounter="0"
+								  MainSectionLabel="Physical"
+								  dictationNoteViewModel="{viewModel.dictationNoteViewModel}"
+								  SectionLevelNote="@{id_DictationNote.SectionLevelNote}"
+								  />
+	
+
+	<!--<dictation2:PatientDictationNoteView id="id_DictationNote" width="100%" minHeight="47" viewModel="{viewModel.dictationNoteViewModel}"
+										isSectionLevel="true" isSaveButtonVisible="false" IsDictaionEditMode="true"/>-->
+
+	
+	<dictation2:NewPatientDictationNoteView  id="id_DictationNote" 
+											 width="100%" minHeight="47" 
+											 isSectionLevel="true"
+											 viewModel="{viewModel.dictationNoteViewModel}"  
+											 RecordLevelNote="@{RecordLevelNote}"
+											 IsDictaionEditMode="true"
+											 /> <!--SectionLevelNote="@{viewModel.notesDTO.Note}" SectionLevelNote="@{notesDTO.Note}"-->
+	
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>	
+			
+			<s:HGroup width="100%" paddingTop="2" paddingBottom="2" paddingLeft="0" paddingRight="0">
+				<vitals:VitalsItemEditView2 width="100%" id="id_vital" click="id_vital_clickHandler(event)" Note="@{RecordLevelNote}"/><!--Note="{id_DictationNote.note}"-->
+			</s:HGroup>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" visible="false"/>
+				<s:DropDownList id="uiSort"  visible="false"
+								selectedIndex="0"
+								buttonMode="true" 
+								toolTip="{uiSort.selectedIndex == -1 ? 'Sort List': (uiSort.selectedItem as Object).label}"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+								>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Vitals" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%" />
+			</s:SkinnableContainer>
+			
+			<s:List id="uiInboxList"
+					width="100%"
+					allowMultipleSelection="false"
+					borderVisible="false"
+					dataProvider="{model.patientVitalsInputList}"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					itemRenderer="com.gazuntite.input.view.inputsections.physical.vitals.VitalsItemRenderer"/>
+		</s:Group>	
+	</s:Scroller>
+</s:SkinnableContainer>

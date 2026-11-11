@@ -1,0 +1,1179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components="com.zigron.controls.extended.components.*"
+							 creationComplete="basicInfoCreationComplete()" 
+							 title="Basic Information"
+							 width="100%" xmlns:registeration="com.gazuntite.view.communication.rapidAccessViews.patient.registeration.*" 
+							  >
+	<components:layout>
+		<s:HorizontalLayout paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"  />
+	</components:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.quivus.skins.chrome.textInputSkins.dateTextBox;
+			import com.adobe.quivus.skins.chrome.textInputSkins.textInput;
+			import com.gazuntite.model.SharedModel;
+			import com.zigron.common.util.ValidationUtils;
+			import com.zigron.controls.extended.skins.LabelTextInputRequiredSkin;
+			import com.zigron.controls.extended.skins.comboBoxRegisterationRequiredSkin;
+			import com.zigron.controls.extended.skins.comboBoxRegisterationSkin;
+			
+			import flash.sampler.NewObjectSample;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.BitmapAsset;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.MoveEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.managers.CursorManager;
+			import mx.utils.Base64Encoder;
+			
+			import spark.components.TextInput;
+			import spark.components.TitleWindow;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Embed(source="com/adobe/Quivus/view/controls/skins/assets/sampleuser.png")]
+			[Bindable]
+			public var dummyImg:Class;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var model:SharedModel = new SharedModel();
+			
+			
+			private var fileToOpen:File = new File();
+			[Bindable]
+			private var m_oImageContent:ByteArray;
+			
+			private var _errorInfo:Object;
+			private var phoneNumberAddMorePopUp:PhoneNumberAddMoreTitleWindow;
+			private var personalPhoneNumbers:ArrayCollection;
+			
+			private function basicInfoCreationComplete():void
+			{
+				InitializeComponent();
+			}
+			
+			public function InitializeComponent():void
+			{
+				id_LeaveMessage.textInput.editable = false;
+				personalPhoneNumbers 	= new ArrayCollection();
+				model.zipcodeList 		= new ArrayCollection();
+				model.citiesList 		= new ArrayCollection();
+				model.statscodeList 	= new ArrayCollection();
+			}
+			
+			/*public function SetIsDirty():void
+			{
+				if(id_Prefix.selectedIndex!=-1 && model.basicUserDTO.Prefix	!= id_Prefix.selectedItem || 
+					model.basicUserDTO.FirstName != id_FName.text || 
+					model.basicUserDTO.MiddleName != id_MName.text || 
+					model.basicUserDTO.LastName != id_LName.text || 
+					model.basicUserDTO.CreatedBy != model.loggedInUserDTO.UserId ||
+					model.basicUserDTO.Gender != id_Gender.selectedItem ) 
+				{
+					model.basicUserDTO.IsDirty = true
+				}
+				
+				if (!ValidationUtils.isValidEmail(id_email))
+				{
+					if (ValidationUtils.isValidUserName(id_email.text))
+					{
+						model.basicUserDTO.IsDirty = true
+					}
+				}
+				else
+				{
+					model.basicUserDTO.IsDirty = true
+				}
+				
+				// optional but if any one field of addres is entered, then all remaining is required.
+				if( id_Address.text != "" && model.patientDTO.Address != id_Address.text )
+				{
+					model.patientDTO.IsDirty = true;
+					
+					//if( id_ZIP.selectedItem && model.patientDTO.ZipCode != ( id_ZIP.selectedItem as ZipCodeDTO ).ZipCode)
+					if( id_ZipCityStateCombine.id_ZIP.selectedItem || id_ZipCityStateCombine.id_ZIP.textInput.text.length >0)
+					{
+						model.patientDTO.IsDirty = true;
+					}
+					
+					if( id_ZipCityStateCombine.id_State.selectedItem && model.patientDTO.State	 != id_ZipCityStateCombine.id_State.selectedItem.StateName )
+					{
+						model.patientDTO.IsDirty = true;
+					}
+					
+					if(id_ZipCityStateCombine.id_City.selectedItem && model.patientDTO.City == id_ZipCityStateCombine.id_City.selectedItem.CityName)
+					{
+						model.patientDTO.IsDirty = true;
+					}
+				}
+				
+				model.patientDTO.DateOfBirth 				= id_DOB.selectedDate;
+				if(id_MeritalStaus.selectedIndex!=-1){
+					model.patientDTO.MaritalStatusType			= id_MeritalStaus.selectedItem as MaritalStatusTypeDTO;
+				}
+				if(id_LeaveMessage.selectedIndex!=-1){
+					model.patientDTO.AllowEmailCommunication 	= id_LeaveMessage.selectedItem == "Yes";
+				}
+				model.patientDTO.CreatedBy 					= model.loggedInUserDTO.UserId;
+				// Tahir Alvi - 14 June, 2012 - 
+				if(id_OtherIDChBox.selected)
+				{
+					model.basicUserDTO.OtherID					= SSNIDValue; //id_SSN.text;
+					model.basicUserDTO.IsSSNSelected			= false;
+				}else
+				{
+					model.basicUserDTO.SSN						= SSNIDValue; //id_SSN.text;
+					model.basicUserDTO.IsSSNSelected			= true;
+				}
+			}*/
+			
+			/*public function loadDataBasicInfo():void
+			{
+				try
+				{
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.Prefix ) )
+						selectPrefix( model.patientProfileDTO.UserDTO.Prefix ); 
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.FirstName ) ){
+						id_FName.text = model.patientProfileDTO.UserDTO.FirstName; 
+						hasChange = true;
+					}
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.MiddleName ) ){
+						id_MName.text = model.patientProfileDTO.UserDTO.MiddleName; 
+						hasChange = true;
+					}
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.LastName ) ){
+						id_LName.text = model.patientProfileDTO.UserDTO.LastName; 
+						hasChange = true;
+					}
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.DateOfBirth ) )
+					{
+						var d:Date = model.patientProfileDTO._PatientDTO.DateOfBirth; 
+						id_DOB.selectedDate = new Date(  d.fullYear, d.month, d.date ); 
+						hasChange = true;
+					}
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.Gender ) )
+						selectGender ( model.patientProfileDTO.UserDTO.Gender ); 
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.MaritalStatusType ) )
+						selectMeritalStatus( model.patientProfileDTO._PatientDTO.MaritalStatusType ); 
+					
+					//var a:AddressDTO = model.patientProfileDTO.PatientAddressBook.AddressDTOlist.getItemAt(0) as AddressDTO;
+					var a:AddressDTO = model.addressBookDTO.AddressDTOlist.getItemAt(0) as AddressDTO;
+					if( ! AppUtils.IsNullOrEmpty( a ) )
+					{
+						if( ! AppUtils.IsNullOrEmpty( a.StreetName ) ){ 
+							id_Address.text	= a.StreetName; 
+							hasChange = true;
+						}
+
+						if(! AppUtils.IsNullOrEmpty( a.ZipCode ))
+						{
+							//caseNo = 1;
+							id_ZipCityStateCombine.loadStateCityZipCodeCombineEvent('0', '0', a.ZipCode);
+						}
+					}
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.UserEmail ) )
+						id_email.text = model.patientProfileDTO.UserDTO.UserEmail; 
+					else if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.UserName ) )
+						id_email.text = model.patientProfileDTO.UserDTO.UserName; 
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.AllowEmailCommunication ) )
+						id_LeaveMessage.selectedIndex = model.patientProfileDTO._PatientDTO.AllowEmailCommunication == "Yes" ? 1 : 0; 
+					if( ! AppUtils.IsNullOrEmpty( model.patientPrimaryPhoneDTO.PhoneNumber ) )
+						id_PhoneNumberAddMore.id_TelNumber.text = id_PhoneNumberAddMore.setPhoneNumberMasking(model.patientPrimaryPhoneDTO.PhoneNumber); 
+					//Start comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.patientPrimaryPhoneDTO.PhoneID ) )
+						id_PhoneNumberAddMore.phoneID = model.patientPrimaryPhoneDTO.PhoneID; 
+					//END comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.patientPrimaryPhoneDTO.Extension ) )
+						id_PhoneNumberAddMore.id_ExtNumber.text = model.patientPrimaryPhoneDTO.Extension; 
+					if( ! AppUtils.IsNullOrEmpty( model.patientPrimaryPhoneDTO.NumberTypeName ) )
+						selectPhoneType( model.patientPrimaryPhoneDTO.NumberTypeName ); 
+					model.patientPrimaryPhoneDTO.OwnerTypeID = Constants.SELF_OWNER_TYPE_ID;
+					
+					//Tahir Alvi - 14 june, 2012
+					//Load SSN or Other ID and select the other id checkbox
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.SSN ) || ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.UserDTO.OtherID ))
+					{
+						if(model.patientProfileDTO.UserDTO.IsSSNSelected)
+						{
+							var val:String  = model.patientProfileDTO.UserDTO.SSN;
+							if(model.patientProfileDTO.UserDTO.SSN.length <= 9)
+							{
+								SSNIDValue = ValidationUtils.setSSNMasking(model.patientProfileDTO.UserDTO.SSN)
+								id_SSN.text = SSNIDValue;
+							}else
+							{
+								SSNIDValue 	= model.patientProfileDTO.UserDTO.SSN;
+								id_SSN.text = SSNIDValue;
+							}
+							id_OtherIDChBox.selected = false;
+						}else
+						{
+							id_SSN.text = model.patientProfileDTO.UserDTO.OtherID;
+							SSNIDValue =  model.patientProfileDTO.UserDTO.OtherID;
+							id_OtherIDChBox.selected = true;
+						}
+					}
+					
+					if(model.patientRegImageDTO.ImageData != null)
+					{
+						if(model.patientRegImageDTO.ImageData.length > 0){
+							id_ProfileImage.source = AppUtils.getByteArray(model.patientRegImageDTO.ImageData); 
+						}
+					}else 
+					{
+						var imgObj:BitmapAsset = new dummyImg() as BitmapAsset;
+						id_ProfileImage.source = imgObj ; 
+					}
+				}
+				catch(e:Error)
+				{
+					trace ( "BasicInfo::loadDataEPP", e.message );
+				}
+			}*/
+			
+			/* private function selectPrefix(g:PrefixTypeDTO):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.PrefixTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:PrefixTypeDTO = list[ i ] as PrefixTypeDTO;
+					if( type.PrefixName == g.PrefixName )
+					{
+						id_Prefix.selectedItem = type;
+						hasChange = true;
+						break;
+					}
+				}
+			} */
+			
+			/*private function selectGender(g:GenderTypeDTO):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.GenderTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var gtype:GenderTypeDTO = list[ i ] as GenderTypeDTO;
+					if( gtype.GenderName == g.GenderName )
+					{
+						id_Gender.selectedItem = gtype;
+						hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectMeritalStatus( ms:MaritalStatusTypeDTO ):void
+			{
+				var mst:ArrayCollection = model.registrationStaticDataDTO.MaritalStatusTypes;
+				var i:int;
+				for( i = 0; i < mst.length; i++ )
+				{
+					var type:MaritalStatusTypeDTO = mst[ i ] as MaritalStatusTypeDTO;
+					if( type.MaritalStatusId == ms.MaritalStatusId )
+					{
+						id_MeritalStaus.selectedItem = type;
+						hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectPhoneType( ps:String ):void
+			{
+				var list:ArrayCollection = model.addressBookStaticDataDTO.PhoneNumberTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:PhoneNumberTypeDTO = list[ i ] as PhoneNumberTypeDTO;
+					if( type.NumberTypeName == ps )
+					{
+						id_PhoneNumberAddMore.id_TelNumberKind.selectedItem = type;
+						hasChange = true;
+						break;
+					}
+				}
+			}*/
+			
+			private function clearAllPopUps():void
+			{
+				if (phoneNumberAddMorePopUp)
+					phoneNumberAddMorePopUp.clearPopUp();
+			}
+			
+			private function AddMorePhoneNumbers(event:Event):void
+			{
+				personalPhoneNumbers = new ArrayCollection();
+				
+				if (!personalPhoneNumbers.length)
+				{
+					var result:Object = id_PhoneNumberAddMore.isInValid(true);
+					if (result.hasOwnProperty("isNotValid") && result.isNotValid)
+					{
+						if (result.hasOwnProperty("errorStr") && result.errorStr)
+						{
+							Alert.show(result.errorStr, "Phone number entry error", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+							{
+								if (result.hasOwnProperty("toSetFocus") && result.toSetFocus)
+									result.toSetFocus.setFocus();
+							});
+						}
+						Alert.show('Please complete all mandatory phone fields','Info');
+						return;
+					}
+					personalPhoneNumbers.addItem(id_PhoneNumberAddMore.getPhoneNumberDetails());
+				}
+				
+				if (!phoneNumberAddMorePopUp)
+					phoneNumberAddMorePopUp = new PhoneNumberAddMoreTitleWindow();
+				
+				// Add all other phone numbers into add more phone popup
+				/* if(model.patientProfileDTO)
+				{
+					if(model.patientProfileDTO.PatientAddressBook)
+					{
+						if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist)
+						{
+							if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length >0 )
+							{
+								for(var p:uint=1; p<model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length; p++)
+								{
+									var phoneDTO:PhoneDTO = model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.getItemAt(p) as PhoneDTO;
+									if(phoneDTO.OwnerTypeID == Constants.SELF_OWNER_TYPE_ID)
+									{
+										var obj:Object 						= new Object();
+										var obj2:PhoneNumberTypeDTO			= new PhoneNumberTypeDTO();
+										obj.phoneNumber 					= phoneDTO.PhoneNumber;
+										obj2.NumberTypeName					= phoneDTO.NumberTypeName;
+										obj2.NumberTypeID					= phoneDTO.NumberTypeID;
+										obj.phoneNumberKind					= obj2;
+										obj.phoneExtension 					= phoneDTO.Extension;
+										obj.phoneID 						= phoneDTO.PhoneID;
+										personalPhoneNumbers.addItem(obj);
+									}
+								}
+							}
+						}
+					}
+				} */
+				
+				if (!phoneNumberAddMorePopUp.phoneNumbers)
+					phoneNumberAddMorePopUp.phoneNumbers = personalPhoneNumbers;
+				
+				var btn:spark.components.Button = spark.components.Button(event.currentTarget);
+				var pt:Point = btn.parent.localToGlobal(new Point(btn.x, btn.y));
+				pt.x += btn.width/2 - 100;
+				pt.y += btn.height;
+				phoneNumberAddMorePopUp.display(this, pt);
+				phoneNumberAddMorePopUp.id_PhoneNumberAddMore.id_TelNumber.setFocus();
+			}
+			
+			public function get errorInfo():Object
+			{
+				return _errorInfo;
+			}
+			
+			public function getBasicInfo():void
+			{
+				/* if(id_Prefix.selectedIndex!=-1){
+					model.basicUserDTO.Prefix			= id_Prefix.selectedItem as PrefixTypeDTO;
+				}
+				model.basicUserDTO.FirstName 			= id_FName.text;
+				model.basicUserDTO.MiddleName 			= id_MName.text;
+				model.basicUserDTO.LastName 			= id_LName.text;
+				model.basicUserDTO.Gender 				= id_Gender.selectedItem as GenderTypeDTO;
+				
+				if (!ValidationUtils.isValidEmail(id_email))
+				{
+					if (ValidationUtils.isValidUserName(id_email.text))
+					{
+						model.basicUserDTO.UserName			= id_email.text;
+						model.basicUserDTO.UserEmail = null;
+					}
+				}
+				else
+				{
+					model.basicUserDTO.UserEmail 			= id_email.text;
+					model.basicUserDTO.UserName = null
+				}
+				
+				model.basicUserDTO.CreatedBy 			= model.loggedInUserDTO.UserId;
+				model.basicUserDTO.CreatedAt 			= new Date();
+				
+				model.addressBookDTO.AddressPartyTypeID = Constants.PATIENT_PARTY_TYPE_ID;
+				model.addressBookDTO.PartyID = Constants.GUID_FORMAT;
+				model.addressBookDTO.CreatedAt = new Date();
+				model.addressBookDTO.CreatedBy = model.loggedInUserDTO.UserId;
+				model.addressBookDTO.UpdatedAt = new Date();
+				
+				// optional but if any one field of addres is entered, then all remaining is required.
+				if( id_Address.text != "" )
+				{
+					var addressDTO:AddressDTO;
+					
+					if(model.addressBookDTO != null && model.addressBookDTO.AddressDTOlist != null && model.addressBookDTO.AddressDTOlist.length >0)
+					{
+						addressDTO =  model.addressBookDTO.AddressDTOlist.getItemAt(0) as AddressDTO;						
+					}
+					
+					if(addressDTO )
+					{
+						addressDTO.StreetName 	  = id_Address.text;
+						//addressDTO.AddressID = model.addressBookDTO.AddressBookID;
+						addressDTO.IsPrimary 	 = true;
+						
+						model.patientDTO.Address = id_Address.text;
+						
+						if( id_ZipCityStateCombine.id_ZIP.selectedItem != -1)
+						{
+							addressDTO.ZipCodeID 	 = id_ZipCityStateCombine.id_ZIP.selectedItem.ZipCodeID;//int(id_ZIP.textInput.text);
+							model.patientDTO.ZipCode = id_ZipCityStateCombine.id_ZIP.selectedItem.ZipCode;//id_ZIP.textInput.text; 
+						}
+						else
+						{
+							Alert.show("please select zip code","invalid zip-code");
+							return;
+						}
+						
+						if( id_ZipCityStateCombine.id_State.selectedItem )
+						{
+							addressDTO.StateID 	 	 =  id_ZipCityStateCombine.id_State.selectedItem.StateID;
+							model.patientDTO.State	 =  id_ZipCityStateCombine.id_State.selectedItem.StateName;
+						}
+						else
+						{
+							Alert.show("please select State","invalid State");
+							return;
+						}
+						
+						addressDTO.CountryID 	 = Constants.COUNTRY_USA_ID;
+						addressDTO.CreatedAt	= new Date();
+						addressDTO.UpdatedAt	= new Date();
+						
+						if(id_ZipCityStateCombine.id_City.selectedItem)
+						{
+							model.patientDTO.City = id_ZipCityStateCombine.id_City.selectedItem.CityName;
+						}
+						model.addressBookDTO.AddressDTOlist.removeAll();
+						model.addressBookDTO.AddressDTOlist.addItem( addressDTO );
+						
+					}else
+					{
+						var addressDTO:AddressDTO = new AddressDTO();
+						
+						addressDTO.StreetName 	  = id_Address.text;
+						//addressDTO.AddressID =     
+						addressDTO.IsPrimary 	 = true;
+						
+						model.patientDTO.Address = id_Address.text;
+						
+						if( id_ZipCityStateCombine.id_ZIP.selectedItem != -1)
+						{
+							addressDTO.ZipCodeID 	 = id_ZipCityStateCombine.id_ZIP.selectedItem.ZipCodeID;//int(id_ZIP.textInput.text);
+							model.patientDTO.ZipCode = id_ZipCityStateCombine.id_ZIP.selectedItem.ZipCode;//id_ZIP.textInput.text;
+						}
+						else
+						{
+							Alert.show("please select zip code","invalid zip-code");
+							return;
+						}
+						
+						if( id_ZipCityStateCombine.id_State.selectedItem )
+						{
+							addressDTO.StateID 	 	 = id_ZipCityStateCombine.id_State.selectedItem.StateID;
+							model.patientDTO.State	 = id_ZipCityStateCombine.id_State.selectedItem.StateName;
+						}
+						else
+						{
+							Alert.show("please select State","invalid State");
+							return;
+						}
+						
+						addressDTO.CountryID 	 = Constants.COUNTRY_USA_ID;
+						addressDTO.CreatedAt	= new Date();
+						addressDTO.UpdatedAt	= new Date();
+						
+						if(id_ZipCityStateCombine.id_City.selectedItem)
+						{
+							model.patientDTO.City = id_ZipCityStateCombine.id_City.selectedItem.CityName;
+						}
+						if(model.addressBookDTO == null)
+							model.addressBookDTO = new AddressBookDTO();
+						
+						if(model.addressBookDTO.AddressDTOlist == null )
+							model.addressBookDTO.AddressDTOlist = new ArrayCollection();
+						
+						model.addressBookDTO.AddressDTOlist.removeAll();
+						
+						model.addressBookDTO.AddressDTOlist.addItem( addressDTO );
+					}
+				}
+				
+				//Tahir Alvi - Adding personal phone numbers 
+				var phoneDto:PhoneDTO
+				if (personalPhoneNumbers && personalPhoneNumbers.length)
+				{
+					// ********** START  remove primary phone number every time before adding phone for save 
+					if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+					{
+						var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(0) as PhoneDTO;
+						if(tempDTO.OwnerTypeID == Constants.SELF_OWNER_TYPE_ID)
+						{
+							tempDTO.IsDeleted = true;
+						}
+						model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+						model.addressBookDTO.PhoneDTOlist.refresh();
+					}
+					
+					for (var i:int = 0; i < personalPhoneNumbers.length; i++)
+					{
+						var isPrim:Boolean = false;
+						if (i == 0)
+						{
+							isPrim = true;
+							phoneDto = QSUtilityFunctions.makePhoneDTO(personalPhoneNumbers[i], isPrim, Constants.SELF_OWNER_TYPE_ID);
+							if( phoneDto.PhoneID != 0 ) 
+								phoneDto.IsDirty = true;
+						}else
+						{
+							phoneDto = QSUtilityFunctions.makePhoneDTO(personalPhoneNumbers[i], isPrim, Constants.SELF_OWNER_TYPE_ID);
+						}
+						
+						if(i == 0)
+							model.addressBookDTO.PhoneDTOlist.addItemAt(phoneDto, 0);
+						else
+							model.addressBookDTO.PhoneDTOlist.addItem(phoneDto);
+					}
+				}
+				else
+				{
+					var personalPhDetails:Object = id_PhoneNumberAddMore.getPhoneNumberDetails();
+					
+					if (personalPhDetails)
+					{
+						// ********** START remove primary phone number every time before adding phone for save **********************
+						if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+						{
+							var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(0) as PhoneDTO;
+							if(tempDTO.OwnerTypeID == Constants.SELF_OWNER_TYPE_ID)
+								tempDTO.IsDeleted = true;
+							
+							model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+							model.addressBookDTO.PhoneDTOlist.refresh();
+						}
+						
+						phoneDto = QSUtilityFunctions.makePhoneDTO(personalPhDetails, true, Constants.SELF_OWNER_TYPE_ID);
+						model.addressBookDTO.PhoneDTOlist.addItemAt(phoneDto, 0);
+					}
+				}
+				
+				//End - Adding personal phone numbers 
+				
+				if(id_DOB.selectedDate!=null){
+					var strDate:Date                           = new Date(formatDateTime.format(id_DOB.text));  
+					model.patientDTO.DateOfBirth 				= strDate; //id_DOB.selectedDate;
+					model.patientDTO.StrDOB  					= model.patientDTO.DateOfBirth.toDateString();
+				}				
+				else if(id_DOB.text.length >0){
+					model.patientDTO.DateOfBirth 				= new Date(formatDateTime.format(id_DOB.text));//Constants.NULL_DATE;
+					model.patientDTO.StrDOB  					= model.patientDTO.DateOfBirth.toDateString();
+				} 
+				
+				if(id_MeritalStaus.selectedIndex!=-1){
+					model.patientDTO.MaritalStatusType			= id_MeritalStaus.selectedItem as MaritalStatusTypeDTO;
+				}
+				
+				if(id_LeaveMessage.selectedIndex!=-1){
+					model.patientDTO.AllowEmailCommunication 	= id_LeaveMessage.selectedItem == "Yes";
+				}
+				model.patientDTO.CreatedBy 					= model.loggedInUserDTO.UserId;
+				
+				// Tahir Alvi - 14 June, 2012 - 
+				if(id_OtherIDChBox.selected)
+				{
+					model.basicUserDTO.OtherID					= SSNIDValue; //id_SSN.text;
+					model.basicUserDTO.IsSSNSelected			= false;
+				}else
+				{
+					model.basicUserDTO.SSN						= SSNIDValue; //id_SSN.text;
+					model.basicUserDTO.IsSSNSelected			= true;
+				} */
+			}
+			
+			private function filterDeletedItems(item:Object):Boolean
+			{
+				var b:Boolean = item["IsDeleted"];
+				return (!b);
+			}
+			
+			public function clearBasicInfo():void
+			{
+				id_ProfileImage.source 		= null;
+				id_Prefix.selectedIndex 	= -1;
+				id_FName.text				= "";
+				id_MName.text				= "";
+				id_LName.text				= "";
+				id_Gender.selectedIndex		= -1;
+				id_email.text				= "";
+				id_Address.text				= "";
+				id_ZipCityStateCombine.id_ZIP.selectedIndex		= -1;
+				//id_ZIP.textInput.text		= "";
+				id_ZipCityStateCombine.id_State.selectedIndex		= -1;
+				id_ZipCityStateCombine.id_City.selectedIndex 		= -1;
+				id_DOB.selectedDate				= null;
+				id_DOB.text					= '';
+				id_MeritalStaus.selectedIndex	= -1;
+				id_LeaveMessage.selectedIndex	= 0;
+				id_SSN.text						= "";
+				SSNIDValue						= '';
+				id_OtherIDChBox.selected      = false;
+				
+				id_PhoneNumberAddMore.resetFields();
+				
+				clearAllPopUps();
+				personalPhoneNumbers = null;
+				hasChange = false;
+			}
+			
+			public function hideAllPopUps():void
+			{
+				if (phoneNumberAddMorePopUp)
+					phoneNumberAddMorePopUp.visible = false;
+				// hide others as well, if is there any
+			}
+			
+			public function showAllPopUps():void
+			{
+				if (phoneNumberAddMorePopUp && phoneNumberAddMorePopUp.isAddPhoneNumberPopUpShown)
+				{
+					phoneNumberAddMorePopUp.visible = true;
+				}
+				//show all other popups as well, if is there any
+			}
+			
+			protected function UploadImage_clickHandler(event:MouseEvent):void
+			{
+				var fileTypes:FileFilter = new FileFilter( "Image Files", "*.gif;*.jpeg;*.jpg;*.png" );
+				fileToOpen.browse([fileTypes]);
+				fileToOpen.addEventListener(Event.SELECT, fileSelected);
+			}
+			
+			private function fileSelected(event:Event):void
+			{
+				var stream:FileStream = new FileStream(); // open filestream
+				stream.open(fileToOpen, FileMode.READ); // open the file
+				var size_500K:Number = 500 * 1024;
+				if (stream.bytesAvailable <= size_500K)
+				{
+					m_oImageContent = new ByteArray();
+					stream.readBytes( m_oImageContent, 0, stream.bytesAvailable ); // read file
+					stream.close(); // close file
+					model.patientRegImageDTO 				= new ImageDTO();
+					model.patientRegImageDTO.UserTypeID 	= Constants.PATIENT_USER_TYPE_ID;
+					model.patientRegImageDTO.ImageTypeId 	= model.profileImageTypeDTO.ImageTypeId;
+					model.patientRegImageDTO.CreatedAt 		= new Date();
+					model.patientRegImageDTO.CreatedBy		= model.loggedInUserDTO.UserId;
+					model.patientRegImageDTO.ImageName 		= fileToOpen.name;
+					model.patientRegImageDTO.ImageData 		= AppUtils.getBase64String(m_oImageContent);
+				}
+				else
+				{
+					Alert.show("Image size can not be greater than 500k.\n", "Image size error", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						id_UploadImage.setFocus();
+					});
+				}
+				id_ProfileImage.source =  m_oImageContent;
+			} 
+			
+			public function isInvalid() : Boolean 
+			{
+				var isNotValid:Boolean = false;
+				
+				ValidationUtils.Trim( id_FName );
+				ValidationUtils.Trim( id_MName );
+				ValidationUtils.Trim( id_LName );
+				ValidationUtils.Trim(id_Address);
+				ValidationUtils.Trim(id_email);
+				
+				var errorStr:String = ""; 
+				var toSetFocus:Object;
+				//Type > String, max length >20, Required > OPtional
+				if (id_Prefix.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Prefix))
+				{
+					isNotValid = true;
+					errorStr += "The data in prefix is invalid.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_Prefix;
+				}
+				//Type > varchar, max length >100, Required > Yes
+				if (id_FName.text.length >= 1 && id_FName.text.length <= 100)
+				{
+					if (!ValidationUtils.isValidAlphaNumericWithSpaces(id_FName.text))
+					{
+						isNotValid = true;
+						errorStr += "The data in first name is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_FName;
+					}
+				}
+				else
+				{
+					isNotValid = true;
+					errorStr += "Please enter data in first name.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_FName;
+				}
+				//Type > varchar, max length >30, Required > Optional
+				if (id_MName.text.length >0)
+				{
+					
+					if(!ValidationUtils.isValidAlphaNumericWithSpaces1(id_MName.text))
+					{
+						isNotValid = true;
+						errorStr += "The data in middle name is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_MName;
+					}
+				}
+				//Type > varchar, max length >100, Required > Yes
+				if (id_LName.text.length >= 1 && id_LName.text.length <= 100)
+				{
+					if (!ValidationUtils.isValidAlphaNumericWithSpaces2(id_LName.text))
+					{
+						isNotValid = true;
+						errorStr += "The data in last name is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_LName;
+					}
+				}
+				else
+				{
+					isNotValid = true;
+					errorStr += "Please enter data in last name.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_LName;
+				}
+				
+				//Type > Numaric, max length >30, Required > Yes
+				if(id_DOB.selectedDate)
+				{
+					if (!ValidationUtils.isValidDate(id_DOB))
+					{
+						isNotValid = true;
+						errorStr += "The data in date of birth is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_DOB;
+					}
+				}else if(id_DOB.text.length > 0)
+				{
+					if(!ValidationUtils.isValidDateFormat(formatDateTime.format(id_DOB.text)))
+					{
+						isNotValid = true;
+						errorStr += "The data in date of birth is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_DOB;
+					}
+					
+				}
+				//Type > String, max length >20, Required > Yes
+				if (!ValidationUtils.isValidValueSelected(id_Gender))
+				{
+					isNotValid = true;
+					errorStr += "The data in gender is invalid.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_Gender;
+				}
+				//Type > String, max length >100, Required > OPtional
+				if (id_MeritalStaus.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_MeritalStaus))
+				{
+					isNotValid = true;
+					errorStr += "The data in merital status is invalid.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_MeritalStaus;
+				}
+				//Type > Varchar, max length >100, Required > OPtional
+				if( id_Address.text.length == 0 || id_Address.text.length > 100)
+				{
+					errorStr += "The data in address is invalid.\n";
+					isNotValid = true;
+					
+					if (!toSetFocus)
+						toSetFocus = id_Address;
+				}
+				//Type > Varchar, max length >100, Required > OPtional
+				//if (id_State.textInput.text.length < 0 || id_State.selectedIndex == -1)
+				if (!ValidationUtils.isValidState(id_ZipCityStateCombine.id_State))
+				{
+					isNotValid = true;
+					errorStr += "The data in state is invalid.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ZipCityStateCombine.id_State;
+				}
+				//Type > Varchar, max length >100, Required > OPtional
+				//if (id_City.textInput.text.length < 0 )
+				if (!ValidationUtils.isValidCity(id_ZipCityStateCombine.id_City))
+				{
+					isNotValid = true;
+					errorStr += "The data in city is invalid.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ZipCityStateCombine.id_City;
+				}
+				
+				//Type > Varchar, max length >100, Required > OPtional
+				if (id_ZipCityStateCombine.id_ZIP.textInput.text.length > 0 && id_ZipCityStateCombine.id_ZIP.textInput.text.length < 50)
+				{
+					if(!ValidationUtils.isValidZipCode(id_ZipCityStateCombine.id_ZIP.textInput.text))
+					{
+						isNotValid = true;
+						errorStr += "The data in zip is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_ZipCityStateCombine.id_ZIP;
+					}
+				}
+				else
+				{
+					isNotValid = true;
+					errorStr += "Please enter data in ZIP.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ZipCityStateCombine.id_ZIP;
+				}
+				//Type > Varchar, max length >100, Required > Yes
+				if (!ValidationUtils.isValidEmail(id_email))
+				{
+					if (!ValidationUtils.isValidUserName(id_email.text))
+					{
+						isNotValid = true;
+						errorStr += "The data in email is invalid. \n"; //"Patient's E-mail / 4-8-digit Pin is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_email;
+					}
+				}
+				
+				//Type > List, max length >at least 1, Required > yes
+				if (!personalPhoneNumbers || !personalPhoneNumbers.length)
+				{
+					var arePhoneFieldsValid:Object = id_PhoneNumberAddMore.isInValid(true, "Patient's personal");
+					if (arePhoneFieldsValid.hasOwnProperty("isNotValid") && arePhoneFieldsValid.isNotValid)
+					{
+						isNotValid = true;
+						
+						if (arePhoneFieldsValid.hasOwnProperty("errorStr"))
+							errorStr += arePhoneFieldsValid.errorStr;
+						
+						if (!toSetFocus && arePhoneFieldsValid.hasOwnProperty("toSetFocus"))
+							toSetFocus = arePhoneFieldsValid.toSetFocus;
+					}
+				}
+				//Tahir Alvi - 15 june, 2012
+				//New Validation on SSN/Other ID
+				//Type > Numaric, max length >09, Required > Required
+				if(!id_OtherIDChBox.selected) //if SSN is provided
+				{
+					if(SSNIDValue.length >9)
+						SSNIDValue = ValidationUtils.getSSNWithoutMasking(SSNIDValue);
+					
+					if(SSNIDValue.length > 9 || SSNIDValue.length <= 0)
+					{
+						isNotValid = true;
+						errorStr += "The data in ssn is invalid. \n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_SSN;
+					}else if(!ValidationUtils.isSSNValid(SSNIDValue))
+					{
+						isNotValid = true;
+						errorStr += "The data in ssn is invalid. \n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_SSN;
+					}
+				}else //if Other ID is provided
+				{
+					if(SSNIDValue.length > 14 || SSNIDValue.length < 4)
+					{
+						isNotValid = true;
+						errorStr += "The data in ssn is invalid. \n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_SSN;
+					}
+				}
+				
+				if (isNotValid && errorStr.length)
+					Alert.show(errorStr, "Patient Registration Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				
+				return isNotValid;
+			}
+			
+			protected function id_Gender_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_Gender.setStyle("skinClass", comboBoxRegisterationRequiredSkin);
+			}
+
+			public function validate_basic():void
+			{
+				/* ErrorTipManager.registerValidator(validator_FName);				
+				validator_FName.validate();
+				ErrorTipManager.registerValidator(validator_LName);				
+				validator_LName.validate();  */
+				
+			}
+			public function removeErrorTips():void
+			{
+				//ErrorTipManager.hideAllErrorTips();
+			}
+			
+			protected function id_Gender_focusOutHandler(event:FocusEvent):void
+			{
+				//ErrorTipManager.registerValidator(validator_Gender);
+				//validator_Gender.validate();
+				
+				/* if(id_Gender.selectedIndex > -1 && id_Gender.textInput.text.substring(0,1).toUpperCase() == "F")
+					model.isPatientFemale = true;
+				else
+					model.isPatientFemale = false; */
+				
+			}
+			
+			protected function id_PhoneNumberAddMore_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_PhoneNumberAddMore.id_TelNumber.setStyle("skinClass", LabelTextInputRequiredSkin);
+				id_PhoneNumberAddMore.id_TelNumberKind.setStyle("skinClass", comboBoxRegisterationRequiredSkin);
+				id_PhoneNumberAddMore.id_TelNumberKind.prompt = 'Phone Type' ;
+			}
+			
+			//Start Comment - Tahir Alvi ------- for green ticker
+			protected function comboChangeIndicator(event:IndexChangeEvent):void 
+			{
+				if(id_Prefix.selectedIndex != -1 || id_Gender.selectedIndex != -1 || id_MeritalStaus.selectedIndex != -1 || id_LeaveMessage.selectedIndex != -1)// || id_State.selectedIndex != -1 || id_City.selectedIndex != -1 || id_ZIP.selectedIndex != -1
+					
+				{
+					hasChange= true;
+				}else{
+					hasChange= false;
+				}
+			}
+			protected function textInputChangeIndicator(event:TextOperationEvent):void 
+			{
+				if(id_FName.text.length>0 ||id_MName.text.length>0 || id_LName.text.length >0 ||id_Address.text.length >0 ||id_email.text.length >0 || id_SSN.text.length >0)
+				{
+					hasChange= true;
+				}else
+				{
+					hasChange= true;
+				}
+			}
+			private var _isChange:Boolean;
+			
+			[Bindable]
+			public function get isChange():Boolean
+			{
+				return _isChange;
+			}
+			
+			public function set isChange(value:Boolean):void
+			{
+				_isChange = value;
+				hasChange = value;
+			}
+			//End Comment - Tahir Alvi ------- for green ticker
+			
+			//Tahir Alvi - 15 june 2012
+			private var SSNIDValue:String ='';
+			protected function id_OtherIDChBox_clickHandler(event:MouseEvent):void
+			{
+				id_SSN.text = '';//clear text of input when switching
+				SSNIDValue  = '';
+				if(id_OtherIDChBox.selected)
+				{
+					id_SSN.prompt = 'Other ID';
+				}else
+				{
+					id_SSN.prompt = 'SSN';
+				}
+			}
+			
+			protected function id_SSN_changeHandler(event:TextOperationEvent):void
+			{
+				if(!id_OtherIDChBox.selected)
+				{
+					var s:String=id_SSN.text.replace(/[^0-9]/g,"");
+					id_SSN.text = s.substring(0,3) + (s.length>3?"-"+s.substring(3,5) + (s.length>5?"-"+s.substring(5,9):""):"");
+					id_SSN.selectRange(id_SSN.text.length, id_SSN.text.length);
+					
+					var val1:String = id_SSN.text;
+					var val2:String = val1.replace('-','');
+					SSNIDValue = val2.replace('-','');
+				}else
+				{
+					id_SSN.restrict = '[0-9]';
+					id_SSN.maxChars = 14;
+					SSNIDValue      = id_SSN.text;
+				}
+				textInputChangeIndicator(event)
+			}
+			/*Tahir Alvi - store temporary data for adding allergies 
+			public function storePatientTempInfo():void
+			{
+				model.patientTempDTO            = new Object();
+				model.patientTempDTO.LastName 	= id_LName.text;
+				model.patientTempDTO.FirstName 	= id_FName.text;
+				model.patientTempDTO.Gender 	= id_Gender.textInput.text.substring(0,1);
+				model.patientTempDTO.DOB 		= id_DOB.text;
+				model.patientTempDTO.Phone 		= id_PhoneNumberAddMore.getPhoneNumberWithoutMasking(id_PhoneNumberAddMore.id_TelNumber.text);
+				model.patientTempDTO.Address 	= id_Address.text;
+				model.patientTempDTO.SSN 		= id_SSN.text;
+			}*/
+		]]>
+	</fx:Script>
+	<fx:Binding source="id_PhoneNumberAddMore.haschange" destination="isChange" />
+	<fx:Binding source="id_ZipCityStateCombine.haschange" destination="isChange" />
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	<s:VGroup width="60" horizontalAlign="center" gap="3" >
+		
+		<s:Group x="0" y="1">
+			<s:Rect height="55" radiusX="5" width="55" x="0" y="0">
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#94A0B2" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#A6B4C0" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+				<s:filters>
+					<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+				</s:filters>
+			</s:Rect>
+			<s:BitmapImage smooth="true" source="@Embed('com/adobe/Quivus/view/controls/skins/assets/picbgtransparent.png')" x="0" y="1"/>
+			<mx:Image id="id_ProfileImage" maintainAspectRatio="false"  height="50" width="50"
+					  source="{dummyImg}" x="0" y="1"/>
+		</s:Group>
+		
+		<s:Button label="Upload " id="id_UploadImage" click="UploadImage_clickHandler(event)"
+				  skinClass="com.adobe.Quivus.view.controls.skins.registerDarkBlueBtnSkin"
+				  buttonMode="true" toolTip="Upload Image"/>
+		<s:Button label="Snap-Shot" skinClass="com.adobe.Quivus.view.controls.skins.registerDarkBlueBtnSkin"
+				  buttonMode="true" toolTip="Take Snap-Shot"/>
+	</s:VGroup>
+	<s:VGroup width="100%"  gap="2">
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:VGroup width="33%" gap="1">
+				<s:HGroup width="100%">
+					<!--Tahir Alvi[24-08-2011] added special  character facilty for First,Middle and Last Name Text input [A-Z a-z , . 0-9]-->
+					
+					<components:LabelComboBox id="id_Prefix"  prompt="Prefix" width="55" autoWidth="false" change="comboChangeIndicator(event)" toolTip="Select prefix"
+											  dataProvider="{model.registrationStaticDataDTO.PrefixTypes}" labelField="PrefixName"  tabIndex="0" />
+					<components:LabelTextInput id="id_FName"   restrict="[A-Z a-z , . 0-9]" maxChars="100"
+											   skinClass="com.zigron.controls.extended.skins.LabelTextInputRequiredSkin" prompt="First Name" 
+											   width="100%" toolTip="Enter first name"
+											   tabIndex="1" change="textInputChangeIndicator(event)" />
+				</s:HGroup>
+				<components:LabelDateField id="id_DOB" 
+										   prompt="DOB" selectableRange="{{rangeEnd:new Date()}}" width="100%" 
+										   textInputStyleName="mandatoryDateSkin" IsEditAllow="false"
+										   tabIndex="4" toolTip="Select Date of Birth" yearNavigationEnabled="true" 
+										   maxYear="{new Date().getFullYear()}" minYear="1901" />
+			</s:VGroup>
+			<s:VGroup width="33%" gap="1">
+				<components:LabelTextInput  id="id_MName"   prompt="Middle Name" width="100%" restrict="[A-Z a-z , . 0-9]" toolTip="Enter middle name"
+											maxChars="30" tabIndex="2" change="textInputChangeIndicator(event)" />
+				
+				<components:LabelComboBox id="id_Gender" prompt="Gender" width="100%" skinClass="com.zigron.controls.extended.skins.comboBoxRegisterationRequiredSkin" 	 
+										  dataProvider="{model.registrationStaticDataDTO.GenderTypes}" labelField="GenderName"  tabIndex="5" toolTip="Select gender type"
+										  creationComplete="id_Gender_creationCompleteHandler(event)" change="comboChangeIndicator(event)"
+										  focusOut="id_Gender_focusOutHandler(event)" autoWidth="false"/>
+				
+			</s:VGroup>
+			<s:VGroup width="34%" gap="1">
+				<components:LabelTextInput id="id_LName"  prompt="Last Name" width="100%" restrict="[A-Z a-z , . 0-9]" maxChars="100"
+										   skinClass="com.zigron.controls.extended.skins.LabelTextInputRequiredSkin"	toolTip="Enter last name" 
+										   tabIndex="3" change="textInputChangeIndicator(event)"/>
+				
+				<components:LabelComboBox id="id_MeritalStaus" prompt="Marital Status" width="100%"  change="comboChangeIndicator(event)"
+										  dataProvider="{model.registrationStaticDataDTO.MaritalStatusTypes}" toolTip="Select marital status"
+										  labelField="MaritalStatusName"  tabIndex="6" autoWidth="false" />
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<components:LabelTextInput id="id_Address"  prompt="Address" width="100%"  tabIndex="7" maxChars="100"
+									   skinClass="com.zigron.controls.extended.skins.LabelTextInputRequiredSkin" 
+									   toolTip="Enter Address"/>
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			<components:LabelComboBox id="id_ZIP" 
+									  prompt="Zip"  width="33%" dataProvider="{zipcodeList}" autoWidth="false" toolTip="Select zip code" 
+									  labelField="ZipCode" skinClass="com.zigron.controls.extended.skins.comboBoxRegisterationRequiredSkin"
+									   />
+			<components:LabelComboBox id="id_City" 
+									  prompt="City" width="33%" dataProvider="{citiesList}" autoWidth="false" toolTip="Select city"
+									  
+									  labelField="CityName" required="true" />
+			<components:LabelComboBox id="id_State" 
+									  prompt="State"  dataProvider="{statscodeList}" width="34%" toolTip="Select state" 
+									 
+									  autoWidth="false"  labelField="StateName" 
+									  skinClass="com.zigron.controls.extended.skins.comboBoxRegisterationRequiredSkin" />
+		</s:HGroup>
+		
+		<s:HGroup width="100%" verticalAlign="middle">
+			<components:LabelTextInput id="id_email" prompt="E-mail / Pin" width="67%"  tabIndex="11" maxChars="100"
+									   skinClass="com.zigron.controls.extended.skins.LabelTextInputRequiredSkin"
+									   change="textInputChangeIndicator(event)"
+									   toolTip="Enter email / pin"/>
+			<s:HGroup width="34%" verticalAlign="middle" horizontalAlign="right">
+				<s:Label text="Leave health messages?" width="70%"  textAlign="right" color="#333333" fontSize="11" fontFamily="Calibri"/>
+				<components:LabelComboBox id="id_LeaveMessage"  change="comboChangeIndicator(event)" selectedIndex="0" width="30%" tabIndex="12" autoWidth="false">
+					<components:dataProvider>
+						<s:ArrayList>
+							<fx:String>Yes</fx:String>
+							<fx:String>No</fx:String>
+						</s:ArrayList>
+					</components:dataProvider>
+				</components:LabelComboBox>
+			</s:HGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" verticalAlign="middle">
+			<registeration:PhoneNumberAddMore id="id_PhoneNumberAddMore" width="66%" tabIndex="13" 
+											  creationComplete="id_PhoneNumberAddMore_creationCompleteHandler(event)" />
+			
+			<s:Button click="AddMorePhoneNumbers(event)" label="Add Phone Numbers"  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn"
+					  buttonMode="true" useHandCursor="true" toolTip="Add Phone Numbers" tabIndex="16"/>
+			
+			<components:LabelTextInput id="id_SSN" prompt="SSN" width="33%" tabIndex="17" restrict="[0-9]"
+									   contentBackgroundColor="#EDDA8C" change="id_SSN_changeHandler(event)"
+									   skinClass="com.zigron.controls.extended.skins.LabelTextInputRequiredSkin" toolTip="Enter ssn / other id"/>
+			<s:CheckBox id="id_OtherIDChBox" label="Other ID" toolTip="Check for Other ID" click="id_OtherIDChBox_clickHandler(event)" tabIndex="18"/>
+		</s:HGroup>
+		
+	</s:VGroup>
+</components:CollapsiblePanel>

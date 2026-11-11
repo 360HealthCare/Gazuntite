@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true">
+	<fx:Script>
+		<![CDATA[
+			import mx.utils.Base64Decoder;
+			
+			private var base64Dec:Base64Decoder;
+			
+			[Bindable]
+			private var byteArr:ByteArray;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (data)
+				{
+					if (!base64Dec)
+						base64Dec = new Base64Decoder();
+					
+					base64Dec.decode(data.ImageData);
+					
+					byteArr = base64Dec.toByteArray();
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:HGroup paddingLeft="5" paddingRight="5" paddingTop="1" paddingBottom="1" gap="0" useHandCursor="true" buttonMode="true" toolTip="{data.Name}">
+		<s:Image id="icon" source="{byteArr}"/>
+		<s:Label id="typeLbl" text="{data.Name}"
+				 fontFamily="CalibriCFF" fontSize="14" textAlign="left" paddingLeft="6"/>
+	</s:HGroup>
+	
+</s:ItemRenderer>

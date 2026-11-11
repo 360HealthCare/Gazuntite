@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="109" height="20">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect x="0" y="0" width="109" height="20">
+		<s:fill>
+			<s:SolidColor alpha="0.01" color="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:RichText y="2" fontFamily="CalibriCFF" fontSize="15" tabStops="S0" text="Register Yourself"
+				whiteSpaceCollapse="preserve"
+				x.disabled="4" color.disabled="#999999"
+				x.down="4" color.down="#002FD1" tabStops.down="S0 S50 S100"
+				textDecoration.down="underline"
+				left.over="4" color.over="#002FD1" tabStops.over="S0 S50 S100"
+				textDecoration.over="underline"
+				x.up="4" color.up="#000000" tabStops.up="S0 S50 S100" textDecoration.up="underline"/>
+</s:Skin>

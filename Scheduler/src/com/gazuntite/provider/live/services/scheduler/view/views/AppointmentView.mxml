@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:views="com.gazuntite.provider.live.services.scheduler.view.views.*" width="100%" 
+					  styleName="blackTitleBGContainerSkin3" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.controls.calendar.calsample.SampleCalendarDescriptor;
+			import com.gazuntite.controls.calendar.views.CalendarDescriptor;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.vo.mygenerator;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			private var calendarDescriptor:com.gazuntite.controls.calendar.views.CalendarDescriptor = new com.gazuntite.controls.calendar.calsample.SampleCalendarDescriptor();
+			[Bindable]
+			private var events:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var calendars:ArrayCollection = new ArrayCollection();
+			private var generator:mygenerator = new mygenerator();
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			private var stationCounter:int = 0;
+			private var ischangedSetting:Boolean = false;		//If user change the filter then refresh Appointments according to saved prefrences;
+			
+			private function init():void
+			{
+				
+			}
+			// get All Rooms List on basis of All locations.			
+			public function creComp():void 
+			{
+				getAppointmentInit();
+				addEventListener('reFreshCalendar', refreshCalendar);
+			}
+			
+			private function getAppointmentInit():void
+			{
+				if(model.ScheduledAppointmentList != null)
+				{
+					if(model.ScheduledAppointmentList.length)
+						model.ScheduledAppointmentList.removeAll();
+				}
+				
+				if(ischangedSetting && model.sl_userId != 0 && model.sl_stanId != 0){
+					callLoadAppointmentService(model.sl_userId, model.sl_stanId, model.sl_isProAll, model.sl_isStaAll);
+				}
+				else
+				{
+					callLoadAppointmentService(model.loggedInUserId, model.loggedInUserSelectedStationId, false, true);
+				}
+			}
+			private function callLoadAppointmentService(userId:int, stationId:int, isAllProvider:Boolean, isAllStation:Boolean):void
+			{
+				model.sl_userId 	= userId;	
+				model.sl_stanId 	= stationId;	
+				model.sl_isProAll 	= isAllProvider;  
+				model.sl_isStaAll 	= isAllStation;
+				
+				var LAappPSEvent:LoadAllAppointmentsEvent  = new LoadAllAppointmentsEvent(userId, stationId, isAllProvider, isAllStation, model.viewTypeMonth, populateAppointments, false);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LAappPSEvent);
+				cursorManager.setBusyCursor();
+				
+			}
+			private var isFilterd:Boolean = false;
+			private function populateAppointments(val:* = null):void
+			{
+				calView.setProviderSetting();	//Select provider that is loggedIn
+				if(model.ScheduledAppointmentList.length)
+				{
+					events.removeAll();
+					calendars.removeAll();
+					
+					generator.generate();
+					events = generator.events;
+					for each (var event:* in events) 
+					{
+						if (!calendars.contains(event.calendar)) 
+							calendars.addItem(event.calendar);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+					} 
+				}
+				
+				if(!model.sl_isStaAll)
+				{
+					var LAappPSEvent2:LoadAllAppointmentsEvent  = new LoadAllAppointmentsEvent(model.sl_userId, model.sl_stanId, false, true, model.viewTypeMonth, populateAppointmentsDummy, true);
+					CairngormEventDispatcher.getInstance().dispatchEvent(LAappPSEvent2);
+					cursorManager.setBusyCursor();
+				}
+			}
+			private function populateAppointmentsDummy(val:* = null):void
+			{
+				
+			}
+			// **************************** Refresh Appointsmenst in All views **************************************
+			public function refreshCalendar(e:Event):void
+			{
+				ischangedSetting = true;
+				events.removeAll();
+				calendars.removeAll();
+				getAppointmentInit();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<views:CalendarView id="calView" backgroundAlpha="0" contentBackgroundAlpha="0"
+						width="100%" height="100%" 
+						calendarDescriptor="{calendarDescriptor}"
+						calendars="{calendars}"
+						events="{events}"/>
+</s:SkinnableContainer>

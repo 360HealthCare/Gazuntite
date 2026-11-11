@@ -1,0 +1,93 @@
+<PatientEncountersResponse xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.Visit" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<EncounterResult xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.PatientBackground">
+<a:PatientEncounterList>
+<a:PatientEncounterDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:CanSignCosign>NULL</a:CanSignCosign>
+<a:DictationID>00000000-0000-0000-0000-000000000000</a:DictationID>
+<a:NoteSubject i:nil="true"/>
+<a:Notes i:nil="true"/>
+<a:OwnerUserId>48546</a:OwnerUserId>
+<a:OwnerUserTypeId>3</a:OwnerUserTypeId>
+<a:PlaceOfServiceTypeID>0</a:PlaceOfServiceTypeID>
+<a:PlaceOfServiceTypeName i:nil="true"/>
+<a:StationID>1</a:StationID>
+<a:StationName>2245 South Lauderdale St</a:StationName>
+<a:VisitDate>2012-07-26T16:26:00</a:VisitDate>
+<a:VisitEncounterTypeName/>
+<a:VisitId>9782</a:VisitId>
+<a:VisitNotes i:nil="true"/>
+<a:VisitProvider>Sami Sahibzada</a:VisitProvider>
+<a:VisitStatus>Un-Signed</a:VisitStatus>
+</a:PatientEncounterDTO>
+<a:PatientEncounterDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:CanSignCosign>NULL</a:CanSignCosign>
+<a:DictationID>00000000-0000-0000-0000-000000000000</a:DictationID>
+<a:NoteSubject i:nil="true"/>
+<a:Notes i:nil="true"/>
+<a:OwnerUserId>605</a:OwnerUserId>
+<a:OwnerUserTypeId>3</a:OwnerUserTypeId>
+<a:PlaceOfServiceTypeID>0</a:PlaceOfServiceTypeID>
+<a:PlaceOfServiceTypeName i:nil="true"/>
+<a:StationID>1</a:StationID>
+<a:StationName>2245 South Lauderdale St</a:StationName>
+<a:VisitDate>2012-07-16T07:47:00</a:VisitDate>
+<a:VisitEncounterTypeName/>
+<a:VisitId>9722</a:VisitId>
+<a:VisitNotes i:nil="true"/>
+<a:VisitProvider>tamjeed hassan</a:VisitProvider>
+<a:VisitStatus>Un-Signed</a:VisitStatus>
+</a:PatientEncounterDTO>
+<a:PatientEncounterDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:CanSignCosign>NULL</a:CanSignCosign>
+<a:DictationID>00000000-0000-0000-0000-000000000000</a:DictationID>
+<a:NoteSubject i:nil="true"/>
+<a:Notes i:nil="true"/>
+<a:OwnerUserId>605</a:OwnerUserId>
+<a:OwnerUserTypeId>3</a:OwnerUserTypeId>
+<a:PlaceOfServiceTypeID>0</a:PlaceOfServiceTypeID>
+<a:PlaceOfServiceTypeName i:nil="true"/>
+<a:StationID>1</a:StationID>
+<a:StationName>2245 South Lauderdale St</a:StationName>
+<a:VisitDate>2012-07-13T10:22:00</a:VisitDate>
+<a:VisitEncounterTypeName/>
+<a:VisitId>9716</a:VisitId>
+<a:VisitNotes i:nil="true"/>
+<a:VisitProvider>tamjeed hassan</a:VisitProvider>
+<a:VisitStatus>Un-Signed</a:VisitStatus>
+</a:PatientEncounterDTO>
+<a:PatientEncounterDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:CanSignCosign>NULL</a:CanSignCosign>
+<a:DictationID>00000000-0000-0000-0000-000000000000</a:DictationID>
+<a:NoteSubject i:nil="true"/>
+<a:Notes i:nil="true"/>
+<a:OwnerUserId>607</a:OwnerUserId>
+<a:OwnerUserTypeId>6</a:OwnerUserTypeId>
+<a:PlaceOfServiceTypeID>0</a:PlaceOfServiceTypeID>
+<a:PlaceOfServiceTypeName>Home</a:PlaceOfServiceTypeName>
+<a:StationID>1</a:StationID>
+<a:StationName>2245 South Lauderdale St</a:StationName>
+<a:VisitDate>2012-06-16T06:42:00</a:VisitDate>
+<a:VisitEncounterTypeName>Complete PE</a:VisitEncounterTypeName>
+<a:VisitId>9160</a:VisitId>
+<a:VisitNotes i:nil="true"/>
+<a:VisitProvider>Tahir Alvi</a:VisitProvider>
+<a:VisitStatus>Un-Signed</a:VisitStatus>
+</a:PatientEncounterDTO>
+</a:PatientEncounterList>
+<a:TotalRecords>4</a:TotalRecords>
+</EncounterResult>
+</PatientEncountersResponse>

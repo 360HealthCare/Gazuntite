@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 title="Chronic Medication" 
+							 skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.checkboxCollapsiblePanelSkin" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			//import valueObjects.MedicationDTO;
+
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+				super.isSelected = value;
+				
+				model.reviewHistroy.IsChornicMedicationReviewed = value;
+			}
+			
+			private function statusLabelFunction(oItem:Object, iCol:int):String
+			{
+				var vd:String = oItem.IsActive;
+				if(vd == "true" || vd == "True")
+				{
+					return "Active";
+				}
+				else if(vd == "false" || vd == "False")
+				{
+					return "InActive";
+				}
+				return ""; 
+			}
+			
+			//Tahir Alvi  - 
+			private function getRefillData(item:Object, iCol:int):String
+			{
+				var result:String;
+				if(item.Refill)
+					result = item.Refill;
+				
+				if(item.isPRN)
+					result = item.isPRN;
+				
+				if(result.toLowerCase() == 'true')
+					result = 'AS NEEDED';
+				else if(item.Refill)
+					result = item.Refill;
+				return result;
+			}
+		]]>
+	</fx:Script>
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</components1:layout>
+	<components1:LabelDataGrid id="id_ChronicMedication" horizontalScrollPolicy="off" verticalScrollPolicy="auto" maxHeight="150" width="100%" dataProvider="{model.medicationDTOList}"
+							  rowCount="{id_ChronicMedication.dataProvider.length?id_ChronicMedication.dataProvider.length:1}" verticalGridLines="false"
+							  >
+		<components1:columns>
+			<mx:DataGridColumn headerText="Medicine Name Strength (Generic Name)" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="drugName"/>
+			<mx:DataGridColumn headerText="Dose" dataField="Dose" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="Quantity" dataField="Quantity" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="NDC" dataField="NDCCODE" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="No. of Refills"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="getRefillData"/>
+		</components1:columns>
+	</components1:LabelDataGrid>
+</components1:CollapsiblePanel>
+

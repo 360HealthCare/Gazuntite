@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="popupgroup1_creationCompleteHandler(event)" 
+		 xmlns:notes="com.gazuntite.patient.visit.view.commons.notes.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			
+			import flashx.textLayout.debug.assert;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.MoveEvent;
+			import mx.managers.PopUpManager;
+			
+			
+			private var m_oNotesDTO:ModuleNoteDTO;
+			private var notesDTOChanged:Boolean;
+			private var _onNotesSaved:Function;
+		
+			private var m_sHeadingLable:String;
+			private var m_sVisitDateLable:String;
+			
+			private var m_sIsPanelShown:Boolean;
+			
+			public function get isPanelShown():Boolean
+			{
+				return m_sIsPanelShown;
+			}
+			
+			public function set isPanelShown(value:Boolean):void
+			{
+				m_sIsPanelShown = value;
+			}
+			
+			public function get notesDTO():ModuleNoteDTO
+			{
+				return m_oNotesDTO;
+			}
+
+			public function set notesDTO(value:ModuleNoteDTO):void
+			{
+				m_oNotesDTO = value;
+				notesDTOChanged = true;
+				
+				/*if( value )
+				{
+					id_body.id_message.text = value.Note;
+					id_body.id_subject.text = value.NoteSubject;	
+				}*/
+				invalidateProperties();
+			}
+
+			public function get onNotesSaved():Function
+			{
+				return _onNotesSaved;
+			}
+			
+			public function set onNotesSaved(value:Function):void
+			{
+				_onNotesSaved = value;
+			}
+
+			[Bindable]
+			public function get VisitDateLable():String
+			{
+				return m_sVisitDateLable;
+			}
+			
+			public function set VisitDateLable(value:String):void
+			{
+				m_sVisitDateLable = value;
+			}
+			[Bindable]
+			public function get HeadingLable():String
+			{
+				return m_sHeadingLable;
+			}
+			
+			public function set HeadingLable(value:String):void
+			{
+				if(value.length >20)
+				{
+					m_sHeadingLable = value.substring(0,20)+"........";
+				}
+				else 
+				m_sHeadingLable = value;
+			}
+			
+
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_body.id_subject.setFocus();
+				
+				if(id_body)
+				{
+					id_body.id_SaveBtn.visible = false;
+					id_body.id_VisitDateLbl.visible = false;
+					
+					id_body.id_SaveBtn.includeInLayout = false;
+					id_body.id_VisitDateLbl.includeInLayout = false;
+				}
+				
+				if( notesDTO )
+				{
+					id_body.id_message.text = notesDTO.Note;
+					id_body.id_subject.text = notesDTO.NoteSubject;
+				}
+				
+				id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					removePopup();
+					event.stopImmediatePropagation();
+				});
+				
+				//id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				/* id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					SaveNotes();
+					event.stopImmediatePropagation();
+				}); */
+				
+			}
+			
+			public function SaveNotes():void
+			{
+
+				if( notesDTO.NoteSubject != id_body.id_subject.text || notesDTO.Note!=id_body.id_message.text)
+					
+				{	notesDTO.Note 			= id_body.id_message.text ;
+					notesDTO.NoteSubject 	= id_body.id_subject.text ;
+					dispatchEvent(new Event("notesSaved", true));
+					if (null != _onNotesSaved)
+						_onNotesSaved();
+					
+				}	
+			}
+			
+			public function hide():void
+			{
+				removeNotePanel();
+			}
+			
+			public override function ShowPopup(parent:DisplayObject):void
+			{
+				super.ShowPopup(parent);
+				
+				isPanelShown = true;
+			}
+			
+			public override function removePopup():void
+			{
+				if (notesDTO)
+				{
+					var doNotRemovePanel:Boolean = false;
+					
+					if (notesDTO.Note)
+					{
+						if (notesDTO.Note != id_body.id_message.text)
+						{
+							doNotRemovePanel = true;
+							askSave();
+						}
+					}
+					else
+					{
+						if (id_body.id_message.text)
+						{
+							doNotRemovePanel = true;
+							askSave();
+						}
+					}
+					
+					if (!doNotRemovePanel)
+					{
+						if (notesDTO.NoteSubject)
+						{
+							if (notesDTO.NoteSubject != id_body.id_subject.text)
+							{
+								doNotRemovePanel = true;
+								askSave();
+							}
+						}
+						else 
+						{
+							if (id_body.id_subject.text)
+							{
+								doNotRemovePanel = true;
+								askSave();
+							}
+						}
+					}
+					
+					if (!doNotRemovePanel)
+					{
+						removeNotePanel();
+					}
+				}
+				else
+				{
+					removeNotePanel();
+				}
+				
+				/*if( notesDTO && ( notesDTO.Note ||  notesDTO.NoteSubject ) )
+				{
+					if( (notesDTO.Note != id_body.id_message.text) || 
+						(notesDTO.NoteSubject != id_body.id_subject.text ))
+					{
+						askSave();
+					}
+					else
+					{
+						removeNotePanel();
+					}
+				}
+				else if( notesDTO && ( notesDTO.Note == null ||  notesDTO.NoteSubject == null ) && 
+						 ( id_body.id_message.text.length > 0 || id_body.id_subject.text.length > 0 ) )
+				{
+					askSave();
+				}
+				else
+				{
+					removeNotePanel();
+				}*/
+				
+			}
+				
+			public function removeNotePanel():void
+			{
+				if( notesDTO )
+				{
+					id_body.id_message.text = notesDTO.Note;
+					id_body.id_subject.text = notesDTO.NoteSubject;
+				}
+				PopUpManager.removePopUp( this );
+				
+				isPanelShown = false;
+				
+				dispatchEvent(new Event("removeNotesPanel", true));
+			}
+			
+			public function askSave():void
+			{
+				if(id_body.id_message.text != notesDTO.Note)
+						Alert.show("There are unsaved changes, do you want to save?","Save Notes", Alert.YES|Alert.NO, 
+					FlexGlobals.topLevelApplication.mainContainer, function(event:CloseEvent):void
+					{
+						if( event.detail == Alert.YES)
+						{
+							SaveNotes();
+							removeNotePanel();
+						}
+						else if( event.detail == Alert.NO)
+						{
+							removeNotePanel();
+						}
+					});
+				
+					
+			}
+			
+
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (notesDTOChanged)
+				{
+					notesDTOChanged = false;
+					
+					if (notesDTO)
+					{
+						id_body.id_message.text = notesDTO.Note;
+						id_body.id_subject.text = notesDTO.NoteSubject;
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="0" />
+	</components:layout>
+	
+	<notes:NotesHeader id="id_header" width="250" height="35" HeadingLable="{HeadingLable}" VisitDateLable="{VisitDateLable}" />
+	<s:Group width="100%">
+		<s:layout>
+			<s:VerticalLayout gap="-2" paddingBottom="5" paddingLeft="0" paddingRight="0" paddingTop="-4" />
+		</s:layout>
+		<s:SkinnableContainer width="100%" skinClass="com.adobe.gazuntite.skins.chrome.notesBodyOrangeSkin">
+			<s:layout>
+				<s:VerticalLayout gap="-1" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+			</s:layout>	
+			<notes:NotesBody VisitDateLable="{VisitDateLable}" id="id_body" width="100%" height="100%" />
+		</s:SkinnableContainer>
+	</s:Group>	
+</components:PopupGroup>

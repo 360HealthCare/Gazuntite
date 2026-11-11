@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.ItemClickEvent;
+			protected function onClick(event:MouseEvent):void {
+				var e:ItemClickEvent = new ItemClickEvent(ItemClickEvent.ITEM_CLICK, true);
+				e.item = data;
+				parent.dispatchEvent(e);
+				
+				event.stopImmediatePropagation();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:CheckBox id="renderer" selected="@{data.selected}" label="{label}" width="100%" height="100%"
+				click="onClick(event)"/>
+	
+	<!--<s:HGroup width="100%">
+		
+		<s:CheckBox />
+		<s:Label text="{data.label}"/>
+	
+	</s:HGroup>-->
+</s:ItemRenderer>

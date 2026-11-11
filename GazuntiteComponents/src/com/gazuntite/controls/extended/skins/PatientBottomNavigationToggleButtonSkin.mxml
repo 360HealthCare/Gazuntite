@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+    ADOBE SYSTEMS INCORPORATED
+    Copyright 2008 Adobe Systems Incorporated
+    All Rights Reserved.
+
+    NOTICE: Adobe permits you to use, modify, and distribute this file
+    in accordance with the terms of the license agreement accompanying it.
+
+-->
+
+<!--- The default skin class for a Spark ToggleButton component.  
+
+     @see spark.components.ToggleButton
+        
+      @langversion 3.0
+      @playerversion Flash 10
+      @playerversion AIR 1.5
+      @productversion Flex 4
+-->
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark" 
+                   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+                   minWidth="21" minHeight="21" height="26"
+                   alpha.disabledStates="0.5">
+    <fx:Script>
+		<![CDATA[
+			import spark.components.ToggleButton;
+			override protected function  updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				var lb:String = (hostComponent as ToggleButton).selected?hostComponent.label.toUpperCase():hostComponent.label;
+				labelDisplay.text = lb;
+			}
+
+		]]>
+	</fx:Script>
+    <!-- host component -->
+    <fx:Metadata>
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.ToggleButton")]
+    </fx:Metadata>
+    
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" stateGroups="overStates" />
+        <s:State name="down" stateGroups="downStates" />
+        <s:State name="disabled" stateGroups="disabledStates" />
+        <s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+        <s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+        <s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+        <s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+    </s:states>
+
+	<s:Rect includeIn="disabled,disabledAndSelected,up" left="0" top="0" bottom="0" right="0"
+			radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#676767" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#353535" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:BevelFilter angle="90" blurX="0" blurY="0" distance="1" highlightAlpha="0.25"
+						   highlightColor="#FFFFFF" knockout="false" quality="3" shadowAlpha="0"
+						   shadowColor="#CCCCCC" strength="1" type="inner"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect includeIn="down,over" left="0" top="0" bottom="0" right="0" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#64281A" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#C68475" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke alpha="0.41000000000000003" caps="none" color="#CCCCCC" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" alpha="1" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect includeIn="downAndSelected,overAndSelected,upAndSelected" left="0" top="0" bottom="0" right="0" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FFE1D8" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#DA8392" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="downAndSelected" alpha="1" angle="270" blurX="2"
+								blurY="2" color="#000000" distance="1" hideObject="false"
+								inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" horizontalCenter="0" top="-12" width="12.091" height="24.921"
+			data="M 10.86 12.49 L 0.04 6.25 10.86 0.01 Z " rotation="90" transformX="5.45"
+			transformY="6.25">
+		<s:fill>
+			<s:SolidColor color="#FFE1D8"/>
+		</s:fill>
+	</s:Path>
+
+     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay -->
+<!--    <s:Label id="labelDisplay"
+             textAlign="center"
+             verticalAlign="middle"
+             maxDisplayedLines="1"
+             horizontalCenter="0" verticalCenter="1"
+             left="10" right="10" top="2" bottom="2">
+    </s:Label>
+-->	<s:RichText id="labelDisplay" textAlign="center" 
+				horizontalCenter="0" verticalCenter="1"
+				left="8" right="8"
+				color="#FFFFFF" color.selectedStates="#000000"
+				fontSize="13" fontFamily="CalibriCFFBold" fontWeight="bold">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#000000" color.selectedStates="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+    
+</s:SparkButtonSkin>

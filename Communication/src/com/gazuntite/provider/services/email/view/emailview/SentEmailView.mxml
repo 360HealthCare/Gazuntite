@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- 
+<This File Contains Sent Email by a user>
+This skin class for a CollapsiblePanel based on default Spark Panel skin.
+<author> Zahid Mehmood</author>
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="435" height="290" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.services.email.model.EmailModelLocator;
+			
+			import mx.events.ListEvent;
+			import mx.controls.Label;
+			import mx.managers.PopUpManager;
+
+			[Bindable]
+			private var model: EmailModelLocator = EmailModelLocator.getInstance();
+			
+			
+			protected function dgEmailSentItem_itemDoubleClickHandler(event:ListEvent):void
+			{
+				var objReadEmail:ReadEmailView =new ReadEmailView();
+				//TODO ??
+				//objReadEmail.emailID=event.itemRenderer.data.UserId;
+				PopUpManager.addPopUp(objReadEmail,this,true);
+			}
+			
+			protected function CheckUncheckAll():void
+			{
+				/* var allRows:int =	 model.m_oEmailResultList.EmailAll.length;
+				
+				for (var i:int = 0; i < allRows; i++)
+				{
+					if (chkHeader.selected == true)
+					{
+						trace ("Checked is true");
+						//		ListCollectionView(dataGrid.dataProvider).getItemAt(requiredRow)[data_field] = newValue;
+						//var data_field:String = dgViewPreview.columns[6].dataField
+						ListCollectionView(dgEmailInbox.dataProvider).getItemAt(i)["isSelected"]=true;
+						//dgEmailInbox.columns[4]=true;
+						//model.m_oEmailResultList.EmailAll[i].
+						//gridData[i].checked = true;
+					}
+					else
+					{
+						trace ("Checked is false");
+						ListCollectionView(dgEmailInbox.dataProvider).getItemAt(i)["isSelected"]=false;
+						//	gridData[i].checked = false;
+					}
+				}
+				dgEmailInbox.dataProvider = model.m_oEmailResultList.EmailAll; */
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components1:LabelDataGrid id="dgEmailSentItem"  
+							  width="100%" top="3" verticalScrollPolicy="off"
+				 dataProvider="{model.m_oEmailResultList.EmailAll}"  mouseEnabled="true"  columnWidths="{['10%','25%','25%','30%']}"
+				 itemDoubleClick="dgEmailSentItem_itemDoubleClickHandler(event)">
+		<components1:columns>
+			<mx:DataGridColumn headerText="" editable="false"  sortable="false"  textAlign="center" dataField="HasAttachment" 
+							   itemRenderer="mx.controls.CheckBox" paddingLeft="3" rendererIsEditor="true" editorDataField="selected"
+							   headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn editable="false" sortable="false" dataField="From" headerText="To" 
+							   itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn editable="false" sortable="false" dataField="Subject" headerText="Subject"
+							   itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn editable="false" sortable="false" dataField="MailSentAt" headerText=""
+							   itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+		</components1:columns> 
+	</components1:LabelDataGrid>
+	<mx:CheckBox id="chkHeader"  click="CheckUncheckAll()" left="3"  top="5" selected="false"  />
+</s:Group>

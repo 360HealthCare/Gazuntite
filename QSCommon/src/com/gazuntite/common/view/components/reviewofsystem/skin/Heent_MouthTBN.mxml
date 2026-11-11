@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="150" height="28">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0.5" y="0.5" width="149" height="27" alpha="1"
+			visible.downAndSelected="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="0xFDFDFD" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0xDADADA" ratio="0.5215686274509804"/>
+				<s:GradientEntry alpha="1.0" color="0xBFBDB7" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#D1D1D1" ratio="0.9137254901960784"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="round" color="#505050" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:RichText x="7" y="8" width="95" height="12" color="#000000" fontFamily="Calibri" fontSize="12"
+				tabStops="S0 S50" text="Mouth"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				color.upAndSelected="#FFFFFF"/>
+	<s:Rect includeIn="downAndSelected,overAndSelected,upAndSelected" x="1" y="1" width="149"
+			height="27" alpha="1">
+		<s:fill>
+			<s:SolidColor color="#666666"/>
+		</s:fill>
+	</s:Rect>
+<!--	<s:ToggleButton visible="false" x="128" y="5" selected="false" skinClass="components.NTB1"/>
+-->	<s:RichText id="labelDisplay" includeIn="downAndSelected,overAndSelected,upAndSelected" x="7" y="8" width="95"
+				height="12" color="#FFFFFF" fontFamily="Calibri" fontSize="14" fontWeight="bold"
+				tabStops="S0 S50"/>
+</s:Skin>

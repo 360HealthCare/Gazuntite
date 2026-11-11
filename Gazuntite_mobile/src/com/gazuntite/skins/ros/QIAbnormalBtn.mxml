@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+	</s:states>
+	<s:Rect height="17" id="rect57" radiusX="3" width="17" x="0.5" y="0.5" visible.over="false" visible.down="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#AFB0B0" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="17" id="rect0" includeIn="down,over" radiusX="3" width="17" x="0.5" y="0.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#009CFF" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#6FC9FF" ratio="0.027450980392156862"/>
+				<s:GradientEntry alpha="1.0" color="#009CFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="2" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="2" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage smooth="true" source="@Embed('com/adobe/Quivus/view/controls/skins/assets/qi_dictation.png')" x="5" y="4">
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="20" blurY="20" color="#AFB0B0" inner="true" knockout="false" quality="3" strength="1" includeIn="disabled,up"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

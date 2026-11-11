@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.ActionBarSkin"
+					  width="100%" 
+					  height="35" 
+					  height.down="100%"
+					  creationComplete="init(event)" 
+					  xmlns:actionBars="com.gazuntite.components.actionBars.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.AssessmentView;
+			import com.gazuntite.components.PatientHistoryView;
+			import com.gazuntite.components.PhysicalView;
+			
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.TabBar;
+			
+			import ws.tink.spark.controls.BorderDataNavigator;
+			import ws.tink.spark.skins.controls.BorderDataNavigatorSkin;
+			
+			[Bindable]
+			protected var _labelText:String;
+			
+			[Bindable]
+			protected var open:Boolean = false;
+			
+			protected var vs:BorderDataNavigator;
+			protected var tabBar:TabBar;
+			
+			protected var signAndReview:SignAndReviewActionBar;
+			
+			public function get labelText():String
+			{
+				return _labelText;
+			}
+			
+			public function set labelText(value:String):void
+			{
+				_labelText = value;
+			}
+			
+			// fill the entire coverflow
+			protected function createSubviews():void
+			{
+				
+				// create new subviews for QI
+				vs.addItem(new PatientHistoryView());
+				vs.addItem(new PhysicalView());
+				vs.addItem(new AssessmentView());
+				
+				tabBar.selectedIndex = 0;
+				
+			}
+			
+			protected function checkState():void
+			{
+				if(open == true)
+				{
+					open = false;
+					this.currentState = "normal";
+					
+					removeElement(vs);
+					
+					if(tabBar != null)
+					{
+						removeElement(tabBar);
+						removeElement(signAndReview);
+					}
+					
+					
+				}else
+				{
+					open = true;
+					this.currentState = "down";
+					
+					vs = new BorderDataNavigator();
+					vs.setStyle("skinClass", ws.tink.spark.skins.controls.BorderDataNavigatorSkin);
+					
+					vs.percentHeight = 99;
+					vs.percentWidth = 100;
+					vs.y = 32;
+					
+					addElement(vs);
+					
+					vs.selectedIndex = 0;
+					
+					tabBar = new TabBar();
+					tabBar.x = 202;
+					tabBar.y = 3;
+					tabBar.height = 27;
+					tabBar.setStyle("chromeColor", "0x1c2b43");
+					tabBar.setStyle("color", "0xffffff");
+					tabBar.labelField="title";
+					tabBar.dataProvider = vs;
+					addElement(tabBar);
+					tabBar.selectedIndex = 0;
+					
+					signAndReview = new SignAndReviewActionBar();
+					signAndReview.right = 2;
+					signAndReview.y = 35;
+					addElement(signAndReview);
+					
+				}
+				
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleOpenEffectEnd(event:EffectEvent):void
+			{
+				// only init child views when needed to save memory and performance
+				createSubviews();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:transitions>
+		<s:Transition fromState="normal" toState="down">
+			<s:Parallel duration="200" effectEnd="handleOpenEffectEnd(event)">
+				<s:Resize target="{this}"/>
+				<s:Move target="{actionBarTitle}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="down" toState="normal">
+			<s:Parallel duration="350">
+				<s:Resize target="{this}"/>
+				<s:Move target="{actionBarTitle}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<s:Label id="actionBarTitle"
+			 text="Quick Input" 
+			 styleName="actionBarTitle"
+			 x.normal="20"
+			 x.down="40"
+			 y="10">
+		
+		<s:filters>
+			<s:DropShadowFilter distance="1"
+								strength=".55"
+								angle="90"/>
+		</s:filters>
+	</s:Label>
+	
+	<!-- Open/close the action bar -->
+	<s:Button click="checkState()"
+			  width="150"
+			  height="40"
+			  alpha="0"
+			  buttonMode="true"
+			  useHandCursor="true"/>
+	
+	<!-- Option buttons on the right side of ActionBar -->	
+	<s:Button skinClass="com.gazuntite.skins.RapidAccessBtnSkin" 
+			  right="40" 
+			  top="4"
+			  buttonMode="true"
+			  useHandCursor="true"
+			  toolTip="Rapid access"/>
+	
+	<s:Button skinClass="com.gazuntite.skins.OptionsBtnSkin" 
+			  right="10" 
+			  top="4"
+			  buttonMode="true"
+			  useHandCursor="true"
+			  toolTip="Other options"/>
+	
+	<s:Spacer height="10"/>
+	
+</s:SkinnableContainer>

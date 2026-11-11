@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" 
+				xmlns:controls="com.gazuntite.components.controls.*"
+				minHeight="33">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			[Bindable]
+			protected var _isSelected:Boolean = false;
+			
+			public function get isSelected():Boolean
+			{
+				return _isSelected;
+			}
+
+			public function set isSelected(value:Boolean):void
+			{
+				_isSelected = value;
+			}
+
+			protected function toggleswitch1_changeHandler(event:Event):void
+			{
+				_isSelected = ts.selected;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle"
+							paddingBottom="3" 
+							paddingLeft="3" 
+							paddingRight="3" 
+							paddingTop="3"/>
+	</s:layout>
+	
+	<s:Label text="{data.type}"/>
+	
+	<s:HGroup width="100%" horizontalAlign="right">
+		<controls:ToggleSwitch id="ts" 
+							   skinClass="com.gazuntite.skins.ToggleSwitchSkin" 
+							   change="toggleswitch1_changeHandler(event)"/>
+	</s:HGroup>
+	
+</s:ItemRenderer>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		 
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.controls.events.FlipViewEvent;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetAddressBookByPartyRegGuidEvent;
+			
+			import mx.events.FlexEvent;
+			
+			public var selectedPatientAddress:String;
+			public var selectedPatientPhone:String;
+			
+			private var _selectedPatient:PatientDTO;
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+				if( null != value )
+					loadPatientAddressBook();
+			}
+			
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			[Bindable]
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+			
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				
+			}
+			
+			public function loadPatientAddressBook():void
+			{
+				var patientAddressEvent: GetAddressBookByPartyRegGuidEvent = new GetAddressBookByPartyRegGuidEvent(selectedPatient.RecGuid, function(response:XML):void
+				{
+					//AddressDTOlist = response.AddressDTOlist;
+					for(var i:uint = 0; i<response.AddressDTOlist.length(); i++)
+					{
+						selectedPatientAddress = response.AddressDTOlist.AddressDTO[0].StreetName + ", " + response.AddressDTOlist.AddressDTO[0].CityName + ", " + response.AddressDTOlist.AddressDTO[0].StateName;
+					}
+					
+					if(response.PhoneDTOlist.PhoneDTO != null)
+					{
+						selectedPatientPhone = ValidationUtils.setPhoneNumberMasking(response.PhoneDTOlist.PhoneDTO[0].PhoneNumber);
+					} 
+				});				
+				CairngormEventDispatcher.getInstance().dispatchEvent(patientAddressEvent);
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			
+			protected function back_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new FlipViewEvent()); 
+			}
+			
+			protected function send_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("sendData", true) );
+			}
+			
+			protected function add_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("addData", true) );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="5" paddingRight="10" paddingLeft="20" paddingTop="10" paddingBottom="10"/>
+	</s:layout>
+	
+	
+	<newrx:SelectedPatientLabelView id="id_SelectedPatientLabelView" width="100%" selectedPatient="{selectedPatient}" 
+									selectedPharmacy="{selectedPharmacy}" />
+	
+	
+	<newrx:SelectedMedicineLabelView id="id_SelectedMedicineLabelView" width="100%" selectedPatient="{selectedPatient}" />
+	
+	<newrx:MedicineInputView id="id_MedicineInputView"  width="100%" />
+	
+	<s:Label id="id_SIG" text="SIG" width="100%" />
+	
+	<s:HGroup width="100%" >
+		<s:Button label="Back" click="back_clickHandler(event)" />
+		<s:Button label="Send" click="send_clickHandler(event)" />
+		
+		<s:Spacer width="100%" />
+		
+		<s:Button label="Add" click="add_clickHandler(event)" />
+		
+	</s:HGroup>
+	
+</s:Group>

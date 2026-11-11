@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dualpanel:DualPanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:dualpanel="com.riavalue.components.dualpanel.*" 
+					  xmlns:components="com.gazuntite.components.*"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+					  width="100%"
+					  height="100%"
+					  transitionDuration="300"
+					  skinClass="com.riavalue.components.dualpanel.SpinSkin"
+					  creationComplete="init(event)" 
+					  xmlns:forms="com.gazuntite.view.quickInput.forms.*" 
+					  xmlns:input="com.gazuntite.view.controls.custom.patientExamView.quickInput.immunization.input.*" 
+					  xmlns:controls="com.gazuntite.view.controls.*" 
+					  xmlns:chronicMedication="com.gazuntite.view.quickInput.forms.chronicMedication.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.itemrenderers.ChronicMedication.ChronicMedicationIRDosageForm;
+			import com.gazuntite.view.itemrenderers.ChronicMedication.ChronicMedicationIRGenericName;
+			import com.gazuntite.view.itemrenderers.ChronicMedication.ChronicMedicationIRMedicineName;
+			import com.gazuntite.events.ArrangeByEvent;
+			import com.gazuntite.events.OptionsButtonClickedEvent;
+			import com.gazuntite.events.PinViewEvent;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.ToggleFormOptionsEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			import spark.components.supportClasses.ListBase;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			[Bindable]
+			protected var editObject:ObjectProxy;
+			
+			[Bindable]
+			protected var notes:Boolean = true;
+			
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+				this.currentState = "normal";
+				
+				this.prefsButton.addEventListener(MouseEvent.CLICK, handlePrefsButtonClick);
+			}
+			
+			
+			
+			protected function handlePrefsButtonClick(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function resetState():void
+			{
+				
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				
+			}
+			
+			protected function detailList_changeHandler(event:IndexChangeEvent):void
+			{
+				
+			}
+			
+			protected function showFullForm(event:MouseEvent):void
+			{
+				this.currentState = "fullForm";
+			}
+			
+			protected function toggleFormOptionsHandler(event:ToggleFormOptionsEvent):void
+			{
+				
+				
+				
+			}
+			
+			protected function saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int = detailList.selectedIndex;
+						sharedModel.immunizationHistoryAC.setItemAt(event.payload, i);
+						editObject = sharedModel.chronicMedicationAC.getItemAt(i) as ObjectProxy;
+					}
+					else
+					{
+						sharedModel.addedChronicMedicationAC.addItem(event.payload);
+						sharedModel.chronicMedicationAC.addItem(event.payload);
+					}
+					
+				}
+				
+				invalidateDisplayList();
+			}
+			
+			protected function updateEditObject():void
+			{
+				
+			}
+			
+			
+			protected function frontPanel_optionsButtonClickedHandler(event:OptionsButtonClickedEvent):void
+			{
+				
+			}
+			
+			protected function pinBtnClickHandler(event:MouseEvent):void
+			{
+				var e:PinViewEvent = new PinViewEvent(PinViewEvent.PIN_VIEW_EVENT, true);
+				dispatchEvent(e);
+				
+			}
+			
+			protected function optionsButtonClickedHandler(event:OptionsButtonClickedEvent):void
+			{
+				if(!event.notes)
+				{
+					notes = false;
+				}else
+				{
+					notes = true;
+				}
+			}
+			
+			
+			protected function arrangebycalloutbutton1_arrangeByHandler(event:ArrangeByEvent):void
+			{
+				//trace(event.field);
+				
+				var l:ListBase; // we don't know yet if this is a List or SpinnerList we're dealing with
+				
+				if(this.currentState == "normal")
+				{
+					l = list;
+				}else
+				{
+					l = detailList;
+				}
+				
+				switch(event.field)
+				{
+					 case "Medicine Name":
+					l.itemRenderer = new ClassFactory(ChronicMedicationIRMedicineName);
+					break;
+					case "Generic Name":
+					l.itemRenderer = new ClassFactory(ChronicMedicationIRGenericName);
+					break;
+					case "Dosage Form":
+					l.itemRenderer = new ClassFactory(ChronicMedicationIRDosageForm);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	
+	<dualpanel:states>
+		<s:State name="normal"/>
+		<s:State name="fullForm"/>
+		<s:State name="normalFlipped"/>
+	</dualpanel:states> 
+	
+	
+	<!-- dual panel views -->
+	
+	<dualpanel:frontView>
+		<controls:CoverFlowPanelView id="frontPanel" 
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="Chronic Medication"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 optionsButtonClicked="frontPanel_optionsButtonClickedHandler(event)"
+									 controlBarVisible="false">
+			
+			<s:BorderContainer width="100%"
+							   height="100%"
+							   borderWeight="0" 
+							   cornerRadius="0" 
+							   dropShadowVisible="false"
+							   borderAlpha="0">
+				
+				<s:backgroundFill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry color="0xffffff" ratio=".1"/>
+						<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+					</s:LinearGradient>
+				</s:backgroundFill>
+				
+				<s:layout>
+					<s:VerticalLayout paddingBottom="0"
+									  paddingLeft="0"
+									  paddingRight="0"
+									  paddingTop="0"
+									  horizontalAlign="center"/>
+				</s:layout>
+				
+				<chronicMedication:QIMedicationForm includeIn="normal"
+													id="id_ChronicMedicationForm"
+													width="100%"
+													saveFormData="saveFormDataHandler(event)"/>
+				
+				<s:BorderContainer width="100%"
+								   height="24"
+								   borderWeight="1" 
+								   borderColor="0x898989"
+								   cornerRadius="0" 
+								   dropShadowVisible="false"
+								   borderAlpha="1">
+					
+					<s:backgroundFill>
+						<s:LinearGradient rotation="90">
+							<s:GradientEntry color="0x898989" ratio=".1"/>
+							<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+						</s:LinearGradient>
+					</s:backgroundFill>
+					
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="bottom" 
+											paddingLeft="10"
+											paddingBottom="10"/>
+					</s:layout>
+					
+					<controls:ArrangeByCalloutButton label="Arrange By:"
+													 color="0x000000"
+													 arrangeBy="arrangebycalloutbutton1_arrangeByHandler(event)">
+						<controls:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object name="Medicine Name"/>
+								<fx:Object name="Generic Name"/>
+								<fx:Object name="Dosage Form"/>
+							</s:ArrayCollection>
+						</controls:dataProvider>
+					</controls:ArrangeByCalloutButton>
+					
+					<s:Label text="Medication records added:" styleName="listLabel"/>
+					
+				</s:BorderContainer>
+				
+				
+				
+				<s:List id="list"
+						width="100%"
+						height="100%"
+						dataProvider="{sharedModel.addedChronicMedicationAC}"
+						itemRenderer="com.gazuntite.view.itemrenderers.ChronicMedication.ChronicMedicationIRMedicineName"/>
+				
+				
+			</s:BorderContainer>
+			
+			
+		</controls:CoverFlowPanelView>
+		
+	</dualpanel:frontView>
+	
+	<!-- Back view dual panel -->
+	
+	<dualpanel:backView>
+		<controls:CoverFlowPanelView id="backPanel" 
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="{'Medication History: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 controlBarVisible="false"
+									 optionsButtonClicked="optionsButtonClickedHandler(event)">
+			
+			<s:BorderContainer width="100%"
+							   height="100%"
+							   borderWeight="0" 
+							   cornerRadius="0" 
+							   dropShadowVisible="false"
+							   borderAlpha="0">
+				
+				<s:backgroundFill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry color="0xffffff" ratio=".1"/>
+						<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+					</s:LinearGradient>
+				</s:backgroundFill>
+				
+				<s:layout>
+					<s:VerticalLayout paddingBottom="0"
+									  paddingLeft="0"
+									  paddingRight="0"
+									  paddingTop="0"
+									  horizontalAlign="center"/>
+				</s:layout>
+				
+				<chronicMedication:QIMedicationMobileHistoryForm includeIn="normal"
+																 id="id_ChronicMedicationForm2"
+																 width="100%"
+																 selectedRecord="{editObject}"
+																 saveFormData="saveFormDataHandler(event)"/>
+				
+				<s:BorderContainer width="100%"
+								   height="24"
+								   borderWeight="1" 
+								   borderColor="0x898989"
+								   cornerRadius="0" 
+								   dropShadowVisible="false"
+								   borderAlpha="1">
+					
+					<s:backgroundFill>
+						<s:LinearGradient rotation="90">
+							<s:GradientEntry color="0x898989" ratio=".1"/>
+							<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+						</s:LinearGradient>
+					</s:backgroundFill>
+					
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="bottom" 
+											paddingLeft="10"
+											paddingBottom="10"/>
+					</s:layout>
+					
+					<controls:ArrangeByCalloutButton label="Arrange By:"
+													 color="0x000000"
+													 arrangeBy="arrangebycalloutbutton1_arrangeByHandler(event)">
+						<controls:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object name="Medicine Name"/>
+								<fx:Object name="Generic Name"/>
+								<fx:Object name="Dosage Form"/>
+							</s:ArrayCollection>
+						</controls:dataProvider>
+					</controls:ArrangeByCalloutButton>
+					
+					<s:Label text="Medication history records:" styleName="listLabel"/>
+					
+				</s:BorderContainer>
+				
+				<s:List id="detailList"
+						width="100%"
+						height="100%"
+						change="detailList_changeHandler(event)"
+						dataProvider="{sharedModel.chronicMedicationAC}"
+						itemRenderer="com.gazuntite.view.itemrenderers.ChronicMedication.ChronicMedicationIRMedicineName"/>
+				
+				
+			</s:BorderContainer>
+			
+			
+			
+		</controls:CoverFlowPanelView>
+	</dualpanel:backView>
+	
+</dualpanel:DualPanel>

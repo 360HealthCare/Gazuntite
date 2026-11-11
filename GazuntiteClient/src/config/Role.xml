@@ -1,0 +1,182 @@
+<Responce xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<ResponseStatus>true</ResponseStatus>
+	<ResponseCode>0</ResponseCode>
+	<Rights>
+		<TopBar Name="Top Bar" ParentName="" IsViewAllowed="false"
+			IsEditAllowed="true" RoleRightID="2" IsDirty="true">
+			<QuivusWeb Name="Quivus Web" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="3" IsDirty="true" />
+			<QuickLinks Name="Quick Links" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="4" IsDirty="true" />
+			<WebSearch Name="Web Search" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="5" IsDirty="true" />
+			<ContactSearch Name="Contact Search" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="6" IsDirty="true" />
+			<Communication Name="Communication" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="7" IsDirty="true">
+				<Email Name="Email" ParentName="Communication" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="11" IsDirty="true" />
+				<SMS Name="SMS" ParentName="Communication" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="12" IsDirty="true" />
+				<VideoChat Name="Video Chat" ParentName="Communication"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="13"
+					IsDirty="true" />
+				<Chat Name="Chat" ParentName="Communication" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="14" IsDirty="true" />
+				<Call Name="Call" ParentName="Communication" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="15" IsDirty="true" />
+			</Communication>
+			<UserProfile Name="User Profile" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="8" IsDirty="true" />
+			<Status Name="Status" ParentName="Top Bar" IsViewAllowed="false"
+				IsEditAllowed="true" RoleRightID="9" IsDirty="true" />
+			<Locationlist Name="Location List" ParentName="Top Bar"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="10" IsDirty="true" />
+		</TopBar>
+		<PatientExam Name="Patient Exam" ParentName=""
+			IsViewAllowed="false" IsEditAllowed="true" RoleRightID="1" IsDirty="true">
+			<PatientSearch Name="Patient Search" ParentName="Patient Exam"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="17" IsDirty="true" />
+			<MostrecentPatient Name="Most recent Patient"
+				ParentName="Patient Exam" IsViewAllowed="false" IsEditAllowed="true"
+				RoleRightID="18" IsDirty="true" />
+			<Communication Name="Communication" ParentName="Patient Exam"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="19" IsDirty="true" />
+			<PatientProfile Name="Patient Profile" ParentName="Patient Exam"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="20" IsDirty="true" />
+			<ViewBackground Name="View Background" ParentName="Patient Exam"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="21" IsDirty="true">
+				<Encounterlist Name="Encounter list" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="22"
+					IsDirty="true" IsSignAllowed="true" />
+				<Documents Name="Documents" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="23"
+					IsDirty="true" />
+				<CreateVisit Name="Create Visit" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="24"
+					IsDirty="true" />
+				<SummaryView Name="Summary View" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="25"
+					IsDirty="true" />
+				<Allergies Name="Allergies" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="26"
+					IsDirty="true" />
+				<ComprehensiveHistory Name="Comprehensive History"
+					ParentName="View Background" IsViewAllowed="false" IsEditAllowed="true"
+					RoleRightID="27" IsDirty="true" />
+				<ChronicMedication Name="Chronic Medication"
+					ParentName="View Background" IsViewAllowed="false" IsEditAllowed="true"
+					RoleRightID="28" IsDirty="true" />
+				<Immunization Name="Immunization" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="29"
+					IsDirty="true" />
+				<VitalSigns Name="Vital Signs" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="30"
+					IsDirty="true" />
+				<CCHPI Name="CCHPI" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="31"
+					IsDirty="true" />
+				<ROS Name="ROS" ParentName="View Background" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="32" IsDirty="true" />
+				<Physical Name="Physical" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="33"
+					IsDirty="true" />
+				<LabIN Name="LabIn" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="34"
+					IsDirty="true" />
+				<Diagnosis Name="Diagnosis" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="35"
+					IsDirty="true" />
+				<Prescription Name="Prescription" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="36"
+					IsDirty="true" />
+				<Procedures Name="Procedures" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="37"
+					IsDirty="true" />
+				<LabOut Name="LabOut" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="38"
+					IsDirty="true" />
+				<Recommendation Name="Recommendation" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="39"
+					IsDirty="true" />
+				<FollowUp Name="FollowUp" ParentName="View Background"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="40"
+					IsDirty="true" />
+			</ViewBackground>
+			<QuickInput Name="Quick Input" ParentName="Patient Exam"
+				IsViewAllowed="false" IsEditAllowed="true" RoleRightID="16" IsDirty="true">
+				<VisitProperties Name="Visit Properties" ParentName="Quick Input"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="41"
+					IsDirty="true" />
+				<PMH Name="PMH" ParentName="Quick Input" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="42" IsDirty="true">
+					<Allergies Name="Allergies" ParentName="PMH"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="48"
+						IsDirty="true" />
+					<ComprehensiveHistory Name="Comprehensive History"
+						ParentName="PMH" IsViewAllowed="false" IsEditAllowed="true"
+						RoleRightID="49" IsDirty="true" />
+					<ChronicMedication Name="Chronic Medication"
+						ParentName="PMH" IsViewAllowed="false" IsEditAllowed="true"
+						RoleRightID="50" IsDirty="true" />
+					<Immunization Name="Immunization" ParentName="PMH"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="51"
+						IsDirty="true" />
+				</PMH>
+				<Physicals Name="Physical" ParentName="Quick Input"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="43"
+					IsDirty="true">
+					<VitalSigns Name="Vital Signs" ParentName="Physical"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="52"
+						IsDirty="true" />
+					<CCHPI Name="CCHPI" ParentName="Physical" IsViewAllowed="false"
+						IsEditAllowed="true" RoleRightID="53" IsDirty="true" />
+					<ROS Name="ROS" ParentName="Physical" IsViewAllowed="false"
+						IsEditAllowed="true" RoleRightID="54" IsDirty="true" />
+					<Physical Name="PhysicalRights" ParentName="Physical"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="55"
+						IsDirty="true" />
+					<LabIn Name="LabIn" ParentName="Physical" IsViewAllowed="false"
+						IsEditAllowed="true" RoleRightID="56" IsDirty="true" />
+				</Physicals>
+				<Assessment Name="Assessment" ParentName="Quick Input"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="47"
+					IsDirty="true">
+					<Diagnosis Name="Diagnosis" ParentName="Assessment"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="57"
+						IsDirty="true" IsImportAllowed="true" />
+					<Treatments Name="Treatments" ParentName="Assessment"
+						IsViewAllowed="false" IsEditAllowed="true" RoleRightID="58"
+						IsDirty="true">
+						<Prescription Name="Prescription" ParentName="Treatments"
+							IsViewAllowed="true" IsEditAllowed="true" RoleRightID="60"
+							IsDirty="false" />
+						<Procedures Name="Procedures" ParentName="Treatments"
+							IsViewAllowed="true" IsEditAllowed="true" RoleRightID="61"
+							IsDirty="false" />
+					</Treatments>
+					<Plans Name="Plans" ParentName="Assessment" IsViewAllowed="false"
+						IsEditAllowed="true" RoleRightID="59" IsDirty="true">
+						<LabOut Name="LabOut" ParentName="Plans" IsViewAllowed="true"
+							IsEditAllowed="true" RoleRightID="62" IsDirty="false" />
+						<Recommendation Name="Recommendation" ParentName="Plans"
+							IsViewAllowed="true" IsEditAllowed="true" RoleRightID="63"
+							IsDirty="false" />
+						<FollowUp Name="FollowUp" ParentName="Plans"
+							IsViewAllowed="true" IsEditAllowed="true" RoleRightID="64"
+							IsDirty="false" />
+					</Plans>
+				</Assessment>
+				<ReviewHistory Name="Review History" ParentName="Quick Input"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="44"
+					IsDirty="true" />
+				<Sgin Name="Sign" ParentName="Quick Input" IsViewAllowed="false"
+					IsEditAllowed="true" RoleRightID="45" IsDirty="true" />
+				<SaveAndReview Name="SaveAndReview" ParentName="Quick Input"
+					IsViewAllowed="false" IsEditAllowed="true" RoleRightID="46"
+					IsDirty="true" />
+			</QuickInput>
+		</PatientExam>
+	</Rights>
+</Responce>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 height="125" width="380" 
+		 creationComplete="creationCompleteHandler()" xmlns:components1="com.gazuntite.controls.extended.components.*" >
+	<fx:Script>
+			
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.event.visit.ManageVisitOwnerEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			
+			import mx.effects.Zoom;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var TITLE:String = QIConstants.SET_VISIT_PROVIDER;
+			[Bindable]	private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			//@ start select the provider that is isDefault is true in service.
+			protected function creationCompleteHandler():void
+			{
+				if(model.VisitProviderSelected != -1)
+					id_Providers.selectedIndex = model.VisitProviderSelected;
+				else
+					id_Providers.selectedIndex = -1;
+				
+				if(model.VisitProviderOwnerType != -1)
+				{
+					switch(model.VisitProviderOwnerType)
+					{
+						case 1:
+							id_rbPrimary.selected = true;
+							break;
+						case 2:
+							id_rbAttending.selected = true;
+							break;
+						case 3:
+							id_rbConsulting.selected = true;
+							break;
+					}
+				}
+				else
+				{
+					id_rbPrimary.selected = true;
+				}
+			}
+			//-- Save Button Click handler
+			protected function onSaveClick(event:MouseEvent):void
+			{
+				if(id_Providers.selectedIndex >= 0)
+				{	
+					if(model.VisitProviderOwnerType != 1 && model.VisitProviderOwnerType != 2 && model.VisitProviderOwnerType != 3)
+						model.VisitProviderOwnerType = 1;
+					
+					 var gueEvent : ManageVisitOwnerEvent = new ManageVisitOwnerEvent(id_Providers.selectedItem.UserId, 
+						id_Providers.selectedItem.UserTypeID, model.VisitProviderOwnerType.toString(), model.VisitID.toString(), model.LoggedInUserId.toString(), callback);
+					CairngormEventDispatcher.getInstance().dispatchEvent( gueEvent );
+				}
+				else
+				{
+					id_Providers.setFocus();
+				}
+			}
+			// -ManageVisitOwnerEvent call back handler
+			public function callback(val:String):void
+			{
+				if(val == 'true')
+				{
+					QIConstants
+					model.isVisitPhysicainSaved = true;
+					PopUpManager.removePopUp( this );
+				}
+			}
+			//-- Radio Button Item select handler
+			protected function itemClickHandler(event:ItemClickEvent):void
+			{
+				switch(event.label)
+				{
+					case 'Primary':
+						model.VisitProviderOwnerType = 1;
+						break;
+					case 'Attending':
+						model.VisitProviderOwnerType = 2;
+						break;
+					case 'Consulting':
+						model.VisitProviderOwnerType = 3;
+						break;
+				}
+			}
+			//--- Combo change handler
+			protected function id_Providers_changeHandler(event:IndexChangeEvent):void
+			{
+				model.VisitProviderSelectedUserID 	= id_Providers.selectedItem.UserId;
+				model.VisitProviderSelected			= id_Providers.selectedIndex;
+				model.VisitProviderOwnerUSerTypeID	= id_Providers.selectedItem.UserTypeID;
+				model.VisitProviderName				= id_Providers.selectedItem.FirstName +' '+ id_Providers.selectedItem.MiddleName + ' '+ id_Providers.selectedItem.LastName;
+			}
+			
+			protected function closePopup(event:MouseEvent):void
+			{
+				//dispatchEvent(new Event('closeSetProviderPopupEvent',true, true));
+				PopUpManager.removePopUp( this );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="visitType" 	itemClick="itemClickHandler(event)"/>
+	</fx:Declarations>
+	
+	<s:BorderContainer width="100%" height="100%" cornerRadius="8" backgroundColor="0x6D6D6D" dropShadowVisible="true" >
+		<s:borderStroke>
+			<s:LinearGradientStroke weight="8" rotation="270">
+				<s:GradientEntry color="0x2E2E2E"/>
+				<s:GradientEntry color="0x2E2E2E"/>
+			</s:LinearGradientStroke>
+		</s:borderStroke>
+		
+		<s:layout>
+			<s:VerticalLayout gap="10" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="3"  />
+		</s:layout>
+		<s:Group width="100%">
+			<s:Label color="#FFFFFF" fontSize="17" fontWeight="normal" text="Select a Provider" left="5"/>
+			<s:Button id="id_closeBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.closeButonSkin" right="5" toolTip="Close Popup" click="closePopup(event)" useHandCursor="true" buttonMode="true"/>
+		</s:Group>
+		
+		<s:HGroup horizontalAlign="center" width="100%">
+			<components1:LabelComboBox id="id_Providers" 
+									  width="100" labelField="FirstName"
+									  change="id_Providers_changeHandler(event)"
+									  dataProvider="{model.VisitProviderDTOList}"
+									  prompt="Select Provider"/>
+			
+			<s:RadioButton id="id_rbPrimary" label="Primary" color="#FFFFFF" group="{visitType}" selected="true" useHandCursor="true" buttonMode="true"/>
+			<s:RadioButton id="id_rbAttending" label="Attending" color="#FFFFFF" group="{visitType}" useHandCursor="true" buttonMode="true"/>
+			<s:RadioButton id="id_rbConsulting" label="Consulting" color="#FFFFFF"   group="{visitType}" useHandCursor="true" buttonMode="true" />
+		</s:HGroup>
+		<s:HGroup horizontalAlign="center" width="100%">
+			<s:Label id="id_error" visible="{id_Providers.selectedIndex >= 0 ? false :true}" color="#F1E912" includeInLayout="{id_error.visible}"
+					 text="Please select a provider from list"/>
+		</s:HGroup>
+		<s:HGroup horizontalAlign="center" width="100%">
+			<s:Button id="id_btnSave" 
+					  label="Save" click="onSaveClick(event)" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin" 
+					  toolTip="Save provider detail" useHandCursor="true" buttonMode="true"/>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+</s:Group>

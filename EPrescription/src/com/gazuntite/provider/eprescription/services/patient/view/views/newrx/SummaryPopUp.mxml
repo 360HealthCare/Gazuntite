@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   creationComplete="popupgroup1_creationCompleteHandler(event)"
+					   >
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			public var URL:String;
+			protected function id_htmlArea_completeHandler(event:Event):void
+			{
+				
+			}
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+					}
+				});
+				
+				CursorManager.removeBusyCursor();
+				id_htmlArea.htmlLoader.navigateInSystemBrowser = false;
+				id_htmlArea.location = URL;
+				
+				id_htmlArea.addEventListener(Event.COMPLETE, completeHandler);
+			}
+			
+			protected function completeHandler(event:Event):void 
+			{
+				if(null != id_htmlArea.htmlLoader.window.document.getElementById("BtnClose"))
+					id_htmlArea.htmlLoader.window.document.getElementById("BtnClose").onclick = clickHandler;
+				
+				if(null != id_htmlArea.htmlLoader.window.document.getElementById("BtnCloseSummary"))
+					id_htmlArea.htmlLoader.window.document.getElementById("BtnCloseSummary").onclick = SaveSuccess_handler;
+			}
+			
+			protected function clickHandler(object:*):void 
+			{
+				trace("You clicked it!");
+				if( isPopUp )
+				{
+					removePopup();
+				}
+			}
+			
+			private function SaveSuccess_handler(object:*):void
+			{
+				if( isPopUp )
+				{
+					var event:Event = new Event("SaveSuccess",true);
+					dispatchEvent(event);
+					removePopup();
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:BorderContainer backgroundColor="#B9BDC6" borderColor="#B9BDC6" borderWeight="1" cornerRadius="3" width="100%" height="100%" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" strength="1" quality="2" color="#727472"/>
+		</s:filters>
+		<mx:HTML horizontalScrollPolicy="off" verticalScrollPolicy="off" id="id_htmlArea" height="100%" width="100%" complete="id_htmlArea_completeHandler(event)"/>
+	</s:BorderContainer>
+</components:PopupGroup>

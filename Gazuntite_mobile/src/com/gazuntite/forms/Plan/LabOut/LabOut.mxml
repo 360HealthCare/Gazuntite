@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:controls="com.gazuntite.components.controls.*"
+		 xmlns:lists="com.gazuntite.components.lists.*"
+		 >
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.itemrenderers.Plan.LabOutIRSortAbleList;
+			import com.gazuntite.components.itemrenderers.Plan.Labout.LabOutIROrderMethod;
+			import com.gazuntite.components.itemrenderers.Plan.Labout.LabOutIRTestCode;
+			import com.gazuntite.components.itemrenderers.Plan.Labout.LabOutIRTestName;
+			import com.gazuntite.components.itemrenderers.Treatment.Prescription.PrescriptionIRMedicineName;
+			import com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRICD;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.services.valueObjects.Plan.LabOutDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var _dataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+
+			public function  validateEditForm():Boolean
+			{
+				return true;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+			
+			public function CleaForm():void
+			{
+			
+			ID_all.selectedItemText = "";
+			ID_AssosiatedDiagnosis.selectedItemText = "";
+			id_collectionDate.selectedItemText = "";
+			ID_OrderMethod.selectedItemText = "";
+			ID_TestCode.selectedItemText = "";
+			ID_TestName.selectedItemText = "";
+			id_description.text = "";
+			ID_Priority.selectedItemText = "";
+			ID_Specimen.selectedItemText = "";
+			id_fasting.selected = undefined;
+			ID_Laboratory.selectedItemText = "";
+			}
+
+			protected function SaveLabOutForm(event:MouseEvent):void
+			{
+				trace("labOut data saved");
+				if( validateEditForm() )
+				{
+					var LabOut:LabOutDTO = new LabOutDTO();
+					
+					LabOut.testName= ID_TestName.selectedItemText ;
+					LabOut.testCode = ID_TestCode.selectedItemText;
+					LabOut.orderMethod = ID_OrderMethod.selectedItemText;					
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = LabOut; 
+					
+					CleaForm();
+					
+					dispatchEvent(e);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:BorderContainer borderVisible="false" width="100%">		
+		<s:layout>
+			<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+		</s:layout>
+		
+		<s:VGroup width="100%">
+			
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_all" 
+										   styleName="subTitle"
+										   labelField="all" 
+										   buttonLabel="All :"
+										   required="true" 
+										   width="50%" 
+										   />
+				<controls:CalloutLabelText id="ID_OrderMethod" 
+										   styleName="subTitle"
+										   labelField="OrderMethod" 
+										   buttonLabel="OrderMethod:"
+										   required="true" 
+										   width="50%" 
+										   />
+				
+			</s:HGroup>		
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_TestCode" 
+										   styleName="subTitle"
+										   labelField="TestCode" 
+										   buttonLabel="Test Code :"
+										   required="true" 
+										   width="100%" 
+										   />
+				<controls:CalloutLabelText id="ID_TestName" 
+										   styleName="subTitle"
+										   labelField="TestName" 
+										   buttonLabel="Test Name :"
+										   required="true" 
+										   width="100%" 
+										   />
+				
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:TextArea width="100%" id="id_description" heightInLines="3" skinClass="spark.skins.mobile.TextInputSkin"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_AssosiatedDiagnosis" 
+										   styleName="subTitle"
+										   labelField="AssosiatedDiagnosis" 
+										   buttonLabel="Assosiated Diagnosis :"
+										   required="false" 
+										   width="50%" 
+										   />
+				<controls:CalloutLabelText id="ID_Priority" 
+										   styleName="subTitle"
+										   labelField="Priority" 
+										   buttonLabel="Priority :"
+										   required="false" 
+										   width="50%" 
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_Specimen" 
+										   styleName="subTitle"
+										   labelField="Specimen" 
+										   buttonLabel="Specimen :"
+										   required="false" 
+										   width="50%" 
+										   />
+				
+				<controls:CalloutLabelText id="ID_Laboratory" 
+										   styleName="subTitle"
+										   labelField="Laboratory" 
+										   buttonLabel="Laboratory :"
+										   required="true" 
+										   width="50%" 
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:VGroup width="30%" verticalAlign="bottom">
+					<controls:CalloutLabelDateSpinner id="id_collectionDate"
+													  newStyleName="subTitle"
+													  labelField="OnSetDate" 
+													  buttonLabel="Date :"
+													  required="true"
+													  isEditForm="false" 
+													  width="100%"
+													  />
+				</s:VGroup>
+				
+				<!--<mx:DateField id="id_collectionDate"
+							  width="25%"
+							  />-->
+				
+				<controls:ToggleSwitchLabel id="id_fasting" 
+											styleName="subTitle"
+											label="Fasting:"
+											width="20%"/>
+				<s:HGroup width="50%" horizontalAlign="right">
+					<s:Button id="ID_btnSave"
+							  styleName="button"
+							  label="Save"
+							  width="50%"
+							  click="SaveLabOutForm(event)"/>
+				</s:HGroup>
+			</s:HGroup>	
+			
+			<lists:SortableList id="id_SortableList" height="100%" width="100%" label="LabOut records added"
+								dataProvider="{dataProvider}"
+								sortableIRList="{new ArrayCollection([{irClass:LabOutIRTestName, name:'Test Name'}, {irClass:LabOutIRTestCode, name:'Test Code'}, {irClass:LabOutIROrderMethod, name:'Order Method'}])}"
+								itemRenderer="com.gazuntite.components.itemrenderers.Plan.LabOutIRSortAbleList" 
+								/>
+<!--								sortableFeildList="{new ArrayCollection(['Order Method','Test Code','Test Name'])}"-->
+		</s:VGroup>		
+	</s:BorderContainer>
+	
+	
+	
+</s:Group>

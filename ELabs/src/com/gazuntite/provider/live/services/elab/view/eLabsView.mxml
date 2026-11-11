@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:lab="com.gazuntite.provider.live.services.elab.view.lab.*"
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 removedFromStage="eLabsViewRemovedHandler(event)"
+		 height="250" width="100%" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.elab.util.ELabsQuivusCombineEventDispatcher;
+			import com.gazuntite.provider.live.services.elab.view.event.ElabActionEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	private var model:ELabsAppModelLocator = ELabsAppModelLocator.getInstance();
+			
+			private var _loggedInClinincBranchId:int;
+			private var _loggedInUserProviderId:int;
+			private var _loggedInUserProviderTypeId:int;
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				ELabsQuivusCombineEventDispatcher.LoadELabStaticData();
+				addEventListener(ElabActionEvent.ELAB_ORDER_PROCESSED, elabOrderProcessedHandler, false, 0, true);
+			}
+			
+			private function eLabsViewRemovedHandler(event:Event):void
+			{
+				if (event.target == this)
+				{
+					if (orderView)
+						orderView.removePopUps();
+					
+					if (resultView)
+						resultView.removePopUps();
+				}
+			}
+			
+			[Bindable]
+			public function get loggedInClinincBranchId():int
+			{
+				return _loggedInClinincBranchId;
+			}
+			
+			public function set loggedInClinincBranchId(value:int):void
+			{
+				_loggedInClinincBranchId = value;
+				
+				if (value)
+				{
+					model.LoggedInUserSelectedBranchId = value;
+				}
+			}
+			
+			[Bindable]
+			public function get loggedInUserProviderId():int
+			{
+				return _loggedInUserProviderId;
+			}
+			
+			public function set loggedInUserProviderId(value:int):void
+			{
+				_loggedInUserProviderId = value;
+				
+				if (value)
+				{
+					model.LoggedInUserProviderId = value;
+				}
+			}
+			
+			[Bindable]
+			public function get loggedInUserProviderTypeId():int
+			{
+				return _loggedInUserProviderTypeId;
+			}
+			
+			public function set loggedInUserProviderTypeId(value:int):void
+			{
+				_loggedInUserProviderTypeId = value;
+				
+				if (value)
+				{
+					model.LoggedInUserProviderTypeId = value; 
+				}
+			}
+			
+			/**
+			 * Ayesha 14/05/2013
+			 * 
+			 * when user processes selected pending orders then processed results will be moved to results tab,
+			 * results tab should be refreshed
+			 * 
+			 **/
+			private function elabOrderProcessedHandler(event:ElabActionEvent):void
+			{
+				if (resultView)
+					resultView.loadAllResults();
+			}
+			
+			private function eLabsViewStackChangeHandler(event:IndexChangeEvent):void
+			{
+				switch (event.oldIndex)
+				{
+					case 0:
+						
+						orderView.removePopUps();
+						break;
+					
+					case 1:
+						
+						resultView.removePopUps();
+						break;
+				}
+			}
+			[Bindable] public var bgColor:String = '0xFFFFFF';
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	 
+	<s:BorderContainer width="100%" height="100%" backgroundColor="{bgColor}" borderVisible="false" borderWeight="0">
+		
+		<s:layout>
+			<s:VerticalLayout  gap="-4" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"  />
+		</s:layout>
+																	   
+		<s:ButtonBar dataProvider="{viewStack}" width="415" skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="2">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="right" />
+			</s:layout>
+			<components:LabelViewStack id="viewStack"  width="100%"  height="100%" change="eLabsViewStackChangeHandler(event)">
+				<s:ArrayList>
+					
+					<s:NavigatorContent label="Pending Order" width="100%" height="100%">
+						<lab:eLabsOrderGridView id="orderView" width="100%" height="100%"/>
+					</s:NavigatorContent>
+					
+					<s:NavigatorContent label="Results" width="100%" height="100%">
+						<lab:eLabsResultGridView id="resultView" width="100%" height="100%" />
+					</s:NavigatorContent>
+					
+					<s:NavigatorContent label="HL7" width="100%" height="100%">
+						<s:SkinnableContainer  width="100%" height="100%"  styleName="blackTitleBGContainerSkin">
+							<s:Label text="Coming Soon" verticalCenter="0" horizontalCenter="0" fontFamily="Calibri" fontSize="15" />
+						</s:SkinnableContainer>
+					</s:NavigatorContent>
+					
+					<s:NavigatorContent label="Settings &amp; Integration" width="100%" height="100%">
+						<s:SkinnableContainer  width="100%" height="100%"  styleName="blackTitleBGContainerSkin">
+							<s:Label text="Coming Soon" verticalCenter="0" horizontalCenter="0" fontFamily="Calibri" fontSize="15" />
+						</s:SkinnableContainer>
+					</s:NavigatorContent>
+					
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+		
+	</s:BorderContainer>
+</s:Group>

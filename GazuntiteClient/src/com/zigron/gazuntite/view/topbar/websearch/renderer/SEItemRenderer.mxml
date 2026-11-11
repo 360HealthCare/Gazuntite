@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				buttonMode="true" useHandCursor="true"
+				creationComplete="cc(event)"
+				>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.utils.Base64Decoder;
+			
+			[Bindable]	private var iconData:ByteArray;
+			/* [Bindable]
+			private var label:ByteArray;
+			*/
+			protected function cc(event:FlexEvent):void
+			{
+				var decoder:Base64Decoder = new Base64Decoder();
+				decoder.decode( data.IconBase64 );
+				iconData = decoder.toByteArray();
+				
+				this.label = data.label;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+	</s:states>  
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" horizontalAlign="left" verticalAlign="top"/>
+	</s:layout>
+	
+	<s:BorderContainer width="100%" height="20" 
+					   backgroundColor.normal="0xE8E8E8" 
+					   backgroundColor.hovered="0xFFD08F"
+					   toolTip="{label}" 
+					   borderVisible="false"
+					   >
+		
+		<s:HGroup width="100%" height="20" gap="10" horizontalAlign="left" verticalAlign="middle" layoutDirection="ltr" paddingLeft="2" paddingTop="3" paddingBottom="3">
+			<s:Image source="{iconData}" height="12" width="12"/>
+			<s:Label text="{label}" fontFamily="CalibriCFF" fontSize="13"/>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Line>
+	
+	
+	<!--<s:Image source="{iconData}" height="12" width="12"/>
+	<s:Label text="{label}" fontFamily=""/>-->
+	
+</s:ItemRenderer>

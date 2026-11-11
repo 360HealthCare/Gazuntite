@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   skinClass="com.gazuntite.skins.controls.container.practiceMangerHeaderSkin"
+				   >
+	<s:layout>
+		<s:HorizontalLayout paddingLeft="5" paddingRight="5" verticalAlign="middle"/>
+	</s:layout>
+	<s:Label text="PRACTICE MANAGER" color="#FFFFFF" fontFamily="CalibriCFF" fontSize="16" />
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.ArrowBgSkin">
+		<s:Label id="id_selectedView" color="#FFFFFF" top="8"
+				 fontFamily="CalibriCFF" paddingLeft="5" fontSize="16" typographicCase="uppercase"  width="130" maxDisplayedLines="1"/>
+	</s:SkinnableContainer>
+	<s:Spacer width="100%" />
+	<s:ToggleButton skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin" 
+					toolTip="More Options"
+					useHandCursor="true" buttonMode="true" />
+</s:BorderContainer>

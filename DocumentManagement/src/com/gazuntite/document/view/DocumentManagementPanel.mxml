@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:view="com.gazuntite.document.view.*"
+				   backgroundColor="0xffffff"
+				   borderWeight="2"
+				   borderColor="0x000000"
+				   width="100%" 
+				   creationComplete="group1_creationCompleteHandler(event)" xmlns:views="com.gazuntite.document.view.views.*" 
+				   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.document.dto.DocomentDTO;
+			import com.gazuntite.document.model.DMModelLocator;
+			import com.gazuntite.document.view.event.DocomentListEvent;
+			import com.gazuntite.document.view.event.patientListEvent;
+			import com.gazuntite.document.utils.DMXML;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var DMmodel : DMModelLocator = DMModelLocator.getInstance();
+			[Bindable] public var bgColor:String = '0xFFFFFF';
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				addEventListener(patientListEvent.PATIENT_LIST_CLICKED, LoadPatientDocoments);
+				addEventListener(DocomentListEvent.DOCOMENT_LIST_CLICKED, ShowSelectedDocument);
+				
+				addEventListener("ResetListDesprictionView" , function ():void
+				{
+					if(id_DetailView.viewStack.selectedIndex == 0 || id_DetailView.viewStack.selectedIndex == 1 || id_DetailView.viewStack.selectedIndex == 2) // Mean List is being displayed so remove it.
+						id_DetailView.viewStack.selectedIndex =  3;
+				});
+				
+				addEventListener("ResetDocomentListView" , function ():void
+				{
+					id_patientList.id_list.selectedIndex = -1;
+				});
+				
+				id_header.addEventListener("FilterPatientList", filterPatient);
+			}
+			
+			private function ShowSelectedDocument(event:DocomentListEvent):void
+			{
+				var xmlModel:DMXML = new DMXML();
+				var array:ArrayCollection = xmlModel.GetDocoments(14,""); 
+				//var i:int = Math.floor(Math.random()*13);
+				
+				id_DetailView.ViewDocoment(array.getItemAt(event.Docomentdto.id) as DocomentDTO);
+			}
+			
+			private function LoadPatientDocoments(event:patientListEvent):void
+			{
+				var userid:int = event.userID;
+				var docCount:int = event.docomentCount;
+				
+				var xmlModel:DMXML = new DMXML();
+				DMmodel.SelectedPatientDocomentList = xmlModel.GetDocoments(docCount,event.patientName); 
+			}
+			
+			private function filterPatient(event:Event):void
+			{
+				DMmodel.PatientDocomentsDTOList.filterFunction = filter_PatientList; 
+				DMmodel.PatientDocomentsDTOList.refresh(); 
+				
+				id_patientList.id_list.selectedIndex = -1;
+			}
+			
+			public function filter_PatientList(item:Object):Boolean
+			{
+				var query:String = id_header.SearchString;
+				var firstName:String = item.Name;
+				
+				if(firstName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				
+				return false;
+			} 
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Group height="100%" width="100%">
+		<s:layout>
+			<s:VerticalLayout gap="3" verticalAlign="top" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3"/>
+		</s:layout>
+		
+		<views:DMHeader id="id_header" width="100%" height="32"/>
+		
+		<s:HGroup  width="100%" height="100%" gap="-1">
+			<views:DMListView  id="id_patientList"  height="100%" width="165" ListDataProvider="{DMmodel.PatientDocomentsDTOList}" />
+			<views:DMDetailView id="id_DetailView"  height="100%" width="100%" dataProvider="{DMmodel.SelectedPatientDocomentList}" /> 
+		</s:HGroup>
+	</s:Group>
+	
+</s:BorderContainer>

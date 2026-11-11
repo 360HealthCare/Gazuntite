@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="80" height="28">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0.5" y="0.5" width="80" height="27" alpha="1"
+			visible.disabledAndSelected="false"
+			visible.downAndSelected="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FCF7DB" ratio="0.21176470588235294"/>
+				<s:GradientEntry alpha="1.0" color="#E9E4C7" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#DCD5B5" ratio="0.49411764705882355"/>
+				<s:GradientEntry alpha="1.0" color="#E7E2C7" ratio="0.8235294117647058"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="round" color="#505050" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:RichText x="7" y="10" color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50"
+				text="Avg. Weight"
+				visible.disabledAndSelected="false"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false"/>
+	<s:Rect x="0" y="0" width="80" height="28" radiusX="3"
+			visible.disabled="false"
+			visible.down="false"
+			visible.over="false"
+			visible.up="false">
+		<s:fill>
+			<s:SolidColor color="#FFEE8B"/>
+		</s:fill>
+	</s:Rect>
+	<s:RichText id="labelDisplay" x="8" y="8" width="120" color="#000000" fontFamily="Calibri" fontSize="14" fontWeight="bold"
+				maxDisplayedLines="1" showTruncationTip="true"
+				tabStops="S0 S50"
+				visible.disabled="false"
+				visible.down="false"
+				visible.over="false"
+				visible.up="false"/>
+</s:Skin>

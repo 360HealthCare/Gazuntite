@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				xmlns:components="com.gazuntite.controls.extended.components.*" 
+				xmlns:lab="com.gazuntite.provider.live.services.elab.view.lab.*"
+				autoDrawBackground="false" width="100%" 
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.upload.FileStreamUploader;
+			import com.gazuntite.common.util.upload.FileStreamUploaderEvent;
+			import com.gazuntite.common.util.xml.XmlConstants;
+			import com.gazuntite.provider.live.services.elab.dto.ELabDTO;
+			import com.gazuntite.provider.live.services.elab.dto.ResultDTO;
+			import com.gazuntite.provider.live.services.elab.event.EnterResultEvent;
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.elab.util.ELabsConstant;
+			import com.gazuntite.provider.live.services.elab.util.ELabsServiceMethods;
+			import com.gazuntite.provider.live.services.elab.view.lab.vo.LabVO;
+			import com.gazuntite.skins.controls.button.eLab.AttachBtnSkin;
+			import com.gazuntite.skins.controls.button.eLab.PDFViewBtnSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			import flash.filesystem.File;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			private static const ENTER_RESULT_STRING:String = "Enter result";
+			
+			[Bindable]
+			private var model:ELabsAppModelLocator = ELabsAppModelLocator.getInstance();
+			
+			[Bindable]
+			private var labVO:LabVO;
+			
+			private var _attachedFileName:String;
+			private var file:File;
+			private var _resultComments:String;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (!data)
+					return;
+				
+				if (data is LabVO)
+				{
+					labVO = LabVO(data);
+					
+					setIconAndToolTip();
+					setExpandedMode(labVO.inExpandedMode);
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function headerClickHandler():void
+			{
+				setExpandedMode(!labVO.inExpandedMode);
+				
+				if (labVO.inExpandedMode)
+				{
+					viewStack.selectedIndex = 0;
+					enterResultsView.visible = false;
+				}
+			}
+			
+			private function enterClickHandler(event:MouseEvent):void
+			{
+				if (!labVO.inExpandedMode)
+					setExpandedMode();
+				
+				viewStack.selectedIndex = 0;
+				
+				enterResultsView.visible = true;
+				
+				if (resultComments && resultComments.length > 0)
+				{
+					enterResultLbl.text = resultComments;
+				}
+				else
+				{
+					enterResultLbl.text = ENTER_RESULT_STRING;
+				}
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function attachClickHandler(event:MouseEvent):void
+			{
+				if (!labVO.labDTO)
+					return;
+				
+				if (!labVO.inExpandedMode)
+					setExpandedMode();
+				
+				if (labVO.labDTO.AttachmentAvailable)
+				{
+					if (!labVO.labDTO.Result)
+						return;
+					
+					if (!labVO.labDTO.Result.File)
+						return;
+					
+					if (!labVO.labDTO.Result.File.length)
+						return;
+					
+					viewStack.selectedIndex = 1;
+					
+					if (documentViewer)
+						showDocument();
+					else
+						callLater(showDocument); 
+					
+					event.stopImmediatePropagation();
+					event.preventDefault();
+				}
+				else
+				{
+					viewStack.selectedIndex = 0;
+					
+					enterResultsView.visible = true;
+					
+					if (resultComments && resultComments.length > 0)
+						enterResultLbl.text = resultComments;
+					
+					else
+						enterResultLbl.text = ENTER_RESULT_STRING;
+				}
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function resultClickHandler(event:MouseEvent):void
+			{
+				if (!labVO.labDTO)
+					return;
+				
+				if (!labVO.inExpandedMode)
+					setExpandedMode();
+				
+				viewStack.selectedIndex = 0;
+				enterResultsView.visible = true;
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				
+				if (resultComments && resultComments.length > 0)
+					enterResultLbl.text = resultComments;
+				
+				else
+					enterResultLbl.text = ENTER_RESULT_STRING;
+			}
+			
+			private function enterResultLabelClick():void
+			{
+				enterResult.text = resultComments;
+				makeEnterResultEditable(true);
+			}
+			
+			private function enterResultFocusOut():void
+			{
+				resultComments = enterResult.text;
+				makeEnterResultEditable(false);
+			}
+			
+			private function makeEnterResultEditable(canEdit:Boolean = true):void
+			{
+				enterResultLbl.visible = !canEdit;
+				enterResultLbl.includeInLayout = !canEdit;
+				
+				enterResult.visible = canEdit;
+				enterResult.includeInLayout = canEdit;
+				
+				if (canEdit)
+					enterResult.setFocus();
+			}
+			
+			private function chooseFileForAttachmentHandler():void
+			{
+				if (labVO.labDTO.AttachmentAvailable)
+				{
+					Alert.show("Do you want to change the previous attachment", "Confirmation", Alert.YES|Alert.NO, 
+						FlexGlobals.topLevelApplication.mainContainer,function(event:CloseEvent):void
+						{
+							if (event.detail == Alert.YES)
+							{
+								browseForAttachment();
+							}
+						});	
+				}
+				else
+				{
+					browseForAttachment();
+				}
+				
+			}
+			
+			private function browseForAttachment():void
+			{
+				//[10/04/2013] by shahid, order id appended in file name
+				var fileName:String = labVO.labDTO.Test.Type + "_" + labVO.labDTO.Test.Name + "_" + labVO.labDTO.LabName + "_" + labVO.labDTO.OrderID; 
+				var url:String = ELabsConstant.RESTFULL_SERVICE_BASE_URL + ELabsServiceMethods.UPLOAD_FILE_AND_LOAD_RESULT + "/" 
+					+ labVO.labDTO.OrderID + "/";
+				
+				var fileStreamUploader:FileStreamUploader = new FileStreamUploader(url, fileName, 'multipart/form-data', onFileSelectedCallBack);
+				fileStreamUploader.Browse();
+				
+				fileStreamUploader.addEventListener(FileStreamUploaderEvent.FILE_STREAM_UPLOAD_COMPLETED_EVENT, fileSreamUploaderUploadCompleteHandler);
+				fileStreamUploader.addEventListener(FileStreamUploaderEvent.FILE_STREAM_UPLOAD_FAILED_EVENT, fileStreamUploaderUploadFailedHandler);
+			}
+			
+			private function fileSreamUploaderUploadCompleteHandler(event:FileStreamUploaderEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var result:XML = XML(event.data.toString());
+				var xStatus:XML = result.Status[0];
+				var type:String = xStatus.@[XmlConstants.TYPE];
+				
+				if (type.toLowerCase() == "success")
+				{
+					var eLabs:XML = result.Labs[0];
+					
+					var eLabDtoXml:XML = eLabs[0];
+					
+					var eLabDTO:ELabDTO = new ELabDTO();
+					eLabDTO.FromXML(eLabDtoXml.Lab[0]);
+					
+					Alert.show("Attachment is uploaded successfully", "Uploaded with Success!", Alert.OK, FlexGlobals.topLevelApplication.mainContainer,
+						function(event:CloseEvent):void
+						{
+							labVO.labDTO.Result = eLabDTO.Result;
+							labVO.labDTO.AttachmentAvailable = eLabDTO.AttachmentAvailable;
+							setIconAndToolTip();
+						});
+				}
+				else
+				{
+					Alert.show("Error occurred while uploading attachment", "Upload Fail", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+				}
+			}
+			
+			private function fileStreamUploaderUploadFailedHandler(event:FileStreamUploaderEvent):void
+			{
+				Alert.show("FileStream Upload Failed", "Upload Failed!", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+			}
+			
+			public function onFileSelectedCallBack(fullFileName:String):void
+			{
+				attachedFileName = fullFileName;
+			}
+			
+			private function saveClickHandler():void
+			{
+				if (resultComments.length > 0)
+				{
+					if (!labVO.labDTO.Result)
+						labVO.labDTO.Result = new ResultDTO();
+					
+					if (labVO.labDTO.Result.Comments == resultComments)
+						return;
+					
+					labVO.labDTO.Result.Comments = resultComments;
+					
+					labVO.labDTO.IsDirty = true;
+					
+					var ev:EnterResultEvent = new EnterResultEvent(labVO.labDTO, labVO.labDTO.Result.Comments, refreshUpdatedResultView);
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				}
+				else
+				{
+					Alert.show("Please enter results", "Info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer,
+						function(event:CloseEvent):void
+						{
+							resultComments = labVO.labDTO.Result.Comments; 
+						});
+				}
+			}
+			
+			public function refreshUpdatedResultView(value:ELabDTO):void
+			{
+				if (!value)
+					return;
+				
+				if (!value.Result)
+					return;
+				
+				labVO.labDTO.ResultAvailable = value.ResultAvailable;
+				labVO.labDTO.Result.Status = value.Result.Status;
+				labVO.labDTO.Result.Comments = value.Result.Comments;
+				
+				setIconAndToolTip();
+			}
+			
+			public function showDocument():void
+			{
+				if (!labVO)
+					return;
+				
+				if (!labVO.labDTO)
+					return;
+				
+				if (!labVO.labDTO.Result)
+					return;
+				
+				if (!labVO.labDTO.Result.File)
+					return;
+				
+				if (!labVO.labDTO.Result.File.length)
+					return;
+				
+				documentViewer.load("Gazuntite lab result", labVO.labDTO.Result.File);
+			}
+			
+			[Bindable]
+			public function get attachedFileName():String
+			{
+				return _attachedFileName;
+			}
+			
+			public function set attachedFileName(value:String):void
+			{
+				if (!value)
+				{
+					_attachedFileName = "";
+					return;
+				}
+				
+				var lastIndexOfSlash:int = value.lastIndexOf("/");
+				
+				if (lastIndexOfSlash == -1)
+				{
+					_attachedFileName = value;
+					return;
+				}
+				
+				var fileName:String = value.substring(lastIndexOfSlash + 1, value.length);
+				
+				_attachedFileName = fileName;
+			}
+			
+			[Bindable]
+			public function get resultComments():String
+			{
+				return _resultComments;
+			}
+			
+			public function set resultComments(value:String):void
+			{
+				_resultComments = value;
+				
+				if (value && value.length > 0)
+				{
+					enterResultLbl.text = resultComments;
+				}
+				else
+				{
+					enterResultLbl.text = ENTER_RESULT_STRING;
+				}
+			}
+			
+			protected function setIconAndToolTip():void
+			{
+				if (labVO.labDTO.AttachmentAvailable)
+				{
+					viewAttachment.setStyle('skinClass', PDFViewBtnSkin);
+					viewAttachment.toolTip = 'View Attachment';
+				}
+				else
+				{
+					viewAttachment.setStyle('skinClass', AttachBtnSkin);
+					viewAttachment.toolTip = 'Attach';
+				}
+			}
+			
+			private function setExpandedMode(doExpand:Boolean = true):void
+			{
+				if (!labVO)
+					return;
+				
+				labVO.inExpandedMode = doExpand;
+				setGlow();
+			}
+			
+			private function setGlow():void
+			{
+				if (!labVO)
+					return;
+				
+				if (labVO.inExpandedMode)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"/>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	<fx:Binding source="labVO.labDTO.Result.File" destination="attachedFileName"/>
+	<fx:Binding source="labVO.labDTO.Result.Comments" destination="resultComments"/>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:layout >
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"/> 
+	</s:layout>
+	<s:SkinnableContainer id="id_Header"
+						  width="100%" height="35"   
+						  click="headerClickHandler()" toolTip="Open/Close Details" useHandCursor="true" buttonMode="true">
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Label id="SrNo" text="{labVO.serialNumber}" fontFamily="CalibriCFF" fontSize="14" width="30"
+				 paddingLeft="6" maxDisplayedLines="1"/>
+		
+		<s:Group width="20%">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="orderId" text="{labVO.labDTO.ID}" toolTip="{labVO.labDTO.ID}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:Group>
+		
+		<s:Group width="20%">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="orderDate" text="{labVO.labDTO.OrderDate}" toolTip="{labVO.labDTO.OrderDate}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:Group>
+		
+		<s:Group width="20%">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="testLbl" text="{labVO.labDTO.Test.Name}" toolTip="{labVO.labDTO.Test.Name}"
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:Group>
+		
+		<s:Group width="20%">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="labLbl" text="{labVO.labDTO.LabName}" toolTip="{labVO.labDTO.LabName}"
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:Group>
+		
+		<s:Group width="20%" >
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="resultLbl" text="{labVO.labDTO.Result.Comments}" toolTip="{labVO.labDTO.Result.Comments}"
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:Group>
+		
+		<s:Group width="50">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Group width="100%">
+				<s:Button id="enter" 
+						  label="Enter" toolTip="Enter Result" visible="{!(labVO.labDTO.ResultAvailable || labVO.labDTO.AttachmentAvailable)}"
+						  includeInLayout="{!(labVO.labDTO.ResultAvailable || labVO.labDTO.AttachmentAvailable)}"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.ProcessBlackButton"
+						  click="enterClickHandler(event)" width="50"
+						  />
+				<s:HGroup width="100%" visible="{(labVO.labDTO.ResultAvailable || labVO.labDTO.AttachmentAvailable)}"
+						  includeInLayout="{(labVO.labDTO.ResultAvailable || labVO.labDTO.AttachmentAvailable)}">
+					<s:Button id="viewAttachment" 
+							  click="attachClickHandler(event)" buttonMode="true" useHandCursor="true"
+							  />
+					<s:Button id="viewResult" 
+							  width="65" label="result" toolTip="{(labVO.labDTO.ResultAvailable)? 'Edit Results': 'Enter Results'}"
+							  buttonMode="true" useHandCursor="true"
+							  click="resultClickHandler(event)"
+							  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton"
+							  />
+				</s:HGroup>
+			</s:Group>
+		</s:Group>
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer id="id_ExpandedView" width="{id_Header.width - 10}" minHeight="80" maxHeight="150"
+						  visible="{labVO.inExpandedMode}" includeInLayout="{labVO.inExpandedMode}">
+		
+		<components:LabelViewStack id="viewStack" 
+								   width="100%" height="100%" backgroundAlpha="0"
+								   skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin"
+								   >
+			<s:ArrayList>
+				<s:NavigatorContent width="100%" height="100%">
+					<s:layout>
+						<s:VerticalLayout paddingBottom="10" paddingLeft="15" paddingRight="15" paddingTop="10" gap="5"/>
+					</s:layout>
+					
+					<s:HGroup width="100%" gap="25">
+						<s:HGroup>
+							<s:VGroup width="80" horizontalAlign="left">
+								<s:Label text="Patient:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" maxDisplayedLines="1"/>
+								<s:Label text="Provider:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" verticalCenter="0" maxDisplayedLines="1"/>
+							</s:VGroup>
+							
+							<s:VGroup width="100%" horizontalAlign="left">
+								<s:Label text="{labVO.labDTO.Patient.FullName}" toolTip="{labVO.labDTO.Patient.FullName}" fontFamily="CalibriCFFBold" fontSize="14" width="100%" maxDisplayedLines="1"/>
+								<s:Label text="{labVO.labDTO.Provider.FullName}" toolTip="{labVO.labDTO.Provider.FullName}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"  maxDisplayedLines="1"/>
+							</s:VGroup>
+						</s:HGroup>
+						
+						<s:HGroup>
+							<s:VGroup width="80" horizontalAlign="left">
+								<s:Label text="Status:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" maxDisplayedLines="1"/>
+								<s:Label text="Range:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" verticalCenter="0" maxDisplayedLines="1"/>
+							</s:VGroup>
+							
+							<s:VGroup width="100%" horizontalAlign="left">
+								<s:Label text="{labVO.labDTO.Result.Status}" toolTip="{labVO.labDTO.Result.Status}" fontFamily="CalibriCFFBold" fontSize="14" width="100%" maxDisplayedLines="1"/>
+								<s:Label text="{labVO.labDTO.Result.Ranage}" toolTip="{labVO.labDTO.Result.Ranage}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"  maxDisplayedLines="1"/>
+							</s:VGroup>
+						</s:HGroup>
+					</s:HGroup>
+					
+					<s:VGroup id="enterResultsView" width="100%" visible="false" includeInLayout="{enterResultsView.visible}">
+						<s:HGroup gap="5">
+							<s:Label text="Result:" height="25" 
+									 fontFamily="CalibriCFF" fontSize="14" right="5" left="5" verticalCenter="0" maxDisplayedLines="1" verticalAlign="middle"/>
+							<s:Group>
+								<s:Label id="enterResultLbl" width="170" height="25"
+										 fontFamily="CalibriCFFBold" fontSize="14" right="5" left="5" verticalCenter="0" maxDisplayedLines="1" verticalAlign="middle"
+										 click="enterResultLabelClick()"/>
+								<s:TextInput id="enterResult" text="{resultComments}"
+											 width="170" focusOut="enterResultFocusOut()" visible="false" includeInLayout="false"
+											 skinClass="com.gazuntite.skins.controls.textInput.AllTextInputSkin" height="25" />
+							</s:Group>
+							<s:Button id="attachment" label="Attachment" toolTip="Attachment" click="chooseFileForAttachmentHandler()"
+									  skinClass="com.gazuntite.skins.controls.button.eLab.AttachmentButton"/>
+						</s:HGroup>
+						<s:Group width="100%">
+							<s:HGroup  left="10" visible="{labVO.labDTO.AttachmentAvailable}" includeInLayout="{labVO.labDTO.AttachmentAvailable}">
+								<s:Label text="{attachedFileName}" toolTip="{attachedFileName}" height="25" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" maxDisplayedLines="1"
+										 verticalAlign="middle"/>
+							</s:HGroup>
+							<s:Button id="saveResults" label="Save" toolTip="save" right="10" click="saveClickHandler()"
+									  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"/>
+						</s:Group>
+					</s:VGroup>
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%">
+					<lab:ELabDocumentViewer id="documentViewer" width="100%" height="120" isOrder="false"/>
+				</s:NavigatorContent>
+			</s:ArrayList>
+		</components:LabelViewStack>
+	</s:SkinnableContainer>
+</s:ItemRenderer>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init(event)" 
+		 useHandCursor="true"
+		 buttonMode="true">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			protected var _dataProvider:ArrayCollection;
+			
+			[Bindable]
+			protected var _labelField:String;
+			
+			[Bindable]
+			protected var _selectedItemText:String = "";
+			
+			[Bindable]
+			protected var _buttonLabel:String;
+			
+			[Bindable]
+			protected var _required:Boolean = false;
+			
+			[Bindable]
+			protected var _isEditForm:Boolean = false;
+			
+			[Bindable]
+			protected var _newStyleName:String;
+			
+			[Bindable]
+			protected var _showButton:Boolean = true;
+			
+			public function get showButton():Boolean
+			{
+				return _showButton;
+			}
+			
+			public function set showButton(value:Boolean):void
+			{
+				_showButton = value;
+			}
+			
+			public function get newStyleName():String
+			{
+				return _newStyleName;
+			}
+			
+			public function set newStyleName(value:String):void
+			{
+				_newStyleName = value;
+				label.styleName = value;
+				myCB.styleName = value;
+			}
+			
+			public function get isEditForm():Boolean
+			{
+				return _isEditForm;
+			}
+			
+			public function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+			}
+			
+			public function get selectedItemText():String
+			{
+				return _selectedItemText;
+			}
+			
+			public function set selectedItemText(value:String):void
+			{
+				_selectedItemText = value;
+			}
+			
+			public function get required():Boolean
+			{
+				return _required;
+			}
+			
+			public function set required(value:Boolean):void
+			{
+				_required = value;
+			}
+			
+			[Bindable]
+			public function get buttonLabel():String
+			{
+				return _buttonLabel;
+			}
+			
+			public function set buttonLabel(value:String):void
+			{
+				_buttonLabel = value;
+			}
+			
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(value:String):void
+			{
+				_labelField = value;
+			}
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				selectedItemText = list.selectedItem[_labelField.toString()];
+				myCB.closeDropDown();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" 
+							horizontalAlign="center"
+							paddingBottom="1" 
+							paddingLeft="1" 
+							paddingRight="1" 
+							paddingTop="1"/>
+	</s:layout>
+	
+	<s:TextInput id="label" 
+				 prompt="Search Date"
+				 maxWidth="130"
+				 focusIn="myCB.openDropDown()"
+				/>
+	
+	<s:CalloutButton id="myCB"
+					 width="100%"
+					 horizontalPosition="middle"
+					 verticalPosition="after"
+					 label="{_selectedItemText}"
+					 skinClass="com.gazuntite.skins.CalloutLabelSkin">
+		
+		<s:calloutLayout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:calloutLayout>
+		
+		<s:List id="list" 
+				change="list_changeHandler(event)" 
+				labelField="{_labelField}"
+				dataProvider="{_dataProvider}"/>
+		
+		<s:Button label="Clear" 
+				  styleName="button"
+				  click="{selectedItemText =''; myCB.closeDropDown()}"
+				  visible="{_showButton}"/>
+	</s:CalloutButton>
+	
+</s:Group>

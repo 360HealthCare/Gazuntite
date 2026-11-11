@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.elab.dto.SearchFieldsDTO;
+			import com.gazuntite.provider.live.services.elab.view.event.ELabGridFilterEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var isPopUpShown:Boolean;
+			
+			private var _searchTypeDataProvider:ArrayCollection;
+			private var _searchtypeLabelField:String;
+			
+			[Bindable]
+			public function get searchTypeDataProvider():ArrayCollection
+			{
+				return _searchTypeDataProvider;
+			}
+			
+			public function set searchTypeDataProvider(value:ArrayCollection):void
+			{
+				_searchTypeDataProvider = value;
+			}
+			
+			[Bindable]
+			public function get searchtypeLabelField():String
+			{
+				return _searchtypeLabelField;
+			}
+			
+			public function set searchtypeLabelField(value:String):void
+			{
+				_searchtypeLabelField = value;
+			}
+			
+			public function showPopUp(parent:DisplayObject):void
+			{
+				if (isPopUpShown)
+					return;
+				
+				isPopUpShown = true;
+				
+				PopUpManager.addPopUp(this, parent);
+			}
+			
+			public function removePopUp():void
+			{
+				isPopUpShown = false;
+				
+				PopUpManager.removePopUp(this);
+				
+				var ev:ELabGridFilterEvent = new ELabGridFilterEvent(ELabGridFilterEvent.SEARCH_POP_UP_CLOSED, true);
+				dispatchEvent(ev);
+			}
+			
+			private function searchTypeChangeHandler(event:IndexChangeEvent):void
+			{
+				if (event.newIndex < 0)
+					return;
+				
+				var searchFieldDTO:SearchFieldsDTO = searchTypeDataProvider[event.newIndex] as SearchFieldsDTO;
+				
+				if (!searchFieldDTO)
+					return;
+				
+				var ev:ELabGridFilterEvent = new ELabGridFilterEvent(ELabGridFilterEvent.SEARCH_TYPE_CHANGED, true);
+				ev.searchType = searchFieldDTO;
+				
+				dispatchEvent(ev);
+				
+				removePopUp();
+			}
+			
+			private function filterClickHandler():void
+			{
+				var ev:ELabGridFilterEvent = new ELabGridFilterEvent(ELabGridFilterEvent.FILTER_CLICKED, true);
+				dispatchEvent(ev);
+				
+				removePopUp();
+			}
+			
+			private function closeClickHandler():void
+			{
+				removePopUp();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.eLab.SerachLabPopupSkin">
+		<s:layout>
+			<s:VerticalLayout gap="4" />
+		</s:layout>
+		
+		<s:BorderContainer width="100%" height="100%" cornerRadius="3" >
+			<s:List id="id_SearchType" 
+					width="100%" height="115" 
+					dataProvider="{searchTypeDataProvider}"
+					skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+					change="searchTypeChangeHandler(event)"
+					borderVisible="false"
+					itemRenderer="com.gazuntite.provider.live.services.elab.view.renderers.ELabSearchTypePopUpListIR"/>
+		</s:BorderContainer>
+		
+		<s:HGroup  width="100%" horizontalAlign="right" height="20">
+			<s:Button id="id_Filter" 
+					  label="filter" click="filterClickHandler()"
+					  skinClass="com.gazuntite.skins.controls.button.eLab.FilterButtonSkin"
+					  toolTip="Advance Search" useHandCursor="true" buttonMode="true"/>
+			<s:Button id="id_Close" 
+					  label="Close" click="closeClickHandler()"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"
+					  toolTip="Close" useHandCursor="true" buttonMode="true"/>
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+</s:Group>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" 
+		xmlns:ns1="*">
+	
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("spark.components.SkinnableContainer")]
+	</fx:Metadata>
+	
+	<!-- states -->
+	<s:states>
+		<s:State name="disabled" />
+		<s:State name="normal" />
+	</s:states>
+	
+	<!-- SkinParts
+	name=contentGroup, type=spark.components.Group, required=false
+	-->
+	
+	
+	<ns1:GrayBar right="0" left="0" top="0" bottom="0">
+		
+	</ns1:GrayBar>
+	
+	<!--- @copy spark.components.SkinnableContainer#contentGroup -->
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="1" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		
+	</s:Group>
+	
+</s:Skin>

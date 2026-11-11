@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer  xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:lab="com.gazuntite.provider.live.services.elab.view.lab.*" 
+					   width="100%" height="100%" styleName="blackTitleBGContainerSkin"
+					   creationComplete="cc(event)" backgroundColor="#FFFFFF"
+					   >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.elab.dto.ELabDTO;
+			import com.gazuntite.provider.live.services.elab.dto.ELabFilterCriteriaDTO;
+			import com.gazuntite.provider.live.services.elab.dto.LabListDTO;
+			import com.gazuntite.provider.live.services.elab.event.LoadLabOrderEvent;
+			import com.gazuntite.provider.live.services.elab.event.LoadTestTypeByNameEvent;
+			import com.gazuntite.provider.live.services.elab.event.ManageLabsEvent;
+			import com.gazuntite.provider.live.services.elab.event.ProcessLabOrderEvent;
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.elab.util.ELabsConstant;
+			import com.gazuntite.provider.live.services.elab.view.Filters.ElabDoOnlyView;
+			import com.gazuntite.provider.live.services.elab.view.event.ELabGridFilterEvent;
+			import com.gazuntite.provider.live.services.elab.view.event.ElabActionEvent;
+			import com.gazuntite.provider.live.services.elab.view.lab.vo.LabVO;
+			import com.gazuntite.provider.live.services.elab.view.renderers.ElabOrderListIR;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			private var ListOnlyPopup:ElabDoOnlyView;
+			private var ProcessOnlyPopup:ElabDoOnlyView;
+			
+			[Bindable]
+			public var model : ELabsAppModelLocator = ELabsAppModelLocator.getInstance();
+			
+			private var _eLabsOrderList:ArrayCollection ;
+			
+			[Bindable]
+			public function get eLabsOrderList():ArrayCollection
+			{
+				return _eLabsOrderList;
+			}
+			
+			public function set eLabsOrderList(value:ArrayCollection):void
+			{
+				_eLabsOrderList = value;		
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				var firstPageNo:int = 1;
+				id_Filter.pageNo = firstPageNo;
+				
+				initializeOrderFilter();
+				
+				var ev:LoadLabOrderEvent = new LoadLabOrderEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				addEventListener(ELabGridFilterEvent.SEARCH_CLICKED, eLabGridFilterSearchClickedHandler, false, 0, true);
+				addEventListener(ELabGridFilterEvent.PAGE_REQUESTED, eLabGridFilterPageRequestedHandler, false, 0, true);
+				addEventListener(ELabGridFilterEvent.PROCESS_CLICKED, eLabGridFilterProcessClickedHandler, false, 0, true);
+				addEventListener(ELabGridFilterEvent.APPLY_FILTER_CLICKED, eLabGridFilterApplyClickedHandler, false, 0, true);
+				
+				addEventListener(ElabActionEvent.ELAB_ORDER_ITEM_EDIT_KEY_UP, itemEditKeyUpHandler, false, 0, true);
+				addEventListener(ElabActionEvent.ELAB_ORDER_SAVE_CLICK, saveRecordClickHandler, false, 0, true);
+				addEventListener(ElabActionEvent.ELAB_ORDER_SELECTED, elabOrderSelectedHandler, false, 0, true);
+			}
+			
+			private function eLabGridFilterSearchClickedHandler(event:ELabGridFilterEvent):void
+			{
+				if (!event)
+					return;
+				
+				id_Filter.pageNo = 1;
+				
+				model.OrderFilterCriteria = event.eLabFilterCriteria;
+				model.OrderFilterCriteria.PageNo = id_Filter.pageNo;
+				
+				var ev:LoadLabOrderEvent = new LoadLabOrderEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}
+			
+			private function eLabGridFilterPageRequestedHandler(event:ELabGridFilterEvent):void
+			{
+				if (!event)
+					return;
+				
+				if (event.pageNo < 1)
+					return;
+				
+				if (!model.OrderFilterCriteria)
+					return;
+				
+				model.OrderFilterCriteria.PageNo = event.pageNo;
+				
+				var ev:LoadLabOrderEvent = new LoadLabOrderEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}
+			
+			private function eLabGridFilterProcessClickedHandler(event:ELabGridFilterEvent):void
+			{
+				if (!id_ElabsList.dataProvider)
+					return;
+				
+				var labsToProcess:ArrayCollection = new ArrayCollection();
+				
+				for (var i:int; i < id_ElabsList.dataProvider.length; i++)
+				{
+					var labVO:LabVO = id_ElabsList.dataProvider[i] as LabVO;
+					
+					if (labVO && labVO.isSelected)
+					{
+						var labDTO:ELabDTO = new ELabDTO();
+						
+						labDTO = labVO.labDTO;
+						
+						if (labDTO)
+						{
+							labsToProcess.addItem(labDTO);
+						}
+					}
+				}
+				
+				if (labsToProcess.length > 0)
+				{
+					var labListDTO:LabListDTO = new LabListDTO();
+					
+					labListDTO.Labs = labsToProcess;
+					
+					var xml:XML = labListDTO.getListIDsXML(labsToProcess.source);
+					
+					var ev:ProcessLabOrderEvent = new ProcessLabOrderEvent(xml, new Date(1901, 0, 1), onLoadLabOrder);
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				}
+				else
+				{
+					Alert.show("Please select lab orders to perform this action", "info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+				}
+			}
+			
+			private function onLoadLabOrder():void
+			{
+				var ev:LoadLabOrderEvent = new LoadLabOrderEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				Alert.show("Selected lab orders have been processed successfully","Info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+				
+				var ev1:ElabActionEvent = new ElabActionEvent(ElabActionEvent.ELAB_ORDER_PROCESSED);
+				dispatchEvent(ev1);
+			}
+			
+			private function eLabGridFilterApplyClickedHandler(event:ELabGridFilterEvent):void
+			{
+				if (!event.eLabFilterCriteria)
+					return;
+				
+				model.OrderFilterCriteria = event.eLabFilterCriteria;
+				
+				model.OrderFilterCriteria.PageNo = id_Filter.pageNo;
+				
+				if (isEmpty(model.OrderFilterCriteria))
+				{
+					model.OrderFilterCriteria.LoadType = ELabsConstant.ALL_LABS_LOAD_TYPE; //when apply button is clicked without giving value then load all records
+				}
+				
+				var ev:LoadLabOrderEvent = new LoadLabOrderEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}	
+			
+			private function isEmpty(value:ELabFilterCriteriaDTO):Boolean
+			{
+				if (value.FromDate.length == 0 && value.ToDate.length == 0 &&
+					value.PatientID == 0 && value.MethodTypeID == "0" && value.LabTypeID == "0" &&
+					value.FieldID == 0 && value.SearchTerm == "")
+				{
+					return true;
+				}
+				
+				return false;
+			}
+			
+			private function itemEditKeyUpHandler(event:ElabActionEvent):void
+			{
+				if (event.searchString && event.searchString.length > 1 && event.searchString.length < 10 
+							&& event.searchString.length % 2 != 0)
+				{
+					/**
+					 * Only test types will be loaded on search string
+					 * */
+					var LoadTestTypes:LoadTestTypeByNameEvent = new LoadTestTypeByNameEvent(event.searchString);
+					CairngormEventDispatcher.getInstance().dispatchEvent(LoadTestTypes);
+				}
+			}
+			
+			private function saveRecordClickHandler(event:ElabActionEvent):void
+			{
+				if (!event.selection)
+					return;
+				
+				var labDTO:ELabDTO = event.selection as ELabDTO;
+				
+				if (!labDTO)
+					return;
+				
+				var ev:ManageLabsEvent = new ManageLabsEvent(labDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}
+			
+			private function elabOrderSelectedHandler(event:ElabActionEvent):void
+			{
+				if (!eLabsOrderList)
+					return;
+				
+				var isOrderSelected:Boolean;
+				
+				for (var i:int=0; i < eLabsOrderList.length; i++)
+				{
+					var lab:LabVO = eLabsOrderList[i] as LabVO;
+					
+					if (lab && lab.isSelected)
+					{
+						isOrderSelected = true;
+						break;
+					}
+				}
+				
+				id_Filter.recordsSelected = isOrderSelected;
+			}
+			
+			private function initializeOrderFilter():void
+			{
+				if (!model.OrderFilterCriteria)
+					model.OrderFilterCriteria = new ELabFilterCriteriaDTO();
+				
+				model.OrderFilterCriteria.PatientID = 0;
+				model.OrderFilterCriteria.FieldID = 0;
+				model.OrderFilterCriteria.SearchTerm = "";
+				model.OrderFilterCriteria.FromDate = "";
+				model.OrderFilterCriteria.ToDate = "";
+				model.OrderFilterCriteria.PageNo = 1;
+				model.OrderFilterCriteria.MethodTypeID = "0";
+				model.OrderFilterCriteria.LabTypeID = "0";
+				model.OrderFilterCriteria.LoadType = ELabsConstant.ALL_LABS_LOAD_TYPE;
+			}
+			
+			private function checkAllClickHandler():void
+			{
+				if (!id_ElabsList.dataProvider)
+					return;
+				
+				var found:Boolean;
+				
+				for (var i:int = 0; i < id_ElabsList.dataProvider.length; i++)
+				{
+					var labVO:LabVO = id_ElabsList.dataProvider[i] as LabVO;
+					
+					if (labVO)
+					{
+						if (labVO.isSelected != checkAll.selected)
+						{
+							labVO.isSelected = checkAll.selected;
+						}
+					}
+				}
+				
+				id_Filter.recordsSelected = checkAll.selected;
+			}
+			
+			public function set eLabsOrderListCollection(value:ArrayCollection):void
+			{
+				if (!value)
+				{
+					eLabsOrderList = value;
+					return;
+				}
+				
+				eLabsOrderList = null; //cleaning previously loaded items
+				
+				for (var i:int = 0; i < value.length; i++)
+				{
+					var labVO:LabVO = new LabVO();
+					labVO.serialNumber = i + 1;
+					
+					var labDTO:ELabDTO = value[i] as ELabDTO;
+					
+					if (labDTO)
+					{
+						labVO.labDTO = labDTO;
+					}
+					
+					if (!eLabsOrderList)
+						eLabsOrderList = new ArrayCollection();
+					
+					eLabsOrderList.addItem(labVO);
+				}
+				
+				if (!eLabsOrderList)
+					Alert.show("No E-lab found", "Info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+				
+				if (eLabsOrderList.length <= 0)
+					Alert.show("No E-lab found", "Info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+				
+				/**
+				 * every time collection changes, all records would be deselected
+				 */
+				id_Filter.recordsSelected = false;
+			}
+			
+			public function removePopUps():void
+			{
+				id_Filter.removeSearchPopUp();
+			}
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.LabOrderListDto.Labs" destination="eLabsOrderListCollection"/>
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<lab:ELabsGridFilterView id="id_Filter" width="100%" doShowProcessButton="true" 
+							 searchTypeDataProvider="{model.OrderSearchFieldsList.Fields}" searchTypeLabelField="Name"
+							 firstRecord="{model.PendingOrdersFirstRecord}" lastRecord="{model.PendingOrdersLastRecord}"
+							 totalRecords="{model.PendingOrdersTotalRecords}"/>
+	
+	<s:BorderContainer id="listView" width="100%" height="100%" backgroundColor="#FFFFFF" borderColor="#FFFFFF" borderWeight="0">
+		<s:layout>
+			<s:VerticalLayout gap="0"/>
+		</s:layout>
+		
+		<s:SkinnableContainer id="id_ListHeader" width="100%" height="29" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="10"/>
+			</s:layout>
+			<s:CheckBox id="checkAll" 
+						width="20" click="checkAllClickHandler()" 
+						skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+						buttonMode="true" useHandCursor="true"/>
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="30" text="Sr#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+			
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Order#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Date" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:Label width="100%" text="Test" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="25%" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				<s:Label width="100%" text="Lab" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			<s:HGroup gap="0" width="70" height="100%" verticalAlign="middle">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				<s:Label width="100%" text="" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+			</s:HGroup>
+			
+		</s:SkinnableContainer>
+		
+		<s:List id="id_ElabsList"  
+				dataProvider="{eLabsOrderList}"
+				width="100%" height="100%" verticalScrollPolicy="on"
+				allowMultipleSelection="true"
+				skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+				borderVisible="false"
+				itemRenderer="com.gazuntite.provider.live.services.elab.view.renderers.ElabOrderListIR"
+				/>
+	</s:BorderContainer>
+</s:SkinnableContainer>

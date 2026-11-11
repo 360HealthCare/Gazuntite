@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:communication="com.zigron.gazuntite.view.topbar.communication.*"
+					  xmlns:profile="com.zigron.gazuntite.view.topbar.provider.profile.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:provider="com.zigron.gazuntite.view.topbar.provider.*" 
+					  xmlns:email="com.gazuntite.provider.services.email.view.*" 
+					  xmlns:sms="com.gazuntite.provider.services.sms.view.*" 
+					  xmlns:video="com.gazuntite.video.chat.view.*" 
+					  width="100%" height="100%"
+					  skinClass="com.gazuntite.skins.MainContainerSplitViewSkin"
+					  contentBackgroundAlpha="0" 
+					  removedFromStage="onRemovedFromStageHandler(event)"
+					  creationComplete="init(event)" xmlns:view="com.gazuntite.provider.search.services.provider.view.*" 
+					  xmlns:view1="com.gazuntite.webRTC.view.*" 
+					  >
+	
+	<fx:Metadata>
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.common.event.ManagePatientVitalEvent;
+			import com.gazuntite.common.event.MarkValidDataExistsEvent;
+			import com.gazuntite.common.event.visit.CreateVisitCommonEvent;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.common.view.events.PatientVideoChatEndEvent;
+			import com.gazuntite.common.view.events.StartChatWithProviderEvent;
+			import com.gazuntite.input.utils.AppUtils;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.provider.eprescription.services.patient.util.EConstants;
+			import com.gazuntite.provider.search.services.provider.dto.providerdto;
+			import com.gazuntite.provider.search.services.provider.event.SearchProviderEvent;
+			import com.gazuntite.provider.search.services.provider.view.event.ListVieClickEvent;
+			import com.gazuntite.provider.services.common.model.CommunicationViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.video.chat.manager.VideoChatManager;
+			import com.gazuntite.video.chat.view.event.VideoChatControlEvent;
+			import com.gazuntite.webRTC.events.SendVideoCallToProviderEvent;
+			import com.gazuntite.webRTC.manager.OpenTokWebViewManager;
+			import com.gazuntite.webRTC.model.WebRTCModel;
+			import com.gazuntite.webRTC.model.vo.VideoChatDTO;
+			import com.zigron.gazuntite.event.login.GetClinicUserDetailsByIDEvent;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderStatusDTO;
+			import com.zigron.gazuntite.utils.Constants;
+			import com.zigron.gazuntite.view.event.SaveVitalsEvent;
+			
+			import labs.otuome.p2p.events.VideoChatEvent;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var _EmailAddress:String;
+			private var _userID:int;
+			private var _Heading:String;
+			private var _ProviderName:String;
+			private var _clinicBranchID:String;
+			private var _vitalsDTO:VitalsDTO;
+			
+			private var _userTypeDTO:XML;
+			
+			private var AssoicationPopUP:ComPatientVitalsView;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]
+			protected var comViewModel:CommunicationViewModel = CommunicationViewModel.getInstance();
+			
+			[Bindable]
+			private var chatManager:VideoChatManager = VideoChatManager.getInstance();
+			
+			[Bindable]
+			private var opentokManager:OpenTokWebViewManager = OpenTokWebViewManager.getInstance();
+			
+			[Bindable]
+			private var opentokModel: WebRTCModel = WebRTCModel.getInstance();
+			
+			private static var _videoSlideoutRef:PopupGroup;
+			private var _neighborhood:ArrayCollection;
+			
+			[Bindable]
+			public function get vitalsDTO():VitalsDTO
+			{
+				return _vitalsDTO;
+			}
+
+			public function set vitalsDTO(value:VitalsDTO):void
+			{
+				_vitalsDTO = value;
+			}
+
+			[Bindable]
+			public function get userTypeDTO():XML
+			{
+				return _userTypeDTO;
+			}
+			
+			public function set userTypeDTO(value:XML):void
+			{
+				_userTypeDTO = value;
+			}
+			
+			public function get providerName():String
+			{
+				return _providerName;
+			}
+			
+			public function set providerName(value:String):void
+			{
+				_providerName = value;
+			}
+			
+			public function get providerAvaliable():Boolean
+			{
+				return _providerAvaliable;
+			}
+			
+			public function set providerAvaliable(value:Boolean):void
+			{
+				_providerAvaliable = value;
+			}
+			
+			public function get clinicBranchID():String
+			{
+				return _clinicBranchID;
+			}
+			
+			[Bindable]
+			public function set clinicBranchID(value:String):void
+			{
+				_clinicBranchID = value;
+			}
+			
+			public function get ProviderName():String
+			{
+				return _ProviderName;
+			}
+			
+			public function set ProviderName(value:String):void
+			{
+				_ProviderName = value;
+			}
+			
+			public function get EmailAddress():String
+			{
+				return _EmailAddress;
+			}
+			
+			public function set EmailAddress(value:String):void
+			{
+				_EmailAddress = value;
+			}
+			
+			[Bindable]
+			public function get neighborhood():ArrayCollection
+			{
+				return _neighborhood;
+			}
+			
+			
+			[Bindable]
+			public function get Heading():String
+			{
+				return _Heading;
+			}
+			
+			
+			public function set Heading(value:String):void
+			{
+				_Heading = value;
+			}
+			
+			[Bindable]
+			public function get userID():int
+			{
+				return _userID;
+			}
+			
+			public function set userID(value:int):void
+			{
+				_userID = value;
+			}
+			
+			private var _providerAvaliable:Boolean;
+			private var _providerName:String;
+			
+			
+			public function set neighborhood(value:ArrayCollection):void
+			{
+				if( _neighborhood && _neighborhood.length )
+				{
+					_neighborhood.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange );
+				}
+				
+				if( value && value.length )
+				{
+					_neighborhood = value;
+					_neighborhood.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCollectionChange );
+				}
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				addEventListener( "startVideoChat", SendCallInvite);
+				
+				BindingUtils.bindProperty( this, "neighborhood", chatManager.videoChat, "neighbors" );
+				
+				callLater(onCollectionChange, [null] ); // update user list for video chat 
+				callLater(CheckAndSetVideoIsSlideout); // checks if video chat was in slide out 
+				
+				chatManager.addEventListener("stopChatting", onChattingEvent );
+				chatManager.addEventListener("startChatting", onChattingEvent );
+				
+				id_chatComponent.addEventListener('VideoCallEnded' ,CallEnded);
+				id_chatComponent.addEventListener(PatientVideoChatEndEvent.PATIENT_CHAT_END ,patientChatEnded);
+				
+				addEventListener("UserUnavaliable_for_call",UserUnavaliableForCall);
+				
+				addEventListener(StartChatWithProviderEvent.SEND_CALL, function(event:StartChatWithProviderEvent):void
+				{
+					SendCallToProvider(event);
+				});
+			}
+			private var videoChatDTO:VideoChatDTO;
+			private function SendCallToProvider(event:StartChatWithProviderEvent):void
+			{
+				videoChatDTO 	= new VideoChatDTO();
+				videoChatDTO.CallInitiatorID 	= model.LoggedInUserDTO.UserId;
+				videoChatDTO.CallInitiatorName 	= model.LoggedInUserDTO.FullName;
+				videoChatDTO.ClinicBranchID	 	= model.LoggedInUserSessionDTO.ClinicBranchID;
+				videoChatDTO.CallRecieverID 		= event.providerID;
+				videoChatDTO.CallRecieverName	= event.providerName;
+				videoChatDTO.isProvider			= true;
+				
+				opentokModel.CallerName =  event.providerName;
+				
+				var cge:SendVideoCallToProviderEvent = new SendVideoCallToProviderEvent( videoChatDTO, SendVideoCall_callBack );
+				CairngormEventDispatcher.getInstance().dispatchEvent( cge );
+				
+				opentokManager.isAvailable = false;
+				opentokManager.model.isCallfromProvider = true;
+			}
+			
+			private function patientChatEnded(event:PatientVideoChatEndEvent):void
+			{
+				vitalsDTO = event.vitals;
+				
+				Alert.show("Do you want to associate this conference with patient's record?", "Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					if( event.detail == Alert.YES )
+					{
+						AssoicateVideoRecord();
+					}
+					else if( event.detail == Alert.NO)
+					{
+						CallEnded();
+					}
+				});
+				
+				//UtilityFunctions.AskMessage("Do you want to associate this conference with patient's record?" ,AssoicateVideoRecord,null,CallEnded,null);
+			}
+			private function CallEnded(event:Event = null):void
+			{
+				
+				id_MainTabs.selectedIndex = 0;
+				id_CommunicationTabs.selectedIndex = 0;
+				id_CommunicationTabs.setFocus();
+				//Alert.show("Call with "+opentokModel.CallerName+" ended.","Call Ended");
+				if(null != _videoSlideoutRef && _videoSlideoutRef.isPopUp)
+					_videoSlideoutRef.removePopup();
+				//dispatchEvent(new Event('VideoCallEnded',true));
+			}
+			
+			
+			public function hasValidValue():Boolean
+			{
+				if( vitalsDTO.Note.length > 3 )
+				{
+					return true;
+				}
+				else if(vitalsDTO.Note.length > 0 && vitalsDTO.Note.length < 4)
+				{
+					Alert.show(" Notes should be more than 3 characters long.","Required!", 4, FlexGlobals.topLevelApplication.mainContainer);
+					
+					return false;
+				}
+				else
+				{
+					if( vitalsDTO.Temperature.length > 0 ||            
+						vitalsDTO.Pulse.length > 0 ||                  
+						vitalsDTO.Respiration.length > 0 ||           
+						vitalsDTO.BPSys.length > 0 ||                 
+						vitalsDTO.BPDys.length > 0 ||                  
+						vitalsDTO.sugarLevel.length > 0 )
+					{
+						return true;
+					} 
+					
+/*					Old Implementation
+					
+ 					if( vitalsDTO.Weight.length > 0 ||                 
+						vitalsDTO.Height.length > 0 ||                 
+						vitalsDTO.Temperature.length > 0 ||            
+						vitalsDTO.Pulse.length > 0 ||                  
+						vitalsDTO.Respiration.length > 0 ||           
+						vitalsDTO.BPSys.length > 0 ||                 
+						vitalsDTO.BPDys.length > 0 ||                  
+						vitalsDTO.Oxygen.length > 0 ||                 
+						vitalsDTO.sugarLevel.length > 0 )
+					{
+						return true;
+					}               */
+				}
+				
+				Alert.show("Please write notes or give vitals to save the Virtual Encounter.","Required!", 4, FlexGlobals.topLevelApplication.mainContainer);
+				
+				return false;
+			}
+			
+			private function AssoicateVideoRecord():void
+			{
+				AssoicationPopUP = new ComPatientVitalsView();
+				AssoicationPopUP.vitalDTO = vitalsDTO;
+				AssoicationPopUP.patientName = opentokModel.CallerName;
+				AssoicationPopUP.patientDOB = "Patient DOB";
+				AssoicationPopUP.patientAge = "Patient Age";
+				AssoicationPopUP.width 	= id_Main.width - 17;
+				AssoicationPopUP.height = 170;
+				AssoicationPopUP.ShowPopup(this);
+				
+				var pt:Point = Video.parent.localToGlobal(new Point(Video.x, Video.y));
+				AssoicationPopUP.move( pt.x+2 , pt.y+2 ); 
+				
+				AssoicationPopUP.addEventListener(SaveVitalsEvent.SAVE_VITAL_EVENT, function (e:SaveVitalsEvent):void
+				{
+					vitalsDTO = e.vitalsDTO;
+					SavePatientVitals();
+				});
+				
+				AssoicationPopUP.addEventListener("cancel", function (event:Event):void
+				{
+					AssoicationPopUP.removePopup();
+					id_MainTabs.selectedIndex = 0;
+					id_CommunicationTabs.selectedIndex = 0;
+				});
+				
+				
+				if(null != _videoSlideoutRef && _videoSlideoutRef.isPopUp)
+					_videoSlideoutRef.removePopup();
+				
+			}
+			
+			private var savedEncounterVisitID:int = 0;
+			private function SavePatientVitals():void
+			{
+				savedEncounterVisitID = 0;
+				var getstaticlists: CreateVisitCommonEvent = new CreateVisitCommonEvent(opentokModel.CallerID, function(response:XML):void
+				{
+					
+					if(response == "0")
+					{
+						UtilityFunctions.ShowMessage("unable to create virtual visit",'Alert',function(event:Event = null):void
+						{
+							
+						});
+						
+						return ;
+					}
+					else
+					{
+						savedEncounterVisitID 	= parseInt(response);					
+						vitalsDTO.VisitID 		= parseInt(response);					
+						vitalsDTO.VisitDate 	= new Date();
+						vitalsDTO.CreatedBy		= model.LoggedInUserDTO.UserId;
+						vitalsDTO.CreatedAt 	= new Date();
+						vitalsDTO.Editable 		= 'true';
+						vitalsDTO.ModifiedBy 	= model.LoggedInUserDTO.UserId;
+						vitalsDTO.PatientID  	= parseInt(opentokModel.CallerID);
+						vitalsDTO.IsDirty		= true;
+						
+						var cge:ManagePatientVitalEvent = new ManagePatientVitalEvent( vitalsDTO, model.LoggedInUserDTO.UserId, vitalsDTO.VisitID, model.LoggedInUserSessionDTO.SessionID ,ManageVitalsCallBack);
+						CairngormEventDispatcher.getInstance().dispatchEvent( cge );
+						
+					} 
+					
+				});	
+				
+				if( hasValidValue() ) //if there are Notes or other details in vital  
+				{
+					getstaticlists.data = createVisitXML(); 				
+					CairngormEventDispatcher.getInstance().dispatchEvent(getstaticlists);    
+				}
+			}
+			
+			public function onSuccessfullVisitSave():void
+			{
+				if( vitalsDTO.Note.length > 3 )
+				{
+					var notesDTO:ModuleNoteDTO =  new ModuleNoteDTO();
+					notesDTO.ModuleNoteId = 0
+					
+					notesDTO.NoteSubject = "Vertual Visit Note";
+					notesDTO.Note = vitalsDTO.Note;
+					notesDTO.ManagedByUserId = model.LoggedInUserDTO.UserId;
+					notesDTO.CreatedBy = model.LoggedInUserDTO.UserId
+					notesDTO.CreatedAt = new Date();
+					notesDTO.ModuleTypeId = 28 //QIUtilityFunctions.getModuleIDByName(Constants.QUICK_INPUT_MODULE_NAME);
+					notesDTO.VisitID = savedEncounterVisitID;
+					notesDTO.PatientID = parseInt(opentokModel.CallerID);
+					notesDTO.IsNewAdded = true;	
+					
+					var mne:ManageModuleNotesEvent = new ManageModuleNotesEvent(notesDTO, "",model.LoggedInUserDTO.UserId,model.LoggedInUserSessionDTO.SessionID);
+					CairngormEventDispatcher.getInstance().dispatchEvent(mne);
+				}
+				
+				AssoicationPopUP.CleanVitals();
+				AssoicationPopUP.removePopup();
+				id_MainTabs.selectedIndex = 0;
+				id_CommunicationTabs.selectedIndex = 0;
+				id_CommunicationTabs.setFocus();
+				vitalsDTO = new VitalsDTO();
+			}
+			
+			public function ManageVitalsCallBack(saved:Boolean):void
+			{
+				if(saved)
+				{
+					var mvdEv:MarkValidDataExistsEvent = new MarkValidDataExistsEvent(model.LoggedInUserDTO.UserId,10 ,11,model.LoggedInUserSessionDTO.SessionID, vitalsDTO.VisitID ,vitalsDTO.VisitDate.toString());
+					mvdEv.functionName = onSuccessfullVisitSave;
+					CairngormEventDispatcher.getInstance().dispatchEvent(mvdEv);
+				}
+				else
+				{
+					Alert.show('Unable to save Vitals please Try again','UnSuccessfull',4,this);
+				}
+			}
+			
+			private function createVisitXML():XML
+			{
+				/* var visitDTO:XML					= <VisitDTO />;
+				visitDTO.IsDeleted 					= "false";
+				visitDTO.IsDirty 					= "false";
+				visitDTO.AppointmentId 				= "0";
+				visitDTO.IsRecordEditable			= "true";
+				visitDTO.IsValidDataExists			= "false";
+				visitDTO.IsVirtualVisit				= "false";
+				visitDTO.OwnerId 					= "0";
+				visitDTO.PlaceOfServiceTypeID		= "0";
+				
+				visitDTO.RecordStatus				= "";
+				visitDTO.SignedByUserId				= "0";
+				visitDTO.SignedByUserType			= "1";
+				visitDTO.SignedDate					= "2012-01-01T00:00:00";
+				visitDTO.TemplateVisitId			= "0";									
+				
+				
+				visitDTO.PatientId 					= patient_ID; //model.loadedPatientId;
+				visitDTO.TemplateId 				= '1'; //templateId;
+				visitDTO.EncounterTypeId 			= '1'; //encounterTypeId;
+				
+				//visitDTO.CreatedStationID 		= model.userSelectedStationDTO.StationID;
+				
+				//visitDTO.ClinicBranch 			= new ClinicBranchDTO();
+				visitDTO.ClinicBranch.ClinicBranchIdSeq =model.LoggedInUserSelectedBranchId; // clinicBranchID;
+				visitDTO.ClinicBranch.AvgPatientPerDay = 0;
+				visitDTO.UserId 					= userId;				
+				
+				visitDTO.UserType.UserTypeId			= model.LoggedInUserProviderTypeId;
+				
+				visitDTO.VisitStatus				= EConstants.UN_SIGNED_STATUS;
+				visitDTO.ModifiedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.SignedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.CoSignedDate				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.RecGuid 					= EConstants.GUID_FORMAT;
+				visitDTO.DictationID 				= EConstants.GUID_FORMAT;
+				
+				//M new fields addded in DTO
+				//28 Mar 2011
+				visitDTO.CreatedBy 					= userId;
+				visitDTO.ModifiedBy					= userId;
+				visitDTO.VisitDate					= AppUtils.getToday(); 
+				visitDTO.CreatedAt 					= AppUtils.getToday(); //"2012-01-01T00:00:00"; 
+				visitDTO.ModifiedAt 				= AppUtils.getToday();// EConstants.NULL_DATE;		
+				visitDTO.CreatedStationID			= '1';
+				
+				
+				visitDTO.appendChild(userTypeDTO);
+				
+				return visitDTO;
+				
+				
+				
+				
+				 */
+				
+				
+				
+				
+				
+				
+				var visitDTO:XML									= <VisitDTO />;
+				visitDTO.IsDeleted 									= "false";
+				visitDTO.IsDirty 									= "false";
+				visitDTO.AppointmentId 								= "0";
+				visitDTO.IsRecordEditable							= "true";
+				visitDTO.IsValidDataExists							= "false";
+				visitDTO.IsVirtualVisit								= "true";
+				visitDTO.OwnerId 									= model.LoggedInUserDTO.UserId; // "0"; [09/02/2013] Shahid Munir to show provider name in vertual encounter
+				visitDTO.OwnerUserType.UserTypeId					= model.LoggedInUserDTO.AllUserTypes[0].UserTypeId; // "0"; [09/02/2013] Shahid Munir to show provider name in vertual encounter
+				visitDTO.PlaceOfServiceTypeID						= "11";
+				
+				visitDTO.RecordStatus								= "";
+				visitDTO.SignedByUserId								= "0";
+				visitDTO.SignedByUserType							= "1";
+				visitDTO.SignedDate									= "2012-01-01T00:00:00";
+				visitDTO.TemplateVisitId							= "0";									
+				
+				
+				visitDTO.PatientId 									= opentokModel.CallerID; // this is actually patientUserID, 
+				visitDTO.isUserID									= 'true'; // this is the case where we are sending PatientUserID , instead of PatientID.
+				
+				
+				visitDTO.TemplateId 								= '1'; 
+				visitDTO.EncounterTypeId 							= '10';
+				visitDTO.ClinicBranch.ClinicBranchIdSeq 			= model.LoggedInUserDTO.UserClinicBranchesList[0].ClinicBranch.ClinicBranchIdSeq; // clinicBranchID;
+				visitDTO.ClinicBranch.AvgPatientPerDay 				= 0;
+				visitDTO.UserId 									= model.LoggedInUserDTO.UserId;				
+				
+				visitDTO.UserType.UserTypeId						= model.LoggedInUserDTO.AllUserTypes[0].UserTypeId;
+				
+				visitDTO.VisitStatus								= EConstants.UN_SIGNED_STATUS;
+				visitDTO.ModifiedDate 								= "2012-01-01T00:00:00";
+				visitDTO.SignedDate 								= "2012-01-01T00:00:00";
+				visitDTO.CoSignedDate								= "2012-01-01T00:00:00";
+				visitDTO.RecGuid 									= EConstants.GUID_FORMAT;
+				visitDTO.DictationID 								= EConstants.GUID_FORMAT;
+				
+				//M new fields addded in DTO
+				//28 Mar 2011
+				visitDTO.CreatedBy 									= model.LoggedInUserDTO.UserId;;
+				visitDTO.ModifiedBy									= model.LoggedInUserDTO.UserId;;
+				visitDTO.VisitDate									= AppUtils.getToday(); 
+				visitDTO.CreatedAt 									= AppUtils.getToday(); 
+				visitDTO.ModifiedAt 								= AppUtils.getToday();	
+				visitDTO.CreatedStationID							= '1';
+				
+				
+				
+				
+				visitDTO.appendChild(userTypeDTO);
+				
+				return visitDTO;
+				
+				
+			}
+			
+			private function onChattingEvent(event:Event):void
+			{
+				switch( event.type )
+				{
+					case "startChatting":
+						id_CommunicationTabs.selectedIndex = id_CommunicationViews.length - 1 ;
+						break;
+					case "stopChatting":
+						id_MainTabs.selectedIndex = 0;
+						break;
+				}
+			}
+			
+			private function SendCallInvite (e:Event):void
+			{
+				StartVideoChat(e.target.provider.UserEmail);
+			}
+			
+			private function StartVideoChat(UserEmail:String):void
+			{
+				var j:int;
+				for(j = 0; j < neighborhood.length; j++ )
+				{
+					var selectedUser:Object = neighborhood.getItemAt( j );
+					if( selectedUser.name == UserEmail )
+					{
+						if( CanStartVideoChat() )
+						{
+							
+							id_MainTabs.selectedIndex = 1; 
+							callLater(function():void{
+								
+								id_CommunicationTabs.selectedIndex = id_CommunicationViews.length - 1; //last child should be Video Chat component
+								
+							});
+							
+							chatManager.sendChatNotification( VideoChatEvent.INVITE, selectedUser );
+						}
+						break;
+					}
+				}
+			}
+			
+			private function onCollectionChange(event:CollectionEvent):void
+			{
+				if( neighborhood && neighborhood.length )
+				{
+					logger.debug("onCollectionChange, total online users are "+ neighborhood.length);
+					
+					//id_searchname.updateNeighborHoodStatus( neighborhood );
+				}
+			}
+			
+			public function onEndChat(event:Event):void
+			{
+				trace("CommunicationView::onEndChat(event:Event)");
+			}
+			
+			private function CanStartVideoChat():Boolean
+			{
+				if(	model.selectedProvider.UserEmail == model.LoggedInProvider.UserEmail )
+				{
+					//UtilityFunctions.ShowMessage( "You can't chat with your self", "select user" );
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+			}
+			
+			/* private var comOptionpoup:ComOptionpoup
+			protected function showComOptionpoup(event:MouseEvent):void
+			{
+			var toggleView:Boolean = null != comOptionpoup;
+			
+			removeAllPopups();
+			
+			if(toggleView )
+			{
+			return;
+			}
+			
+			comOptionpoup = new ComOptionpoup();
+			comOptionpoup.ShowPopup( this );
+			comOptionpoup.dataProvider = id_CommunicationTabs;
+			comOptionpoup.addEventListener("optionChaned", function(optionevent:Event):void 
+			{ 
+			logger.debug( "ComOptionpoup view changed " );
+			if( CommunicationViewModel.getInstance().communicationViewSectionName == "VIDEO")
+			{
+			//StartVideoChat( model.selectedProvider.UserEmail );
+			if(providerAvaliable)
+			{
+			var startChatEvent:StartChatWithProviderEvent = new StartChatWithProviderEvent(StartChatWithProviderEvent.SEND_CALL,true);
+			
+			startChatEvent.providerID = userID;
+			startChatEvent.providerName = providerName;
+			
+			dispatchEvent(startChatEvent);
+			}
+			}
+			});
+			comOptionpoup.addEventListener("closePopup", 
+			function(closeevent:Event):void 
+			{ 
+			removeAllPopups();
+			comViewModel.communicationViewMenuShown = false;
+			} );
+			
+			var pt:Point = event.relatedObject.parent.localToGlobal(new Point(event.localX, event.localY));
+			
+			comOptionpoup.move( pt.x - comOptionpoup.width + event.relatedObject.width + 5, pt.y + event.relatedObject.height);
+			
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			} 
+			
+			public function removeAllPopups():void
+			{
+			if( comOptionpoup && comOptionpoup.isPopUp )
+			{
+			comOptionpoup.removePopup();
+			comOptionpoup = null;
+			}
+			}*/
+			
+			protected function close_clickHandler(event:MouseEvent):void
+			{
+				var lc:Event = new Event( "close", true, false );
+				dispatchEvent( lc );
+			}
+			
+			protected function max_clickHandler(event:MouseEvent):void
+			{
+				PatientViewModel.getInstance().closeAllTabs();
+			}
+			
+			protected function onRemovedFromStageHandler(event:Event):void
+			{
+				if( false == opentokManager.isAvailable && model.LoggedInUserSessionDTO.Status != ProviderStatusDTO.BUSY )
+				{
+					var h:Number = Video.height; 
+					var w:Number = Video.width; 
+					
+					if( null != Video && id_CommunicationViews.contains(Video) )
+						id_CommunicationViews.removeElement( Video );
+					
+					Video.ShowPopup( FlexGlobals.topLevelApplication as DisplayObject);
+					
+					
+					var loc:Point = localToGlobal( new Point( width + x, y ) );
+					
+					_videoSlideoutRef = Video;
+					
+					
+					_videoSlideoutRef.width 	= 465;
+					_videoSlideoutRef.height 	= 410;
+					
+					Video.move( loc.x + 2, loc.y + 50 );
+					
+					/* _videoSlideoutRef.addEventListener('VideoCallEnded' ,CallEnded);
+					_videoSlideoutRef.addEventListener('PatientChatEnd' ,patientChatEnded); */
+					
+					_videoSlideoutRef.addEventListener( VideoChatControlEvent.END_VIDEO_CHAT, function(event:Event ):void
+					{
+						_videoSlideoutRef.removePopup();
+						_videoSlideoutRef = null;
+					});
+				}
+				else
+				{
+					opentokManager.VideoChat_URL = '';
+					_videoSlideoutRef = null;
+				}
+				
+				if(null != AssoicationPopUP && AssoicationPopUP.isPopUp)
+					AssoicationPopUP.removePopup();
+				
+			}
+			
+			protected function CheckAndSetVideoIsSlideout():void
+			{
+				if(null != id_CommunicationTabs && null != _videoSlideoutRef && _videoSlideoutRef.isPopUp )
+				{
+					id_MainTabs.selectedIndex = id_MainTabs.length - 1 ;
+					callLater( function():void
+					{
+						//id_CommunicationTabs.removeElement( Video );
+						_videoSlideoutRef.removePopup();
+						
+						id_CommunicationTabs.selectedIndex = id_CommunicationViews.length - 1 ;
+						Video = _videoSlideoutRef;
+						id_CommunicationViews.addElement( Video );
+						Video.move(0, 0);
+						Video.percentWidth 	= 100;
+						Video.percentHeight = 100;
+					});
+					
+				}
+			}
+			
+			protected function searchproviderview1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var psEvent:SearchProviderEvent =new SearchProviderEvent('',getProviderList);
+				CairngormEventDispatcher.getInstance().dispatchEvent(psEvent);
+				event.stopImmediatePropagation();
+				
+				//id_SearchProviderView.id_ProviderSearchResultView.id_providerSearchTextInput.setFocus();
+			}
+			
+			private function SendVideoCall_callBack(dto:VideoChatDTO):void
+			{
+				opentokManager.model.isCallfromProvider = true;
+				opentokManager.SetCallInfo( dto.OpenTokSessionID, dto.OpenTokTokenID, videoChatDTO.CallInitiatorName, videoChatDTO.CallRecieverName );
+				
+				callLater(function():void{ 
+					
+					id_CommunicationTabs.selectedIndex = id_CommunicationViews.length - 1; //last child should be Video Chat component
+					
+				});
+				id_MainTabs.selectedIndex = 1;
+			}
+			
+			private function getProviderList(value:* = null):void
+			{
+				//trace(value);
+				
+			}
+			
+			protected function searchproviderview1_LoadClinicUserDetailsEventHandler(event:ListVieClickEvent):void
+			{
+				
+				Heading="Profile";
+				if(event.userId > 0)
+					userID = event.userId;
+				providerAvaliable = event.isAvaliable;
+				
+				if(null != event.providerName)
+					providerName = event.providerName;
+				
+				clinicBranchID = event.branchId.toString();
+				
+				LoadSMS_EMAIL();
+				
+				var clinicuserIDevent:GetClinicUserDetailsByIDEvent  = new GetClinicUserDetailsByIDEvent(event.userId,event.branchId, false, getProviderList);
+				CairngormEventDispatcher.getInstance().dispatchEvent(clinicuserIDevent);
+			}
+			
+			
+			protected function id_CommunicationTabs_changeHandler(event:IndexChangeEvent):void
+			{
+				trace (event.newIndex);
+			}
+			
+			protected function uiTab_clickHandler(event:MouseEvent):void
+			{
+				if(null != id_CommunicationTabs && id_CommunicationTabs.selectedIndex == 4)
+				{
+					var dto : providerdto = id_SearchProviderView.id_ProviderSearchResultList.id_SearchList.selectedItem; 
+					if(null != dto)
+					{
+						if(dto.userSessionStatusID == QSConstants.SESSION_STATUS_ONLINE)
+						{
+							var startChatEvent:StartChatWithProviderEvent = new StartChatWithProviderEvent(StartChatWithProviderEvent.SEND_CALL,true);
+							
+							startChatEvent.providerID = dto.UserId;
+							startChatEvent.providerName = dto.ProviderCompleteName;
+							startChatEvent.SessionStatusID = dto.userSessionStatusID;
+							
+							dispatchEvent(startChatEvent);
+						}
+							
+						else
+						{
+							UserUnavaliableForCall();
+						}
+					}
+					else
+					{
+						Alert.show("Please select a provider to call.", "Provider not Selected", Alert.OK, this);
+					}
+					
+				}
+				
+			}
+			
+			protected function UserUnavaliableForCall(event:* = null):void
+			{
+				
+				Alert.show("Provider is not available for video call, please try later.", "Unavaliable", Alert.OK, this, function( event:CloseEvent):void
+				{
+					id_CommunicationTabs.selectedIndex = 0;
+				});
+			}
+			protected function id_MainTabs_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_MainTabs_changeHandler(event:IndexChangeEvent):void
+			{
+				switch( event.newIndex )
+				{
+					case 0 :
+						comViewModel.communicationViewSectionName = "PROFILE";
+						break;
+					case 1 :
+						comViewModel.communicationViewSectionName = "COMMUNICATION";
+						LoadSMS_EMAIL();
+						break;
+				}
+			}
+			
+			public function SelectVideoTab():void
+			{
+				id_MainTabs.selectedIndex = 1;
+				callLater(function():void{
+					
+					callLater(function():void{ 
+						id_CommunicationTabs.selectedIndex = id_CommunicationViews.length - 1;
+					});
+				});
+			}
+			
+			public function LoadSMS_EMAIL():void
+			{
+				if(id_MainTabs.selectedIndex == 1)
+				{
+					id_smsView.LoadSMS();
+					id_ComView.loadMailData();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<s:BorderContainer width="100%" backgroundColor="#FFFFFF" height="100%" borderVisible="false">
+		<s:layout>
+			<s:VerticalLayout gap="0"  />
+		</s:layout>
+		<!-- ************************************************** HEADER CONTENT *********************************************************** -->
+		<s:SkinnableContainer width="100%"  height="27" skinClass="com.gazuntite.skins.controls.container.CommunicationHUDContainerSkin"  >
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle"	horizontalAlign="center" paddingLeft="10"	paddingRight="2"/>
+			</s:layout>
+			
+			<s:HGroup width="100%"
+					  horizontalAlign="left"
+					  verticalAlign="middle"
+					  paddingLeft="-4"
+					  paddingRight="4"
+					  >
+				
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.RapidAccessHeader"/>
+				<s:Label fontFamily="CalibriCFF" fontSize="15"  text="COMMUNICATION"/>
+				<s:Spacer width="10"/>
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.RapidAccessHeaderArrow"/>
+				<s:Label text="{comViewModel.communicationViewSectionName}" fontFamily="CalibriCFF" fontSize="15"  color="#294C6F"/>
+				
+				<s:Spacer width="100%" />
+				<s:Button width="19" 
+						  click="max_clickHandler(event)"
+						  skinClass="com.gazuntite.skins.controls.button.restoreButton" 
+						  buttonMode="true" useHandCursor="true"
+						  toolTip="Maximize"
+						  visible="false" includeInLayout="false"
+						  />
+				<s:Button width="19" 
+						  click="close_clickHandler(event)"
+						  skinClass="com.gazuntite.skins.controls.button.GraphicCloseButtonSkin" 
+						  buttonMode="true" useHandCursor="true"
+						  toolTip="Close"
+						  />
+			</s:HGroup>
+			
+		</s:SkinnableContainer>
+		
+		<!-- ************************************************** HEADER CONTENT *********************************************************** -->
+		
+		<s:BorderContainer width="100%" height="100%"  minHeight="200" backgroundColor="#F6D0C8" borderVisible="true"
+						   >
+			<s:layout>
+				<s:HorizontalLayout gap="-1" verticalAlign="top" />
+			</s:layout>
+			
+			<view:SearchProviderView id="id_SearchProviderView" width="180" height="100%" minWidth="150" creationComplete="searchproviderview1_creationCompleteHandler(event)" LoadClinicUserDetailsEvent="searchproviderview1_LoadClinicUserDetailsEventHandler(event)"/>
+			
+			<s:SkinnableContainer id="id_Main"
+								  width="100%"  height="100%" minHeight="0"
+								  skinClass="com.gazuntite.skins.controls.container.ProvidersContainerSkin"
+								  ><!--minWidth="376"-->
+				<!--			
+				skinClass="com.zigron.gazuntite.skins.controls.container.ProvidersContainerSkin"
+				skinClass="com.zigron.gazuntite.skins.controls.container.ProviderProfileViewSkin"
+				>
+				-->			
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" paddingTop="2" paddingBottom="2" paddingLeft="2" paddingRight="2" gap="0"/>
+				</s:layout>
+				
+				<profile:ProvidersHeaderBar width="100%" dataProvider="{id_MainTabs}"	/>
+				
+				
+				<!--											moreOptionsClick="showComOptionpoup(event)"-->
+				<!--<s:Line width="100%">
+				<s:stroke>
+				<s:SolidColorStroke caps="none" color="#b4b4b4" joints="miter" miterLimit="4" weight="1" />
+				</s:stroke>
+				</s:Line>-->
+				
+				<components:LabelViewStack id="id_MainTabs" width="99.5%" height="100%" minHeight="0" backgroundColor="#F6D0C8" change="id_MainTabs_changeHandler(event)"
+										   borderVisible="false" creationPolicy="all" contentBackgroundAlpha="1" backgroundAlpha="1"
+										   >
+					
+					<s:ArrayList>
+						<s:Group id="Profile" 
+								 width="100%" 
+								 height="100%">
+							
+							<profile:ProviderProfileView height="98%" width="100%" />
+							
+							
+						</s:Group>
+						
+						
+						
+						<s:Group id="Communication" 
+								 width="100%" 
+								 height="100%"
+								 >
+							<s:layout>
+								<s:VerticalLayout gap="-2" paddingTop="3" paddingLeft="3" paddingRight="3" paddingBottom="3" />
+							</s:layout>
+							
+							<s:ButtonBar id="id_CommunicationTabs" dataProvider="{id_CommunicationViews}" labelField="id" 
+										 skinClass="com.gazuntite.skins.controls.buttonBar.communication.IconButtonBar"
+										 width="100%" selectedIndex="0"
+										 click="uiTab_clickHandler(event)"
+										 >
+								<s:layout>
+									<s:HorizontalLayout gap="1" />
+								</s:layout>
+							</s:ButtonBar>
+							
+							<s:Group width="100%" 
+									 height="100%" >
+								<s:BorderContainer width="100%"    height="100%" backgroundColor="0xFFFFFF" borderWeight="1" x="0"	y="0"   />
+								
+								<components:LabelViewStack id="id_CommunicationViews"  width="100%" height="100%" change="id_CommunicationTabs_changeHandler(event)"
+														   borderVisible="false" creationPolicy="all" contentBackgroundAlpha="1" backgroundAlpha="0"  selectedIndex="0">
+									<s:ArrayList>
+										<s:Group id="Email" 
+												 width="100%" 
+												 height="100%">
+											<email:CommunicationView id="id_ComView" height="100%" width="100%" EmailAddress="{model.SearchProviderDetailsResults.UserEmail}" userID="{model.SearchProviderDetailsResults.userID}" />
+											
+										</s:Group>
+										<s:Group id="SMS" 
+												 width="100%" 
+												 height="100%">
+											
+											<sms:SMSView id="id_smsView" height="100%" width="100%" BranchID="{clinicBranchID}" userID="{userID}"/>
+											
+											
+										</s:Group>
+										<s:Group id="Chat" 
+												 width="100%" 
+												 height="100%">
+											<s:BorderContainer width="100%" 
+															   height="100%" backgroundColor="0xFFFFFF" borderWeight="1">
+												<s:Label text="Chat View - under construction..." horizontalCenter="0" verticalCenter="0" fontSize="14"/>
+												
+											</s:BorderContainer>
+										</s:Group>
+										<s:Group id="Audio" 
+												 width="100%" 
+												 height="100%">
+											<s:BorderContainer width="100%" 
+															   height="100%" backgroundColor="0xFFFFFF" borderWeight="1">
+												<!--<communication:AudioView height="100%" width="100%"/>-->
+												<s:Label text="Audio View - under construction..." horizontalCenter="0" verticalCenter="0" fontSize="14"/>
+											</s:BorderContainer>
+										</s:Group>
+										<components:PopupGroup id="Video"  width="100%" height="100%" >
+											<components:layout>
+												<s:VerticalLayout paddingLeft="2" paddingTop="2" />
+											</components:layout>
+											<!--<local:chatComponent id="id_chatComponent" width="100%" height="100%" ShowNeighborList="false"/>
+											-->
+											
+											<!--<video:VideoChatView id="id_chatComponent" width="100%" height="100%" showNeighborList="false"/>-->
+											
+											<view1:VideoWebView  id="id_chatComponent" width="100%" height="100%" />
+											
+										</components:PopupGroup>
+									</s:ArrayList>
+								</components:LabelViewStack>
+							</s:Group>
+							
+						</s:Group>
+					</s:ArrayList>
+				</components:LabelViewStack>
+			</s:SkinnableContainer>
+		</s:BorderContainer>
+	</s:BorderContainer>
+</s:SkinnableContainer>

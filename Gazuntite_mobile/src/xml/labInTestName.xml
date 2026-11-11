@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LabIn xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Tests>
+		<Test testName="test1" testCode="001" />
+		<Test testName="test2" testCode="002" />
+		<Test testName="test3" testCode="003" />
+		<Test testName="test4" testCode="004" />
+		<Test testName="test5" testCode="005" />
+		<Test testName="test6" testCode="006" />
+		<Test testName="test7" testCode="007" />
+		<Test testName="test8" testCode="008" />
+		<Test testName="test9" testCode="009" />
+		<Test testName="test10" testCode="010" />
+	</Tests>
+</LabIn>

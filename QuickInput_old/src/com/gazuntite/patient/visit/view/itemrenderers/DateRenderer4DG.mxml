@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true" 
+						  creationComplete="mxdatagriditemrenderer1_creationCompleteHandler(event)"
+						  
+						  >
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			
+			import mx.events.FlexEvent;
+
+			protected function mxdatagriditemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				trace( dataGridListData.label );
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (dataGridListData && dataGridListData.label)
+				{
+					var dateRecieved:Date = new Date(Date.parse(dataGridListData.label));
+					var nullDate:Date = QIConstants.NULL_DATE;
+					
+					if (dateRecieved.getFullYear() <= nullDate.getFullYear() && dateRecieved.getMonth() <= nullDate.getMonth())
+						lbl.text = "";
+				}
+			}
+			
+			private function formatDate():void
+			{
+				
+			}
+
+		]]>
+	</fx:Script>
+	<!--<s:Label id="lblData" top="0" left="0" right="0" bottom="0" text="{dataGridListData.label}" />-->
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YY" />
+	</fx:Declarations>
+	<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" paddingTop="2">
+	<s:Label id="lbl" text="{formatDateTime.format( dataGridListData.label ) }" maxDisplayedLines="1" fontWeight="normal" fontStyle="normal"
+			 color="#333333" fontSize="12" />
+	</s:HGroup>
+</s:MXDataGridItemRenderer>

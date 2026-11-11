@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:views="com.adobe.audio.views.*"
+		 currentState="list"
+		 width="100%" 
+		 height="100%"
+		 xmlns:sf="http://www.spicefactory.org/parsley" 
+		 creationComplete="completeHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.audio.format.WAVWriter;
+			import com.gazuntite.events.DisplayNotesAndDictationEvent;
+			import com.gazuntite.events.MyContextMenuEvent;
+			import com.gazuntite.events.SoundClipEvent;
+			import com.gazuntite.events.SoundFileEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.charts.CategoryAxis;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			//import mx.controls.Alert;
+			
+			protected var directory:File;
+			
+			protected function completeHandler(event:Event):void
+			{
+				// Setting Global Exception Handler
+				loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorHandler);
+				
+				//addEventListener(SoundFileEvent.MENU, contextMenuHandler);
+				addEventListener(SoundFileEvent.SELECT, fileSelectedHandler);
+				addEventListener(MyContextMenuEvent.DELETE, deleteHandler);
+				//addEventListener(MyContextMenuEvent.EMAIL, emailHandler);
+				addEventListener(MyContextMenuEvent.MENU_CLOSE, menuCloseHandler);
+				
+				readDirectory();
+				
+			}	
+			
+			protected function readDirectory():void
+			{
+				directory = File.documentsDirectory.resolvePath("voicenotesdata");
+				if (!directory.exists) directory.createDirectory();
+				//list.files = directory.getDirectoryListing();
+				list.dataProvider = new ArrayCollection(directory.getDirectoryListing() as Array);
+			}
+			
+			private function uncaughtErrorHandler(event:UncaughtErrorEvent):void
+			{
+				currentState = "error";
+				//errorView.message.text = ""+event.error;
+			}			
+			
+			protected function contextMenuHandler(event:SoundFileEvent):void
+			{
+				currentState = "contextMenu";
+				//myContextMenu.file = event.file;
+			} 
+			
+			protected function fileSelectedHandler(event:SoundFileEvent):void
+			{
+				readFile(event.file);
+			}
+			
+			protected function readFile(file:File):void
+			{
+				currentState="playing";
+				var bytes:ByteArray = new ByteArray();
+				var stream:FileStream = new FileStream();
+				
+				try{
+					stream.open(file, FileMode.READ);
+					stream.readBytes(bytes);
+					stream.close();
+					playingView.startPlaying(bytes);
+				}catch(ex:Error)
+				{
+					trace(ex.message);
+				}
+				
+				
+			}
+			
+			protected function deleteHandler(event:MyContextMenuEvent):void
+			{
+				event.file.deleteFile();
+				readDirectory();
+				currentState = "list";
+				sharedModel.dictationPath = null;
+			}
+			
+			protected function emailHandler(event:MyContextMenuEvent):void
+			{
+				currentState = "list";
+				navigateToURL(new URLRequest("mailto:"));
+			}
+			
+			protected function menuCloseHandler(event:MyContextMenuEvent):void
+			{
+				currentState = "list";
+			}
+			
+			protected function startRecording():void
+			{
+				currentState = "recording";
+				recordingView.startRecording();
+			}
+			
+			protected function recordingEndHandler(event:SoundClipEvent):void
+			{
+				writeFile(event.soundClip);
+				readDirectory();				
+				currentState = "list";
+			}
+			
+			protected function writeFile(bytes:ByteArray):void
+			{
+				var file:File = directory.resolvePath(df.format(new Date())+"_"+sharedModel.patientName.toString()+".vn");				
+				var stream:FileStream = new FileStream();
+				stream.open(file, FileMode.WRITE);
+				stream.writeBytes(bytes);
+				stream.close();
+			}
+			
+			protected function writeWAV(bytes:ByteArray):void
+			{
+				var outputDir:File = File.documentsDirectory.resolvePath("voicenotesdata");
+				if (!outputDir.exists) outputDir.createDirectory();
+				var outputFile:File = outputDir.resolvePath(df.format(new Date())+"_"+sharedModel.patientName.toString()+".wav");				
+				
+				var outputStream:FileStream = new FileStream();
+				var wavWriter:WAVWriter = new WAVWriter();
+				
+				bytes.position = 0;  // rewind to the beginning of the sample
+				
+				wavWriter.numOfChannels = 1; // set the inital properties of the Wave Writer
+				wavWriter.sampleBitRate = 16;
+				wavWriter.samplingRate = 44100;
+				
+				outputStream.open(outputFile, FileMode.WRITE);  //write out our file to disk.
+				wavWriter.processSamples(outputStream, bytes, 44100, 1); // convert our ByteArray to a WAV file.
+				outputStream.close();
+			}
+			
+			
+			protected function addDictationHandler(event:MouseEvent):void
+			{
+				if(list.selectedItem != null)
+				{
+					var f:File = list.selectedItem as File;
+					sharedModel.dictationPath = f.nativePath;
+				}
+			}
+			
+			[MessageHandler]
+			public function handleDisplayNotesAndDictation(event:DisplayNotesAndDictationEvent):void
+			{
+				if(event.dictationPath != "" && event.dictationPath != null)
+				{
+					var file:File = directory.resolvePath(event.dictationPath);
+					var a:Array = new Array();
+					a.push(file);
+					
+					list.dataProvider = new ArrayCollection(a as Array);
+					readFile(file);
+				}else
+				{
+					readDirectory();
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!--<fx:Style source="styles.css"/>-->
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+		<mx:DateFormatter id="df" formatString="YYYY-MM-DD LLNNSSA"/>
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="list"/>
+		<s:State name="contextMenu"/>
+		<s:State name="recording"/>
+		<s:State name="playing"/>
+		<s:State name="error"/>
+	</s:states>
+	
+	<s:List id="list" 
+			width="80%" 
+			height="75%" 
+			visible="false" 
+			visible.list="true"
+			includeIn="list"
+			visible.contextMenu="true"
+			horizontalScrollPolicy="off"
+			contentBackgroundColor="0xffffff"
+			itemRenderer="com.adobe.audio.renderers.VoiceNoteRenderer"/>
+	
+	<!--<views:VoiceNoteList id="list" left="8" right="8" bottom="78" top="8" visible="false" visible.list="true" visible.contextMenu="true"/>-->
+	
+	<!--<views:ContextMenu id="myContextMenu" left="0" top="0" right="0" bottom="0" visible="false" visible.contextMenu="true"/>-->
+	
+	<s:VGroup left="8" right="8" bottom="8" top="8">
+		
+		<views:RecordingView id="recordingView"
+							 visible="false" 
+							 visible.recording="true"
+							 includeIn="recording"
+							 recordingEnd="recordingEndHandler(event)"/>
+		
+		<views:PlayingView id="playingView"
+						   visible="false" 
+						   visible.playing="true"
+						   includeIn="playing"
+						   playingEnd="currentState='list'"/>
+	</s:VGroup>
+	
+	<s:Group width="100%" height="100%">
+		<s:Button label="Record dictation" 
+				  click="startRecording()" 
+				  horizontalCenter="0"
+				  bottom="3"
+				  skinClass="com.gazuntite.skins.RecordBtnSkin" 
+				  visible="false" 
+				  visible.list="true"/>
+	</s:Group>
+	
+	
+	
+	<!--<views:ErrorView id="errorView" close="currentState='list'" left="0" right="0" top="0" bottom="0" visible="false" visible.error="true"/>-->
+	
+</s:Group>

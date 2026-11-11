@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				width="100%" height="100%"
+				creationComplete="cc(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.common.dto.assessment.followUp.FollowUpDTO;
+			import com.gazuntite.common.dto.assessment.labOut.LabDTO;
+			import com.gazuntite.common.dto.assessment.procedure.ProcedureDTO;
+			import com.gazuntite.common.dto.assessment.recommendation.RecommendationDTO;
+			import com.gazuntite.common.dto.physical.ccHpi.ChiefComplaintHpiDTO;
+			import com.gazuntite.common.dto.physical.inHouseLab.InHouseLabDTO;
+			import com.gazuntite.common.dto.physical.ros.PhysicalDTO;
+			import com.gazuntite.common.dto.physical.ros.ROSDTO;
+			import com.gazuntite.common.dto.pmh.Allergy.AllergyDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.FamilyHistoryDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.MedicalHistoryDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryDTO;
+			import com.gazuntite.common.dto.pmh.immunization.ImmunizationDTO;
+			import com.gazuntite.common.dto.pmh.presprection.ChronicRXDTO;
+			import com.gazuntite.common.dto.pmh.presprection.PresprectionRXDTO;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var date:String;
+			
+			private var arr:Array;
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if(data != null && data.DTOCollection.length > 0)
+				{
+					id_list.height = CalculateListHeight(data.DTOCollection.getItemAt(0) ,data.DTOCollection.length );
+					
+					id_list.itemRenderer = HistoryItemRendererFactory.getItemRendererFor( data.DTOCollection.getItemAt(0) );
+					id_headingLabel.text = HistoryItemRendererFactory.getItemLabelFor( data.DTOCollection.getItemAt(0) );
+					
+					//ToggelView();
+					
+					this.date = DisplyDate();
+				}
+			}
+			
+			private function CalculateListHeight(dto:Object , DTOCount:int):int
+			{
+				
+				var size:int = 0;
+				
+				if(dto is FamilyHistoryDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is SocialHistoryDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is VitalsDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is ImmunizationDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is ChiefComplaintHpiDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is ROSDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is PhysicalDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is InHouseLabDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is DiagnosisDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is LabDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is RecommendationDTO)
+					size = 60 * DTOCount ;
+					
+					
+				else if(dto is FollowUpDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is ProcedureDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is MedicalHistoryDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is AllergyDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is ChronicRXDTO)
+					size = 40 * DTOCount ;
+					
+				else if(dto is PresprectionRXDTO)
+					size = 80 * DTOCount ;
+				
+				/* if(dto is FamilyHistoryDTO)
+				return 40 * DTOCount ;
+				if(dto is FamilyHistoryDTO)
+				return 40 * DTOCount ; */
+				
+				return size;
+			}
+			
+			protected function ToggelView():void
+			{
+				if(id_list.visible)
+				{
+					id_list.visible 		= false;
+					id_header.height 		= 21;
+					id_date.text			= UtilityFunctions.TitleCase(id_date.text);
+					id_headingLabel.text	= UtilityFunctions.TitleCase(id_headingLabel.text);
+				}
+				else
+				{
+					id_list.visible 		= true;
+					id_header.percentHeight = 100;
+					id_date.text			= id_date.text.toLocaleUpperCase();
+					id_headingLabel.text    = id_headingLabel.text.toLocaleUpperCase();
+				}
+			}
+			
+			
+			private function DisplyDate():String
+			{
+				
+				if (data.Date.indexOf("/") != -1)
+				{
+					arr =  new Array();
+					arr = data.Date.split("/");
+					
+					var day:int = new Date().date;
+					
+					if(day - parseInt(arr[0]) == 0)
+						return "Today ("+ data.Date +")";
+					else if(day - parseInt(arr[0]) == 1)
+						return "Yesterday ("+ data.Date +")";
+					else
+					{
+						var weekDay:int = new Date(data.Date).day;
+						
+						var dayName:Array = ['Sunday', 'Monday', 'Tuesday','Wednesday', 'Thursday', 'Friday', 'Saturday'];
+						
+						
+						
+						return dayName[weekDay] +" (" + data.Date +")";
+					}
+				}
+				else
+					return data.Date;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<s:BorderContainer id="id_header" borderVisible="false" backgroundColor="0x5D5D5D" width="100%" height="100%" cornerRadius="4">
+		<s:layout>
+			<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"/>
+		</s:layout>
+		
+		<s:SkinnableContainer width="100%" 
+							  skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBgSkin" 
+							  click="ToggelView()" 
+							  useHandCursor="true" buttonMode="true" horizontalCenter="0">
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="2" paddingRight="2" verticalAlign="middle" />
+			</s:layout>
+			
+			<s:Label id="id_date" text="{ date }" color="#333333" fontSize="11" fontFamily="CalibriCFF" showTruncationTip="true" 
+					 /> 
+			<s:Spacer width="100%" />
+			<s:Label id="id_headingLabel" fontFamily="CalibriCFFBold" fontSize="12" showTruncationTip="true" 
+					 /> 
+		</s:SkinnableContainer>
+		
+		<s:List id="id_list" 
+				dataProvider="{data.DTOCollection}" 
+				borderVisible="false"
+				width="100%"
+				allowMultipleSelection="false"
+				verticalScrollPolicy="off"
+				horizontalScrollPolicy="off"
+				layoutDirection="ltr"
+				skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+				includeInLayout="{id_list.visible}"
+				/>
+		<!--<s:Spacer id="id_spacer" height="3" visible="{id_list.visible}" includeInLayout="{id_list.visible}"/>-->
+	</s:BorderContainer>
+</s:ItemRenderer>

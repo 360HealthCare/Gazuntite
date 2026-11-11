@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  xmlns:view="com.gazuntite.document.view.*"
+					  skinClass="com.gazuntite.skins.controls.container.dmg.DMGViewBgSkin"
+					  height="100%" width="100%"
+					  creationComplete="group1_creationCompleteHandler(event)" 
+					  xmlns:view1="com.gazuntite.common.view.*" 
+					  xmlns:components1="com.gazuntite.components.*" 
+					  xmlns:views="com.gazuntite.document.view.views.*" xmlns:components2="com.gazuntite.common.view.components.*" 
+					  
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.DocumentLoader;
+			import com.gazuntite.document.dto.DocomentDTO;
+			import com.gazuntite.document.dto.ListViewObjectsDTO;
+			import com.gazuntite.document.model.DMModelLocator;
+			import com.gazuntite.document.view.event.DocomentPreviewEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import flash.filesystem.File;
+			
+			import mx.collections.Sort;
+			import mx.events.FlexEvent;
+			
+			import spark.collections.SortField;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			[Bindable]
+			public var DMmodel : DMModelLocator = DMModelLocator.getInstance();
+			
+			
+			private var DM_DocumentLoaded:DocumentLoader;
+			public var FileName:String;
+			
+			[Bindable]
+			public var ListdataProvider:ArrayCollection = new ArrayCollection();
+			private var _dataProvider:ArrayCollection;
+			public var mappingCollection:ArrayCollection = new ArrayCollection();
+			public var GroupedCollection:ArrayCollection = new ArrayCollection();
+			
+			
+			public var ViewStackOldIndex:int = -1;
+			public var searchString:String;
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			[Bindable]
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				if(value != null)
+				{
+					
+					_dataProvider = value;
+					
+					viewStack.selectedIndex = 0;
+					id_SearchInput.text = ''; 
+					
+					GroupDataByProperty(uiSortDropdown.selectedItem.field);
+				}
+			}
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				addEventListener(DocomentPreviewEvent.DOCOMENT_EVENT ,DownloadDocoment);
+				viewStack.selectedIndex = 3;
+			}
+			
+			private function DownloadDocoment(event:DocomentPreviewEvent):void
+			{
+				ViewDocoment(event.DocomentDto);
+			}
+			
+			public function ViewDocoment(DocomentDto:DocomentDTO):void
+			{
+				var Docoment_url:String =	DocomentDto.ServerFilePath;
+				var Docoment_Name:String =	DocomentDto.ServerFilePath;
+				FileName = DocomentDto.DocumentName;
+				DM_DocumentLoaded = new DocumentLoader();
+				DM_DocumentLoaded.documentLoadCallBack = onDocumentLoad;
+				
+				var lastIdx:int = Docoment_url.lastIndexOf("/");
+				
+				Docoment_Name = Docoment_url.substring(lastIdx + 1, Docoment_url.length);
+				
+				DM_DocumentLoaded.load(Docoment_Name,Docoment_url);
+			}
+			
+			public function onDocumentLoad(file:File):void
+			{
+				if (!file)
+					return;
+				
+				if (!file.url)
+					return;
+				
+				if (!file.url.length)
+					return;
+				
+				id_fileViewer.filename = FileName;
+				id_fileViewer.FilePath = file.nativePath;
+				id_fileViewer.createdDate = UtilityFunctions.FormatDate(file.creationDate);
+				
+				ViewStackOldIndex = viewStack.selectedIndex;
+				viewStack.selectedIndex = 2;
+				
+				try
+				{
+					/* id_Html.location = file.url;
+					
+					if (HTMLLoader.pdfCapability == HTMLPDFCapability.STATUS_OK)
+					{
+					var pop:PopupWindow = new PopupWindow();
+					pop.width = 500;
+					pop.height = 500;
+					pop.addElement( id_Html );
+					
+					//pop.ShowPopup( FlexGlobals.topLevelApplication as DisplayObject , true );
+					(FlexGlobals.topLevelApplication as WindowedApplication).addElement( id_Html );
+					}
+					else
+					{
+					file.openWithDefaultApplication();
+					} */
+					
+					cursorManager.removeBusyCursor();
+				}
+				catch(error:Error)
+				{
+					cursorManager.removeBusyCursor();
+				}
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					searchString = id_SearchInput.text;
+					dispatchEvent(new Event("FilterPatientList"));
+				}
+				
+				if(id_SearchInput.text.length>0)
+					id_searchBtn.visible = false;
+				else
+					id_searchBtn.visible = true;
+			}
+			
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_SearchInput_changeHandler(event:TextOperationEvent):void
+			{
+				
+				dataProvider.filterFunction = filter_PatientList; 
+				dataProvider.refresh(); 
+				
+				GroupDataByProperty(uiSortDropdown.selectedItem.field);
+			}
+			
+			
+			public function filter_PatientList(item:Object):Boolean
+			{
+				var query:String = id_SearchInput.text;
+				var FilteringValue:String = item.DocumentName;
+				
+				if(FilteringValue.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				
+				return false; 
+			} 
+			
+			protected function viewStack_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function viewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+				event.newIndex
+				
+			}
+			
+			protected function id_GridListRB_changeHandler(event:Event):void
+			{
+				ViewStackOldIndex = viewStack.selectedIndex;
+				
+				if(id_listviewbtn.selected)
+				{
+					viewStack.selectedIndex = 0;
+				}
+					
+				else if (id_thumbtviewbtn.selected)
+				{
+					viewStack.selectedIndex = 1;
+				}
+				
+			}
+			
+			protected function uiSortDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				GroupDataByProperty(uiSortDropdown.selectedItem.field);
+				
+				lbl_selected.text = uiSortDropdown.selectedItem.label;//Assign the text
+			}
+			
+			public function GroupNumber(GroupName:String):int
+			{
+				
+				// item index will be the Group id .
+				var index:int = mappingCollection.getItemIndex(GroupName);
+				
+				if(index == -1)
+				{
+					mappingCollection.addItem(GroupName);
+					index = mappingCollection.getItemIndex(GroupName);
+				}
+				
+				return index;
+			}
+			
+			protected function GroupDataByProperty(GroupByValue:String):void
+			{
+				// GroupByValue is the Heading name
+				
+				if(null != dataProvider)
+				{
+					mappingCollection = new ArrayCollection();
+					GroupedCollection = new ArrayCollection();
+					ListdataProvider = new ArrayCollection();
+					
+					for each (var x:Object in dataProvider)
+					{
+						var groupid:int = GroupNumber(x[GroupByValue]);
+						x.groupID = groupid;
+						
+						GroupedCollection.addItem(x);
+					}
+					
+					//sort GroupedCollection on base of groupID
+					GroupedCollection = sort(GroupedCollection,'groupID',true);
+					
+					var GroupHeading:String = '';
+					var Dto:ListViewObjectsDTO;
+					
+					for each (var obj:Object in GroupedCollection)
+					{	
+						if(obj[GroupByValue] != GroupHeading) // new group arrived.
+						{
+							if(Dto != null)
+								ListdataProvider.addItem(Dto);
+							
+							Dto = new ListViewObjectsDTO();
+							GroupHeading =  obj[GroupByValue] ;
+							Dto.Heading = GroupHeading;
+							Dto.DTOCollection.addItem(obj);
+						}
+						else								// old data is here.
+						{
+							Dto.DTOCollection.addItem(obj);
+						}
+						
+					}
+					ListdataProvider.addItem(Dto);
+				}
+			}
+			
+			
+			public static function sort(arrayCollection:ArrayCollection, sortBy:String, numericSort:Boolean):ArrayCollection { 
+				var dataSortField:SortField        = new SortField(); 
+				dataSortField.name                = sortBy; 
+				dataSortField.numeric            = numericSort; 
+				
+				var dataSort:Sort    = new Sort(); 
+				dataSort.fields        = [dataSortField]; 
+				
+				/* Set the ArrayCollection object's sort property to our 
+				custom sort, and refresh the ArrayCollection. */ 
+				
+				dataSortField.descending = true
+				arrayCollection.sort = dataSort; 
+				arrayCollection.refresh(); 
+				
+				/* Return the collection */ 
+				return arrayCollection; 
+			} 
+			
+			protected function id_fileViewer_CloseDocomontViewHandler(event:Event):void
+			{
+				viewStack.selectedIndex = ViewStackOldIndex;
+				
+				if(ViewStackOldIndex != 0 && ViewStackOldIndex != 1)
+					dispatchEvent(new Event("ResetDocomentListView",true));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="id_GridListRB" change="id_GridListRB_changeHandler(event)" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3"/>
+	</s:layout>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HEAD SECTION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<s:HGroup id="id_header" verticalAlign="middle" gap="5"  width="100%" height="27" enabled="{(!DMmodel.isSearchByDocument) &amp;&amp; (viewStack.selectedIndex != 3)}">
+		
+		<s:SkinnableContainer width="50%"  skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBetailBGSkin"
+							  height="25" enabled="{viewStack.selectedIndex != 1}"
+							  useHandCursor="true" buttonMode="true"
+							  click="uiSortDropdown.openDropDown()">
+			<s:HGroup width="100%" height="100%" verticalAlign="middle" paddingLeft="8" paddingRight="2" gap="4">
+				<s:Label text="Arrange By:" fontSize="12" fontFamily="CalibriCFF"/>
+				<s:Label id="lbl_selected" 
+						 fontFamily="CalibriCFFBold"
+						 width="100%" maxDisplayedLines="1" text="Name"/>
+				<s:Button skinClass="com.gazuntite.skins.controls.combobox.StepperComboOpenButtonSkin"/>
+			</s:HGroup>
+			
+			<s:ComboBox id="uiSortDropdown"
+						selectedIndex="0" top="24" width="100%" height="1"
+						change="uiSortDropdown_changeHandler(event)"
+						skinClass="com.gazuntite.skins.controls.combobox.cmbHolderSkin"
+						itemRenderer="com.gazuntite.document.view.itemRenderer.DDItemrederer"
+						>
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="Date" field='UploadedDate'/>
+						<fx:Object label="Category" field='DocumentTypeName'/>
+						<fx:Object label="Uploaded By" field='UploadedByUserFullName'/>
+						<fx:Object label="Reviewed By" field='UploadedByUserFullName'/>	
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:ComboBox>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer width="50%" height="25" 
+							  skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin"
+							  >
+			<components:LabelTextInput id="id_SearchInput" 
+									   borderAlpha="0" height="100%"
+									   focusAlpha="0" fontSize="15" 
+									   prompt="Search" width="100%"
+									   keyUp="textInput_keyUpHandler(event)"
+									   click="textInput_clickHandler(event)"  
+									   change="id_SearchInput_changeHandler(event)"
+									   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin"
+									   toolTip="Search"
+									   verticalCenter="0" left="3" right="25"
+									   />
+			<s:Button id="id_searchBtn" right="4"
+					  skinClass="com.gazuntite.skins.controls.container.dmg.DMGSearchPatientIconSkin"
+					  verticalCenter="2"
+					  />
+		</s:SkinnableContainer>
+		
+		<s:Spacer width="2" />
+		
+		<s:SkinnableContainer width="55"  height="22" right="10" skinClass="com.gazuntite.skins.controls.container.dmg.DMgSwitchViewBGSkin">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="0"/>
+			</s:layout>
+			<s:RadioButton id="id_listviewbtn" 
+						   selected="{viewStack.selectedIndex == 0 ||viewStack.selectedIndex == 3}" groupName="id_GridListRB" 
+						   buttonMode="true" useHandCursor="true" toolTip="List View"
+						   skinClass="com.gazuntite.skins.controls.radioButton.dmg.DmgListViewRBSkin"
+						   />
+			<s:RadioButton id="id_thumbtviewbtn" 
+						   groupName="id_GridListRB" selected="{viewStack.selectedIndex == 1}"
+						   buttonMode="true" useHandCursor="true" toolTip="Thumb View"
+						   skinClass="com.gazuntite.skins.controls.radioButton.dmg.DmgThumbViewRBSkin"
+						   />
+		</s:SkinnableContainer>
+	</s:HGroup>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BODY SECTION  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<s:SkinnableContainer id="id_Body" width="100%" height="100%" >
+		<components:LabelViewStack id="viewStack"  
+								   width="100%"  height="100%" 
+								   creationPolicy="all" 
+								   change="viewStack_changeHandler(event)" 
+								   creationComplete="viewStack_creationCompleteHandler(event)" 
+								   borderVisible="false" 
+								   backgroundAlpha="0"
+								   contentBackgroundAlpha="0"
+								   >
+			<s:ArrayList >
+				<s:List id="id_list" 
+						dataProvider="{ListdataProvider}" 
+						labelField="DocumentName" 
+						borderVisible="false"
+						width="100%" height="100%"
+						skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+						itemRenderer="com.gazuntite.document.view.itemRenderer.DocomentListViewIR"
+						/>
+				
+				
+				<s:DataGroup id="myDG" 
+							 width="100%" height="100%" 
+							 dataProvider="{dataProvider}"
+							 itemRenderer="com.gazuntite.document.view.itemRenderer.DocumentThumViewIR"> 
+					<s:layout>
+						<s:TileLayout paddingLeft="3" paddingTop="3" paddingRight="3" paddingBottom="3"/>
+					</s:layout> 
+					
+				</s:DataGroup>
+				
+				<s:Group  width="100%" height="100%">
+					<views:DocumentViewer CloseDocomontView="id_fileViewer_CloseDocomontViewHandler(event)" id="id_fileViewer" width="100%" height="100%" />
+				</s:Group> 
+				
+				<s:Group  width="100%" height="100%" >
+					<components2:PleaseSelectView label="To view document, select any record" verticalCenter="0" right="30" left="30" />
+				</s:Group>
+				
+			</s:ArrayList>
+		</components:LabelViewStack>
+		
+	</s:SkinnableContainer>
+	
+</s:SkinnableContainer>

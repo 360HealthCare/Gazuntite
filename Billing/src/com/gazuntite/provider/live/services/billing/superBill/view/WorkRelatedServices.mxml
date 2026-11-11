@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 creationComplete="CC(event)" width="100%"
+							 xmlns:components="com.gazuntite.controls.extended.components.*"
+							 title="Work Related Services"
+							 skinClass="com.gazuntite.controls.extended.skins.popUpCollapsiblePanelSkin" 
+							 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.dto.WorkRelatedServiceDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			[Bindable]
+			public var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			[Bindable]
+			private var m_aWRService:ArrayCollection;
+			
+			[Bindable]
+			public function get Services():ArrayCollection
+			{
+				return m_aWRService;
+			}
+			public function set Services(value:ArrayCollection):void
+			{
+				m_aWRService = value;
+			}
+			
+			protected function check_changeHandler(event:Event):void
+			{
+				var chk:CheckBox = event.currentTarget as CheckBox
+				switch (chk.id)
+				{
+					case "id_Type1":							
+						if(chk.selected == true && id_Type1Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type1Fee.text);
+							id_Type1Fee.setStyle("color","Green");
+							id_Type1Fee.setStyle("fontWeight","bold");
+							
+							(model.CurrentWRServices[0] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type1Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type1Fee.text);
+							var defaultDTO:WorkRelatedServiceDTO = Services[0] as WorkRelatedServiceDTO;
+							id_Type1Fee.text = defaultDTO.Fee;
+							id_Type1Fee.setStyle("color","Black");
+							id_Type1Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[0] as WorkRelatedServiceDTO).Fee = defaultDTO.Fee;
+							(model.CurrentWRServices[0] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;
+					case "id_Type2":							
+						if(chk.selected == true && id_Type2Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type2Fee.text);
+							id_Type2Fee.setStyle("color","Green");
+							id_Type2Fee.setStyle("fontWeight","bold");
+							(model.CurrentWRServices[1] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type2Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type2Fee.text);
+							var defaultDTO1:WorkRelatedServiceDTO = Services[1] as WorkRelatedServiceDTO;
+							id_Type2Fee.text = defaultDTO1.Fee;
+							id_Type2Fee.setStyle("color","Black");
+							id_Type2Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[1] as WorkRelatedServiceDTO).Fee = defaultDTO1.Fee;
+							(model.CurrentWRServices[1] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;
+					case "id_Type3":							
+						if(chk.selected == true && id_Type3Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type3Fee.text);
+							id_Type3Fee.setStyle("color","Green");
+							id_Type3Fee.setStyle("fontWeight","bold");
+							(model.CurrentWRServices[2] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type3Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type3Fee.text);
+							var defaultDTO2:WorkRelatedServiceDTO = Services[2] as WorkRelatedServiceDTO;
+							id_Type3Fee.text = defaultDTO2.Fee;
+							id_Type3Fee.setStyle("color","Black");
+							id_Type3Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[2] as WorkRelatedServiceDTO).Fee = defaultDTO2.Fee;
+							(model.CurrentWRServices[2] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;
+					case "id_Type4":							
+						if(chk.selected == true && id_Type4Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type4Fee.text);
+							id_Type4Fee.setStyle("color","Green");
+							id_Type4Fee.setStyle("fontWeight","bold");
+							(model.CurrentWRServices[3] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type4Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type4Fee.text);
+							var defaultDTO3:WorkRelatedServiceDTO = Services[3] as WorkRelatedServiceDTO;
+							id_Type4Fee.text = defaultDTO3.Fee;
+							id_Type4Fee.setStyle("color","Black");
+							id_Type4Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[3] as WorkRelatedServiceDTO).Fee = defaultDTO3.Fee;
+							(model.CurrentWRServices[3] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;
+					case "id_Type5":							
+						if(chk.selected == true && id_Type5Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type5Fee.text);
+							id_Type5Fee.setStyle("color","Green");
+							id_Type5Fee.setStyle("fontWeight","bold");
+							(model.CurrentWRServices[4] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type5Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type5Fee.text);
+							var defaultDTO4:WorkRelatedServiceDTO = Services[4] as WorkRelatedServiceDTO;
+							id_Type5Fee.text = defaultDTO4.Fee;
+							id_Type5Fee.setStyle("color","Black");
+							id_Type5Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[4] as WorkRelatedServiceDTO).Fee = defaultDTO4.Fee;
+							(model.CurrentWRServices[4] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;
+					case "id_Type6":							
+						if(chk.selected == true && id_Type6Fee.text != "")
+						{
+							model.TotalCharges += Number(id_Type6Fee.text);
+							id_Type6Fee.setStyle("color","Green");
+							id_Type6Fee.setStyle("fontWeight","bold");
+							(model.CurrentWRServices[5] as WorkRelatedServiceDTO).IsSelected = true;
+						}
+						else if(chk.selected == false && id_Type6Fee.text != "")
+						{
+							model.TotalCharges -= Number(id_Type6Fee.text);
+							var defaultDTO5:WorkRelatedServiceDTO = Services[5] as WorkRelatedServiceDTO;
+							id_Type6Fee.text = defaultDTO5.Fee;
+							id_Type6Fee.setStyle("color","Black");
+							id_Type6Fee.setStyle("fontWeight","normal");
+							(model.CurrentWRServices[5] as WorkRelatedServiceDTO).Fee = defaultDTO5.Fee;
+							(model.CurrentWRServices[5] as WorkRelatedServiceDTO).IsSelected = false;
+						}
+						break;						
+				}
+				model.CalculateSuperBill();
+			}
+			
+			protected function fee_focusOutHandler(event:FocusEvent):void
+			{
+				var txt:TextInput = event.currentTarget as TextInput
+				switch(txt.id)
+				{
+					case "id_Type1Fee":	
+						if(id_Type1.selected )	
+						{
+							if(id_Type1Fee.text != "" && Number(id_Type1Fee.text) != Number((model.CurrentWRServices[0] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[0] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type1Fee.text);
+								(model.CurrentWRServices[0] as WorkRelatedServiceDTO).Fee = id_Type1Fee.text;
+							}
+							else if(id_Type1Fee.text == "") 
+								id_Type1Fee.text = (Services[0] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type1Fee.text = (Services[0] as WorkRelatedServiceDTO).Fee;
+						
+						break;
+					case "id_Type2Fee":	
+						if(id_Type2.selected )	
+						{
+							if(id_Type2Fee.text != "" && Number(id_Type2Fee.text) != Number((model.CurrentWRServices[1] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[1] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type2Fee.text);
+								(model.CurrentWRServices[1] as WorkRelatedServiceDTO).Fee = id_Type2Fee.text;
+							}
+							else if(id_Type2Fee.text == "") 
+								id_Type2Fee.text = (Services[1] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type2Fee.text = (Services[1] as WorkRelatedServiceDTO).Fee;
+						
+						break;
+					case "id_Type3Fee":		
+						if(id_Type3.selected )	
+						{
+							if(id_Type3Fee.text != "" && Number(id_Type3Fee.text) != Number((model.CurrentWRServices[2] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[2] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type3Fee.text);
+								(model.CurrentWRServices[2] as WorkRelatedServiceDTO).Fee = id_Type3Fee.text;
+							}
+							else if(id_Type3Fee.text == "") 
+								id_Type3Fee.text = (Services[2] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type3Fee.text = (Services[2] as WorkRelatedServiceDTO).Fee;
+						
+						break;
+					case "id_Type4Fee":
+						if(id_Type4.selected )	
+						{
+							if(id_Type4Fee.text != "" && Number(id_Type4Fee.text) != Number((model.CurrentWRServices[3] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[3] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type4Fee.text);
+								(model.CurrentWRServices[3] as WorkRelatedServiceDTO).Fee = id_Type4Fee.text;
+							}
+							else if(id_Type4Fee.text == "") 
+								id_Type4Fee.text = (Services[3] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type4Fee.text = (Services[3] as WorkRelatedServiceDTO).Fee;
+						
+						break;
+					case "id_Type5Fee":
+						if(id_Type5.selected )	
+						{
+							if(id_Type5Fee.text != "" && Number(id_Type5Fee.text) != Number((model.CurrentWRServices[4] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[4] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type5Fee.text);
+								(model.CurrentWRServices[4] as WorkRelatedServiceDTO).Fee = id_Type5Fee.text;
+							}
+							else if(id_Type5Fee.text == "") 
+								id_Type5Fee.text = (Services[4] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type5Fee.text = (Services[4] as WorkRelatedServiceDTO).Fee;
+						
+						break;
+					case "id_Type6Fee":	
+						if(id_Type6.selected )	
+						{
+							if(id_Type6Fee.text != "" && Number(id_Type6Fee.text) != Number((model.CurrentWRServices[5] as WorkRelatedServiceDTO).Fee))
+							{
+								model.TotalCharges -= Number((model.CurrentWRServices[5] as WorkRelatedServiceDTO).Fee);
+								model.TotalCharges += Number(id_Type6Fee.text);
+								(model.CurrentWRServices[5] as WorkRelatedServiceDTO).Fee = id_Type6Fee.text;
+							}
+							else if(id_Type6Fee.text == "") 
+								id_Type6Fee.text = (Services[5] as WorkRelatedServiceDTO).Fee;
+						}
+						else
+							id_Type6Fee.text = (Services[5] as WorkRelatedServiceDTO).Fee;
+						
+						break;				
+				}	
+				
+				model.CalculateSuperBill();
+				//txt.editable = false;
+			}
+									
+			public var LastChildTabIndex:int = 0;
+			private function SetTabIndexes():void
+			{
+				var incrementer:int = 0;
+				id_Type1.tabIndex = tabIndex + (++incrementer);
+				id_Type1Fee.tabIndex = tabIndex + (++incrementer);
+				
+				id_Type2.tabIndex = tabIndex + (++incrementer);
+				id_Type2Fee.tabIndex = tabIndex + (++incrementer);
+				
+				id_Type3.tabIndex = tabIndex + (++incrementer);
+				id_Type3Fee.tabIndex = tabIndex + (++incrementer);
+				
+				id_Type4.tabIndex = tabIndex + (++incrementer);
+				id_Type4Fee.tabIndex = tabIndex + (++incrementer);
+				
+				id_Type5.tabIndex = tabIndex + (++incrementer);
+				id_Type5Fee.tabIndex = tabIndex + (++incrementer);
+				
+				id_Type6.tabIndex = tabIndex + (++incrementer);
+				id_Type6Fee.tabIndex = tabIndex + (++incrementer);			
+				
+				LastChildTabIndex = ++incrementer;
+			}	
+			protected function CC(event:FlexEvent):void
+			{
+				//SetTabIndexes();				
+							
+			}
+			public function initializeData():void
+			{
+				Services = model.VisitSuperBill.WRSInfo;
+				
+				if(Services != null && Services.length > 0 )
+				{
+					model.CurrentWRServices = new ArrayCollection();
+					
+					for(var i:int = 0; i < Services.length; i++)
+					{
+						var dto1:WorkRelatedServiceDTO = Services[i] as WorkRelatedServiceDTO;
+						var dto1New:WorkRelatedServiceDTO = new WorkRelatedServiceDTO();
+						dto1New.Fee = dto1.Fee;
+						dto1New.IsSelected = dto1.IsSelected;
+						dto1New.WRSTypeId = dto1.WRSTypeId;
+						
+						model.CurrentWRServices.addItem(dto1New);
+					}					
+					
+					var dto:WorkRelatedServiceDTO = Services[0] as WorkRelatedServiceDTO;
+					
+					id_Type1.selected = dto.IsSelected as Boolean ;
+					id_lblType1.text = dto.ServiceDescription;
+					id_lblType1.toolTip = dto.ServiceDescription;
+					id_Type1Fee.text = dto.Fee;
+					if(id_Type1.selected == true)
+					{
+						model.TotalCharges += Number(id_Type1Fee.text);
+						id_Type1Fee.setStyle("color","Green");
+						id_Type1Fee.setStyle("fontWeight","bold");
+					}
+					
+					dto = Services[1] as WorkRelatedServiceDTO;
+					
+					id_Type2.selected = dto.IsSelected as Boolean ;
+					id_lblType2.text = dto.ServiceDescription;
+					id_lblType2.toolTip = dto.ServiceDescription;
+					id_Type2Fee.text = dto.Fee;
+					if(id_Type2.selected == true)
+					{
+						model.TotalCharges += Number(id_Type2Fee.text);
+						id_Type2Fee.setStyle("color","Green");
+						id_Type2Fee.setStyle("fontWeight","bold");
+					}					
+					
+					dto = Services[2] as WorkRelatedServiceDTO;
+					
+					id_Type3.selected = dto.IsSelected as Boolean ;
+					id_lblType3.text = dto.ServiceDescription;
+					id_lblType3.toolTip = dto.ServiceDescription;
+					id_Type3Fee.text = dto.Fee;
+					if(id_Type3.selected == true)
+					{
+						model.TotalCharges += Number(id_Type3Fee.text);
+						id_Type3Fee.setStyle("color","Green");
+						id_Type3Fee.setStyle("fontWeight","bold");
+					}
+					
+					dto = Services[3] as WorkRelatedServiceDTO;
+					
+					id_Type4.selected = dto.IsSelected as Boolean ;
+					id_lblType4.text = dto.ServiceDescription;
+					id_lblType4.toolTip = dto.ServiceDescription;
+					id_Type4Fee.text = dto.Fee;
+					if(id_Type4.selected == true)
+					{
+						model.TotalCharges += Number(id_Type4Fee.text);
+						id_Type4Fee.setStyle("color","Green");
+						id_Type4Fee.setStyle("fontWeight","bold");
+					}
+					
+					dto = Services[4] as WorkRelatedServiceDTO;
+					
+					id_Type5.selected = dto.IsSelected as Boolean ;
+					id_lblType5.text = dto.ServiceDescription;
+					id_lblType5.toolTip = dto.ServiceDescription;
+					id_Type5Fee.text = dto.Fee;
+					if(id_Type5.selected == true)
+					{
+						model.TotalCharges += Number(id_Type5Fee.text);
+						id_Type5Fee.setStyle("color","Green");
+						id_Type5Fee.setStyle("fontWeight","bold");
+					}
+					
+					dto = Services[5] as WorkRelatedServiceDTO;
+					
+					id_Type6.selected = dto.IsSelected as Boolean ;
+					id_lblType6.text = dto.ServiceDescription;
+					id_lblType6.toolTip = dto.ServiceDescription;
+					id_Type6Fee.text = dto.Fee;
+					if(id_Type6.selected == true)
+					{
+						model.TotalCharges += Number(id_Type6Fee.text);
+						id_Type6Fee.setStyle("color","Green");
+						id_Type6Fee.setStyle("fontWeight","bold");
+					}
+					
+				}	
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:HorizontalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+	</components:layout>
+	
+	<s:VGroup width="50%" height="100%">	
+		<s:HGroup width="100%" verticalAlign="middle" >
+			<s:CheckBox id="id_Type1"  change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType1" width="135" text="Label 1" fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type1Fee" width="45" height="20" 
+						 focusOut="fee_focusOutHandler(event)" restrict="[0-9]\."
+						 skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:CheckBox id="id_Type2" change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType2" width="135"   fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type2Fee" width="45" height="20" focusOut="fee_focusOutHandler(event)" restrict="[0-9]\."
+						 skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:CheckBox id="id_Type3" change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType3" width="135"   fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type3Fee" width="45" height="20" focusOut="fee_focusOutHandler(event)" restrict="[0-9]\."
+						 skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<s:VGroup width="50%" height="100%">
+		<s:HGroup width="100%" verticalAlign="middle" >
+			<s:CheckBox id="id_Type4"  change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType4" width="135"  fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type4Fee" width="45" height="20" focusOut="fee_focusOutHandler(event)" restrict="[0-9]\." skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle" >
+			<s:CheckBox id="id_Type5"  change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType5" width="135"  fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type5Fee" width="45" height="20" focusOut="fee_focusOutHandler(event)" restrict="[0-9]\." skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle" >
+			<s:CheckBox id="id_Type6"  change="check_changeHandler(event)" skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" useHandCursor="true" buttonMode="true"/>
+			<s:Label id="id_lblType6" width="135"  fontFamily="CalibriCFF" fontSize="11" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:TextInput id="id_Type6Fee" width="45" height="20" focusOut="fee_focusOutHandler(event)" restrict="[0-9]\." skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>
+		</s:HGroup>
+	</s:VGroup>
+</components:CollapsiblePanel>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="115" height="115">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect x="0.5" y="0.5" width="114" height="114" radiusX="15"
+			visible.disabled="false"
+			visible.up="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#863623" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="13" blurY="13" color="#BD492D" inner="false"
+						  knockout="false" quality="2" strength="1"/>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="3" blurY="3" color="#000000"
+								distance="3" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#FFA492" inner="true"
+						  knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0.23137254901960785"/>
+				<s:GradientEntry alpha="1.0" color="#EFF0F0" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="0" y="1" width="114" height="114" radiusX="15">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="4" blurY="4" color="#000000"
+								distance="2" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"
+								 alpha.disabled="1.0"/>
+				<s:GradientEntry includeIn="down,over,up" alpha="1.0" color="#FFFFFF"
+								 ratio="0.27450980392156865"/>
+				<s:GradientEntry alpha="1.0" color="#EAEBEB" ratio="1"
+								 color.disabled="#CCCCCC"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:BitmapImage x="16" y="5" smooth="true" source="@Embed('/assets/images/Foot.png')"/>
+</s:Skin>

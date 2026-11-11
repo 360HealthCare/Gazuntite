@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true">
+	<s:Rect top="0" left="0" right="0" bottom="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#6E7C85" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#85919A" ratio="0.027450980392156862"/>
+				<s:GradientEntry alpha="1.0" color="#B1BCC3" ratio="0.043137254901960784"/>
+				<s:GradientEntry alpha="1.0" color="#8D9BA6" ratio="0.09019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#AEB6BD" ratio="0.9058823529411765"/>
+				<s:GradientEntry alpha="1.0" color="#8A969E" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Label id="lblData" top="0" left="0" right="0" bottom="0" text="{dataGridListData.label}" verticalAlign="middle" />
+</s:MXDataGridItemRenderer>

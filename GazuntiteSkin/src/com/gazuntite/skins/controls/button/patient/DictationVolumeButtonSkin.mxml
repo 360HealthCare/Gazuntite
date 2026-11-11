@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0" y="0" width="10" height="3">
+		<s:fill.up>
+			<s:SolidColor color="#CCCCCC"/>
+		</s:fill.up>
+		<s:fill.downAndSelected>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#5EA7E9" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#3665D6" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill.downAndSelected>
+		<s:fill.disabledAndSelected>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#5EA7E9" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#3665D6" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill.disabledAndSelected>
+		<s:fill.overAndSelected>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#5EA7E9" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#3665D6" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill.overAndSelected>
+		<s:fill.upAndSelected>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#5EA7E9" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#3665D6" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill.upAndSelected>
+		<s:fill.over>
+			<s:SolidColor color="#CCCCCC"/>
+		</s:fill.over>
+		<s:fill.down>
+			<s:SolidColor color="#CCCCCC"/>
+		</s:fill.down>
+		<s:fill.disabled>
+			<s:SolidColor color="#CCCCCC"/>
+		</s:fill.disabled>
+	</s:Rect>
+</s:Skin>

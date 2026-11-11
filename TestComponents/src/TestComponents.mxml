@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+					   xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*" 
+					   xmlns:list="com.gazuntite.components.kapit.list.*" 
+					   
+					   >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			[Embed(source="assets/icon-tick-circle.png")]
+			private static var icon_tick_circle:Class;
+			
+			
+			[Bindable]
+			private var dp:ArrayCollection = new ArrayCollection([
+				{label:"Text here", data:1},
+				{label:"Text here", data:2},
+				{label:"Some text here", data:3},
+				{label:"Some Text here", data:4},
+				{label:"More Text here", data:5},
+				{label:"More Text here", data:6}
+				
+			]);
+			
+			
+			
+			protected function id_combo_textClearedHandler(event:Event):void
+			{
+				Alert.show('text length : '+id_combo.text.length.toString(), 'Info');
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center"/>
+	</s:layout>
+	
+	<s:Label text="Auto Complete" />
+	<autoComplete:AutoComplete width="250" prompt="your Prompt here"  icon="{icon_tick_circle}"
+							   dataProvider="{dp}" 
+							   labelField="label"
+							   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSkin" />
+	
+	<s:Label text="Auto Complete Search" />
+	<autoComplete:AutoComplete id="id_combo" width="250" height="25" dataProvider="{dp}"  
+							   icon="{icon_tick_circle}"
+							   labelField="label" prompt="Search Patient"
+							   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin" 
+							   textCleared="id_combo_textClearedHandler(event)"
+							   />
+	
+	<s:Label text="Advanced Text Input" />
+	<advancedTextInput:AdvancedTextInput width="250" icon="{icon_tick_circle}"
+										 prompt="Test Prompt !!!"
+										 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+										 />
+	
+	<s:Label text="Advanced List" />
+	<list:AdvancedList width="250" dataProvider="{dp}" 
+					   labelField="label"
+					   skinClass="com.gazuntite.components.kapit.list.AdvancedListSkin" />
+	
+	
+</s:WindowedApplication>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="creationCompleteHandler(event)" 
+		 xmlns:providerComm="com.gazuntite.view.communication.providerComm.*"
+		 xmlns:sf="http://www.spicefactory.org/parsley"
+		 width="100%" height="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ChangePatientEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				/* id_searchname . id_list.addEventListener(MouseEvent.CLICK,function(event:MouseEvent):void {
+					if(event.currentTarget.selectedItem)
+					{
+						var providerxml : XML 	= event.currentTarget.selectedItem as XML;
+						id_ProviderProfileView.id_ProviderGeneralView.firstName 	= providerxml.FirstName;
+						id_ProviderProfileView.id_ProviderGeneralView.middleName 	= providerxml.MiddleName;					
+						id_ProviderProfileView.id_ProviderGeneralView.lastName 		= providerxml.LastName;
+						id_ProviderProfileView.id_ProviderGeneralView.email 		= providerxml.UserEmail;
+						id_ProviderProfileView.id_ProviderGeneralView.userID 		= providerxml.UserId;  
+
+						id_ProviderProfileView.id_ProviderGeneralView.address 		= providerxml.address;  
+						id_ProviderProfileView.id_ProviderGeneralView.notes 		= providerxml.notes;  
+						id_ProviderProfileView.id_ProviderGeneralView.homePage 		= providerxml.homePage;  
+						id_ProviderProfileView.id_ProviderGeneralView.gmapPage 		= providerxml.gmapPage;  
+						id_ProviderProfileView.id_ProviderGeneralView.LastUpdated 	= providerxml.LastUpdated;  
+					}
+					
+				});  */
+				
+			}
+			
+			[MessageHandler]
+			public function changeSelectedUser(event:ChangePatientEvent):void
+			{
+				id_ProviderProfileView.id_ProviderGeneralView.firstName 	= sharedModel.selectedProvider.FirstName;
+				id_ProviderProfileView.id_ProviderGeneralView.middleName 	= sharedModel.selectedProvider.MiddleName;					
+				id_ProviderProfileView.id_ProviderGeneralView.lastName 		= sharedModel.selectedProvider.LastName;
+				id_ProviderProfileView.id_ProviderGeneralView.email 		= sharedModel.selectedProvider.UserEmail;
+				id_ProviderProfileView.id_ProviderGeneralView.userID 		= sharedModel.selectedProvider.UserId;  
+				
+				id_ProviderProfileView.id_ProviderGeneralView.address 		= sharedModel.selectedProvider.Address;  
+				id_ProviderProfileView.id_ProviderGeneralView.notes 		= sharedModel.selectedProvider.Notes;  
+				id_ProviderProfileView.id_ProviderGeneralView.homePage 		= sharedModel.selectedProvider.HomePage;  
+				id_ProviderProfileView.id_ProviderGeneralView.gmapPage 		= sharedModel.selectedProvider.GMapPage;  
+				id_ProviderProfileView.id_ProviderGeneralView.LastUpdated 	= sharedModel.selectedProvider.LastUpdated;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout gap="0"/>
+	</s:layout>
+	
+	<!--<providerComm:ProviderSearchName id="id_searchname" width="30%" height="100%"/>-->
+	<providerComm:ProviderProfileView id="id_ProviderProfileView" width="100%" height="100%" />
+	
+</s:Group>

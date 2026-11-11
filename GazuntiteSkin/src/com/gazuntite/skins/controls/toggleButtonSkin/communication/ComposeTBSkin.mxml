@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="30" height="30">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0" y="0" width="30" height="30" radiusX="5"
+			visible.down="false"
+			visible.downAndSelected="false"
+			visible.over="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect includeIn="disabledAndSelected,down,downAndSelected,over,overAndSelected,up,upAndSelected"
+			x="0" y="0" width="30" height="30" radiusX="5"
+			visible.disabledAndSelected="false"
+			visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#511607" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D58674" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage x="0" y="0" smooth="true"
+				   source="@Embed('/assets/images/smallbutton_transparentbg.png')"
+				   visible.down="false"
+				   visible.downAndSelected="false"
+				   alpha.overAndSelected="0.75">
+	</s:BitmapImage>
+	<s:BitmapImage includeIn="down,downAndSelected,up" x="0" y="0" smooth="true"
+				   source="@Embed('/assets/images/smallbutton_transparentbg.png')"
+				   visible.up="false">
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="#333333" distance="2"
+								hideObject="false" inner="true" knockout="false" quality="3"
+								strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+	<s:BitmapImage x="5" y="5" smooth="true" source="@Embed('/assets/images/compose.png')">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				autoDrawBackground="false" 
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="30" useHandCursor="true" buttonMode="true">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" />
+		</s:layout>
+		<s:Label width="10%" text="{data.serialNumber}" paddingLeft="6"/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label width="25%" text="{data.DrugName}" paddingLeft="6"/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label width="45%" text="{data.NDC}" paddingLeft="6"/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Button width="20" height="20" toolTip="Delete" label="Delete" 
+				  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"
+				  buttonMode="true" useHandCursor="true"/>
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

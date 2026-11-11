@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="cc(event)" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:diabetesGuideLine="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.diabetesGuideLine.*">
+	
+	<fx:Metadata>
+		[Event(name="CloseInputForm", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.AgeIR;
+			import com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.DiabeticTypeIR;
+			import com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.GenderIR;
+			import com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.MaritalStatusIR;
+			import com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.ScrollerInputPop;
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabetesSearchEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var UISearchCallBack:Function;
+			private var searchString:String;
+			
+			private var diabeticTypeDP:ArrayCollection;
+			private var AgeDP:ArrayCollection;
+			private var MartialStatusDP:ArrayCollection;
+			private var GenderDP:ArrayCollection;
+			
+			private var diabeticTypeLabelField:String;
+			private var AgeLabelField:String;
+			private var MartialStatusLabelField:String;
+			private var GenderLabelField:String;
+			
+			private var popup:ScrollerInputPop = new ScrollerInputPop();
+			
+			public var selectedBtn:String = '';
+			
+			protected function cc(event:FlexEvent):void
+			{
+				addEventListener(DiabetesSearchEvent.DIABETIC_SEARCH_EVENT,SendtoServer);
+				
+				
+				
+				////********* Static DATA *************************///
+				GetListStaticData();
+				
+				diabeticTypeLabelField	= 'code';
+				AgeLabelField			= 'Age';
+				MartialStatusLabelField	= 'Status';
+				GenderLabelField		= 'Gender';
+				
+			}   
+			
+			private function MoveToNextPanel():void
+			{
+				if(uiViewStack.selectedIndex < 2)
+					uiViewStack.selectedIndex ++;
+			}
+			
+			public function GetListStaticData():void
+			{
+				diabeticTypeDP = new ArrayCollection([
+					
+					{code:'823.5',Description: 'test 197'},
+					{code:'124.5',Description: 'test 677'},
+					{code:'433.5',Description: 'test 607'},
+					{code:'153.5',Description: 'test 007'},
+					{code:'022.5',Description: 'test 067'},
+					{code:'543.5',Description: 'test 807'},
+					
+				]);
+				
+				AgeDP = new ArrayCollection([
+					
+					{Age:'25 yrs- 32 yrs'},
+					{Age:'22 yrs- 29 yrs'},
+					{Age:'55 yrs- 60 yrs'},
+					{Age:'31 yrs- 42 yrs'},
+					{Age:'20 yrs- 30 yrs'},
+					{Age:'35 yrs- 49 yrs'},
+					
+				]);
+				MartialStatusDP = new ArrayCollection([
+					
+					{Status:'Single'},
+					{Status:'Divorce'},
+					{Status:'widow'},
+					{Status:'married'},
+					
+				]);
+				GenderDP = new ArrayCollection([
+					
+					{Gender:'Female'},
+					{Gender:'Male'},
+					
+				]);
+			}
+			
+			private function SendtoServer(event:DiabetesSearchEvent):void
+			{
+				UISearchCallBack = event.callback; // this call back will take the resulted data to the ListView.
+				searchString = event.SearchString; // this is the search String ,to send to the server.
+				
+				UISearchCallBack(new ArrayCollection([ 
+					
+					{TestName:'test 01'},
+					{TestName:'test 02'},
+					{TestName:'test 03'},
+					{TestName:'test 04'},
+					{TestName:'test 05'},
+					{TestName:'test 06'},
+					{TestName:'test 07'},
+					
+				]));
+			}
+			
+			protected function id_CancleBtn_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event('CloseInputForm',true));
+			}
+			
+			
+			protected function InputButton_clickHandler(event:MouseEvent):void
+			{
+				var id:String = event.currentTarget.id;
+				var isDefaultDisplay:Boolean = true;
+				
+				if(popup.isPopUp) // already a pop is openned. close that popuop to open the next one.
+				{
+					if(event.currentTarget.id != selectedBtn)
+						event.currentTarget.selected = false;
+					else
+						event.currentTarget.selected = true;
+					
+					event.stopImmediatePropagation();
+					event.preventDefault();
+					return;
+				}
+				
+				popup = new ScrollerInputPop();
+				
+				switch(id)
+				{
+					case "id_diabeticTypeBtn":
+					{
+						popup.DataProvider = diabeticTypeDP;
+						popup.btnRefrence  =id_diabeticTypeBtn;
+						popup.ResultRenderer = new ClassFactory(DiabeticTypeIR)//"com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.DiateticTypeIR"
+						
+						selectedBtn = 'id_diabeticTypeBtn';
+						
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							if(null != popup.id_list.selectedItem)
+							{
+								id_diabeticLabel.text = 'ICD Code: ' + popup.id_list.selectedItem[diabeticTypeLabelField];
+								id_diabeticLabel.toolTip = popup.id_list.selectedItem[diabeticTypeLabelField];
+							}
+							
+							id_diabeticTypeBtn.selected = false ;
+							selectedBtn = '';
+							popup.removePopup();
+							
+						});
+						break;
+					}
+						
+					case "id_AgeBtn":
+					{
+						popup.DataProvider = AgeDP;
+						selectedBtn = 'id_AgeBtn';
+						popup.btnRefrence  =id_AgeBtn;
+						popup.ResultRenderer = new ClassFactory(AgeIR);//"com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.AgeIR"
+						
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							if(null != popup.id_list.selectedItem)
+							{
+								id_AgeBtnlabel.text =popup.id_list.selectedItem[AgeLabelField];
+								id_AgeBtnlabel.toolTip = popup.id_list.selectedItem[AgeLabelField];
+							}
+							
+							id_AgeBtn.selected = false ;
+							selectedBtn = '';
+							popup.removePopup();
+							
+						});
+						break;
+					}
+						
+					case "id_GenderBtn":
+					{
+						popup.DataProvider = GenderDP;
+						selectedBtn = 'id_GenderBtn';
+						popup.btnRefrence  =id_GenderBtn;
+						popup.ResultRenderer= new ClassFactory(GenderIR)//"com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.GenderIR"
+						
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							if(null != popup.id_list.selectedItem)
+							{
+								id_GenderBtnlabel.text = popup.id_list.selectedItem[GenderLabelField];
+								id_GenderBtnlabel.toolTip = popup.id_list.selectedItem[GenderLabelField];
+							}
+							
+							id_GenderBtn.selected = false ;
+							selectedBtn = '';
+							popup.removePopup();
+							
+						});
+						
+						break;
+					}
+					case "id_MartialStatusBtn":
+					{
+						popup.DataProvider = MartialStatusDP;
+						selectedBtn = 'id_MartialStatusBtn';
+						popup.btnRefrence  =id_MartialStatusBtn;
+						popup.ResultRenderer= new ClassFactory(MaritalStatusIR)// "com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.scrollerIR.MaritalStatusIR"
+						
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							if(null != popup.id_list.selectedItem)
+							{
+								id_MartialStatusBtnlabel.text = popup.id_list.selectedItem[MartialStatusLabelField];
+								id_MartialStatusBtnlabel.toolTip = popup.id_list.selectedItem[MartialStatusLabelField];
+							}
+							
+							id_MartialStatusBtn.selected = false ;
+							selectedBtn = '';
+							popup.removePopup();
+							
+						});
+						
+						break;
+					}
+						
+				}
+				popup.ShowPopup( this );
+				
+				if(isDefaultDisplay)
+				{
+					var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+					popup.move( pt.x  , pt.y + event.currentTarget.height  - 4); 
+				}else
+				{
+					var pt2:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+					popup.move( (pt2.x + event.currentTarget.width)  - popup.width - 5 , pt2.y + event.currentTarget.height  - 4); 
+				} 
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="30" skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBgSkin">
+		<s:layout >
+			<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" paddingLeft="5" paddingRight="5"/>
+		</s:layout>
+		<s:TextInput id="id_guidelineName" width="60%" prompt="Enter Guideline Name" 
+					 skinClass="com.gazuntite.skins.controls.textInput.AllTextInputSkin"/>
+		<s:Spacer width="100%" />
+		<s:Button id="id_CancleBtn" toolTip="Cancel Guideline" label="Cancel" click="id_CancleBtn_clickHandler(event)"
+				  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.CancelButtonSkin"/>
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer width="100%" height="55" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputViewBg">
+		
+		<s:layout>
+			<s:HorizontalLayout gap="0" />
+		</s:layout>
+		
+		<s:VGroup width="25%" horizontalAlign="center">
+			<s:ToggleButton id="id_diabeticTypeBtn" label="Diabetic Type" width="100%"  click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin"
+							toolTip="Diabetic Type"/>
+			<s:Label id="id_diabeticLabel"  fontSize="14" width="95%" fontFamily="Calibri" fontWeight="bold" maxDisplayedLines="1"	/>
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center">
+			<s:ToggleButton id="id_AgeBtn" label="Age" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Age"/>
+			<s:Label id="id_AgeBtnlabel"  fontSize="14" width="95%" fontFamily="Calibri" fontWeight="bold"  maxDisplayedLines="1"		/>
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center">
+			<s:ToggleButton id="id_GenderBtn" label="Gender" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Gender"/>
+			<s:Label id="id_GenderBtnlabel"  fontSize="14" width="95%" fontFamily="Calibri" fontWeight="bold"  maxDisplayedLines="1" 	/>
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center">
+			<s:ToggleButton id="id_MartialStatusBtn" label="Martial Status" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Marital Status"/>
+			<s:Label id="id_MartialStatusBtnlabel"   fontSize="14" width="95%" fontFamily="Calibri" fontWeight="bold"  maxDisplayedLines="1" />
+		</s:VGroup>
+		
+		<s:Line height="100%">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+	</s:SkinnableContainer>
+	
+	<s:Spacer height="2" />
+	
+	<s:VGroup width="100%" height="100%" gap="-4">
+		<s:Group width="100%" >
+			<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" 
+						 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar"
+						 right="20" left="8">
+				<s:layout>
+					<s:ButtonBarHorizontalLayout gap="2" />
+				</s:layout>
+			</s:ButtonBar>
+		</s:Group>
+		
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="2">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="right" />
+			</s:layout>
+			
+			<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false">
+				<s:ArrayList>
+					<diabetesGuideLine:DiabetesProcedureView name="Test/Procedures" width="100%" height="100%"/>
+					<diabetesGuideLine:DiabetesMedicationView name="Medication"  width="100%" height="100%"/>
+					<diabetesGuideLine:DiabetesImmunizationView name="Immunization"  width="100%" height="100%"/>
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+		
+		<s:HGroup paddingRight="5"  paddingTop="7" width="100%" height="30" horizontalAlign="right" >
+			<s:Button id="id_save"  toolTip="Save" label="Save"
+					  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"/>		
+			<s:Button id="id_next"  toolTip="Next" label="Next" click="MoveToNextPanel()"
+					  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+					 />		
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+</s:Group>

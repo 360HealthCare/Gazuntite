@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 xmlns:validators="com.gazuntite.patient.visit.utils.validators.*"
+		 xmlns:notes="com.gazuntite.patient.visit.view.commons.notes.*"
+		 xmlns:itemEditors="com.gazuntite.patient.visit.view.commons.itemEditors.*"
+		 xmlns:immunization="com.gazuntite.patient.visit.view.pmh.immunization.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.cairngorm.model.ModelLocator;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreAllergiesBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.closeCrossButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotesSelected;
+			import com.gazuntite.common.dto.ImmunizationDTO;
+			import com.gazuntite.common.dto.common.GeneralTypeDTO;
+			import com.gazuntite.common.event.immunization.ManagePatientImmunizationEvent;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.itemEditors.SparkComboBoxItemEditor;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.event.pmh.immunization.LoadImmunicationStaticDataEvent;
+			import com.gazuntite.patient.visit.event.pmh.immunization.LoadImmunizationByVisitIDEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.ValidationUtils;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.managers.dictation.QIDictationManager;
+			import com.gazuntite.patient.visit.view.commons.QIGridController.QIGridController;
+			import com.gazuntite.patient.visit.view.commons.dictation.DictationPopup;
+			import com.gazuntite.patient.visit.view.commons.itemEditors.SparkDateFieldEditor;
+			import com.gazuntite.patient.visit.view.commons.notes.NotesPanel;
+			import com.gazuntite.patient.visit.view.reviewcomponents.Immunization;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CloseEvent;
+			import mx.events.DataGridEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ValidationResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var _hasGridChanged:Boolean;
+			private var _hasViewChanged:Boolean;
+			
+			private var isRecordAddInGrid:Boolean = false;
+			
+			[Bindable]
+			private var _ImmunizationList:ArrayCollection;
+			
+			private var recordLevelDicPanel:DictationPopup;
+			public var recordNotesPanel:NotesPanel;
+			private var recordGridNotesPopUp:NotesPanel;
+			private var section:String;
+			
+			private var recordNotesDTO:ModuleNoteDTO;
+			private var recordDictationDTO:ModuleDictationDTO;
+			
+			[Bindable]
+			public var model: QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _enable :Boolean;
+			
+			[Bindable]
+			private var arrAssociateTypes:ArrayCollection = new ArrayCollection(['This Visit', 'Previous Visit', 'N/A']);
+			
+			/* [Bindable]
+			public var deleteColumnData:Object; */
+			
+			
+			
+			
+			public function get enable():Boolean
+			{
+				return _enable;
+			}
+			
+			public function set enable(value:Boolean):void
+			{
+				_enable = value;
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			/* private function preInitialize():void
+			{
+			if (!deleteColumnData)
+			deleteColumnData = {};
+			
+			deleteColumnData["noteDataFields"] = {subject: "NoteSubject", note: "Note", header: "ImmunizationType.Name"};
+			deleteColumnData["dictationDataField"] = "DictationID";
+			deleteColumnData["recordIDField"] = "ID";
+			deleteColumnData["section"] = QIPopUpManager.IMMUNIZATION;
+			} */
+			
+			private function resetForm():void
+			{
+				id_ImmunizationCmbo.selectedIndex = -1;
+				id_ImmunizationCmbo.textInput.text = "";
+				id_ManufacturerCmbo.selectedIndex = -1;
+				id_ManufacturerCmbo.textInput.text = "";
+				
+				id_RefusalChk.selected = false;
+				
+				id_ReasonOfRefusalCmbo.selectedIndex = -1;
+				id_ReasonOfRefusalCmbo.textInput.text = "";
+				
+				id_DoseCmbo.selectedIndex = -1;
+				id_DoseCmbo.textInput.text = "";
+				
+				id_LotNoCmbo.selectedIndex = -1;
+				id_LotNoCmbo.textInput.text = "";
+				
+				id_BodySideRouteCmbo.selectedIndex = -1;
+				id_BodySideRouteCmbo.textInput.text = "";
+				
+				id_SiteCmbo.selectedIndex = -1;
+				id_SiteCmbo.textInput.text = "";
+				
+				id_DateAdmin.selectedDate = null;
+				id_DateAdmin.text = "";
+				
+				id_NextDue.selectedDate = null;
+				id_NextDue.text = "";
+				
+				id_ExpiryDate.selectedDate = null;
+				id_ExpiryDate.text = "";
+				
+				id_SeriesCmbo.selectedIndex = -1;
+				id_SeriesCmbo.textInput.text = "";
+				
+				enable = false;
+				id_Add.enableAll = false;
+				
+				recordNotesDTO = new ModuleNoteDTO();
+				
+				id_Add.notesDTO = new ModuleNoteDTO();
+				id_Add.dictationDTO = null
+				
+				if (recordNotesPanel)
+					recordNotesPanel.removePopup();
+			}
+			
+			protected function id_AssociateVisitzCombo_changeHandler():void
+			{
+				resetForm();//reset all fields before any selection
+				
+				if(id_AssociateVisitzCombo.selectedIndex != -1)
+					id_ImnzationForm.enabled = true;
+				
+				if(id_AssociateVisitzCombo.selectedIndex == 1)
+				{
+					
+					id_ImnzationForm.enabled = false;
+					id_VisitDatesCombo.visible = true;
+					dateToolTipContainer.includeInLayout = true;
+					dateToolTipContainer.visible = true;
+					id_DateLabel.text = 'Please Select Visit Date' ;
+					if(id_btnAdd.enabled)
+						id_btnAdd.enabled = false;
+					
+				}else
+				{
+					id_VisitDatesCombo.visible = false;
+					dateToolTipContainer.includeInLayout =  false;
+					dateToolTipContainer.visible =  false;
+				}
+			}
+			
+			private function getVisitDate(item:Object):String 
+			{
+				return "dumy_return";
+			}
+			
+			private function comboChangeHandler(event:Event):void
+			{
+				id_Add.enableAll = areRequiredFieldsProvidedAndValid();
+			}
+			
+			public function areRequiredFieldsProvidedAndValid():Boolean
+			{
+				var result:Boolean = false;
+				
+				if ((id_ImmunizationCmbo.selectedIndex >= 0 && id_ImmunizationCmbo.selectedItem != null) &&
+					(id_DoseCmbo.textInput.text.length || id_DoseCmbo.selectedIndex >= 0 && id_DoseCmbo.selectedItem != null))
+				{
+					result = true;
+					
+					if (id_AssociateVisitzCombo.selectedIndex == 1)
+					{
+						if (id_VisitDatesCombo.selectedItem)
+							result = true;
+						else
+							result = false;
+					}
+					
+					if (id_RefusalChk.selected)
+					{
+						if (!id_ReasonOfRefusalCmbo.textInput.text.length && id_ReasonOfRefusalCmbo.selectedIndex < 0 )
+						{
+							result = false;
+						}
+					}
+				}
+				
+				return result;
+			}
+			
+			private function refusalCheckBoxChangeHandler():void
+			{	
+			}
+			
+			protected function id_DoseCmbo_changeHandler(event:IndexChangeEvent):void
+			{
+				id_DoseCmbo.textInput.text.replace("-", "");
+				id_DoseCmbo_keyUpHandler( event );
+			}
+			
+			protected function id_DoseCmbo_keyUpHandler(event:Event):void
+			{							
+				id_Add.enableAll = areRequiredFieldsProvidedAndValid();
+				enable = isGetEdited();
+			}
+			
+			private function onWriteNotesClick(event:Event):void
+			{	
+				if (!recordGridNotesPopUp)
+					recordGridNotesPopUp = new NotesPanel();
+				
+				if (!recordGridNotesPopUp.isPanelShown)
+				{
+					var headingLabel:String = "";
+					
+					
+					
+					var addRecord:AddRecord = AddRecord(event.target);
+					
+					recordGridNotesPopUp 				= new NotesPanel();
+					recordGridNotesPopUp.width			= 250;
+					recordGridNotesPopUp.height			= 110;
+					recordGridNotesPopUp.HeadingLable 	= id_ImmunizationCmbo.textInput.text;
+					recordGridNotesPopUp.VisitDateLable = UtilityFunctions.FormatDate(model.VisitDate, "MM-DD-YYYY");//model.FormatedVisitDate;new Date().toDateString();
+					recordGridNotesPopUp.ShowPopup(this);
+					
+					
+					
+					recordGridNotesPopUp.notesDTO		=  addRecord.notesDTO; //gridNotesDTO;
+					
+					QIPopUpManager.addPopUp(recordGridNotesPopUp, section);
+					
+					
+					var pt:Point = id_Add.localToGlobal(new Point(id_Add.id_WriteNotes.x ,id_Add.id_WriteNotes.y));
+					
+					recordGridNotesPopUp.move(pt.x - 195, pt.y + 20);
+					
+					
+					recordGridNotesPopUp.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+						
+					}, false, 0, true);
+					
+					recordGridNotesPopUp.id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						recordGridNotesPopUp.SaveNotes();
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);
+							
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+							
+						}
+						recordGridNotesPopUp.removeNotePanel();
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+					});
+					
+					
+					recordGridNotesPopUp.addEventListener("notesSaved", function(event:Event):void
+					{
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);								
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+						}
+					});
+				}
+			}
+			private function onWriteDictationClick(event:Event):void
+			{	
+				var addRecord:AddRecord = AddRecord(event.target);
+				
+				recordLevelDicPanel = QIDictationManager.show(addRecord, recordLevelDicPanel, addRecord.dictationDTO, addRecord.id_WriteDictation);
+				QIPopUpManager.addPopUp(recordLevelDicPanel, QIPopUpManager.IMMUNIZATION);
+				
+				recordLevelDicPanel.move( recordLevelDicPanel.x - 81, recordLevelDicPanel.y);
+				
+				
+				recordLevelDicPanel.addEventListener(MouseEvent.CLICK, function():void
+				{
+					QIPopUpManager.removePopUp(recordLevelDicPanel, QIPopUpManager.IMMUNIZATION);
+					
+					if(recordLevelDicPanel && recordLevelDicPanel.DictationID)
+					{
+						id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+					}
+					
+				}, true, 0, false);
+			}
+			
+			public function resetFields():void
+			{
+				id_ImmunizationCmbo.selectedIndex = -1;
+				id_ImmunizationCmbo.textInput.text = "";
+				id_ManufacturerCmbo.selectedIndex = -1;
+				id_ManufacturerCmbo.textInput.text = "";
+				
+				id_RefusalChk.selected = false;
+				
+				id_ReasonOfRefusalCmbo.selectedIndex = -1;
+				id_ReasonOfRefusalCmbo.textInput.text = "";
+				
+				id_DoseCmbo.selectedIndex = -1;
+				id_DoseCmbo.textInput.text = "";
+				
+				id_LotNoCmbo.selectedIndex = -1;
+				id_LotNoCmbo.textInput.text = "";
+				
+				id_BodySideRouteCmbo.selectedIndex = -1;
+				id_BodySideRouteCmbo.textInput.text = "";
+				
+				id_SiteCmbo.selectedIndex = -1;
+				id_SiteCmbo.textInput.text = "";
+				
+				id_DateAdmin.selectedDate = null;
+				id_DateAdmin.text = "";
+				
+				id_NextDue.selectedDate = null;
+				id_NextDue.text = "";
+				
+				id_ExpiryDate.selectedDate = null;
+				id_ExpiryDate.text = "";
+				
+				id_SeriesCmbo.selectedIndex = -1;
+				id_SeriesCmbo.textInput.text = "";
+				
+				enable = false;
+				id_Add.enableAll = false;
+				
+				recordNotesDTO = new ModuleNoteDTO();
+				
+				id_Add.notesDTO = new ModuleNoteDTO();
+				id_Add.dictationDTO = null
+				
+				if (recordNotesPanel)
+					recordNotesPanel.removePopup(); 
+				
+				id_ImnzationForm.enabled = false;
+				id_AssociateVisitzCombo.selectedIndex = -1;
+				id_VisitDatesCombo.selectedIndex	  = -1;
+				if(id_VisitDatesCombo.visible == true)
+					id_VisitDatesCombo.visible = false;
+				
+			}
+			
+			protected function id_add_clickHandler(event:MouseEvent):void
+			{
+				id_Add.enableAll = areRequiredFieldsProvidedAndValid();
+				id_Add.enableAll = isNonRequiredFieldsLengthValid();
+				enable = isGetEdited();
+				if( id_Add.enableAll )
+				{
+					saveRecords();
+					
+					id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+					id_Add.id_WriteDictation.setStyle("skinClass", QIDictationBtn);
+				}
+				else
+				{
+					if(UtilityFunctions.IsNullOrEmpty(id_ImmunizationCmbo.selectedItem) )
+					{
+						id_ImmunizationCmbo.errorString = "invalid immunization";
+						id_ImmunizationCmbo.setFocus();
+					}
+					else if(UtilityFunctions.IsNullOrEmpty(id_DoseCmbo.selectedItem) )
+					{
+						id_DoseCmbo.errorString = "invalid dose value";
+						id_DoseCmbo.setFocus();
+					}
+				}
+			}
+			
+			
+			public function saveRecords():void
+			{
+				//Alert.show('Are you sure you want to save this record?', 'Save Confirmation', Alert.YES | Alert.NO, this, saveRecordsConfirmed, null, Alert.OK)	
+				saveRecordsConfirmed();
+			}
+			
+			public function saveRecordsConfirmed():void 
+			{
+				/* if (eventObj.detail == Alert.NO)
+					return; */
+				
+				var immDTO:ImmunizationDTO = new ImmunizationDTO();
+				immDTO.ImmunizationType = id_ImmunizationCmbo.selectedItem as GeneralTypeDTO;
+				immDTO.Dose	= id_DoseCmbo.textInput.text;
+				immDTO.LotNumber = id_LotNoCmbo.textInput.text;
+				immDTO.Manufacturer	= id_ManufacturerCmbo.textInput.text;
+				immDTO.Rout	= id_BodySideRouteCmbo.textInput.text;
+				
+				var reasonOfRefusal:String = ValidationUtils.TrimString(id_ReasonOfRefusalCmbo.textInput.text);
+				
+				if (reasonOfRefusal.length)
+				{
+					immDTO.RefusalReason = reasonOfRefusal;
+				}
+				
+				immDTO.Site	= id_SiteCmbo.textInput.text;
+				immDTO.Series = id_SeriesCmbo.textInput.text;
+				
+				immDTO.CreatedAt = new Date();
+				immDTO.UpdatedAt = new Date();
+				immDTO.PatientID = model.patientID;
+				
+				//Tahir Alvi - New Feature implemented
+				switch(id_AssociateVisitzCombo.selectedIndex)
+				{
+					case 0:
+						immDTO.IsNA = false;
+						immDTO.VisitID = model.VisitID;
+						immDTO.VisitDate = model.VisitDate;
+						break;
+					
+					case 1:
+						immDTO.IsNA = false;
+						immDTO.VisitID = id_VisitDatesCombo.selectedItem.VisitID;
+						
+						var prevAssociatedVisitDate:Date;
+						if (id_VisitDatesCombo.selectedItem)
+						{
+							prevAssociatedVisitDate = new Date(Date.parse(id_VisitDatesCombo.selectedItem.VisitDate));
+						}
+						
+						immDTO.VisitDate = prevAssociatedVisitDate;
+						break;
+					
+					case 2:
+						immDTO.IsNA = true;
+						immDTO.VisitID = 0;
+						immDTO.VisitDate = QIConstants.NULL_DATE;
+						break;
+				}
+				
+				immDTO.CreatedBy = model.LoggedInUserId;
+				immDTO.ManagedBy = model.LoggedInUserId;
+				immDTO.DateAdmin = id_DateAdmin.text;
+				immDTO.NextDoseDue = id_NextDue.text;
+				immDTO.ExpiryDate = id_VISDate.text; 
+				
+				immDTO.ModifiedAt = Constants.NULL_DATE;
+				immDTO.IsRecordEditable = true;
+				
+				if (id_Add.notesDTO)
+				{
+					immDTO.Note = id_Add.notesDTO.Note;
+					immDTO.NoteSubject = id_Add.notesDTO.NoteSubject; 
+				}
+				// Mansoor
+				
+				if (id_Add.dictationDTO != null && id_Add.dictationDTO.DictationID != null)
+				{
+					immDTO.DictationID = id_Add.dictationDTO.DictationID;
+					
+					//id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+				}
+				
+				if(model.immunizationDTOList == null)
+					model.immunizationDTOList = new ArrayCollection();
+				
+				//Tahir Alvi - Associated Visit
+				if((id_AssociateVisitzCombo.selectedIndex == 2) || (id_AssociateVisitzCombo.selectedIndex == 1 && id_VisitDatesCombo.selectedIndex != -1))
+				{
+					immDTO.IsDirty = true;
+					model.immunizationDTOList.addItemAt(immDTO, 0);
+					
+					Alert.show('Are you sure you want to save this record.', 'Save Confirmation', Alert.YES | Alert.NO, this, alertSaveListener, null, Alert.OK)	
+				}
+				
+				else
+				{
+					immDTO.IsDirty = true;
+					model.immunizationDTOList.addItemAt(immDTO, 0);
+					
+					 var mpiEvent:ManagePatientImmunizationEvent = new ManagePatientImmunizationEvent(model, onImmunizationSave);
+					CairngormEventDispatcher.getInstance().dispatchEvent(mpiEvent); 
+					
+					isRecordAddInGrid = true;
+				}
+				
+				hasViewChanged = _hasGridChanged = true;
+				resetFields();
+			}
+			
+			public function onImmunizationSave():void
+			{
+				var lpviEvent:LoadImmunizationByVisitIDEvent = new LoadImmunizationByVisitIDEvent(); 
+				CairngormEventDispatcher.getInstance().dispatchEvent( lpviEvent );
+			}
+			
+			private function alertSaveListener(eventObj:CloseEvent):void 
+			{
+				if (eventObj.detail == Alert.YES) 
+				{
+					 var mpiEvent:ManagePatientImmunizationEvent = new ManagePatientImmunizationEvent(model, onImmunizationSave);
+					CairngormEventDispatcher.getInstance().dispatchEvent( mpiEvent ); 
+				}
+				else
+				{
+					return;	
+				}
+			} 
+			private function isNonRequiredFieldsLengthValid():Boolean
+			{
+				var result:Boolean = true;
+				
+				if( id_BodySideRouteCmbo.textInput.text.length > 0 && id_BodySideRouteCmbo.textInput.text.length > 200 )
+				{
+					result = false;
+					id_BodySideRouteCmbo.setFocus();
+					UtilityFunctions.ShowMessage("Max length for \"Body Side Route\" is 200 chars", "Invalid Input");
+				}
+				else if( id_SiteCmbo.textInput.text.length > 0 && id_SiteCmbo.textInput.text.length > 200 )
+				{
+					result = false;
+					id_SiteCmbo.setFocus();
+					UtilityFunctions.ShowMessage("Max length for Site is 200 chars", "Invalid Input");
+				}
+				else if( id_SeriesCmbo.textInput.text.length > 0 && id_SeriesCmbo.textInput.text.length > 200 )
+				{
+					result = false;
+					id_SeriesCmbo.setFocus();
+					UtilityFunctions.ShowMessage("Max length for Series is 200 chars", "Invalid Input");
+				}
+				
+				return result;
+			}
+			
+			protected function id_AddMoreBtn_clickHandler(event:MouseEvent):void
+			{
+				if(id_AddMoreBtn.label == 'Add More')
+				{
+					dateToolTipContainer.visible=true;
+					dateToolTipContainer.includeInLayout = true;
+					id_AddMoreBtn.label = ''; 
+					id_AddMoreBtn.label = 'Close';  
+					id_imnzButtons.visible = true;
+					id_imnzButtons.includeInLayout = true;
+					id_ImnzationForm.visible = true;
+					id_ImnzationForm.includeInLayout = true;
+					id_ImnzationForm.enabled = false;
+					id_AssociateVisitzCombo.visible = true;
+					id_AssociateVisitzCombo.includeInLayout =true;
+					id_AssociateVisitzCombo.selectedIndex = -1;
+					
+					callLater( function():void
+					{
+						id_AssociateVisitzCombo.setFocus();	
+					});
+					
+				}else if(id_AddMoreBtn.label == 'Close')
+				{
+					dateToolTipContainer.visible=false;
+					dateToolTipContainer.includeInLayout = false;
+					id_AddMoreBtn.label = ''; 
+					id_AddMoreBtn.label = 'Add More';  
+					id_imnzButtons.visible = false;
+					id_imnzButtons.includeInLayout = false;
+					id_ImnzationForm.visible = false;
+					id_ImnzationForm.includeInLayout = false;
+					id_ImnzationForm.enabled = false;
+					
+					
+					if(id_ImnzationForm.enabled == true)
+						id_ImnzationForm.enabled = false;
+					id_AssociateVisitzCombo.visible = false;
+					id_AssociateVisitzCombo.includeInLayout = false;
+					id_AssociateVisitzCombo.selectedIndex = -1;
+					if(id_VisitDatesCombo.visible == true)
+						id_VisitDatesCombo.visible = false;
+					id_VisitDatesCombo.selectedIndex = -1;
+				}
+				
+			}
+			
+			protected function Combo_keyUpHandler(event:KeyboardEvent):void
+			{
+				var searchString:String = event.currentTarget.textInput.text;
+				
+				if( searchString.length == 2 || searchString.length == 5 )  //only search if length is 2 or 5
+				{
+					var lisd:LoadImmunicationStaticDataEvent;
+					
+					switch(event.currentTarget)
+					{
+						case id_ImmunizationCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.TYPE_SELECT_TYPE);
+							
+							break;
+						case id_DoseCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.DOSE_SELECT_TYPE);
+							
+							break;
+						case id_ManufacturerCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.MANUFACTURER_SELECT_TYPE);
+							
+							break;
+						case id_SeriesCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.SERIERS_SELECT_TYPE);
+							
+							break;
+						case id_ReasonOfRefusalCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.REFUSAL_SELECT_TYPE);
+							
+							break;
+						case id_BodySideRouteCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.ROUT_SELECT_TYPE);
+							
+							break;
+						case id_SiteCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.SITE_SELECT_TYPE);
+							
+							break;
+						case id_LotNoCmbo:
+							
+							lisd = new LoadImmunicationStaticDataEvent(searchString, QIConstants.LOT_SELECT_TYPE);
+							
+							break;	
+					}
+					
+					if( null != lisd )
+						CairngormEventDispatcher.getInstance().dispatchEvent( lisd );
+				}
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				var edited:Boolean = false;
+				
+				if (id_ImmunizationCmbo.selectedItem != null ||
+					id_DoseCmbo.textInput.text.length ||  id_DoseCmbo.selectedItem != null ||
+					id_LotNoCmbo.textInput.text.length || id_LotNoCmbo.selectedItem != null ||
+					id_DateAdmin.text.length || id_DateAdmin.selectedItem != null ||
+					id_NextDue.text.length || id_NextDue.selectedItem != null ||
+					id_ManufacturerCmbo.textInput.text.length || id_ManufacturerCmbo.selectedItem != null ||
+					id_BodySideRouteCmbo.textInput.text.length > 2 || id_BodySideRouteCmbo.selectedItem != null ||
+					id_ExpiryDate.text.length || id_ExpiryDate.selectedDate != null ||
+					id_ReasonOfRefusalCmbo.textInput.text.length || id_ReasonOfRefusalCmbo.selectedItem != null ||
+					id_SiteCmbo.textInput.text.length > 2 || id_SiteCmbo.selectedItem != null ||
+					id_SeriesCmbo.textInput.text.length > 2 || id_SeriesCmbo.selectedItem != null)
+					
+					edited = true;
+				
+				//hasViewChanged = (_hasGridChanged)? _hasGridChanged : edited;
+				
+				return edited;
+			}
+			
+			
+			
+			/* private function itemEditKeyUpHandler(event:DataGridActionsEvent):void
+			{
+				
+				var lblFld:String = event.dataField;
+				var lisd:LoadImmunicationStaticDataEvent;
+				
+				if (event.searchString.length == 2 || event.searchString.length == 5 )
+				{
+					if (lblFld == "Dose")
+					{
+						lisd = new LoadImmunicationStaticDataEvent(event.searchString, QIConstants.DOSE_SELECT_TYPE);
+					}
+					else if (lblFld == "LotNumber")
+					{
+						lisd = new LoadImmunicationStaticDataEvent(event.searchString, QIConstants.LOT_SELECT_TYPE);
+					}
+					
+					if (lisd)
+						CairngormEventDispatcher.getInstance().dispatchEvent(lisd);
+				}
+				
+			} */
+			
+			/**
+			 * Ayesha 24/1/2013
+			 * This handler controls the height and vertical scroll bars depending upon no of records in dataprovider
+			 * */
+			/* private function dataGridProviderChangeHandler(event:Event):void
+			{
+			if (!id_DataGrid.dataProvider)
+			return;
+			
+			if (!id_DataGrid.dataProvider.hasOwnProperty("length"))
+			return;
+			
+			
+			var recordsCount:int = id_DataGrid.dataProvider.length;
+			
+			if (recordsCount > 10)
+			{
+			id_DataGrid.rowCount = 10;
+			}
+			else
+			{
+			id_DataGrid.rowCount = id_DataGrid.dataProvider.length;
+			}
+			} */
+			
+			protected function cc(event:FlexEvent):void
+			{
+				/* id_DataGrid.addEventListener(DataGridActionsEvent.SAVE_RECORD_CLICK, saveRecordClickHandler, false, 0, true);
+				id_DataGrid.addEventListener(DataGridActionsEvent.EDIT_RECORD_CLICK, editRecordClickHandler, false, 0, true);
+				id_DataGrid.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true); 
+				id_DataGrid.addEventListener(DataGridActionsEvent.ITEM_EDIT_KEY_UP, itemEditKeyUpHandler, false, 0, true);
+				id_DataGrid.addEventListener("NotesSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				id_DataGrid.addEventListener("DictationSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				
+				id_DataGrid.addEventListener(Event.CHANGE, dataGridProviderChangeHandler, false, 0, true);
+				*/
+			}
+			
+			/* protected function NotesDictationSavedFromGrid(event:Event):void
+			{
+			var evn:ManagePatientImmunizationEvent = new ManagePatientImmunizationEvent();
+			CairngormEventDispatcher.getInstance().dispatchEvent(evn);
+			} */
+			
+			
+			private function onPreviousVisitDateChange(event:Event):void
+			{
+				if (id_VisitDatesCombo.selectedItem)
+				{
+					id_ImnzationForm.enabled = true;
+					
+					dateToolTipContainer.visible = false;
+					dateToolTipContainer.includeInLayout = false;
+				}
+				else
+				{
+					id_ImnzationForm.enabled = false;
+					
+					dateToolTipContainer.visible = true;
+					dateToolTipContainer.includeInLayout = true;
+				}
+			}
+			
+			public function loadData():void
+			{
+				if( UtilityFunctions.IsNullOrEmpty( model.immunizationDTOList ) )
+				{
+					var mpiEvent : LoadImmunizationByVisitIDEvent = new LoadImmunizationByVisitIDEvent(  );
+					CairngormEventDispatcher.getInstance().dispatchEvent( mpiEvent );
+				}
+				
+				if( UtilityFunctions.IsNullOrEmpty(model.GeneralTypeDTOListForImmunizationType))
+				{
+					var lisd:LoadImmunicationStaticDataEvent = new LoadImmunicationStaticDataEvent("temp", QIConstants.TYPE_SELECT_TYPE);
+					CairngormEventDispatcher.getInstance().dispatchEvent(lisd);
+				}
+				
+			}
+		]]>
+		
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="5" paddingRight="5" paddingLeft="5" />
+	</s:layout>
+	<s:HGroup id="id_NotesArea" width="100%" paddingTop="0" />
+	
+	<s:HGroup width="100%">
+		<s:DropDownList id="id_AssociateVisitzCombo"  focusEnabled="true"
+						prompt="Associate With" visible="false"   change="id_AssociateVisitzCombo_changeHandler()" dataProvider="{arrAssociateTypes}"
+						width="{id_ImmunizationCmbo.width}" skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.requiredDropDownList" includeInLayout="false"/> 
+		<s:DropDownList id="id_VisitDatesCombo" prompt="Select Visit Date" focusEnabled="true" visible="false" width="{id_DoseCmbo.width}" 
+						labelField="VisitDateLbl" includeInLayout="{id_VisitDatesCombo.visible}" dataProvider="{model.unSignedVisitDates}"
+						change="onPreviousVisitDateChange(event)"
+						skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.requiredDropDownList"/>
+		<s:SkinnableContainer id="dateToolTipContainer" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.dateToolTipBG" 
+							  visible="false" includeInLayout="false"  > <!---->
+			<s:Label id="id_DateLabel" text="Please Select Visit" fontFamily="Calibri" fontSize="12"
+					 width="100%" paddingLeft="10" horizontalCenter="0"  verticalCenter="0"/>
+		</s:SkinnableContainer>
+	</s:HGroup>
+	
+	<s:HGroup id="id_ImnzationForm" width="100%" visible="false" includeInLayout="false" enabled="false"> 
+		
+		<s:VGroup width="33%">
+			<components:LabelComboBox id="id_ImmunizationCmbo" prompt="Immunization" width="100%" maxChars="30"
+									  dataProvider="{model.GeneralTypeDTOListForImmunizationType}"
+									  keyUp="Combo_keyUpHandler(event)" 
+									  change="comboChangeHandler(event)"
+									  focusOut="areRequiredFieldsProvidedAndValid()"
+									  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" tabIndex="1"/> <!--dataProvider="{model.immunizationTypeDTOList}"-->
+			<components:LabelComboBox id="id_ManufacturerCmbo" prompt="Manufacturer" width="100%" maxChars="250"
+									  dataProvider="{model.GeneralLabelDTOListForManufacturer}"
+									  keyUp="Combo_keyUpHandler(event)" tabIndex="8" /><!-- dataProvider="{model.immunizationManufacturerList}" -->
+			
+			<s:HGroup width="100%" verticalAlign="middle">
+				
+				<s:CheckBox id="id_RefusalChk" fontFamily="Calibri" color="#ffffff" label="Refusal" tabIndex="12"
+							skinClass="com.gazuntite.controls.skins.QICheckBoxSkin"  />
+				<s:Label text="Refusal" fontFamily="Calibri" color="#ffffff" fontSize="11" />
+				
+				<components:LabelComboBox id="id_ReasonOfRefusalCmbo" prompt="Reason of Refusal" width="100%" maxChars="500"
+										  dataProvider="{model.GeneralLabelDTOListForRefusal}"
+										  keyUp="Combo_keyUpHandler(event)" change="comboChangeHandler(event)" tabIndex="13"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+		<s:VGroup width="33%">
+			<s:HGroup width="100%" >
+				<components:LabelComboBox id="id_DoseCmbo" prompt="Dose" width="50%"  maxChars="50"
+										  dataProvider="{model.GeneralLabelDTOListForDose}"
+										  keyUp="Combo_keyUpHandler(event)" 
+										  change="id_DoseCmbo_changeHandler(event)"
+										  focusOut="areRequiredFieldsProvidedAndValid()"
+										  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" tabIndex="2"/>
+				<components:LabelComboBox id="id_LotNoCmbo" prompt="Lot#" width="50%"
+										  dataProvider="{model.GeneralLabelDTOListForLot}"
+										  keyUp="Combo_keyUpHandler(event)" tabIndex="3"  maxChars="50"/> 
+			</s:HGroup>
+			<components:LabelComboBox id="id_BodySideRouteCmbo" prompt="Body Side/Route" width="100%" maxChars="250"
+									  dataProvider="{model.GeneralLabelDTOListForRoute}"
+									  keyUp="Combo_keyUpHandler(event)"
+									  tabIndex="9" />
+			
+			<components:LabelComboBox id="id_SiteCmbo" prompt="Site" width="100%" maxChars="250"
+									  dataProvider="{model.GeneralLabelDTOListForSite}"
+									  keyUp="Combo_keyUpHandler(event)" tabIndex="14"/>
+			
+		</s:VGroup>
+		
+		<s:VGroup width="34%">
+			<s:HGroup width="100%" >
+				
+				<components:LabelDateField id="id_DateAdmin" prompt="Date Admin" toolTip="Admin Date" width="50%" 
+										   yearNavigationEnabled="true" editable="true" maxYear="{new Date().getFullYear()}" minYear="1901"
+										   selectableRange="{{rangeEnd : new Date()}}" fontFamily="calibri" fontSize="11" tabIndex="4"/>
+				<components:LabelDateField id="id_NextDue" prompt="Next Due" toolTip="Next Due" width="50%" 
+										   yearNavigationEnabled="true" editable="true" selectableRange="{{rangeStart:new Date()}}"
+										   fontFamily="calibri" fontSize="11" tabIndex="5"/>
+			</s:HGroup>
+			<s:HGroup width="100%" >
+				<components:LabelDateField id="id_VISDate" toolTip="Visit Date" width="50%" yearNavigationEnabled="true" textInputStyleName="optionalDateTextBox"  
+										   enabled="false" editable="false" 
+										   maxYear="{new Date().getFullYear()}" minYear="1901" tabIndex="10" selectedDate="{model.VisitDate}"/>
+				<components:LabelDateField id="id_ExpiryDate" prompt="Expiry Date" textInputStyleName="optionalDateTextBox" toolTip="Expiry Date" width="50%" 
+										   yearNavigationEnabled="true" editable="true" maxYear="{new Date().getFullYear()}" minYear="1901"
+										   fontFamily="calibri" fontSize="11" tabIndex="11"/>
+			</s:HGroup>
+			<components:LabelComboBox id="id_SeriesCmbo" prompt="Series" width="100%" maxChars="250"
+									  dataProvider="{model.GeneralLabelDTOListForSeries}"
+									  keyUp="Combo_keyUpHandler(event)" tabIndex="15" />
+			
+		</s:VGroup>
+		
+		<s:VGroup verticalAlign="top" horizontalAlign="left" width="10%" paddingTop="0" gap="12">
+			<commons:AddRecord id="id_Add" writeNotesClick="onWriteNotesClick(event)" writeDictationClick="onWriteDictationClick(event)" 
+							   tabIndex="6"/>
+		</s:VGroup>	
+	</s:HGroup>
+	
+	<s:HGroup width="100%">
+		
+		<s:HGroup id="id_imnzButtons" width="100%" > <!--includeInLayout="false" visible="false"-->
+			<s:Button id="id_btnAdd"  buttonMode="true" useHandCursor="true" toolTip="Add Record"	  
+					  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreTooltipBtn" label="Add Immunization" tabIndex="16" 
+					  click="id_add_clickHandler(event)" enabled="{id_Add.enableAll}"
+					  width="135"/>
+			<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBGContainer" visible="{!id_btnAdd.enabled}"/>
+		</s:HGroup>
+		<s:HGroup horizontalAlign="right" width="100%">
+			<s:Button id="id_AddMoreBtn" label="Add More" click="id_AddMoreBtn_clickHandler(event)"
+					  skinClass="{id_AddMoreBtn.label=='Close' ? closeCrossButton : AddMoreAllergiesBtn}"
+					  toolTip="{id_AddMoreBtn.label=='Close' ? 'Close Immunization Form' :'Add Immunization'}"
+					  buttonMode="true" useHandCursor="true"  />
+			<s:Button label="Next" id="id_nextBtn" 
+					  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin"
+					  toolTip="Move to Next Section Physical" buttonMode="true" />
+		</s:HGroup>
+		
+		
+	</s:HGroup>	
+	<immunization:ImmunizationBodyGridView id="gridView" width="100%"/>
+</s:Group>

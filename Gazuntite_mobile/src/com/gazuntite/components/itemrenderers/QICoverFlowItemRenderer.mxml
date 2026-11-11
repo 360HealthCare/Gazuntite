@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				width="480"
+				height="94%"
+				creationComplete="init(event)"
+				xmlns:dualpanel="com.rialvalue.components.dualpanel.*" 
+				xmlns:components="com.gazuntite.components.*"
+				mouseChildren="{data.en}">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.coverflow.DiagnosisDualPanel;
+			import com.gazuntite.components.coverflow.PlanDualPanel;
+			import com.gazuntite.components.coverflow.ROSDualPanel;
+			import com.gazuntite.components.coverflow.TreatmentDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.AllergiesDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.BlankPanel;
+			import com.gazuntite.components.quickInput.coverflow.ChiefComplaintDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ChronicMedicationDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ComprehensiveHistoryDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ImmunizationDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.InHouseLabDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.PhysicalDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.VitalsDualPanel;
+			
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				//calculateSizeRequirements();
+				assignForms();
+			}
+			
+			protected function calculateSizeRequirements():void
+			{
+				//trace(Capabilities.screenResolutionX);
+				
+				if(Capabilities.screenResolutionX <= 1345)
+				{
+					this.width = 380;
+					this.height = 400;
+				}
+				
+				if(Capabilities.screenResolutionX <= 1280)
+				{
+					this.width = 370;
+					this.height = 370;
+				}
+			}
+			
+			protected function assignForms():void
+			{
+				switch(data.title)
+				{
+					case "Allergies":
+						addElement(new AllergiesDualPanel());
+						break;
+					case "Immunization":
+						addElement(new ImmunizationDualPanel());
+						break;
+					case "Chronic Medication":
+						addElement(new ChronicMedicationDualPanel());
+						break;
+					case "Comprehensive History":
+						addElement(new ComprehensiveHistoryDualPanel());
+						break;
+					case "Vitals":
+						addElement(new VitalsDualPanel());
+						break;
+					case "Chief Complaint":
+						addElement(new ChiefComplaintDualPanel());
+						break;
+					case "Review of System":
+						//addElement(new ROSDualPanel());
+						break;
+					case "Physical":
+						//addElement(new PhysicalDualPanel());
+						break;
+					case "In-House Lab":
+						addElement(new InHouseLabDualPanel());
+						break;
+					case "Diagnosis":
+						addElement(new DiagnosisDualPanel());
+						break;
+					case "Treatment":
+						//addElement(new TreatmentDualPanel());
+						break;
+					case "Plan":
+						//addElement(new PlanDualPanel());
+						break;					
+					default:
+						addElement(new BlankPanel());// base view
+						break;
+				} 
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>  
+	
+</s:ItemRenderer>

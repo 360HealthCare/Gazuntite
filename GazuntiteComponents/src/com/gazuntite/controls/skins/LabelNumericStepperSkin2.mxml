@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+      xmlns:fb="http://ns.adobe.com/flashbuilder/2009" minHeight="23" minWidth="40" 
+      alpha.disabled="0.5">
+
+    <fx:Metadata>
+    <![CDATA[ 
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.NumericStepper")]
+    ]]>
+    </fx:Metadata> 
+    
+    <fx:Script fb:purpose="styling">
+        /* Define the skin elements that should not be colorized. 
+           For numeric stepper, the skin itself is colorized but the individual parts are not. */
+        static private const exclusions:Array = ["textDisplay", "decrementButton", "incrementButton"];
+
+        /**
+         * @private
+         */  
+        override public function get colorizeExclusions():Array {return exclusions;}
+        
+        /**
+         * @private
+         */
+        override protected function initializationComplete():void
+        {
+            useChromeColor = true;
+            super.initializationComplete();
+        }
+        
+        private var cornerRadiusChanged:Boolean;
+        private var borderStylesChanged:Boolean;
+        
+        /**
+         *  @private
+         */
+        override protected function commitProperties():void
+        {
+            super.commitProperties();
+            
+            if (cornerRadiusChanged)
+            {
+                var cr:Number = getStyle("cornerRadius");
+                if (incrementButton)
+                    incrementButton.setStyle("cornerRadius", cr);
+                if (decrementButton)
+                    decrementButton.setStyle("cornerRadius", cr);
+                cornerRadiusChanged = false;
+            }
+            
+            if (borderStylesChanged)
+            {
+                textDisplay.setStyle("borderAlpha", getStyle("borderAlpha"));
+                textDisplay.setStyle("borderColor", getStyle("borderColor"));
+                textDisplay.setStyle("borderVisible", getStyle("borderVisible"));
+                borderStylesChanged = false;
+            }
+        }
+        
+        /**
+         *  @private
+         */
+        override public function styleChanged(styleProp:String):void
+        {
+            var allStyles:Boolean = !styleProp || styleProp == "styleName";
+
+            super.styleChanged(styleProp);
+            
+            if (allStyles || styleProp == "cornerRadius")
+            {
+                cornerRadiusChanged = true;
+                invalidateProperties();
+            }
+            
+            if (allStyles || styleProp.indexOf("border") == 0)
+            {
+                borderStylesChanged = true;
+                invalidateProperties();
+            }
+        }
+		
+    </fx:Script>
+  
+    <s:states>
+        <s:State name="normal" /><s:State name="normalWithControlBar" />
+        <s:State name="disabled" />
+    </s:states>
+
+	<s:layout>
+		<s:HorizontalLayout gap="0"/>
+	</s:layout>
+	<s:Button id="decrementButton" rotation="0" width="18" height="18"
+			  skinClass="com.gazuntite.controls.skins.QIHistoryHeader_prevBtn" />
+		
+	<s:TextInput id="textDisplay" height="18" fontFamily="calibri" fontSize="11" 
+				 skinClass="spark.skins.spark.NumericStepperTextInputSkin" width="100%" textAlign="center"/>
+	
+	<s:Button id="incrementButton" rotation="0" width="18" height="18"
+			  skinClass="com.gazuntite.controls.extended.skins.QIHistoryHeader_nextBtn" />	
+</s:SparkSkin>

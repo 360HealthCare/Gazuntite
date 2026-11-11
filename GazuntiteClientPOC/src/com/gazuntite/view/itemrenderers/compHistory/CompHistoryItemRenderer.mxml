@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" 
+				xmlns:controls="com.gazuntite.view.controls.*"
+				minHeight="28"
+				creationComplete="init(event)">
+	
+	<fx:Metadata>
+		[Event(name="showForm", type="com.gazuntite.events.CompHistoryShowFormEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.CompHistoryShowFormEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			protected var _isSelected:Boolean = false;
+			
+			public function get isSelected():Boolean
+			{
+				return _isSelected;
+			}
+			
+			public function set isSelected(value:Boolean):void
+			{
+				_isSelected = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				//buttonBar.selectedIndex = buttonBar.dataProvider.length - 1;
+			}
+			
+			protected function buttonBar_changeHandler(event:IndexChangeEvent):void
+			{
+				var e:CompHistoryShowFormEvent = new CompHistoryShowFormEvent(CompHistoryShowFormEvent.SHOW_FORM,true);
+				
+				if(event.newIndex == 0)
+				{
+					e.formVisible = true;
+					
+				}else
+				{
+					e.formVisible = false;
+				
+				}
+				
+				dispatchEvent(e);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle"
+							paddingBottom="3" 
+							paddingLeft="3" 
+							paddingRight="3" 
+							paddingTop="3"/>
+	</s:layout>
+	
+	<s:Label text="{data.name}"/>
+	
+	<s:HGroup width="100%" 
+			  horizontalAlign="right">
+		<s:ButtonBar id="buttonBar" 
+					 skinClass="com.gazuntite.skins.ButtonBarFlashSkin"
+					 change="buttonBar_changeHandler(event)">  
+			<s:ArrayCollection>
+				<fx:String>Y</fx:String> 
+				<fx:String>N</fx:String> 
+			</s:ArrayCollection>
+		</s:ButtonBar>
+	</s:HGroup>
+	
+	
+	
+</s:ItemRenderer>

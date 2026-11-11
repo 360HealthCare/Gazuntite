@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		 xmlns:FlipViews="com.gazuntite.controls.extended.components.FlipViews.*" 
+		 xmlns:FlipViews1="com.gazuntite.common.view.FlipViews.*"
+		 creationComplete="cc(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.MedRXDTO;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.MarkValidDataExistsEvent;
+			import com.gazuntite.common.view.events.MarkVisitValidEvent;
+			import com.gazuntite.controls.events.FlipViewEvent;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			
+			import mx.events.FlexEvent;
+			
+			
+			private var _openforInputChronic:Boolean;
+			private var _openforInputPrescription:Boolean;
+			private var _IsforInput:Boolean;
+			
+			private var _selectedPatient:PatientDTO;
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			private var _visitDate:String; 
+			private var _visitID:String; 
+			
+			private var _RXMedicationDTO:MedRXDTO;
+			
+			//M:26Nov2013
+			[Bindable] public var RecordLevelDictationID:String;
+			
+			[Bindable]  public var RecordLevelNote:String 		= '';
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			private var PropertiesAlreadyCommited:Boolean = false ;
+			
+			[Bindable]
+			public function get RXMedicationDTO():MedRXDTO
+			{
+				return _RXMedicationDTO;
+			}
+
+			public function set RXMedicationDTO(value:MedRXDTO):void
+			{
+				if(value)
+				{
+					_RXMedicationDTO = value;
+					id_newRxView.id_InputView.LoadRXMedicationDTO(RXMedicationDTO);
+				}
+				
+			}
+
+			[Bindable]
+			public function get openforInputPrescription():Boolean
+			{
+				return _openforInputPrescription;
+			}
+
+			public function set openforInputPrescription(value:Boolean):void
+			{
+				_openforInputPrescription = value;
+			}
+
+			[Bindable]
+			public function get visitID():String
+			{
+				return _visitID;
+			}
+
+			public function set visitID(value:String):void
+			{
+				_visitID = value;
+				
+				if(value)
+					id_newRxView.id_InputView.QIVisitID = value;
+			}
+
+			[Bindable]
+			public function get visitDate():String
+			{
+				return _visitDate;
+			}
+
+			public function set visitDate(value:String):void
+			{
+				_visitDate = value;
+				
+				if(value)
+					id_newRxView.id_InputView.QIVisitDate = value;
+			}
+
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+			
+			[Bindable]
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				
+				if(null != value)
+				{
+					id_newRxView.id_InputView.selectedPharmacy = value;
+				}
+			}
+			
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			[Bindable]
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+				
+				if(null != value)
+				{
+					id_newRxView.id_InputView.selectedPatient = value;
+				}
+			}
+			
+			public function get IsforInput():Boolean
+			{
+				return _IsforInput;
+			}
+			
+			[Bindable]
+			public function set IsforInput(value:Boolean):void
+			{
+				_IsforInput = value;
+				
+				/* if(value)
+					id_newRxView.id_InputView.OpenForQuickInputEpreprection(visitID,visitDate); */
+			}
+			
+			[Bindable]
+			public function get openforInputChronic():Boolean
+			{
+				return _openforInputChronic;
+			}
+			
+			public function set openforInputChronic(value:Boolean):void
+			{
+				_openforInputChronic = value;
+				
+				/* if(value)
+					id_newRxView.id_InputView.OpenForQuickInputChronic(visitID,visitDate); */
+				
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				id_summaryView.addEventListener("CloseRX",CloseRXPanel);
+				id_summaryView.addEventListener("AddMorePrescreption",AddMore);
+				
+				addEventListener(MarkVisitValidEvent.MarkVisitValid,MarkVisitValid);
+				id_newRxView.addEventListener(FlipViewEvent.FLIP_VIEW_EVENT, onFlipRequested);
+				
+				//dispatchEvent(new Event('PanelCreationCompleted',true));
+			}
+			
+			private function MarkVisitValid(e:MarkVisitValidEvent):void
+			{
+				var mvdEv:MarkValidDataExistsEvent = new MarkValidDataExistsEvent(model.LoggedInUserId,10 ,11,model.LoggedInUserSessionID,e.visitID ,e.visitDate.toString());
+				
+				mvdEv.functionName = onSuccessfullVisitSave;
+				
+				CairngormEventDispatcher.getInstance().dispatchEvent(mvdEv); 
+			}
+			
+			
+			public function onSuccessfullVisitSave():void
+			{
+				
+			}
+			
+			
+			private function AddMore(event:Event):void
+			{
+				id_newRxView.id_InputView.ResetRXForm();
+				
+				/* if(openforInputChronic && IsforInput) // for chronic
+					id_newRxView.id_InputView.OpenForQuickInputChronic(visitID,visitDate);
+					
+				else if(!openforInputChronic && IsforInput) // for Presprection
+					id_newRxView.id_InputView.OpenForQuickInputEpreprection(visitID,visitDate); */
+			}
+			
+			private function CloseRXPanel(event:Event):void
+			{
+				if(openforInputChronic)
+				{
+					id_summaryView.dispatchEvent( new Event('AddMorePrescreption'));
+					id_summaryView.dispatchEvent(new FlipViewEvent());
+				}
+				
+				else if (IsforInput)
+				{
+					
+				}
+				else
+				{
+					// This will close ful rapid Access View
+					var lc:Event = new Event( "close", true, false );
+					dispatchEvent( lc );
+				}
+			}
+			
+			protected function onFlipRequested(event:Event):void
+			{
+				id_summaryView.URL = id_newRxView.Summry_url;
+			}
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if(openforInputChronic && PropertiesAlreadyCommited == false)
+				{
+					/* id_newRxView.id_InputView.OpenForQuickInputChronic(visitID,visitDate);
+					PropertiesAlreadyCommited = true; */
+				}
+				
+				if(IsforInput && PropertiesAlreadyCommited == false)
+				{
+					/* id_newRxView.id_InputView.OpenForQuickInputEpreprection(visitID,visitDate);
+					PropertiesAlreadyCommited = true; */
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="5" />
+	</s:layout>
+	
+	<FlipViews:PatientSubViewContainer width="100%" height="100%">
+		<FlipViews:inputViews>
+			<FlipViews:FlipViewContainer >
+				<FlipViews:flipViews>
+					<newrx:NewRxView id="id_newRxView" width="100%" height="100%" openforInputChronic="@{openforInputChronic}" 
+									 openforInputPrescription="@{openforInputPrescription}" IsforInput="@{IsforInput}" 
+									 RecordLevelNote="@{RecordLevelNote}" 
+									 RecordLevelDictationID="@{RecordLevelDictationID}"/>
+					<newrx:SummaryView id="id_summaryView" width="100%" height="100%" maxHeight="210"/>
+				</FlipViews:flipViews>
+			</FlipViews:FlipViewContainer>
+		</FlipViews:inputViews>
+	</FlipViews:PatientSubViewContainer>
+</s:Group>

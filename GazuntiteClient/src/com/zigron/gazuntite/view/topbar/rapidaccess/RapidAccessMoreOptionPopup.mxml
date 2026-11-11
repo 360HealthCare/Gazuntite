@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="cc(event)" 
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.search.SearchEngineList;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable]
+			private var DataProvider:ArrayCollection;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						var e:Event = new Event('closePopup', true);
+						dispatchEvent( e);
+						//removePopup();
+					}
+				});
+				
+				id_Selist.selectedIndex = 0;
+			}
+			
+			protected function listItem_changeHandler(event:IndexChangeEvent):void
+			{
+				var e:Event = new Event('change', true);
+				dispatchEvent( e );
+				
+				/* e = new Event('closePopup', true);
+				dispatchEvent( e); */
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:SkinnableContainer width="100%" height="100%"   skinClass="com.gazuntite.skins.controls.container.AddMoreSearchPopUpSkin">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="35" paddingTop="5" gap="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.searchListContainer" width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			<s:Spacer height="50" />
+			<s:Label text="Coming Soon" fontFamily="CalibriCFF" fontSize="20" />
+			<s:List id="id_Selist" width="100%" height="100%" dataProvider="{DataProvider}"  borderVisible="false" contentBackgroundAlpha="0"
+					change="listItem_changeHandler(event)"
+					itemRenderer="com.zigron.gazuntite.view.topbar.websearch.renderer.AddmoreItemRenderer" visible="false" includeInLayout="{id_Selist.visible}"/>
+			<s:Spacer height="50" />
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</components:PopupGroup>

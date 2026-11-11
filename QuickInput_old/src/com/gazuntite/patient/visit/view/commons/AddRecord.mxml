@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" gap="3"
+		  creationComplete="hgroup1_creationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			
+			import mx.events.FlexEvent;
+
+			
+			
+			private var _enableAll:Boolean;
+			
+			private var _notesDTO: ModuleNoteDTO;
+			private var _notesHeadingLabel:String;
+			private var _dictationDTO: ModuleDictationDTO;
+
+			[Bindable]
+			public function get enableAll():Boolean
+			{
+				return _enableAll;
+			}
+
+			public function set enableAll(value:Boolean):void
+			{
+				_enableAll = value;
+				enabled = _enableAll;
+			}
+
+			public function get notesDTO(): ModuleNoteDTO
+			{
+				return _notesDTO;
+			}
+			
+			public function set notesDTO(value:ModuleNoteDTO ):void
+			{
+				_notesDTO = value;
+			}
+
+			public function get notesHeadingLabel():String
+			{
+				return _notesHeadingLabel;
+			}
+			
+			public function set notesHeadingLabel(value:String):void
+			{
+				_notesHeadingLabel = value;
+			}
+			
+			public function get dictationDTO():ModuleDictationDTO
+			{
+				return _dictationDTO;
+			}
+			
+			public function set dictationDTO(value:ModuleDictationDTO ):void
+			{
+				_dictationDTO = value;
+			}
+			
+			private function onWriteNotesClick(event:MouseEvent):void
+			{
+				if (!_notesDTO)
+					_notesDTO = new ModuleNoteDTO();
+				
+				dispatchEvent(new Event("writeNotesClick", true));
+			}
+			
+			private function onWriteDictationClick(event:MouseEvent):void
+			{
+				if (!_dictationDTO)
+				{
+					_dictationDTO = new ModuleDictationDTO();
+				}
+				
+				
+				dispatchEvent(new Event("writeDictationClick", true));
+			}
+			
+			private function onAddClick(event:MouseEvent):void
+			{
+				
+			}
+
+			protected function hgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_WriteNotes.tabIndex = tabIndex ;
+				
+				id_WriteDictation.tabIndex=tabIndex+1;
+			
+			}
+ 
+		
+			
+		]]>
+	</fx:Script>
+	<fx:Metadata>
+		[Event (name = "writeNotesClick", type = "flash.events.Event")]
+		[Event (name = "writeDictationClick", type = "flash.events.Event")]
+		[Event (name = "addRecordClick", type = "flash.events.Event")]
+	</fx:Metadata>
+	<s:ToggleButton id="id_WriteNotes" click="onWriteNotesClick(event)" enabled="{enabled}" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes" buttonMode="true" useHandCursor="true" toolTip="Write Notes" />
+	<s:Button id="id_WriteDictation" click="onWriteDictationClick(event)" enabled="{enabled}" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn" buttonMode="true" useHandCursor="true" toolTip="Record Dictation"/>
+	<!--<s:Button id="id_add" click="onAddClick(event)" enabled="{enableAll}" buttonMode="true" useHandCursor="true" toolTip="Add Record"
+			  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.ImmunizationAddBtn"/>-->
+</s:HGroup>

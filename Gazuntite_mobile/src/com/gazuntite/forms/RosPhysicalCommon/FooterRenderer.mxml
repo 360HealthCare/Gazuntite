@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				>
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.events.ItemClickEvent;
+			import mx.states.OverrideBase;
+			
+			import spark.components.IItemRenderer;
+			import spark.skins.spark.ToggleButtonSkin;
+			
+			/**
+			 * 
+			 * @param 1 string value,selected value 'Yes' or 'No'
+			 * @param 2 string value,section label where clicked
+			 * 
+			 */	
+			public var OptionButtonClickHandler:Function;
+			/**
+			 * 
+			 * @PARAM 1 MOUSE EVENT RELATED TO BUTTON CLICK
+			 * @PARAM 2 STRING VALUE,SECTION lABEL WHERE CLICKED
+			 * 
+			 */	
+			public var ButtonClickHandler:Function;
+			
+			
+			protected function buttonbarbutton1_clickHandler(event:MouseEvent):void
+			{
+				if( null != ButtonClickHandler )
+					ButtonClickHandler(event, label);
+			}
+			
+			protected function rbGroup_itemClickHandler(event:ItemClickEvent):void
+			{
+				if( null != OptionButtonClickHandler )
+					OptionButtonClickHandler( event.item, label);
+				selected = true;
+			}
+			
+			[Bindable]
+			public override function set selected(value:Boolean):void
+			{
+				super.selected = value;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" itemClick="rbGroup_itemClickHandler(event)" />
+	</fx:Declarations>
+	
+	<!--<fx:Binding destination="selected" source="id_MainButton.selected" twoWay="true" />-->
+	
+	
+	<s:BorderContainer width="100%" height="26" borderAlpha="0" borderColor="#999AAA" backgroundAlpha="0" backgroundColor="yellow">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" horizontalAlign="right" paddingLeft="4" />
+		</s:layout>
+		<s:Button id="id_AllNormalBtn" skinClass="com.gazuntite.skins.ros.ROSallNormalBtn" buttonMode="true" useHandCursor="true" toolTip="All Normal" />
+		<s:Group id="id_Spacer" width="100%" />
+		
+		
+		<s:HGroup width="100%" horizontalAlign="right">
+			
+			<s:Button id="id_PreviousBtn" skinClass="com.gazuntite.skins.ros.VBPMHPrevBtn_small" useHandCursor="true" buttonMode="true" toolTip="Previous Section" />
+			<s:Button id="id_NextBtn" skinClass="com.gazuntite.skins.ros.VBPMHNextBtn_small" useHandCursor="true" buttonMode="true" toolTip="Next Section" />
+		</s:HGroup>
+		
+		
+	</s:BorderContainer>
+	
+	
+</s:ItemRenderer>

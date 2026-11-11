@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true">
+	<fx:Declarations>
+		<mx:DateFormatter id="dateFormatter2" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentRequestEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.event.LoadAppointmentEvent;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			//Button Click handler
+			protected function lblData_clickHandler(event:MouseEvent):void
+			{
+				Alert.show('Do you really want to approve this request ?','Confirmation', Alert.YES | Alert.NO, this, alertCancelListener, null, Alert.OK);
+			}
+			
+			//**************Alert of yes/No handler *****************************
+			private function alertCancelListener(eventObj:CloseEvent):void
+			{
+				if (eventObj.detail == Alert.YES) 
+				{
+					approveRequest();
+				}else
+				{
+					return;
+				}
+			}
+			//On click ok from Alert
+			protected function approveRequest():void
+			{
+				var date:Date = new Date();
+				var strModiedAt:String =  dateFormatter2.format(date.toDateString());//+'T'+time.format(date);
+				var statusID:int	= 1;
+				var RREvent:ManageAppointmentRequestEvent = new ManageAppointmentRequestEvent(data.ID, statusID, model.loggedInUserProviderId, strModiedAt,	'true', model.loggedInUserSelectedBranchId,'bnVsbA==', populateRequests);
+				CairngormEventDispatcher.getInstance().dispatchEvent( RREvent );
+				cursorManager.setBusyCursor();
+			}
+			//Callback function
+			private function populateRequests(val:* =null):void
+			{
+				dispatchEvent(new LoadAppointmentEvent('loadAppointmentEvent'));
+				Alert.show('successfully approved','Info',4,FlexGlobals.topLevelApplication.mainContainer);
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Button id="lblData" label="Approve" horizontalCenter="-0" verticalCenter="0" buttonMode="true"
+			  click="lblData_clickHandler(event)" styleName="actionButtonSkin" toolTip="Approve"/>
+</s:MXDataGridItemRenderer>

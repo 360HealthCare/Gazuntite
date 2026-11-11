@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+					  width="100%" height="22" 
+					  skinClass="com.adobe.gazuntite.skins.QuickInput.QIinternalBarSkin"
+					  >
+	
+	<fx:Metadata>
+		[DefaultProperty("HeaderContents")]
+		[Event(name="showNotesPanel", type="flash.events.Event")]
+		[Event(name="showDictationPanel", type="flash.events.Event")]
+		
+		[Event(name="saveData", type="flash.events.Event")]
+		
+		[Event(name="clearClicked", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		[Event(name="ALLNormal", type="flash.events.MouseEvent")]
+		[Event(name="importVitalsClicked", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		
+		[Event(name="englishUnitSelected", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		[Event(name="metricUnitSelected", type="com.gazuntite.patient.visit.view.events.VitalsHeaderEvent")]
+		
+		[Event(name="pinPanel", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarFocusSkin;
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarSkin;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtnSelected;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtnSelected;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButtonFilled;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButtonFilled2;
+			import com.gazuntite.patient.visit.view.events.VitalsHeaderEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			
+			private var _ShowSaveButton:Boolean;
+			private var _ShowVitalHeader:Boolean;
+			private var _ShowAllNormal:Boolean;
+			
+			
+			[ArrayElementType("mx.core.IDeferredInstance")]
+			public var HeaderContents:Array;
+			
+			private var _m_sHeadingLable:String;
+			
+			
+			public function get ShowAllNormal():Boolean
+			{
+				return _ShowAllNormal;
+			}
+			
+			public function set ShowAllNormal(value:Boolean):void
+			{
+				_ShowAllNormal = value;
+			}
+			
+			[Bindable]
+			public function get ShowVitalHeader():Boolean
+			{
+				return _ShowVitalHeader;
+			}
+			
+			public function set ShowVitalHeader(value:Boolean):void
+			{
+				_ShowVitalHeader = value;
+			}
+			
+			[Bindable]
+			public function get ShowSaveButton():Boolean
+			{
+				return _ShowSaveButton;
+			}
+			
+			public function set ShowSaveButton(value:Boolean):void
+			{
+				_ShowSaveButton = value;
+			}
+			
+			[Bindable]
+			public function get HeadingLable():String
+			{
+				return _m_sHeadingLable;
+			}
+			
+			public function set HeadingLable(value:String):void
+			{
+				_m_sHeadingLable = value;
+			}
+			
+			protected function id_iconButtons_clickHandler(event:MouseEvent):void
+			{
+				
+				id_OptionPopUp.displayPopUp = !id_OptionPopUp.displayPopUp;  
+				event.stopImmediatePropagation();
+				
+			}
+			
+			protected function id_OptionPopUp_focusOutHandler(event:FocusEvent):void
+			{
+				CloseOptionPopup();	
+			}
+			protected function id_CloseButton_clickHandler(event:MouseEvent):void
+			{
+				CloseOptionPopup();
+			}
+			
+			private function CloseOptionPopup():void
+			{
+				id_OptionPopUp.displayPopUp = false ;
+				id_iconButtons.selected		= false ;
+			}
+			
+			protected function OnOptionClick(event:MouseEvent):void
+			{
+				switch(event.currentTarget)
+				{
+					case id_NotesBtn:
+						dispatchEvent(new Event("showNotesPanel"));
+						break;
+					case id_DictationBtn:
+						dispatchEvent(new Event("showDictationPanel"));
+						break;
+					case id_Pin:
+						dispatchEvent(new Event("pinPanel"));
+						break;
+				}
+				
+				CloseOptionPopup();
+				trace(event.currentTarget.id);
+				event.stopImmediatePropagation();
+			}
+			
+			protected function id_SaveHistory_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				dispatchEvent(new VitalsHeaderEvent("saveData", true));
+			}
+			
+			protected function id_clear_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				dispatchEvent(new VitalsHeaderEvent(VitalsHeaderEvent.CLEAR_CLICKED, true));
+			}
+			
+			protected function id_import_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				dispatchEvent(new VitalsHeaderEvent(VitalsHeaderEvent.IMPORT_VITALS_CLICKED, true));
+			}
+			
+			protected function id_metric_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();		
+				dispatchEvent(new VitalsHeaderEvent(VitalsHeaderEvent.METRIC_UNIT_SELECTED, true));
+				
+			}
+			
+			protected function id_english_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				dispatchEvent(new VitalsHeaderEvent(VitalsHeaderEvent.ENGLISH_UNIT_SELECTED, true));
+			}
+			
+			
+			protected function id_AllNormalBtn_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				dispatchEvent(new MouseEvent("ALLNormal", true));
+			}
+			
+			
+			protected function OnHeaderInitialize(event:FlexEvent):void
+			{
+				if( HeaderContents )
+					for (var i:int = 0; i < HeaderContents.length; i++)
+						id_HeaderView.addElement(UIComponent(HeaderContents[i].getInstance()));
+				
+			}
+			
+			public function setIcons(hasNotes:Boolean, hasDictation:Boolean):void
+			{
+				//if(id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0)
+				
+				if(hasNotes && hasDictation)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled2);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtnSelected);
+				}				
+				else if(hasNotes)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtn);
+				}
+				else if(hasDictation)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtnSelected);	
+					id_NotesBtn.setStyle("skinClass", VBnotesBtn);
+				}				
+				else
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButton);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtn);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtn);					
+				}			
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" />
+	</s:layout>
+	
+	<s:HGroup verticalAlign="middle" horizontalAlign="left" width="100%" paddingLeft="1">
+		
+		<s:HGroup gap="0" horizontalAlign="left" verticalAlign="middle" width="24">
+			
+			<s:HGroup verticalAlign="top" paddingTop="-1">				
+				<s:Button id="id_CloseBtn" width="23" height="21" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QICrossButtonSkin" toolTip="Close" useHandCursor="true" buttonMode="true"  />
+			</s:HGroup>
+			
+			<buttonSkins:buttonSeparator />
+			
+		</s:HGroup>
+		
+		<s:HGroup verticalAlign="middle" horizontalAlign="left" width="50%" paddingLeft="4">
+			<s:Label id="id_headingLbl" color="#000000" fontFamily="Calibri" text="{HeadingLable}"/>	
+		</s:HGroup>
+		
+		
+		<s:HGroup id="commons" horizontalAlign="right" verticalAlign="middle" width="50%" paddingRight="5" gap="0">
+			
+			
+			<s:HGroup id="id_HeaderView" width="100%" horizontalAlign="right" verticalAlign="middle" tabChildren="true"
+					  initialize="OnHeaderInitialize(event);" maxHeight="22" 
+					  />
+			<s:VGroup width="77"  horizontalAlign="right" paddingTop="1" gap="-2">
+				<s:HGroup gap="0" width="{id_ChangeIndicator.visible ? 40 : 25}" horizontalAlign="right">
+					<buttonSkins:buttonSeparator visible="{id_ChangeIndicator.visible}" />
+					<s:HGroup paddingTop="3" paddingLeft="4">						
+						<s:ToggleButton id="id_ChangeIndicator" skinClass="com.adobe.gazuntite.skins.QuickInput.changeIndicator" includeInLayout="false" visible="false"/>
+					</s:HGroup>		
+					<buttonSkins:buttonSeparatorBlue visible="false" includeInLayout="false"/>
+					<s:HGroup paddingTop="0" paddingLeft="0" paddingRight="1" verticalAlign="middle">	
+						<s:Button id="id_SaveBtn" click="id_SaveHistory_clickHandler(event)" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIHeaderSaveBtnBlack" width="21" height="21" 
+								  toolTip="Save {UtilityFunctions.TitleCase(HeadingLable)}" buttonMode="true" useHandCursor="true" visible="{ShowSaveButton}" includeInLayout="{id_SaveBtn.visible}"/>
+					</s:HGroup>
+					
+					<buttonSkins:buttonSeparator />
+					<s:ToggleButton id="id_iconButtons" height="26" toolTip="Other Options" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButton" buttonMode="true" useHandCursor="true" 
+									click="id_iconButtons_clickHandler(event)"/>
+				</s:HGroup>
+				
+				
+				
+				<s:PopUpAnchor id="id_OptionPopUp" width="138"
+							   popUpPosition="below"								   
+							   displayPopUp="false"	
+							   focusOut="id_OptionPopUp_focusOutHandler(event)"
+							   styleName="popUpBox">
+					<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.communicationIconsBG" width="100%">
+						<s:layout>
+							<s:VerticalLayout gap="2" verticalAlign="bottom" horizontalAlign="left" paddingBottom="5" paddingLeft="7" paddingTop="4" />
+						</s:layout>
+						<s:HGroup width="100%" paddingRight="5">
+							<s:RichText color="#000000" fontSize="12" height="12" kerning="off" text="Other Options" whiteSpaceCollapse="preserve" fontFamily="Calibri Bold"/>
+							<mx:Spacer width="100%"/>
+							<s:Button buttonMode="true" id="id_CloseButtonn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.popupCloseBtnSkin"
+									  toolTip="Close" height="16" width="16"
+									  click="id_CloseButton_clickHandler(event)"/>
+						</s:HGroup>
+						
+						<s:Button 		id="id_DictationBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtn" 
+										buttonMode="true" useHandCursor="true" toolTip="Record Dictation" 
+										click="OnOptionClick(event)"/>
+						<s:Button 		id="id_NotesBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtn" 
+										buttonMode="true" useHandCursor="true" toolTip="Write Notes" 
+										click="OnOptionClick(event)"/>		
+						<s:ToggleButton  id="id_Pin" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.pinToggleButton"
+										 buttonMode="true" useHandCursor="true" toolTip="pin / Un-pin" 
+										 click="OnOptionClick(event)"/>	
+						
+					</s:SkinnableContainer>
+				</s:PopUpAnchor>
+			</s:VGroup>
+			<buttonSkins:buttonSeparator width="2" />
+			
+			<s:HGroup paddingTop="-2">
+				<s:ToggleButton id="id_expandBtn"  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.expandButton_grey"
+								buttonMode="true" useHandCursor="true" toolTip="{id_expandBtn.selected?'Collapse':'Expand'}"/>
+			</s:HGroup>
+			
+			
+		</s:HGroup>
+		
+		
+		
+	</s:HGroup>
+	<!--</s:BorderContainer>-->
+	<!--	</s:SkinnableContainer>-->
+</s:SkinnableContainer>

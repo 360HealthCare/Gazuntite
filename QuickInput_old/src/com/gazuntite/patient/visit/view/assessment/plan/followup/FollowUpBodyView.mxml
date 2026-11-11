@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*"
+		 xmlns:followup="com.gazuntite.patient.visit.view.assessment.plan.followup.*"
+		 creationComplete="cc(event)"		 
+		>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotesSelected;
+			import com.gazuntite.patient.visit.dto.FollowUpServiceTypeDTO;
+			import com.gazuntite.patient.visit.dto.PatientFollowupMergedDTO;
+			import com.gazuntite.patient.visit.dto.common.GeneralTypeDTO;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.GetPatientAllMedEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowUpInstructionAgeTypesEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowUpInstructionAgeValueTypesEvents;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowUpMergeByVisitIdEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowUpMethodTypeEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowUpServiceTypeEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowupDataControlTypeEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.LoadFollowupInstructionDurationTypeEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.followup.ManagePatientFollowupMergedEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.ValidationUtils;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.managers.dictation.QIDictationManager;
+			import com.gazuntite.patient.visit.view.commons.dictation.DictationPopup;
+			import com.gazuntite.patient.visit.view.commons.notes.NotesPanel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			
+			import spark.events.DropDownEvent;
+			[Bindable]
+			public var deleteColumnData:Object;
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _hasGridChanged:Boolean;
+			private var _hasViewChanged:Boolean;
+			private var PatientFollowup:PatientFollowupMergedDTO = new PatientFollowupMergedDTO();
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			
+			private function doValidation():void
+			{
+					//bindData();
+				
+				if( isInvalid() )
+				{
+					id_Add.enableAll = false;
+					return;
+				}
+				
+				id_Add.enableAll = true;
+				id_Add.enabled = true;
+			}
+			
+			private function followUpDateKeyUpHandler():void
+			{
+				doValidation();
+				
+				var searchStr:String = id_FollowUpDate.textInput.text;
+				
+				if (searchStr.length > 2)
+				{		
+					var lfmtEvent:LoadFollowUpServiceTypeEvent= new LoadFollowUpServiceTypeEvent(QIConstants.FOLLOWUP_DATE_ID, searchStr);//date ID is 2 for date dictionaries
+					CairngormEventDispatcher.getInstance().dispatchEvent( lfmtEvent );
+				}
+			}
+			
+			private function followUpServiceKeyUpHandler():void
+			{
+				doValidation();
+				
+				var searchStr:String = id_Service.textInput.text;
+				
+				if (searchStr.length > 2)
+				{
+					var lfmtEvent:LoadFollowUpServiceTypeEvent= new LoadFollowUpServiceTypeEvent(QIConstants.FOLLOWUP_SERVICE_ID, searchStr);//serviceID is 1 for service dictionaries
+					CairngormEventDispatcher.getInstance().dispatchEvent( lfmtEvent );
+				}
+			}
+			
+			public function labelFunction(item:Object) : String
+			{
+				if ( item )
+					return item.LabTestDescription + ", " + item.TestCode  ;
+				else
+					return "";
+			}
+			
+			
+			private var recordGridNotesPopUp:NotesPanel;
+			private var section:String = QIPopUpManager.FOLLOW_UP_INSTRUCTIONS;
+			private function onWriteNotesClick(event:Event):void
+			{
+				if (!recordGridNotesPopUp)
+					recordGridNotesPopUp = new NotesPanel();
+				
+				if (!recordGridNotesPopUp.isPanelShown)
+				{
+					var headingLabel:String = "";
+					
+					var addRecord:AddRecord = AddRecord(event.target);
+					
+					recordGridNotesPopUp 				= new NotesPanel();
+					recordGridNotesPopUp.width			= 250;
+					recordGridNotesPopUp.height			= 110;
+					recordGridNotesPopUp.HeadingLable 	= "Follow Up";
+					recordGridNotesPopUp.VisitDateLable = UtilityFunctions.FormatDate(model.VisitDate, "MM-DD-YYYY");//new Date().toDateString();
+					recordGridNotesPopUp.ShowPopup(this);
+					
+					recordGridNotesPopUp.notesDTO		=  addRecord.notesDTO; //gridNotesDTO;
+					
+					QIPopUpManager.addPopUp(recordGridNotesPopUp, section);
+					
+					var pt:Point = id_Add.localToGlobal(new Point(id_Add.id_WriteNotes.x ,id_Add.id_WriteNotes.y));
+					
+					recordGridNotesPopUp.move(pt.x - 195, pt.y + 20);
+					
+					recordGridNotesPopUp.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+						
+					}, false, 0, true);
+					
+					recordGridNotesPopUp.id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						recordGridNotesPopUp.SaveNotes();
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);
+							
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+							
+						}
+						recordGridNotesPopUp.removeNotePanel();
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+					});
+				}
+				
+			}
+			
+			private var recordLevelDicPanel:DictationPopup;
+			private function writeDictationClickHandler(event:Event):void
+			{
+				var addRecord:AddRecord = AddRecord(event.target);
+				
+				recordLevelDicPanel = QIDictationManager.show(addRecord, recordLevelDicPanel, addRecord.dictationDTO, addRecord.id_WriteDictation);
+				
+				QIPopUpManager.addPopUp(recordLevelDicPanel, QIPopUpManager.LAB_OUT);
+				recordLevelDicPanel.move( recordLevelDicPanel.x - 81, recordLevelDicPanel.y);
+				recordLevelDicPanel.addEventListener(MouseEvent.CLICK, function():void
+				{
+					QIPopUpManager.removePopUp(recordLevelDicPanel, QIPopUpManager.LAB_OUT);
+					
+					if(recordLevelDicPanel && recordLevelDicPanel.DictationID)
+					{
+						id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+					}
+					
+				}, true, 0, false);
+				
+			}
+		
+			private function bindData():void
+			{
+				/*if( isInvalid() )
+				{
+					trace( "followup data is invalid" );
+					id_Add.enableAll = false;
+					return;
+				}
+				id_Add.enableAll = true;*/
+				
+				if(PatientFollowup ==  null)
+				{
+					PatientFollowup = new PatientFollowupMergedDTO();
+				}
+				
+				if( id_ByDate.selected )
+				{
+					PatientFollowup.IsByDate 				= true;				
+					PatientFollowup.IsOnCompletion 			= false;
+					
+					if(id_FollowUpDate != null && id_FollowUpDate.textInput.text.length > 2 )
+					{
+						PatientFollowup.FollowUpDate = id_FollowUpDate.textInput.text;//.selectedDate;
+					}
+					
+				}
+				else if( id_OnCompletion.selected )
+				{
+					PatientFollowup.IsByDate 				= false;				
+					PatientFollowup.IsOnCompletion 			= true;
+					
+					if(id_ddlLabs.selectedItem)
+					{
+						PatientFollowup.labtest 				= id_ddlLabs.selectedItem as GeneralTypeDTO;// .LabTestType.LabTestTypeID; on W. Baber 					
+						PatientFollowup.IsLabTestSelected 		= true;
+						PatientFollowup.IsDrugselected 			= false;
+					}
+					else
+					{
+						PatientFollowup.labtest.ID = -1;
+					}
+					
+					if(id_ddlDrugs.selectedItem)
+					{	
+						PatientFollowup.drug = id_ddlDrugs.selectedItem as GeneralTypeDTO;//.PatientMedicationPrescribedID;on W. Baber 
+						PatientFollowup.IsDrugselected =  true;
+						
+						PatientFollowup.IsLabTestSelected =  false;
+					}
+					else
+					{
+						PatientFollowup.drug.ID = -1;
+					}
+				}
+				
+				if(PatientFollowup.followupMethodType==null)
+					PatientFollowup.followupMethodType = new GeneralTypeDTO();
+				//M
+				if(id_Office.selected)
+				{
+					PatientFollowup.followupMethodType = (QIUtilityFunctions.getFollowupMethodTypeDTOByName(Constants.OFFICE_FOLLOWUP_METHOD_NAME) as GeneralTypeDTO) ;
+				}
+				else if(id_Phone.selected)
+				{
+					PatientFollowup.followupMethodType = (QIUtilityFunctions.getFollowupMethodTypeDTOByName(Constants.PHONE_FOLLOWUP_METHOD_NAME) as GeneralTypeDTO) ;
+				}
+				else if(id_Email.selected)
+				{
+					PatientFollowup.followupMethodType = (QIUtilityFunctions.getFollowupMethodTypeDTOByName(Constants.EMAIL_FOLLOWUP_METHOD_NAME) as GeneralTypeDTO) ;
+				}
+				else if(id_Chat.selected)
+				{
+					PatientFollowup.followupMethodType = (QIUtilityFunctions.getFollowupMethodTypeDTOByName(Constants.CHAT_FOLLOWUP_METHOD_NAME) as GeneralTypeDTO) ;
+				}
+				else if(id_Video.selected)
+				{
+					PatientFollowup.followupMethodType = (QIUtilityFunctions.getFollowupMethodTypeDTOByName(Constants.VIDEO_FOLLOWUP_METHOD_NAME) as GeneralTypeDTO) ;
+				}
+				
+				
+				PatientFollowup.IsAcute = id_Acute.selected;
+				PatientFollowup.IsChronic = id_Chronic.selected;
+				PatientFollowup.IsPreventive = id_Preventive.selected;
+				
+				if( id_Service.selectedIndex >= 0 )
+				{
+					if(PatientFollowup.objServiceTypeDTO == null)
+						PatientFollowup.objServiceTypeDTO = new FollowUpServiceTypeDTO();
+					if(id_Service.selectedItem)
+						PatientFollowup.objServiceTypeDTO = id_Service.selectedItem as FollowUpServiceTypeDTO;
+				}
+				else
+				{
+					var serviceDto:FollowUpServiceTypeDTO 		= new FollowUpServiceTypeDTO();
+					serviceDto.followUpService 	  		= id_Service.textInput.text;
+					PatientFollowup.objServiceTypeDTO 	= serviceDto;
+				}
+				
+				if (id_FreqAge.selected)
+				{
+					PatientFollowup.IsAgeSelected = true;
+					PatientFollowup.IsDurationSelected = false;
+					
+					if(id_AgeType.selectedItem)
+					{
+						PatientFollowup.AgeType = id_AgeType.selectedItem as GeneralTypeDTO;
+						PatientFollowup.AgeValueType = id_AgeValue.selectedItem as GeneralTypeDTO;
+					}
+				}
+				else if (id_FreqDuration.selected)
+				{
+					PatientFollowup.IsAgeSelected = false;
+					PatientFollowup.IsDurationSelected = true;
+					
+					PatientFollowup.AfterDurationValue = parseInt(id_AfterDurationValue.text);
+					
+					if(id_AfterDurationType.selectedItem)
+					PatientFollowup.AfterInstructionDurationTypeDTO = id_AfterDurationType.selectedItem as GeneralTypeDTO;
+					
+					PatientFollowup.ForDurationValue = parseInt(id_ForDurationValue.text);
+					
+					if(id_ForDurationType.selectedItem)
+					PatientFollowup.ForInstructionDurationTypeDTO = id_ForDurationType.selectedItem as GeneralTypeDTO;
+				}
+				
+				PatientFollowup.IsPRN = id_PRN.selected;
+				
+				PatientFollowup.VisitDate = model.VisitDate;
+				PatientFollowup.VisitID = model.VisitID;;
+				PatientFollowup.PatientID = model.patientID;
+				PatientFollowup.CreatedBy = model.LoggedInUserId;
+				PatientFollowup.CreatedAt = new Date();
+				PatientFollowup.ModifiedAt = Constants.NULL_DATE;
+				PatientFollowup.DictationID = Constants.GUID_FORMAT;
+				PatientFollowup.ClinicBranchId = model.LoggedInUserSelectedBranchId;
+				PatientFollowup.CreatedByUserTypeID = model.LoggedInUserProviderTypeId;
+				PatientFollowup.IsDirty = 	true;
+				
+				if (id_Add.notesDTO)
+				{
+					PatientFollowup.Note 		= id_Add.notesDTO.Note;
+					PatientFollowup.NoteSubject = id_Add.notesDTO.NoteSubject;
+				}
+				
+				if (id_Add.dictationDTO != null && id_Add.dictationDTO.DictationID != Constants.GUID_FORMAT)
+				{
+					PatientFollowup.DictationID = id_Add.dictationDTO.DictationID;
+				}
+				
+			}
+			
+			private function addRecordClickHandler():void
+			{
+				if (isInvalid())
+				{
+					id_Add.enableAll = false;
+					return;
+				}
+				
+				if( null == model.PatientFollowupMerged )
+					model.PatientFollowupMerged = new ArrayCollection();
+				
+				/* if(!PatientFollowup.followupMethodType)
+					PatientFollowup.followupMethodType = new GeneralTypeDTO();
+				
+				PatientFollowup.followupMethodType.ID = 0; */
+				bindData();
+				model.PatientFollowupMerged.addItemAt(PatientFollowup, 0);
+				
+				var followupEvent:ManagePatientFollowupMergedEvent = new ManagePatientFollowupMergedEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(followupEvent);
+				
+				if(hasViewChanged)
+					hasViewChanged = false;
+				
+				hasViewChanged = true;
+				resetFields();
+			}
+			
+			public function isInvalid():Boolean
+			{
+				var notValid:Boolean = false;
+				
+				if (!isFrequencyValid())
+					return true;
+				
+				if (id_ByDate.selected)
+				{
+					if (id_FollowUpDate.textInput.text.length < 3)
+						return true;
+					
+					return false;
+				}
+				/*else if( id_ByDate.selected && (id_Service.textInput.text.length > 2 || id_Service.selectedIndex >=0))
+				{
+					notValid = false;
+				}
+				else if( id_ByDate.selected && id_PRN.selected)
+				{
+					notValid = false;
+				}*/
+				
+				if( id_OnCompletion.selected /*&& id_Service.textInput.text.length == 0 && id_FollowUpDate.textInput.text.length == 0 && !id_PRN.selected*/ && id_ddlLabs.selectedIndex < 0 && id_ddlDrugs.selectedIndex < 0)
+				{
+					if (id_rbLabTest.selected)
+					{
+						if (!ValidationUtils.isValidValueSelected(id_ddlLabs))
+							return true;
+							
+						return false;
+					}
+					
+					if (id_rbDrug.selected)
+					{
+						if (!ValidationUtils.isValidValueSelected(id_ddlDrugs))
+							return true;
+						
+						return false;
+					}
+					
+					return true;
+				}
+				
+				return true;
+				/*else if (id_FreqAge.selected)
+				{
+					if (!ValidationUtils.isValidValueSelected(id_AgeType))
+					{
+						notValid = true;
+					}	
+					else if (!ValidationUtils.isValidValueSelected(id_AgeValue))
+					{
+						notValid = true;
+					}
+				}
+					
+				else if (id_FreqDuration.selected)
+				{
+					ValidationUtils.Trim(id_AfterDurationValue);
+					ValidationUtils.Trim(id_ForDurationValue);
+					
+					var afterVal:Number = Number(id_AfterDurationValue.text);
+					var forVal:Number = Number(id_ForDurationValue.text);
+					
+					if (isNaN(afterVal))
+					{
+						notValid = true;
+					}
+					else if (!ValidationUtils.isValidValueSelected(id_AfterDurationType))
+					{
+						notValid = true;
+					}
+					else if (isNaN(forVal))
+					{
+						notValid = true;
+					}
+					else if (!ValidationUtils.isValidValueSelected(id_ForDurationType))
+					{
+						notValid = true;
+					}
+				}
+				
+				return notValid;*/
+			}
+			
+			private function isFrequencyValid():Boolean
+			{
+				if (id_PRN.selected)
+					return true;
+				
+				if (id_FreqAge.selected)
+				{
+					if (!ValidationUtils.isValidValueSelected(id_AgeType))
+					{
+						return false;
+					}	
+					
+					if (!ValidationUtils.isValidValueSelected(id_AgeValue))
+					{
+						return false;
+					}
+					
+					return true;
+				}
+				
+				if (id_FreqDuration.selected)
+				{
+					ValidationUtils.Trim(id_AfterDurationValue);
+					ValidationUtils.Trim(id_ForDurationValue);
+					
+					var afterVal:Number = Number(id_AfterDurationValue.text);
+					var forVal:Number = Number(id_ForDurationValue.text);
+					
+					if (isNaN(afterVal))
+					{
+						return false;
+					}
+					
+					if (!ValidationUtils.isValidValueSelected(id_AfterDurationType))
+					{
+						return false;
+					}
+					
+					if (isNaN(forVal))
+					{
+						return false;
+					}
+					
+					if (!ValidationUtils.isValidValueSelected(id_ForDurationType))
+					{
+						return false;
+					}
+					
+					return true;
+				}
+				
+				return false;
+			}
+			
+			private function resetFields():void
+			{
+				PatientFollowup = null;
+				
+				id_Add.enableAll = false;
+					
+				id_grpByDate.visible 		= true;
+				id_grpOnComplition.visible 	= false;
+				
+				id_ByDate.selected = true;
+				id_Chronic.selected = true;
+				
+				id_FollowUpDate.selectedIndex = -1;
+				id_FollowUpDate.textInput.text = "";
+				
+				id_Service.selectedItem = null;
+				id_Service.textInput.text = "";
+				
+				//id_FreqAge.selected = true;
+				id_FrequencyViews.selectedIndex = 0;
+				
+				id_PRN.selected = false;
+				id_Chronic.selected = true;
+				id_Office.selected = true;
+				
+				if (id_AgeType)
+				{
+					id_AgeType.selectedItem = null;
+					id_AgeType.textInput.text = "";
+				}
+				
+				if (id_AgeValue)
+				{
+					id_AgeValue.selectedItem = null;
+					id_AgeValue.textInput.text = "";
+				}
+				
+				if (id_AfterDurationType)
+				{
+					id_AfterDurationType.selectedItem = null;
+					id_AfterDurationType.textInput.text = "";
+				}
+				
+				if (id_AfterDurationValue)
+					id_AfterDurationValue.text = "";
+				
+				if (id_ForDurationType)
+				{
+					id_ForDurationType.selectedItem = null;
+					id_ForDurationType.textInput.text = "";
+				}
+				
+				if (id_ForDurationValue)
+					id_ForDurationValue.text = "";
+				
+				
+				if ( id_Add.notesDTO != null )
+				{
+					id_Add.notesDTO = null;
+				}
+				
+				if ( id_Add.dictationDTO != null )
+				{
+					id_Add.dictationDTO = null 
+				}
+				
+				id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+				id_Add.id_WriteDictation.setStyle("skinClass", QIDictationBtn);
+			}
+			
+			protected function rbGroup_itemClickHandler(event:ItemClickEvent):void
+			{
+				//bindData();
+				
+				if( isInvalid() )
+				{
+					id_Add.enableAll = false;
+					return;
+				}
+				
+				id_Add.enableAll = true;
+			}
+			
+			protected function rbSection_itemClickHandler(event:ItemClickEvent):void
+			{
+				if( event.item == "LabTest" )
+				{
+					id_ddlLabs.enabled 	= true;
+					id_ddlDrugs.enabled = false;
+					id_ddlLabs.setFocus();
+				}
+				else
+				{
+					id_ddlDrugs.enabled = true;
+					id_ddlLabs.enabled 	= false;
+					id_ddlDrugs.setFocus();
+				}
+			}
+			
+			private function frequencyItemClickHandler(event:ItemClickEvent):void
+			{
+				if (event.item == "age")
+					id_FrequencyViews.selectedIndex = 0;
+				else
+					id_FrequencyViews.selectedIndex = 1;
+				
+			}
+			
+			private function id_OptionType_changeHandler(event:ItemClickEvent):void
+			{
+				//bindData();
+				
+				if( isInvalid() )
+				{
+					id_Add.enableAll = false;
+					return;
+				}
+				
+				id_Add.enableAll = true;
+			}
+			
+			protected function id_FollowUpType_changeHandler(event:ItemClickEvent):void
+			{
+				if( event.item == "ByDate" )
+				{
+					id_grpByDate.visible 		= true;
+					id_grpOnComplition.visible 	= false;	
+				}
+				
+				else if( event.item == "OnCompletion" )
+				{
+					id_grpByDate.visible 		= false;
+					id_grpOnComplition.visible 	= true;
+					
+					id_ddlLabs.enabled 			= true;
+					id_ddlDrugs.enabled 		= false;
+					id_rbLabTest.selected 		= true;
+					
+					id_ddlLabs.setFocus();
+					
+				}
+			}
+			
+			public function loadGridData():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(model.followUpDataControlType))
+				{
+					var lfdcEvent : LoadFollowupDataControlTypeEvent= new LoadFollowupDataControlTypeEvent(LoadStaticData);
+					CairngormEventDispatcher.getInstance().dispatchEvent( lfdcEvent );
+				}				
+			}
+				
+			private function LoadStaticData():void
+			{	
+				if(model.followUpinstructionAgeTypeDTOList==null || model.followUpinstructionAgeTypeDTOList.length==0)
+				{
+					var fuiaEvent : LoadFollowUpInstructionAgeTypesEvent= new LoadFollowUpInstructionAgeTypesEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( fuiaEvent );
+				}
+				
+				if(model.instructionAgeValueTypeDTOList==null || model.instructionAgeValueTypeDTOList.length==0)
+				{
+					var fuiavEvent : LoadFollowUpInstructionAgeValueTypesEvents= new LoadFollowUpInstructionAgeValueTypesEvents();
+					CairngormEventDispatcher.getInstance().dispatchEvent( fuiavEvent );
+				}
+				
+				if(model.instructionAgeValueTypeDTOList==null || model.instructionAgeValueTypeDTOList.length==0)
+				{
+					var fuidEvent : LoadFollowupInstructionDurationTypeEvent= new LoadFollowupInstructionDurationTypeEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( fuidEvent );
+				}
+				
+				if(model.instructionAgeValueTypeDTOList==null || model.instructionAgeValueTypeDTOList.length==0)
+				{
+					var fumtEvent : LoadFollowUpMethodTypeEvent= new LoadFollowUpMethodTypeEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( fumtEvent );
+				}
+				
+				if(model.PatientFollowupMerged==null || model.PatientFollowupMerged.length==0)
+				{
+					var lfmEvent : LoadFollowUpMergeByVisitIdEvent= new LoadFollowUpMergeByVisitIdEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( lfmEvent );
+				}
+			}
+			
+			protected function id_ddlDrugs_openHandler(event:DropDownEvent):void
+			{
+				if(model.PatientMedicationDTOlist.length <= 0 && model.gaxenID != '')
+				{
+					var ve:GetPatientAllMedEvent = new GetPatientAllMedEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(ve);
+				}
+					
+			}
+			
+			protected function NotesDictationSavedFromGrid(event:Event):void
+			{
+				var evn:ManagePatientFollowupMergedEvent = new ManagePatientFollowupMergedEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(evn);
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				gridView.addEventListener("NotesSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				gridView.addEventListener("DictationSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" itemClick="rbGroup_itemClickHandler(event)" 		/>
+		<s:RadioButtonGroup id="rbSection" itemClick="rbSection_itemClickHandler(event)" 	/>
+		<s:RadioButtonGroup id="frequencyGrp" itemClick="frequencyItemClickHandler(event)"	/>
+		<s:RadioButtonGroup id="rbOptionType" itemClick="id_OptionType_changeHandler(event)" />
+		<s:RadioButtonGroup id="id_FollowUpType" itemClick="id_FollowUpType_changeHandler(event)" />
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="5" paddingRight="5" paddingLeft="5"/>
+	</s:layout>
+	<s:HGroup>
+		<s:RadioButton id="id_ByDate" label="By Date" value="ByDate" selected="true" fontFamily="Calibri" fontSize="11"
+					   groupName="id_FollowUpType"
+					   buttonMode="true" useHandCursor="true" toolTip="By Date" color="#ffffff" />
+		<s:RadioButton id="id_OnCompletion" label="Upon Completion of" value="OnCompletion" fontFamily="Calibri" fontSize="11"
+					   groupName="id_FollowUpType" 
+					   buttonMode="true" useHandCursor="true" toolTip="Upon Completion of" color="#ffffff" />
+	</s:HGroup>
+	<s:HGroup width="100%" gap="3" >
+		<s:VGroup>
+			
+			<s:HGroup id="id_grpByDate">
+				<components:LabelComboBox id="id_FollowUpDate" prompt="Date" width="150" change="doValidation()" keyUp="followUpDateKeyUpHandler()" includeInLayout="{id_grpByDate.visible}"
+										  dataProvider="{model.followUpServiceDateList}" labelField="followUpService"/>
+			</s:HGroup>
+			
+			<s:HGroup id="id_grpOnComplition" gap="20" visible="false" includeInLayout="{id_grpOnComplition.visible}" >
+				<s:VGroup gap="20" >
+					<s:HGroup>	
+						<s:Label text="Lab Test" fontFamily="Calibri" fontSize="11" color="#ffffff" />
+						<s:RadioButton id="id_rbLabTest" label="Lab Test" groupName="rbSection" value="LabTest" visible="true" fontFamily="Calibri" fontSize="11" 
+									   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true"/>
+					</s:HGroup>
+					<s:HGroup>
+						<s:Label text="Drug" fontFamily="Calibri" fontSize="11" color="#ffffff" paddingRight="15" verticalAlign="middle" />
+						<s:RadioButton id="id_rbDrug" label="Drug" groupName="rbSection" value="Drug" visible="true" fontFamily="Calibri" fontSize="11" 
+									   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true"/>
+					</s:HGroup>
+				</s:VGroup>
+				<s:VGroup gap="2">
+					<components:LabelComboBox id="id_ddlLabs" width="150"  labelFunction="labelFunction" 
+											  change="doValidation()" keyUp="doValidation()" tabIndex="1" /><!--dataProvider="{model.followupLabsDTOList}" -->
+					<components:LabelComboBox id="id_ddlDrugs" width="150"  labelField="DrugName" 
+											  change="doValidation()" keyUp="doValidation()" open="id_ddlDrugs_openHandler(event)" tabIndex="3" dataProvider="{model.PatientMedicationDTOlist}"/>
+				</s:VGroup>
+			</s:HGroup >
+			<s:HGroup>
+				<s:RadioButton id="id_Chronic" label="Chronic" groupName="rbOptionType" value="Chronic" visible="true" fontFamily="Calibri" fontSize="11" selected="true"
+							   buttonMode="true" useHandCursor="true" tabIndex="2" color="#ffffff"/>
+				<s:RadioButton id="id_Preventive" label="Preventive" groupName="rbOptionType" value="Preventive" visible="true" fontFamily="Calibri" fontSize="11"
+							   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+				<s:RadioButton id="id_Acute" label="Acute" groupName="rbOptionType" value="Acute" visible="true" fontFamily="Calibri" fontSize="11"
+							   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+		<s:RadioButton id="id_Office" label="Office" groupName="rbGroup" value="Office" visible="true" fontFamily="Calibri" fontSize="11" selected="true"
+					   buttonMode="true" useHandCursor="true" tabIndex="2" color="#ffffff"/>
+		<s:RadioButton id="id_Phone" label="Phone" groupName="rbGroup" value="Phone" visible="true" fontFamily="Calibri" fontSize="11"
+					   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+		<s:RadioButton id="id_Email" label="Email" groupName="rbGroup" value="Email" visible="true" fontFamily="Calibri" fontSize="11"
+					   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+		<s:RadioButton id="id_Chat" label="Chat" groupName="rbGroup" value="Chat" visible="true" fontFamily="Calibri" fontSize="11"
+					   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+		<s:RadioButton id="id_Video" label="Video" groupName="rbGroup" value="Video" visible="true" fontFamily="Calibri" fontSize="11"
+					   buttonMode="true" useHandCursor="true" color="#ffffff"/>
+		
+		<s:HGroup width="100%">
+			<commons:AddRecord id="id_Add" writeNotesClick="onWriteNotesClick(event)"  writeDictationClick="writeDictationClickHandler(event)" enabled="false" tabIndex="3" horizontalAlign="center" paddingLeft="10" />
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:VGroup width="100%" gap="2">
+		<s:Label text="Post Visit Preventive and Wellness Instructions" fontFamily="Calibri" color="#ffffff"/>
+		<s:HGroup width="100%">
+			<components:LabelComboBox id="id_Service" prompt="Select Required Preventive and Wellness Service" width="100%" restrict="/[0-9a-zA-Z]*[.-_]]/"
+									  labelField="followUpService" change="doValidation()" keyUp="followUpServiceKeyUpHandler()" dataProvider="{model.followUpServiceTypeList}" tabIndex="4"/><!---->
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:Label text="Frequency" height="23" verticalAlign="middle" fontFamily="Calibri" color="#ffffff"/>
+			<s:RadioButton label="Age" id="id_FreqAge" value="age" groupName="frequencyGrp" fontFamily="Calibri" selected="true" height="23"
+						   
+						   buttonMode="true" useHandCursor="true" tabIndex="5" color="#ffffff" />
+			<s:RadioButton label="Duration" id="id_FreqDuration" value="duration" groupName="frequencyGrp" fontFamily="Calibri" height="23"
+						   buttonMode="true" useHandCursor="true" color="#ffffff"
+						   />
+			
+			<s:CheckBox id="id_PRN" label="PRN" width="50" change="doValidation()" fontFamily="Calibri" color="#ffffff" />
+			<mx:ViewStack id="id_FrequencyViews" width="100%" paddingLeft="5">
+				<s:NavigatorContent width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					
+					<components:LabelComboBox id="id_AgeType" prompt="Age Type" width="120"  labelField="Name"
+											  change="doValidation()" keyUp="doValidation()" tabIndex="6" dataProvider="{model.followUpinstructionAgeTypeDTOList}" />
+					<components:LabelComboBox id="id_AgeValue" prompt="Age Value" width="100%"  change="doValidation()" keyUp="doValidation()" 
+											   labelField="Name" tabIndex="7" dataProvider="{model.instructionAgeValueTypeDTOList}" /> 
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					<s:Label text="After Every:" height="23" verticalAlign="middle" fontFamily="calibri" color="#ffffff"/>
+					<components:LabelTextInput id="id_AfterDurationValue" prompt="Value" width="55" height="23" change="doValidation()" keyUp="doValidation()"/>
+					<components:LabelComboBox id="id_AfterDurationType" prompt="Type" width="100%"  labelField="Name"
+											  change="doValidation()" keyUp="doValidation()" dataProvider="{model.followUpDurationTypeList}"/>
+					
+					<s:Label text="For:" height="23" verticalAlign="middle" fontFamily="calibri" color="#ffffff"/>
+					<components:LabelTextInput id="id_ForDurationValue" prompt="Value" width="55" height="23" change="doValidation()" keyUp="doValidation()"/>
+					<components:LabelComboBox id="id_ForDurationType" prompt="Type" width="100%"  labelField="Name"
+											  change="doValidation()" keyUp="doValidation()"  dataProvider="{model.followUpDurationTypeList}"/>
+				</s:NavigatorContent>
+			</mx:ViewStack>
+		</s:HGroup>
+		<s:HGroup width="100%" >
+			<s:Button id="id_AddRecord" click="addRecordClickHandler()" enabled="{id_Add.enableAll}" buttonMode="true" useHandCursor="true" 
+					  toolTip="Add Record"  label="Add Follow Up"
+					  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreTooltipBtn"  width="150" tabIndex="8"/>
+			<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBG" visible="{!id_Add.enabled}" width="100%" />
+		</s:HGroup>
+		<followup:FollowUpBodyGridView id="gridView" width="100%"/>
+	</s:VGroup>
+</s:Group>

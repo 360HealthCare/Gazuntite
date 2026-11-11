@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dualpanel:DualPanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:dualpanel="com.riavalue.components.dualpanel.*"
+					 xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+					 xmlns:controls="com.gazuntite.components.controls.*"
+					 
+					 width="100%"
+					 height="100%"
+					 
+					 skinClass="com.riavalue.components.dualpanel.SpinSkin"
+					 transitionDuration="300" 
+					 xmlns:treatment="com.gazuntite.view.quickInput.forms.treatment.*" 
+					 creationComplete="creationCompleteHandler(event)"
+					 xmlns:procedure="com.gazuntite.view.quickInput.forms.treatment.procedure.*" 
+					 xmlns:prescription="com.gazuntite.view.quickInput.forms.treatment.prescription.*"
+					 xmlns:LabOut="com.gazuntite.view.quickInput.forms.Plan.LabOut.*"
+					 xmlns:Recommendation="com.gazuntite.view.quickInput.forms.Plan.Recommendation.*" xmlns:FollowUp="com.gazuntite.view.quickInput.forms.Plan.FollowUp.*" xmlns:controls1="com.gazuntite.view.controls.*"
+					 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ArrangeByEvent;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.Plan.LabOutDTO;
+			import com.gazuntite.services.valueObjects.Treatment.ProcedureDTO;
+			
+			import flashx.textLayout.events.ModelChange;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			import spark.components.supportClasses.ListBase;
+			
+			
+			[Bindable]
+			protected var editObject:Object;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			protected function saveProcedureDataHandler(event:SaveFormDataEvent):void
+			{
+				
+			}
+			
+			
+			
+			
+			public function id_labOut_saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int =id_labOut.id_SortableList.id_ListView.selectedIndex;
+						sharedModel.LabOutAC.setItemAt(event.payload, i);
+						editObject = sharedModel.LabOutAC.getItemAt(i) as LabOutDTO;
+					}
+					else
+					{
+						sharedModel.addedLabOutAC.addItem(event.payload);
+						sharedModel.LabOutAC.addItem(event.payload);
+					}
+					trace ("done");
+				} 
+				
+				invalidateDisplayList();			
+			}
+			
+			protected function recommendation1_saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int =id_recommandation.id_SortableList.id_ListView.selectedIndex;
+						sharedModel.RecommendationAC.setItemAt(event.payload, i);
+						editObject = sharedModel.RecommendationAC.getItemAt(i) as LabOutDTO;
+					}
+					else
+					{
+						sharedModel.addedRecommendationAC.addItem(event.payload);
+						sharedModel.RecommendationAC.addItem(event.payload);
+					}
+					trace ("done");
+				} 
+				
+				invalidateDisplayList();
+			}
+			
+			protected function followup1_saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int =id_followUp.id_SortableList.id_ListView.selectedIndex;
+						sharedModel.FollowUpAC.setItemAt(event.payload, i);
+						editObject = sharedModel.FollowUpAC.getItemAt(i) as ObjectProxy;
+					}
+					else
+					{
+						sharedModel.addedFollowUpAC.addItem(event.payload);
+						sharedModel.FollowUpAC.addItem(event.payload);
+					}
+					trace (" FollowUp save done");
+				} 
+				
+				invalidateDisplayList();
+				
+			}
+			
+		]]>
+		
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<dualpanel:states>
+		<s:State name="normal"/>
+		<s:State name="normalFlipped"/>
+	</dualpanel:states> 
+	
+	
+	<dualpanel:frontView>
+		
+		<controls1:CoverFlowPanelView id="id_CFPFrontView"
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="{'Plan: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 
+									 >
+			<controls:layout>
+				<s:VerticalLayout paddingBottom="0"
+								  paddingLeft="0"
+								  paddingRight="0"
+								  paddingTop="0"
+								  horizontalAlign="center"/>
+			</controls:layout>
+			
+			<s:TabBar width="100%" dataProvider="{vs}" />
+			
+			<mx:ViewStack id="vs" width="100%" height="100%" >
+				<s:NavigatorContent  width="100%" height="100%" label="Lab Out">
+					<LabOut:LabOut width="100%" height="100%" id="id_labOut" saveFormData="id_labOut_saveFormDataHandler(event)" dataProvider="{sharedModel.addedLabOutAC}"/>				
+				</s:NavigatorContent>
+				<s:NavigatorContent  width="100%" height="100%" label="Recommantation" >
+					<Recommendation:Recommendation id="id_recommandation" width="100%" height="100%" saveFormData="recommendation1_saveFormDataHandler(event)" dataprovider="{sharedModel.addedRecommendationAC}"/>
+				</s:NavigatorContent>
+				<s:NavigatorContent  width="100%" height="100%" label="Follow Up" >
+				   	<FollowUp:FollowUp id="id_followUp" width="100%" height="100%" saveFormData="followup1_saveFormDataHandler(event)"  dataprovider="{sharedModel.addedFollowUpAC}" />
+				</s:NavigatorContent>
+			</mx:ViewStack>
+			
+		</controls1:CoverFlowPanelView>
+		
+		
+		
+	</dualpanel:frontView>
+	
+	
+	<dualpanel:backView>
+		
+		
+		<controls1:CoverFlowPanelView id="id_CFPBackView"
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="{'Plan: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 
+									 >
+			<controls:layout>
+				<s:VerticalLayout paddingBottom="0"
+								  paddingLeft="0"
+								  paddingRight="0"
+								  paddingTop="0"
+								  horizontalAlign="center"/>
+			</controls:layout>
+			
+			
+			<s:TabBar width="100%" dataProvider="{vsBV}" />
+			
+			<mx:ViewStack id="vsBV" width="100%" height="100%" >
+				<s:NavigatorContent  width="100%" height="100%" label="Lab Out">
+					<LabOut:LabOut width="100%" height="100%" id="id_labOutBV" saveFormData="id_labOut_saveFormDataHandler(event)" dataProvider="{sharedModel.addedLabOutAC}"/>				
+				</s:NavigatorContent>
+				<s:NavigatorContent  width="100%" height="100%" label="Recommantation" >
+					<Recommendation:Recommendation id="id_recommandationBV" width="100%" height="100%" saveFormData="recommendation1_saveFormDataHandler(event)" dataprovider="{sharedModel.addedRecommendationAC}"/>
+				</s:NavigatorContent>
+				<s:NavigatorContent  width="100%" height="100%" label="Follow Up" >
+					<FollowUp:FollowUp id="id_followUpBV" width="100%" height="100%" saveFormData="followup1_saveFormDataHandler(event)" dataprovider="{sharedModel.addedFollowUpAC}" />
+				</s:NavigatorContent>
+			</mx:ViewStack>
+			
+			<!--<procedure:ProcedureForm id="id_ProcedureFormBV" dataProvider="{sharedModel.procedureAC}" width="100%" height="100%" />			-->
+			
+		</controls1:CoverFlowPanelView>
+		
+		
+		
+	</dualpanel:backView>
+	
+</dualpanel:DualPanel>

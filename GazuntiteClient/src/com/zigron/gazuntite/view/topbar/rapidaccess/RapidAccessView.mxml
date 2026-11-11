@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:sf="http://www.spicefactory.org/parsley"
+					  xmlns:common="com.zigron.gazuntite.view.common.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:view="com.zigron.provider.eprescription.services.patient.view.*"
+					  xmlns:scheduler="com.zigron.provider.live.services.scheduler.view.*" 
+					  skinClass="com.gazuntite.skins.MainContainerSplitViewSkin"
+					  xmlns:eprescription="com.gazuntite.provider.eprescription.services.patient.view.*"
+					  xmlns:view1="com.gazuntite.provider.live.services.scheduler.view.*" 
+					  xmlns:view2="com.gazuntite.provider.live.services.elab.view.*" 
+					  xmlns:documgmt="com.gazuntite.document.view.*"
+					  width="100%" height="100%"
+					  creationComplete="cc(event)" 
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.zigron.gazuntite.event.rapidAccess.LoadUserDefaultQuickLinksbyLocationEvent;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]	private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable]	private var rapidAccessModel : RapidAccessModel = RapidAccessModel.getInstance();
+			[Bindable]private var defaultArray : ArrayCollection = new ArrayCollection();
+			
+			private var moreOptionPopup:RapidAccessMoreOptionPopup;
+			private var quickLinksPopup:QuickLinksPopup;
+			
+			protected function Close_clickHandler(event:MouseEvent):void
+			{
+				var lc:Event = new Event( "close", true, false );
+				dispatchEvent( lc );
+			}
+			
+			protected function max_clickHandler(event:MouseEvent):void
+			{
+				PatientViewModel.getInstance().closeAllTabs();
+			}
+			
+			
+			protected function moreOption_clickHandler(event:MouseEvent):void
+			{
+				
+				var toggleView:Boolean = null != moreOptionPopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				moreOptionPopup = new RapidAccessMoreOptionPopup();
+				moreOptionPopup.ShowPopup( this );
+				moreOptionPopup.addEventListener("closePopup", function(event:Event):void { removeAllPopups() } );
+				
+				//moreOptionPopup.minWidth = 245;
+				//moreOptionPopup.percentWidth = 100;
+				moreOptionPopup.width =  170;
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				moreOptionPopup.move( pt.x - (moreOptionPopup.width ) , pt.y + event.currentTarget.height  + 5); 
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			public function removeAllPopups():void
+			{
+				if( moreOptionPopup && moreOptionPopup.isPopUp )
+				{
+					moreOptionPopup.removePopup();
+					moreOptionPopup = null;
+				}
+				
+				if( quickLinksPopup && quickLinksPopup.isPopUp )
+				{
+					quickLinksPopup.removePopup();
+					quickLinksPopup = null;
+					id_quickLinksTB.selected = false;
+					
+				}
+			}
+			
+			protected function rapidAccess_tabbar_changeHandler(event:IndexChangeEvent):void
+			{
+				id_Views.selectedIndex = event.currentTarget.selectedIndex;
+			}
+			
+			protected function id_Views_changeHandler(event:IndexChangeEvent):void
+			{
+				if(id_Views.selectedIndex == 0)
+					id_SelectedTabLabel.text = 'PRESCRIPTION';
+				if(id_Views.selectedIndex == 1)
+					id_SelectedTabLabel.text = 'DOCUMENT MANAGEMENT';
+				if(id_Views.selectedIndex == 2)
+					id_SelectedTabLabel.text = 'E-LAB';
+				if(id_Views.selectedIndex == 3)
+					id_SelectedTabLabel.text = 'UNSIGNED ENCOUNTER';
+				if(id_Views.selectedIndex == 4)
+					id_SelectedTabLabel.text = 'SCHEDULER';
+				
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				UpdateEpresprectionModel();
+			}
+			
+			public function UpdateEpresprectionModel():void
+			{
+				EPrescriptionModelLocator.getInstance().LoggedInUserId = model.LoggedInUserDTO.UserId;
+			}
+			
+			
+			protected function quickLinksClickHandler(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != quickLinksPopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				if(!model.manageQuickLinksList)
+					model.manageQuickLinksList = new ArrayCollection();
+				else
+					model.manageQuickLinksList.removeAll();
+				
+				if(!model.quickLinksList)
+				{
+					var evt:LoadUserDefaultQuickLinksbyLocationEvent = new LoadUserDefaultQuickLinksbyLocationEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(evt);
+				}
+				
+				if(!model.allQuickLinksList)
+				{
+					rapidAccessModel.LoadAllQuickLinks();
+				}
+				
+				quickLinksPopup = new QuickLinksPopup();
+				quickLinksPopup.ShowPopup( this );
+				quickLinksPopup.addEventListener("closePopup", function(event:Event):void { removeAllPopups() } );
+				quickLinksPopup.width 	=  220;
+				quickLinksPopup.width 	=  270;
+				quickLinksPopup.defaultArray 	=  defaultArray;
+				
+				var pt:Point;
+				pt = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				quickLinksPopup.move( pt.x - 110 , pt.y + id_quickLinksTB.height  ); 
+				
+				quickLinksPopup.addEventListener('changeView',function (event:GeneralEvent):void{
+					switch(event.value)
+					{
+						case 'Prescription':
+						{
+							id_Views.selectedIndex = 0;
+							id_ButtonBar.selectedIndex = 0;
+							break;
+						}
+						case 'Document Mgmt.':
+						{
+							id_Views.selectedIndex = 1;
+							id_ButtonBar.selectedIndex = 1;
+							break;
+						}
+						case 'E-labs':
+						{
+							id_Views.selectedIndex = 2;
+							id_ButtonBar.selectedIndex = 2;
+							break;
+						}
+						case 'Un-signed Encounters':
+						{
+							id_Views.selectedIndex = 3;
+							id_ButtonBar.selectedIndex = 3;
+							break;
+						}
+						case 'Scheduler':
+						{
+							id_Views.selectedIndex = 4;
+							id_ButtonBar.selectedIndex = 4;
+							break;
+						}
+						
+							
+						default:
+						{
+							break;
+						}
+					}	
+				});
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.WebPanelBodySkin" width="100%" height="100%" minHeight="290">		
+		<s:layout>
+			<s:VerticalLayout paddingTop="3" paddingLeft="0" paddingRight="0" paddingBottom="0" gap="3" verticalAlign="middle" horizontalAlign="center" />
+		</s:layout>
+		
+		<!-- START  HEADER RAPID ACCESS -->
+		<s:Group width="100%" height="20">
+			<s:HGroup left="10" height="100%" verticalAlign="middle">
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.RapidAccessHeader"/>
+				<s:Label fontFamily="CalibriCFF" fontSize="15" paddingTop="4" text="RAPID ACCESS"/>
+				<s:Spacer width="10"/>
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.ePrescription.RapidAccessHeaderArrow"/>
+				<s:Label id="id_SelectedTabLabel" fontFamily="CalibriCFF" fontSize="15" paddingTop="4" color="#294C6F"/>
+			</s:HGroup>
+			
+			<s:ToggleButton 
+				id="id_quickLinksTB"
+				horizontalCenter="0"
+				verticalCenter="0"
+				click="quickLinksClickHandler(event)"
+				skinClass="com.gazuntite.skins.controls.toggleButtonSkin.QuickLinksTBSkin"
+				toolTip="Quick Links" useHandCursor="true" buttonMode="true"
+				/>
+			<!--<s:Button width="19" 
+			click="max_clickHandler(event)"
+			skinClass="com.gazuntite.skins.controls.button.restoreButton" 
+			buttonMode="true" useHandCursor="true"
+			toolTip="Maximize"
+			includeInLayout="false" visible="false"
+			/>-->
+			<s:HGroup right="5" height="100%" verticalAlign="middle">
+				<s:ToggleButton click="moreOption_clickHandler(event)"   
+								buttonMode="true" useHandCursor="true" toolTip="More Options" 
+								skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin" />
+				<s:Button id="Close"
+						  toolTip="Close" 
+						  skinClass="com.gazuntite.skins.controls.button.blackCloseButtonSkin" 
+						  useHandCursor="true" buttonMode="true" click="Close_clickHandler(event)" />
+			</s:HGroup>
+		</s:Group>
+		<!-- END  HEADER RAPID ACCESS -->
+		
+		<s:HGroup width="100%" height="97%" minHeight="0" gap="-2" >
+			<s:ButtonBar id="id_ButtonBar" width="70" height="100%" selectedIndex="0" change="rapidAccess_tabbar_changeHandler(event)" 
+						 skinClass="com.gazuntite.skins.controls.tabbar.RapidAccessButtonBarSkin" useHandCursor="true" buttonMode="true">
+				<s:layout>
+					<s:TileLayout verticalGap="0"
+								  horizontalGap="0"
+								  columnWidth="70"
+								  rowHeight="50"
+								  requestedRowCount="5"/>
+				</s:layout>
+				
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object icon="@Embed('assets/rapidaccess/prescriptionBtnIcon.png')"
+								   iconSelected="@Embed('assets/rapidaccess/prescriptionBtnIconSelected.png')"
+								   label="Prescription"  
+								   />
+						<fx:Object icon="@Embed('assets/rapidaccess/documentManagementIcon.png')"
+								   iconSelected="@Embed('assets/rapidaccess/documentManagementIconSelected.png')"
+								   label="Document Management"
+								   />
+						<fx:Object icon="@Embed('assets/rapidaccess/elabicon.png')"
+								   iconSelected="@Embed('assets/rapidaccess/elabicon_pressed.png')"
+								   label="Patient Registration"
+								   />
+						<fx:Object icon="@Embed('assets/rapidaccess/unsignedEncounterIcon.png')"
+								   iconSelected="@Embed('assets/rapidaccess/unsignedEncounterIconSelected.png')"
+								   label="Unsigned Encounter"
+								   />
+						<fx:Object icon="@Embed('assets/rapidaccess/schedulerIcon.png')"
+								   iconSelected="@Embed('assets/rapidaccess/schedulerIconSelected.png')"
+								   label="Scheduler"
+								   />
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:ButtonBar>
+			
+			
+			<components:LabelViewStack change="id_Views_changeHandler(event)" id="id_Views" width="100%" height="100%" borderAlpha="0" minHeight="0">
+				<s:ArrayList>
+					
+					<eprescription:ePrescription id="id_prescription" width="100%"   />
+					
+					<documgmt:DocumentManagementPanel id="id_DocumentManagement" width="100%" height="250" />
+					
+					<view2:eLabsView id="id_Elab" width="100%" minHeight="0" 
+									 loggedInClinincBranchId="{model.LoggedInUserSessionDTO.ClinicBranchID}"
+									 loggedInUserProviderId="{model.LoggedInProvider.UserId}"
+									 loggedInUserProviderTypeId="{model.LoggedInUserSessionDTO.UserTypeID}"/>
+					
+					<common:ComingSoonView id="id_UnsignedEncounter" width="100%" height="100%" minHeight="0"  />
+					
+					<view1:Scheduler id="id_Scheduler" width="100%"  />
+					
+				</s:ArrayList>
+			</components:LabelViewStack>
+			
+		</s:HGroup>
+		
+		
+	</s:SkinnableContainer>		
+	
+	
+</s:SkinnableContainer>

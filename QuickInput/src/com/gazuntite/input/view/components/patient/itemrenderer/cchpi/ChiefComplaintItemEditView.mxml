@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*"
+					  xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc(event)" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.ccHpi.ChiefComplaintHpiDTO;
+			import com.gazuntite.common.dto.physical.ccHpi.HPIDetailsDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.physical.chiefcomplaint.PatientInputPhysicalChiefComplaintEvent;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var inItemRenderer:Boolean = false;
+			[Bindable]	private var labelWidth:int = 100;
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			private var _chiefComplaintHpiDTO:ChiefComplaintHpiDTO;
+			public var toolTipChanged:Boolean;
+			
+			[Bindable]
+			public function get chiefComplaintHpiDTO():ChiefComplaintHpiDTO
+			{
+				return _chiefComplaintHpiDTO;
+			}
+			
+			public function set chiefComplaintHpiDTO(value:ChiefComplaintHpiDTO):void
+			{
+				_chiefComplaintHpiDTO = value;
+			}
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var ev:PatientInputPhysicalChiefComplaintEvent = new PatientInputPhysicalChiefComplaintEvent(
+					PatientInputPhysicalChiefComplaintEvent.PATIENT_INPUT_CHIEF_COMPLAINT_ITEM_EDIT_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				
+				switch (curTar.id)
+				{
+					case "id_SymptomsCmbo":
+						
+						ev.sectionName = QIConstants.SYMPTOM_MODULE_NAME;
+						
+						break;
+					
+					case "id_DurationCmbo":
+						
+						ev.sectionName = QIConstants.DURATION_MODULE_NAME;
+						
+						break;
+					
+					case "id_LocationCmbo":
+						
+						ev.sectionName = QIConstants.LOCATION_MODULE_NAME;
+						
+						break;
+					
+					case "id_QualityCmbo":
+						
+						ev.sectionName = QIConstants.QUALITY_MODULE_NAME;
+						
+						break;
+					
+					case "id_SeverityCmbo":
+						
+						ev.sectionName = QIConstants.SEVERITY_MODULE_NAME;
+						
+						break;
+					
+					case "id_ContextCmbo":
+						
+						ev.sectionName = QIConstants.CONTEXT_MODULE_NAME;
+						
+						break;
+					
+					case "id_ModifyingFactorsCmbo":
+						
+						ev.sectionName = QIConstants.MODIFYINGFACTORS_MODULE_NAME;
+						
+						break;
+					
+					case "id_ExacerbatingCmbo":
+						
+						ev.sectionName = QIConstants.EXACERBATING_MODULE_NAME;
+						
+						break;
+					
+					case "id_ProgressionCmbo":
+						
+						ev.sectionName = QIConstants.PROGRESSION_MODULE_NAME;
+						
+						break;
+					
+					case "id_RadiationCmbo":
+						
+						ev.sectionName = QIConstants.RADIATION_MODULE_NAME;
+						
+						break;
+				}
+				
+				dispatchEvent(ev);
+				
+				toolTipChanged = true;
+				invalidateProperties();
+			}
+			
+			private function comboChangeHandler(event:IndexChangeEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				if (curTar.selectedIndex >= 0 && curTar.selectedIndex < curTar.dataProvider.length)
+				{
+					curTar.text = curTar.dataProvider[curTar.selectedIndex] as String;
+				}
+				
+				toolTipChanged = true;
+				invalidateProperties();
+			}
+			
+			private function saveClickHandler():void
+			{
+				if (!chiefComplaintHpiDTO)
+					return;
+				
+				if (isInvalid())
+					return;
+				
+				chiefComplaintHpiDTO.ChiefComplaint = id_ChiefComplaint.text;
+				var hpiDetailsDTO:HPIDetailsDTO = new HPIDetailsDTO();
+				
+				hpiDetailsDTO.Symptom = id_SymptomsCmbo.text;
+				hpiDetailsDTO.Duration = id_DurationCmbo.text;
+				hpiDetailsDTO.Location = id_LocationCmbo.text;
+				hpiDetailsDTO.Quality = id_QualityCmbo.text;
+				hpiDetailsDTO.Severity = id_SeverityCmbo.text;
+				hpiDetailsDTO.Context = id_ContextCmbo.text;
+				hpiDetailsDTO.ModifyingFactors = id_ModifyingFactorsCmbo.text;
+				hpiDetailsDTO.Exacerbating = id_ExacerbatingCmbo.text;
+				hpiDetailsDTO.Progression = id_ProgressionCmbo.text;
+				hpiDetailsDTO.Radiation = id_RadiationCmbo.text;
+				
+				chiefComplaintHpiDTO.HPIFields = hpiDetailsDTO;
+				
+				chiefComplaintHpiDTO.IsDirty = true;
+				chiefComplaintHpiDTO.IsRecordEditable = true;
+				
+				chiefComplaintHpiDTO.ModifiedAt = new Date();
+				chiefComplaintHpiDTO.ModifiedBy = model.LoggedInUserId;
+				
+				chiefComplaintHpiDTO.Note 				= id_dictationNoteView.note;
+				chiefComplaintHpiDTO.NoteSubject = "";
+				
+				chiefComplaintHpiDTO.DictationID = id_dictationNoteView.DictationID;
+				
+				var ev:PatientInputPhysicalChiefComplaintEvent = new PatientInputPhysicalChiefComplaintEvent(
+					PatientInputPhysicalChiefComplaintEvent.PATIENT_INPUT_CHIEF_COMPLAINT_EDIT_EVENT, true);
+				
+				ev.chiefComplaintHpiDTO = chiefComplaintHpiDTO;
+				
+				dispatchEvent(ev);
+				dispatchEvent( new Event( 'saveStatus', true ) );
+			}
+			
+			private function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (id_ChiefComplaint.text.length <= 0 )
+				{
+					isNotValid = true;
+					
+					errorStr += "Please enter Chief Complaint\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ChiefComplaint;
+				}
+				
+				if((id_SymptomsCmbo.selectedIndex < 0 || id_SymptomsCmbo.selectedItem == null) && id_SymptomsCmbo.text.length <= 2)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Symptoms\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_SymptomsCmbo;
+				}
+				
+				if (errorStr.length > 0)
+				{
+					Alert.show(errorStr, "Required Field", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			
+			private function setToolTips():void
+			{
+				if (id_ChiefComplaint.text.length > 0)
+				{
+					id_ChiefComplaint.toolTip = id_ChiefComplaint.text;
+				}
+				else
+				{
+					id_ChiefComplaint.toolTip = "Chief Complaint";
+				}
+				
+				if (id_SymptomsCmbo.text.length > 0)
+				{
+					id_SymptomsCmbo.toolTip = id_SymptomsCmbo.text;
+				}
+				else
+				{
+					id_SymptomsCmbo.toolTip = "Symptoms";
+				}
+				
+				if (id_DurationCmbo.text.length > 0)
+				{
+					id_DurationCmbo.toolTip = id_DurationCmbo.text;
+				}
+				else
+				{
+					id_DurationCmbo.toolTip = "Duration";
+				}
+				
+				if (id_LocationCmbo.text.length > 0)
+				{
+					id_LocationCmbo.toolTip = id_LocationCmbo.text;
+				}
+				else
+				{
+					id_LocationCmbo.toolTip = "Location";
+				}
+				
+				if (id_QualityCmbo.text.length > 0)
+				{
+					id_QualityCmbo.toolTip = id_QualityCmbo.text;
+				}
+				else
+				{
+					id_QualityCmbo.toolTip = "Quality";
+				}
+				
+				if (id_SeverityCmbo.text.length > 0)
+				{
+					id_SeverityCmbo.toolTip = id_SeverityCmbo.text;
+				}
+				else
+				{
+					id_SeverityCmbo.toolTip = "Severity";
+				}
+				
+				if (id_ContextCmbo.text.length > 0)
+				{
+					id_ContextCmbo.toolTip = id_ContextCmbo.text;
+				}
+				else
+				{
+					id_ContextCmbo.toolTip = "Context";
+				}
+				
+				if (id_ModifyingFactorsCmbo.text.length > 0)
+				{
+					id_ModifyingFactorsCmbo.toolTip = id_ModifyingFactorsCmbo.text;
+				}
+				else
+				{
+					id_ModifyingFactorsCmbo.toolTip = "Modifying Factors";
+				}
+				
+				if (id_ExacerbatingCmbo.text.length > 0)
+				{
+					id_ExacerbatingCmbo.toolTip = id_ExacerbatingCmbo.text;
+				}
+				else
+				{
+					id_ExacerbatingCmbo.toolTip = "Exacerbating";
+				}
+				
+				if (id_ProgressionCmbo.text.length > 0)
+				{
+					id_ProgressionCmbo.toolTip = id_ProgressionCmbo.text;
+				}
+				else
+				{
+					id_ProgressionCmbo.toolTip = "Progression";
+				}
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (toolTipChanged)
+				{
+					toolTipChanged = false;
+					
+					setToolTips();
+				}
+			}
+			// TA - hide whole view of notes & dictation 
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+					viewModel.visible = false;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="8" paddingTop="8" paddingBottom="8" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="25" verticalAlign="middle">
+		<s:BitmapImage id="img_ChiefComplaint" source="{(id_ChiefComplaint.text.length > 0)? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+		<advancedTextInput:AdvancedTextInput id="id_ChiefComplaint" tabIndex="0"
+											 width="100%" prompt="Enter Chief Complaint" toolTip="Chief Complaint"
+											 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+											 />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="20" verticalAlign="middle">
+		<s:Label text="History of Present Illness" styleName="patientNameSubTitle" color="#3194BE" />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" gap="8" >
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<s:HGroup width="100%" height="25" verticalAlign="middle">
+				<s:BitmapImage id="img_Symptoms" source="{id_SymptomsCmbo.text.length >= 1 ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+				<autoComplete:AutoComplete id="id_SymptomsCmbo" 
+										   width="100%"  height="25" labelField="DISPLAY_NAME"  
+										   prompt="Select Symptoms" toolTip="Symptoms" tabIndex="1"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.symptomsList}"
+										   keyUp="comboKeyUpHandler(event)"
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16">
+				<autoComplete:AutoComplete id="id_QualityCmbo" tabIndex="4"
+										   width="100%" height="25" labelField="DISPLAY_NAME"
+										   prompt="Select Quality" toolTip="Quality"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.qualityList}"
+										   keyUp="comboKeyUpHandler(event)"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16" >
+				<autoComplete:AutoComplete id="id_ModifyingFactorsCmbo" 
+										   width="100%"  height="25" labelField="DISPLAY_NAME" tabIndex="7"
+										   prompt="Select Modifying Factors" toolTip="Modifying Factors"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.modifyingFactorsList}"
+										   keyUp="comboKeyUpHandler(event)"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16" >
+				<autoComplete:AutoComplete id="id_RadiationCmbo" tabIndex="10"
+										   width="100%" height="25" labelField="DISPLAY_NAME" prompt="Select Radiation" toolTip="Radiation"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.radiationList}"
+										   keyUp="comboKeyUpHandler(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<autoComplete:AutoComplete id="id_DurationCmbo" tabIndex="2"
+									   width="100%" height="25"  labelField="DISPLAY_NAME"  
+									   prompt="Select Duration" toolTip="Duration"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.durationList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+			<autoComplete:AutoComplete id="id_SeverityCmbo" tabIndex="5"
+									   width="100%" height="25" labelField="DISPLAY_NAME"
+									   prompt="Select Severity" toolTip="Severity"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.severityList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+			<autoComplete:AutoComplete id="id_ExacerbatingCmbo" tabIndex="8"
+									   width="100%"  height="25" labelField="DISPLAY_NAME" 
+									   prompt="Select Exacerbating" toolTip="Exacerbating"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.exacerbatingList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+		</s:VGroup>
+		
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<autoComplete:AutoComplete id="id_LocationCmbo" tabIndex="3"
+									   width="100%" height="25" labelField="DISPLAY_NAME" 
+									   prompt="Select Location" toolTip="Location"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.locationList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+			<autoComplete:AutoComplete id="id_ContextCmbo" tabIndex="6"
+									   width="100%"  height="25" labelField="DISPLAY_NAME"
+									   prompt="Select Context" toolTip="Context"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.contextList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+			<autoComplete:AutoComplete id="id_ProgressionCmbo" tabIndex="9"
+									   width="100%"  height="25" labelField="DISPLAY_NAME"
+									   prompt="Select Progression" toolTip="Progression"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.progressionList}"
+									   keyUp="comboKeyUpHandler(event)"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right" paddingRight="8" verticalAlign="middle">
+		<s:ToggleButton id="id_btnDictation"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						skinClass="{ (chiefComplaintHpiDTO.DictationID &amp;&amp; chiefComplaintHpiDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+		
+		<s:ToggleButton id="id_btnNote"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inNoteMode}"
+						toolTip="Record Level Notes"
+						skinClass="{chiefComplaintHpiDTO.Note.length ?NotesRedButtonSkin : com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin}"
+						/>
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  toolTip="Save"  click="saveClickHandler()"
+				  right="0" verticalCenter="0"
+				  tabIndex="5"
+				  />
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView id="id_dictationNoteView" 
+										 width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{chiefComplaintHpiDTO.Note}" note="@{chiefComplaintHpiDTO.Note}"	isSaveButtonVisible="false"
+										 DictationID="{chiefComplaintHpiDTO.DictationID}" IsDictaionEditMode="{true}" ShowSaveButton="false"
+										 />
+	
+</s:SkinnableContainer>

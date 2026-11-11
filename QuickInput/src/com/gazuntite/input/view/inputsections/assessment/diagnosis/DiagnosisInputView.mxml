@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:diagnosis="com.gazuntite.input.view.components.patient.itemrenderer.diagnosis.*" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  creationComplete="cc()"
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleDictationDTO;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import spark.components.supportClasses.Skin;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	private var viewModel:PatientInputAssessmentDiagnosisViewModel = PatientInputAssessmentDiagnosisViewModel.getInstance();
+			[Bindable]	private var notesDTO:ModuleNoteDTO;
+			[Bindable]	public var NavItems:ArrayCollection;
+			[Bindable]  public var RecordLevelNote:String = '';
+			
+			//M:13Nov2013
+			[Bindable]	private var dictationDTO:ModuleDictationDTO;
+			
+			private function cc():void
+			{
+				dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.DIAGNOSIS_MODULE_NAME);
+				notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.DIAGNOSIS_MODULE_NAME);
+				
+				addEventListener(PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_ADD_EVENT, patientInputDiagnosisAddHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_ITEM_EDIT_KEY_UP_EVENT, patientInputDiagnosisItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_EDIT_EVENT, managePatientInputDiagnosisHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_DELETE_EVENT, managePatientInputDiagnosisHandler, false, 0, true);
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+				
+				//id_DictationNote.viewModel.inlineEditing = true;
+			}
+			
+			private function patientInputDiagnosisAddHandler(event:PatientInputAssessmentDiagnosisEvent):void
+			{
+				if (!event.diagnosisDTO)
+					return;
+				
+				if (!model.diagnosisDTOList)
+					model.diagnosisDTOList = new ArrayCollection();
+				
+				if(event.diagnosisDTO.AssociateType == 'This Visit')
+				{
+					model.diagnosisDTOList.addItem(event.diagnosisDTO);
+					event.diagnosisDTO.serialNumber = model.diagnosisDTOList.length;
+					viewModel.managePatientDiagnosis(QIConstants.INPUT_VIEW);
+				}
+				else
+				{
+					if (!model.diagnosisDTOListTemp)
+						model.diagnosisDTOListTemp = new ArrayCollection();
+					else
+						model.diagnosisDTOListTemp.removeAll();
+					
+					model.diagnosisDTOListTemp.addItem(event.diagnosisDTO);
+					viewModel.managePatientDiagnosis(QIConstants.INPUT_VIEW, 'Other');
+				}
+			}
+			
+			private function patientInputDiagnosisItemEditKeyUpHandler(event:PatientInputAssessmentDiagnosisEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadPatientDiagnosisStaticData(event.searchString);
+			}
+			
+			private function managePatientInputDiagnosisHandler(event:PatientInputAssessmentDiagnosisEvent):void
+			{
+				if(event.AssociateType == 'Other')
+				{
+					if (!model.diagnosisDTOListTemp)
+						model.diagnosisDTOListTemp = new ArrayCollection();
+					else
+						model.diagnosisDTOListTemp.removeAll();
+					
+					model.diagnosisDTOListTemp.addItem(event.diagnosisDTO);
+				}
+				viewModel.managePatientDiagnosis(QIConstants.INPUT_VIEW, event.AssociateType);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				event.moduleName = QIConstants.DIAGNOSIS_MODULE_NAME;
+				event.data = notesDTO;
+				
+				if(null == notesDTO)
+					notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.DIAGNOSIS_MODULE_NAME);
+				
+				if(event.isNoteSave)
+				{
+					var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( notesDTO, QIConstants.DIAGNOSIS_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				}
+				else
+				{
+					if (!dictationDTO)
+					{
+						var dictaionId:String = id_DictationNote.SectionLevelDictationID;
+						
+						dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.DIAGNOSIS_MODULE_NAME);
+						dictationDTO.DictationID = dictaionId;
+					}
+					var dicEvent:ManageModuleDictationEvent = new ManageModuleDictationEvent( dictationDTO, QIConstants.DIAGNOSIS_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, model.LoggedInUserSelectedBranchId, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( dicEvent );
+				}
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed");
+				if(isNoteSaved)
+					viewModel.dictationNoteViewModel.visible = false;
+			}
+			
+			public function ClearDiagnosisInputView():void
+			{
+				if(id_diagnosisInputView)
+					id_diagnosisInputView.clearForm();
+				
+				if(model.diagnosisDTOList)
+					model.diagnosisDTOList.removeAll();
+				
+				
+				notesDTO = null;
+				dictationDTO = null;
+				if( null != id_DictationNote )
+				{
+					id_DictationNote.SectionLevelNote = "";
+					id_DictationNote.resetToDefault();
+				}
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.diagnosisDTOList && model.diagnosisDTOList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.diagnosisDTOList = UtilityFunctions.SortArrayCollection(model.diagnosisDTOList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.diagnosisDTOList = UtilityFunctions.SortArrayCollection(model.diagnosisDTOList,'label',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+			}
+			
+			protected function id_diagnosisInputView_keyUpHandler(event:KeyboardEvent):void
+			{
+				CheckAndSetViewDirty( event );
+			}
+			
+			protected function id_diagnosisInputView_clickHandler(event:MouseEvent):void
+			{
+				CheckAndSetViewDirty( event );
+			}
+			private function CheckAndSetViewDirty(event:Event):void
+			{
+				var component:Object = null;
+				var IsViewDirty:Boolean = id_diagnosisInputView.IsViewDirty;
+				
+				if( event.target is Skin )
+					component = event.target.hostComponent;
+				else
+					component = event.target;
+				
+				id_diagnosisInputView.IsViewDirty = UtilityFunctions.IsComponentDirty( component ) || IsViewDirty;
+			}
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.diagnosisDTOList" destination="DataList_changeHandler" />
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="10"/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" maxSectionCounter="3"  sectionNumber="1" showInputPart="true"
+								  label="DIAGNOSIS" 
+								  PrevSectionLabel=""
+								  NextSectionLabel="Treatment"
+								  NavItems="{NavItems}"
+								  MainSectionLabel="Assessment"
+								  dictationNoteViewModel="{viewModel.dictationNoteViewModel}"
+								  SectionLevelNote="@{notesDTO.Note}"	
+								  SectionLevelDictationID="{dictationDTO.DictationID}"
+								  />
+	<dictation2:NewPatientDictationNoteView id="id_DictationNote" 
+											width="100%" minHeight="47" 
+											viewModel="{viewModel.dictationNoteViewModel}"
+											isSectionLevel="true" 
+											SectionLevelNote="@{notesDTO.Note}"
+											RecordLevelNote="@{RecordLevelNote}"
+											SectionLevelDictationID="@{dictationDTO.DictationID}"
+											/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto"
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<diagnosis:DiagnosisInputFormView id="id_diagnosisInputView" width="100%" 
+											  keyUp="id_diagnosisInputView_keyUpHandler(event)"
+											  click="id_diagnosisInputView_clickHandler(event)"
+											  RecordLevelNote="@{RecordLevelNote}"
+											  RecordLevelDictationID="@{id_DictationNote.RecordLevelDictationID}"
+											  />
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+				
+				<s:DropDownList id="uiSortDropDown"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+								selectedIndex="0"
+								buttonMode="true" toolTip="Sort List"
+								change="SortDataList()">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Diagnosis" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%"/>
+			</s:SkinnableContainer>
+			
+			<s:List id="uiDiagnosisList" 
+					width="100%"  minHeight="50" allowMultipleSelection="true"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false"
+					dataProvider="{model.diagnosisDTOList}"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.diagnosis.DiagnosisListItemRenderer"/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:component="com.gazuntite.view.patient.component.*"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:components1="com.gazuntite.controls.extended.components.*" 
+					  xmlns:labOut="com.gazuntite.input.view.inputsections.assessment.plan.labOut.*" 
+					  xmlns:recommendation="com.gazuntite.input.view.inputsections.assessment.plan.recommendation.*" 
+					  xmlns:followUp="com.gazuntite.input.view.inputsections.assessment.plan.followUp.*"
+					  creationComplete="cc()" xmlns:quickInput="com.gazuntite.provider.live.services.diabetes.view.quickInput.*" xmlns:advanceCare="com.gazuntite.provider.live.services.diabetes.view.quickInput.advanceCare.*" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:skins="com.gazuntite.input.view.skins.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.input.view.inputsections.assessment.plan.recommendation.PatientInputAssessmentRecommendationEvent;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var viewModel:PatientInputAssessmentPlanViewModel = PatientInputAssessmentPlanViewModel.getInstance();
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputAssessmentRecommendationEvent.PATIENT_INPUT_RECOMMENDATION_ITEM_EDIT_KEY_UP_EVENT, 
+					patientInputRecommendationItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentRecommendationEvent.PATIENT_INPUT_RECOMMENDATION_EDIT_EVENT, 
+					managePatientRecommendationHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentRecommendationEvent.PATIENT_INPUT_RECOMMENDATION_DELETE_EVENT, 
+					managePatientRecommendationHandler, false, 0, true);
+				
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_ITEM_EDIT_KEY_UP_EVENT, 
+					followUpItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_EDIT_EVENT, 
+					managePatientFollowUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_DELETE_EVENT, 
+					managePatientFollowUpHandler, false, 0, true);
+			}
+			
+			private function patientInputRecommendationItemEditKeyUpHandler(event:PatientInputAssessmentRecommendationEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadRecommedationLinksOnSearch(event.searchString);
+			}
+			
+			private function managePatientRecommendationHandler(event:PatientInputAssessmentRecommendationEvent):void
+			{
+				viewModel.managePatientRecommendation(QIConstants.HISTORY_VIEW);
+			}
+			
+			private function followUpItemEditKeyUpHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadFollowUpServiceType(event.followUpDataControlTypeID, event.searchString);
+			}
+			
+			private function managePatientFollowUpHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				viewModel.managePatientFollowUp(QIConstants.HISTORY_VIEW);
+				
+				dispatchEvent(new PatientInputAssessmentFollowUpEvent(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, true));
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="5"/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" label="PLAN"  maxSectionCounter="3" sectionNumber="3" showInputPart="false" showHistoryPart="true" inputCounter="0"
+								  PrevSectionLabel="Treatment"
+								  NextSectionLabel=""
+								  NavItems="{NavItems}"
+								  MainSectionLabel="Assessment"
+									  dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}"/>
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}"
+												dictationNoteDataProvider="{model.planDictationNoteHistoryDTOList}"/>
+	
+	<s:VGroup width="100%" height="100%" gap="-5" paddingTop="10" paddingLeft="2" paddingRight="2" horizontalAlign="center">
+		<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+			<s:Group width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout gap="0" />
+				</s:layout>
+				<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="3">
+					<s:layout>
+						<s:VerticalLayout  horizontalAlign="center" verticalAlign="top" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="2"/>
+					</s:layout>
+					<components1:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false"
+												selectedIndex="@{viewModel.planInputTabSelectedIdx}">
+						<s:ArrayList>
+							<labOut:LabOutHistoryView name="Lab Out" width="100%" height="100%"/>
+							<recommendation:RecommendationHistoryView name="Recommendations" width="100%" height="100%"/>
+							<followUp:FollowUpHistoryView name="Follow Up" width="100%" height="100%"/>
+							<advanceCare:AdvanceCareHistoryView name="Advance Care" width="100%" height="100%"/>
+						</s:ArrayList>
+					</components1:LabelViewStack>
+				</s:BorderContainer>
+			</s:Group>
+		</s:Scroller>
+	</s:VGroup>
+</s:SkinnableContainer>

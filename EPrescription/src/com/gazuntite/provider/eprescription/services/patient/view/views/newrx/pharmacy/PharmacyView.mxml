@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		 creationComplete="cc(event)" >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPatientPharmEvent;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.PharmacySelectedEvent;
+			import com.gazuntite.provider.eprescription.services.patient.view.views.newrx.PharmacySelectionView;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			
+			private var isPharmacyLoaded:Boolean;
+			
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			[Bindable]
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+			
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				if(value != null)
+					toggleSearchView();	
+				
+				
+			}
+			
+			private var _selectedPatient:PatientDTO;
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+				
+				if(null != value)
+				{
+					LoadPatientFavPharmacy();
+				}
+			}
+			
+			protected function LoadPatientFavPharmacy(e:Event = null):void
+			{
+				var getPharmacy: GetPatientPharmEvent = new GetPatientPharmEvent(selectedPatient.ID, pharmaciesLoaded);				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getPharmacy);
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				/* FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					toggleSearchView();
+				}); */
+				
+				
+				isPharmacyLoaded = false;
+				id_container.visible = false;
+				
+				addEventListener("CancelClick",onActionBtnClick);
+				addEventListener("PharmacySelected",whenPharmacySelected);
+				addEventListener("ReLoadPatientPharmacy",LoadPatientFavPharmacy);
+			}
+			
+			
+			private function onActionBtnClick(event:Event):void
+			{
+				id_container.visible = false;
+				id_selectPharmacyBtn.selected = false;
+			}
+			
+			protected function SelectPharmacyClick(event:MouseEvent):void
+			{
+				id_container.visible = !id_container.visible ; // toggle View
+				id_selectionView.id_selectPharmacyVS.selectedIndex = 0;
+				
+				/* id_favPharmacyView.visible = true;
+				id_PharmacySelectionView.visible = false; */
+			}
+			
+			protected function whenPharmacySelected(event:PharmacySelectedEvent):void
+			{
+				selectedPharmacy = event.selection as PharmaciesResult;
+				id_selectPharmacyBtn.selected = false;
+				
+				toggleSearchView();
+			}
+			
+			public function toggleSearchView():void
+			{
+				id_container.visible = false;
+				id_selectPharmacyVS.selectedIndex = 1;
+				
+			}
+			
+			public function pharmaciesLoaded(pharmaciesXML:XML):void
+			{
+				trace("favorite pharmacies loaded");
+				trace(pharmaciesXML.toXMLString());
+				
+				
+				pharmaciesXML = AppUtils.removeDefaultNamespaceFromXML(pharmaciesXML);
+				
+				var favArrayCol:ArrayCollection = new ArrayCollection();
+				
+				//trace("fav pharmacies length for user "+patientID+" "+pharmaciesXML.Pharmacy.PatientFavouritePharmDTO.length());
+				for(var i:int=0; i<pharmaciesXML.Pharmacy.length(); i++)
+				{
+					
+					
+					var fp_obj:PharmaciesResult = new PharmaciesResult();
+					
+					
+					fp_obj.FromXML(pharmaciesXML.Pharmacy[i]);
+					
+					favArrayCol.addItem(fp_obj);
+					
+				}
+				
+				isPharmacyLoaded = true;
+				id_selectionView.id_favPharmacyView.DataProvider = favArrayCol; 
+				
+			}
+			
+			protected function label1_clickHandler(event:MouseEvent):void
+			{
+				
+				Alert.show("Do you want to Change Pharmacy ?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					
+					if( event.detail == Alert.YES )
+					{
+						id_selectPharmacyVS.selectedIndex = 0;
+						//selectedPharmacy = null;
+					}
+					else if( event.detail == Alert.NO )
+					{
+						id_selectPharmacyVS.selectedIndex = 1;
+					}
+				});
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="-5" horizontalAlign="center"/>
+	</s:layout>
+	
+	<components:LabelViewStack id="id_selectPharmacyVS" width="100%" height="100%" borderVisible="false" backgroundAlpha="0" >
+		<s:ArrayList>
+			<s:HGroup width="100%">
+				<s:Group width="15" height="30">
+					<s:RichText   color="#174EAA" fontFamily="Calibri" fontSize="19" tabStops="S0"	text="@" horizontalCenter="0" verticalCenter="0"/>
+				</s:Group>
+				<s:ToggleButton label="Select Pharmacy" id="id_selectPharmacyBtn"
+								click="SelectPharmacyClick(event)" toolTip="Select Pharmacy" useHandCursor="true" buttonMode="true"
+								skinClass="com.gazuntite.skins.controls.button.ePrescription.SelectPharmacyButton"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" height="29" click="label1_clickHandler(event)" horizontalAlign="left" verticalAlign="middle">
+				<s:Group width="15" height="30">
+					<s:RichText   color="#174EAA" fontFamily="Calibri" fontSize="19" tabStops="S0"	text="@" horizontalCenter="0" verticalCenter="0"/>
+				</s:Group>
+				<s:SkinnableContainer  width="100%" height="24"  skinClass="com.gazuntite.skins.controls.container.ePrescription.SerachPatientSkeltonBG" horizontalCenter="0" verticalCenter="0" >
+					<s:Label text="{selectedPharmacy.StoreName}" toolTip="{selectedPharmacy.StoreName}" fontWeight="bold" fontFamily="CalibriCFFBold" fontSize="15"   verticalCenter="0" width="100%" left="5" maxDisplayedLines="1"/>
+				</s:SkinnableContainer>
+			</s:HGroup>
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+	<s:Group id="id_container" left="15" width="100%" visible="false" includeInLayout="{id_container.visible}"  >
+		<newrx:PharmacySelectionView id="id_selectionView" width="100%" />
+	</s:Group>
+	
+</s:Group>

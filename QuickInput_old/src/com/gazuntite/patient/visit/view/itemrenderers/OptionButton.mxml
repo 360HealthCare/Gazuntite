@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 tabChildren="true"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.ItemClickEvent;
+			
+			private var m_sLabel:String;
+			private var m_sCounter:int;
+			
+			/**
+			 * 
+			 * @param 1 string value,selected value 'Yes' or 'No'
+			 * @param 2 string value,section label where clicked
+			 * 
+			 */	
+			public var YesNoClickHandler:Function;
+			/**
+			 * 
+			 * @PARAM 1 MOUSE EVENT RELATED TO BUTTON CLICK
+			 * @PARAM 2 STRING VALUE,SECTION lABEL WHERE CLICKED
+			 * 
+			 */	
+			public var ButtonClickHandler:Function;
+			[Bindable]
+			public function get Label():String
+			{
+				return m_sLabel;
+			}
+
+			public function set Label(value:String):void
+			{
+				m_sLabel = value;
+			}
+
+			protected function buttonbarbutton1_clickHandler(event:MouseEvent):void
+			{
+				ButtonClickHandler(event, Label);
+			}
+
+			protected function rbGroup_itemClickHandler(event:ItemClickEvent):void
+			{
+				YesNoClickHandler( event.item, Label, this);
+			}
+			
+			public function set showOptionButtons(value:String):void
+			{
+				id_Y.visible 			= false;
+				id_Y.includeInLayout 	= false;
+				id_U.visible 			= false;
+				id_U.includeInLayout 	= false;
+				id_N.visible 			= false;
+				id_N.includeInLayout 	= false;
+				id_M.visible 			= false;
+				id_M.includeInLayout 	= false;
+				id_R.visible 			= false;
+				id_R.includeInLayout 	= false;
+				id_S.visible 			= false;
+				id_S.includeInLayout 	= false;
+				id_D.visible 			= false;
+				id_D.includeInLayout 	= false;
+				id_W.visible 			= false;
+				id_W.includeInLayout 	= false;
+				
+				for( var i:int = 0; i < value.length; i++ )
+				{
+					trace( value.charAt( i ) )
+					switch( value.charAt( i ).toLowerCase() )
+					{
+						case 'y':
+							id_Y.visible = true;
+							id_Y.includeInLayout = true;
+							break;
+						case 'u':
+							id_U.visible = true;
+							id_U.includeInLayout = true;
+							break;
+						case 'n':
+							id_N.visible = true;
+							id_N.includeInLayout = true;
+							break;
+						case 'm':
+							id_M.visible = true;
+							id_M.includeInLayout = true;
+							break;
+						/* case 'r':
+							id_R.visible = true;
+							id_R.includeInLayout = true;
+							break; */
+						case 's':
+							id_S.visible = true;
+							id_S.includeInLayout = true;
+							break;
+						case 'd':
+							id_D.visible = true;
+							id_D.includeInLayout = true;
+							break;
+						case 'w':
+							id_W.visible = true;
+							id_W.includeInLayout = true;
+							break;
+					}
+				}
+			}
+
+
+			protected function set ChangeLabelCase(value:Boolean):void
+			{
+				if( value )
+				{
+					id_MainButton.label = id_MainButton.label.toUpperCase();
+				}
+				else
+				{
+					id_MainButton.label = UtilityFunctions.TitleCase( id_MainButton.label );
+				}
+			}
+
+
+			protected function rbGroup_changeHandler(event:Event):void
+			{
+				YesNoClickHandler( event.currentTarget.selectedValue, Label, this);
+			}
+
+			[Bindable]
+			public function get Counter():int
+			{
+				return m_sCounter;
+			}
+
+			public function set Counter(value:int):void
+			{
+				m_sCounter = value;
+			}
+
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" change="rbGroup_changeHandler(event)" />
+	</fx:Declarations>
+
+	<fx:Binding source="id_MainButton.selected" destination="ChangeLabelCase" /> 
+	
+	<s:ToggleButton minWidth="110" id="id_MainButton" maxWidth="131" width="100%" label="{Label}" click="buttonbarbutton1_clickHandler(event)"
+					   skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIVerticalTabs" textAlignLast="left" height="100%" />
+
+	<s:HGroup left="0" width="100%" height="{id_MainButton.height}"  tabEnabled="true" tabChildren="true" verticalAlign="middle" gap="0" horizontalAlign="right" right="2" paddingRight="5" paddingLeft="-11">
+		<!--<s:Label text="{Counter}" width="25" />-->
+		
+		<s:RadioButton id="id_Y" groupName="rbGroup" value="{Constants.STRING_YES_UI}" visible="true" toolTip="Yes"  buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton"
+					   />
+		<s:RadioButton id="id_U" groupName="rbGroup" value="{Constants.UNKNOWN}" visible="true" toolTip="Unknown"  buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.URadioButton"
+					   />
+		<s:RadioButton id="id_N" groupName="rbGroup" value="{Constants.STRING_NO_UI}" visible="true" toolTip="No" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.NRadioButton"
+					   />
+		<s:RadioButton id="id_M" groupName="rbGroup" value="{Constants.MARRIED}" visible="true" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.MRadioButton" toolTip="Married"
+					   />
+		<s:RadioButton id="id_R" groupName="rbGroup" value="Record" visible="false" includeInLayout="false" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.RRadioButton"
+					   />
+		<s:RadioButton id="id_S" groupName="rbGroup" value="{Constants.SINGLE}" visible="true" toolTip="Single" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.SRadioButton"
+					   />
+		<s:RadioButton id="id_D" groupName="rbGroup" value="{Constants.DIVORCED}" visible="true" toolTip="Divorced" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.DRadioButton"
+					   />
+		<s:RadioButton id="id_W" groupName="rbGroup" value="{Constants.WIDOW}" visible="true" toolTip="Widow" buttonMode="true" useHandCursor="true"
+					   skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.WRadioButton"
+					   />
+		
+	</s:HGroup>
+	
+	
+</s:Group>

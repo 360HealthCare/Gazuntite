@@ -1,0 +1,180 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace ns "library://ns.tink.ws/flex/spark";
+@namespace skins "com.gazuntite.skins.*";
+
+.blueButton:over {
+	chromeColor: "0x56d9e5";
+}
+
+/* compound. override the down state of the button in element desc for class styleClass blueButton */
+.blueButton:down {
+	chromeColor: "0x56d9e5";
+}
+
+global
+{
+	fontSize: 10px;	
+	fontWeight: normal;
+}
+
+s|Button
+{
+	fontWeight: normal;	
+}
+
+.versionLabel
+{
+	color:#ffffff;
+	fontSize: 8px;
+}
+
+.viewBackgroundItemNumber
+{
+	fontSize: 12px;
+}
+
+.itemNumber
+{
+	fontSize: 15px;
+}
+
+.drName
+{
+	fontSize: 10px;
+	fontWeight: bold;
+	color: #ffffff;
+}
+
+
+.vbTitle
+{
+	fontSize: 12px;
+	fontWeight: bold;
+	color: #000000;
+}
+
+.vbSubTitle
+{
+	fontSize: 10px;
+	fontWeight: normal;
+	color: #000000;
+}
+
+.vbGrayText
+{
+	fontSize: 10px;
+	color: #898989;
+}
+
+
+
+
+.title
+{
+	fontSize: 15px;
+	fontWeight: bold;
+	color: #000000;
+}
+
+.subTitle
+{
+	fontSize: 12px;
+	fontWeight: normal;
+	color: #000000;
+}
+
+.grayText
+{
+	fontSize: 10px;
+	color: #898989;
+}
+
+s|Callout
+{
+	chromeColor: #0a1f30;	
+}
+
+.gazuntiteTitle 
+{
+	fontSize: 20px;
+	color: #ffffff;
+}
+
+.gazuntiteTitleSmall
+{
+	fontSize: 12px;
+	color: #ffffff;
+}
+
+.editButton 
+{
+	skinClass: ClassReference("qs.ipeControls.skins.EditToggleButtonSkin");
+}
+
+
+
+.listLabel
+{
+	fontSize: 11px;
+	fontWeight: bold;
+	color: #000000;
+}
+
+.actionBarTitle
+{
+	color: #ffffff;
+	fontSize: 15px;
+	fontWeight: bold;
+}
+
+.actionBarTitleBlack
+{
+	color: #b5b6b7;
+	fontSize: 15px;
+	fontWeight: bold;
+}
+
+.coverflowTabBar
+{
+	chromeColor: #4a6fa9;
+	color: #ffffff;
+}
+.button 
+{
+/*	chromeColor: #4a6fa9;*/
+	color: #ffffff;
+	skinClass: ClassReference("com.gazuntite.skins.BlueButton");
+}
+
+.calloutBtn 
+{
+	/*	chromeColor: #4a6fa9;*/
+	color: #ffffff;
+/*	skinClass: ClassReference("com.gazuntite.skins.CalloutBtnSkin");*/
+}
+
+.grayButton 
+{
+	/*	chromeColor: #4a6fa9;*/
+	color: #ffffff;
+/*	skinClass: ClassReference("com.gazuntite.skins.CalloutButtonEditSkin");*/
+}
+
+.actionButton
+{
+	chromeColor: #4cb847;	
+}
+
+.actionTabBar
+{
+	chromeColor: #4c4c4c;
+	
+	color: #ffffff;
+	selectionColor: #000000;
+}
+
+.arrangeByDropDownList
+{
+	fontSize: 10px;
+}

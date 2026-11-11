@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin 
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	>
+
+	<!--
+	////////////////////////////////////////////////////////////////////////////
+	//
+	//	Metadata
+	//
+	////////////////////////////////////////////////////////////////////////////
+	-->
+
+	<fx:Metadata>
+	<![CDATA[
+		 
+		[HostComponent("com.gazuntite.controls.extended.components.LabelTextInput")]
+    	
+	]]>
+	</fx:Metadata>
+	<fx:Style>
+		
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		@font-face
+		{
+			fontFamily: "Calibri Bold";
+			src: url("assets/fonts/CALIBRIB.TTF");
+			embedAsCFF: true;
+		}
+		@font-face
+		{
+			fontFamily: CalibriBold;
+			src: url("assets/fonts/CALIBRIB.TTF");
+			embedAsCFF: true;
+		}
+		@font-face
+		{
+			fontFamily: Calibri;
+			src: url("assets/fonts/CALIBRIB.TTF");
+			embedAsCFF: true;
+		}
+	</fx:Style>
+
+	<!--
+	////////////////////////////////////////////////////////////////////////////
+	//
+	//	States
+	//
+	////////////////////////////////////////////////////////////////////////////
+	-->
+
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="normalWithPrompt"/>
+		<s:State name="disabled"/>
+		<s:State name="disabledWithPrompt"/>
+	</s:states>
+
+	<!--
+	////////////////////////////////////////////////////////////////////////////
+	//
+	//	Graphics
+	//
+	////////////////////////////////////////////////////////////////////////////
+	-->
+
+	<!-- border -->
+	<!--<s:Rect 
+		id = "id_border"
+		bottom="0"
+		left="0"
+		right="0"
+		top="0"
+		>
+		<s:stroke>
+			<s:SolidColorStroke id="outline" weight="1" color="#444444" alpha="0"/>
+		</s:stroke>
+		
+	</s:Rect>-->
+
+	<!-- fill -->
+	<!--<s:Rect 
+		id="background"
+		bottom="1"
+		left="1"
+		right="1"
+		top="1"
+		radiusX="2"
+		>
+		
+		<s:fill>
+			<s:LinearGradient id="bgFill" rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0.7215686274509804"/>
+				<s:GradientEntry alpha="1.0" color="#E1E1E1" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>-->
+	
+	
+	<s:Group width="100%" >
+	<s:Rect id="background" radiusX="2" width="100%"
+			height="19"
+		    alpha="0">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#7F7F7F" joints="miter" miterLimit="4" weight="1" alpha="0"/>
+		</s:stroke>
+	</s:Rect>
+	
+	</s:Group>
+	
+	
+	<!-- shadow -->
+	<!--<s:Rect 
+		height="1"
+		left="1"
+		right="1"
+		top="1"
+		>
+		<s:fill>
+			<s:SolidColor 
+				color="0x000000"
+				alpha="0"
+				/>
+		</s:fill>
+	</s:Rect>-->
+
+	<!--
+	////////////////////////////////////////////////////////////////////////////
+	//
+	//	Components
+	//
+	////////////////////////////////////////////////////////////////////////////
+	-->
+
+	<!-- text -->
+	<s:RichEditableText 
+		id="textDisplay"
+		bottom="1"
+		left="1"
+		paddingBottom="3"
+		paddingLeft="3"
+		paddingRight="3"
+		paddingTop="5"
+		right="1"
+		top="1"
+		fontSize="11"
+		fontFamily="CalibriCFF"
+		focusRect="false"
+		focusThickness="0"
+		color="#333333"
+		
+		focusIn="{textDisplay.selectRange(0,textDisplay.text.length) }"
+		/>
+
+	<!-- prompt -->
+	<s:Label 
+		id="promptDisplay"
+		includeIn="disabledWithPrompt,normalWithPrompt"
+		bottom="1"
+		color="#333333"
+		left="1"
+		paddingBottom="3"
+		paddingLeft="3"
+		paddingRight="3"
+		paddingTop="5"
+		right="1"
+		top="1"
+		fontStyle="normal"
+		fontSize="11"
+		fontFamily="CalibriCFF"
+		/>
+</s:SparkSkin>

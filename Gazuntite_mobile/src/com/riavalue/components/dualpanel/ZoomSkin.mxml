@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+    xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+    xmlns:mx="library://ns.adobe.com/flex/mx">
+
+    <fx:Metadata>
+		[HostComponent("com.riavalue.components.dualpanel.DualPanel")]
+	</fx:Metadata>
+
+    <fx:Script>
+        <![CDATA[
+            private static const SCALE_FACTOR:int = 3;
+        ]]>
+    </fx:Script>
+
+    <s:states>
+        <s:State name="front"/>
+        <s:State name="back"/>
+    </s:states>
+
+    <s:transitions>
+        <s:Transition fromState="front"
+            toState="back"
+            autoReverse="true">
+
+            <s:Sequence duration="400">
+                <s:Scale target="{frontContainerHolder}"
+                    autoCenterTransform="true"
+                    scaleXTo="{SCALE_FACTOR}"
+                    scaleYTo="{SCALE_FACTOR}"/>
+
+                <s:RemoveAction target="{frontContainerHolder}"/>
+                <s:AddAction target="{backContainerHolder}"/>
+
+                <s:Scale target="{backContainerHolder}"
+                    autoCenterTransform="true"
+                    scaleXFrom="{SCALE_FACTOR}"
+                    scaleXTo="1"
+                    scaleYFrom="{SCALE_FACTOR}"
+                    scaleYTo="1"/>
+            </s:Sequence>
+        </s:Transition>
+
+        <s:Transition fromState="back"
+            toState="front"
+            autoReverse="true">
+
+            <s:Sequence duration="400">
+                <s:Scale target="{backContainerHolder}"
+                    autoCenterTransform="true"
+                    scaleXTo="{SCALE_FACTOR}"
+                    scaleYTo="{SCALE_FACTOR}"/>
+
+                <s:RemoveAction target="{backContainerHolder}"/>
+                <s:AddAction target="{frontContainerHolder}"/>
+
+                <s:Scale target="{frontContainerHolder}"
+                    autoCenterTransform="true"
+                    scaleXTo="1"
+                    scaleXFrom="{SCALE_FACTOR}"
+                    scaleYTo="1"
+                    scaleYFrom="{SCALE_FACTOR}"/>
+            </s:Sequence>
+        </s:Transition>
+    </s:transitions>
+
+
+    <s:Group id="frontContainerHolder"
+        width="100%" height="100%"
+        horizontalCenter="0"
+        verticalCenter="0"
+        includeIn="front"/>
+
+    <s:Group id="backContainerHolder"
+        width="100%" height="100%"
+        horizontalCenter="0"
+        verticalCenter="0"
+        includeIn="back"/>
+
+    <s:Button id="prefsButton"
+        width="30"
+        right="0"
+        label="i"/>
+</s:Skin>

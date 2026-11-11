@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  width="100%" height="100%"
+					  backgroundColor="0x000000" 
+					  xmlns:communication="com.gazuntite.view.communication.*" 
+					  xmlns:view="com.zigron.provider.search.services.provider.view.*" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	<!--
+	<s:Scroller id="id_Scroller" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >
+	<s:Group id="id_patientExamArea"  width="100%" height="100%" >
+	<s:layout>
+	<s:VerticalLayout paddingTop="2" horizontalAlign="center" verticalAlign="top" gap="-4" clipAndEnableScrolling="true" />
+	</s:layout>
+	<s:HGroup width="100%" paddingLeft="4" visible="{id_ProfileViews.visible}" includeInLayout="{id_ProfileViews.visible}">		
+	<s:TabBar id="id_mainTanButtons"  dataProvider="{ id_ProfileViews }" 
+	skinClass="com.gazuntite.skins.profileTabBarSkin" 
+	top="0" width="100%" />
+	</s:HGroup>
+	
+	<mx:ViewStack id="id_ProfileViews" width="100%" height="100%" backgroundAlpha="0" resizeToContent="true" 
+	visible="true" includeInLayout="{id_ProfileViews.visible}"  >
+	<s:NavigatorContent backgroundAlpha="0" width="100%" height="100%" label="Basic Information"  >
+	
+	<s:Scroller id="id_BasicScroller" width="100%" height="300" verticalScrollPolicy="off">
+	<s:Group width="100%" height="100%" >
+	<s:layout>
+	<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+	</s:layout>
+	
+	<s:HGroup id="id_maincontents" width="100%" gap="0" verticalAlign="top" paddingBottom="5" paddingRight="5" paddingLeft="5">
+	<s:Group buttonMode="true" toolTip="Edit Patient Profile" click=""  >
+	<s:Rect height="55" radiusX="5" width="55" x="0" y="3">
+	<s:fill>
+	<s:LinearGradient rotation="90">
+	<s:GradientEntry alpha="1.0" color="#94A0B2" ratio="0"/>
+	<s:GradientEntry alpha="1.0" color="#A6B4C0" ratio="1"/>
+	</s:LinearGradient>
+	</s:fill>
+	<s:filters>
+	<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+	</s:filters>
+	</s:Rect>
+	<s:BitmapImage smooth="true" source="" x="1" y="1"/>
+	<mx:Image id="id_ProfileImage" x="5" y="5" width="50" height="52" maintainAspectRatio="false" 
+	source=""/>
+	<s:Rect height="12" radiusX="0.550801" radiusY="0.550801" width="55"  y="61">
+	<s:fill>
+	<s:SolidColor id="id_p_rect" color="#666666"/>
+	</s:fill>
+	</s:Rect>
+	<s:RichText color="#FFFFFF" fontFamily="Calibri" fontSize="12" tabStops="S0" text="Edit Profile"  y="63" x="0"/>
+	</s:Group>
+	
+	<mx:Spacer width="2" />
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" gap="10"/>
+	</s:layout>	
+	<s:VGroup width="100%" maxWidth="50"  horizontalAlign="left" gap="7">
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Quivus ID:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="External ID: "  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="SSN / ID:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="DOB:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Gender:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Phone:"  />
+	
+	<s:VGroup width="100%" horizontalAlign="left" paddingRight="2" gap="7">
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="{}"  maxDisplayedLines="1" maxWidth="95" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="{}"  maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="{}"  maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="{}"  maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="{}"  maxDisplayedLines="1" maxWidth="95"/>
+	<s:HGroup width="100%" verticalAlign="top">
+	<s:RichText color="#000000"  fontFamily="Calibri" fontSize="12" text="{}"   maxDisplayedLines="1" maxWidth="85"/>
+	</s:HGroup>
+	</s:VGroup>
+	</s:VGroup>
+	</s:SkinnableContainer>	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+	</s:layout>
+	<s:VGroup width="100%" horizontalAlign="left" gap="7">
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Insurance:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Policy #" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Expiry Date:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Type:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Ins. Balance:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Eligible:"  />
+	</s:VGroup>
+	
+	<s:VGroup width="100%"  horizontalAlign="left" paddingRight="2" gap="7">
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip=""  maxDisplayedLines="1" maxWidth="70" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip="" maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text=""   maxDisplayedLines="1" maxWidth="70"/>
+	</s:VGroup>
+	</s:SkinnableContainer>
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+	</s:layout>
+	<s:VGroup width="100%" horizontalAlign="left" gap="7" >
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Rejected Claims:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Patient Balance:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Claims Overdue:"  />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Allergies:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Chronic Diagnosis:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Pri. Care Provider:"  />
+	</s:VGroup>
+	
+	
+	<s:VGroup width="100%" horizontalAlign="left" paddingRight="2" gap="7">
+	<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text=""    maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text=""  maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text=""   maxDisplayedLines="1" maxWidth="70"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" maxDisplayedLines="1" maxWidth="70" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" />
+	</s:VGroup>
+	</s:SkinnableContainer>
+	
+	
+	<s:HGroup gap="0" width="100%" paddingBottom="5" paddingRight="5" paddingLeft="5">
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="2" />
+	</s:layout>	
+	<s:VGroup width="100%" maxWidth="95" gap="7" >
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay15" tabStops="S0 S50 S100 S150" text="Race:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay21" tabStops="S0 S50 S100 S150" text="Mother's M Name:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay27" tabStops="S0 S50 S100 S150" text="Father's Name:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay0" tabStops="S0 S50 S100 S150" text="Occupation:" />
+	</s:VGroup>
+	
+	<s:VGroup width="100%" maxWidth="95" horizontalAlign="left" gap="7" >
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text=""  maxDisplayedLines="1" maxWidth="90" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text="" maxDisplayedLines="1" maxWidth="90" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text=""  maxDisplayedLines="1" maxWidth="90" />
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text=""  maxDisplayedLines="1" maxWidth="90" />
+	</s:VGroup>	
+	</s:SkinnableContainer>
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+	
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+	</s:layout>
+	<s:VGroup width="100%" maxWidth="70" gap="7">
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Ethencity:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Phone:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Phone:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Employer:" />
+	</s:VGroup>
+	<s:VGroup width="100%" maxWidth="100" horizontalAlign="left" gap="7">
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text=""  maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="" maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="" maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="" maxDisplayedLines="1" maxWidth="95"/>
+	</s:VGroup>
+	</s:SkinnableContainer>
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+	<s:layout>
+	<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+	</s:layout>
+	<s:VGroup width="100%" maxWidth="75" gap="7" >
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Marital Status:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Ability:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Language:" />
+	<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Medicare #" />
+	</s:VGroup>
+	
+	<s:VGroup width="100%" maxWidth="95" horizontalAlign="left" paddingRight="5" gap="7" >
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="{}" maxDisplayedLines="1" maxWidth="95"/>
+	<s:Label id="id_ability" color="#000000" fontFamily="Calibri" fontSize="12"  text="{}"  maxDisplayedLines="1" maxWidth="95"/>
+	<s:Label id="id_language" color="#000000" fontFamily="Calibri" fontSize="12"  text="{}"  maxDisplayedLines="1" maxWidth="95"/>
+	<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="{}" maxDisplayedLines="1" maxWidth="95"/>
+	</s:VGroup>
+	</s:SkinnableContainer>
+	
+	</s:HGroup>
+	
+	<sections:BasicSection id="id_basicSection" width="100%" EditProfile="basicsection1_EditProfileHandler(event)"
+	skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"/>
+	<sections:OtherInformationSection id="id_otherInfo" width="100%" skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"/>
+	
+	</s:HGroup>
+	</s:Group>
+	</s:Scroller>
+	
+	</s:NavigatorContent>
+	
+	<s:NavigatorContent width="100%" height="100%" label="Emergency contact" fontFamily="Calibri" >
+	
+	
+	</s:NavigatorContent>
+	
+	<s:NavigatorContent width="100%" height="100%" label="Guarantor" fontFamily="Calibri Bold" >
+	
+	
+	
+	</s:NavigatorContent>
+	
+	<s:NavigatorContent width="100%" height="100%" label="Health Hx" >
+	
+	
+	</s:NavigatorContent>
+	
+	<s:NavigatorContent width="100%" height="100%" label="Insurance" >
+	
+	
+	</s:NavigatorContent>
+	</mx:ViewStack>
+	
+	
+	
+	</s:Group>
+	</s:Scroller>
+	
+	-->
+	
+	
+	
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xffffff" ratio=".1"/>
+				<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="10"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="10"/>
+		</s:layout>
+		
+		<mx:Accordion  height="100%" width="100%">
+			<s:NavigatorContent backgroundAlpha="0" fontSize="16" label="Personal Detail" width="50%" height="50%">
+				
+				<s:HGroup id="id_maincontents" width="100%" gap="0" verticalAlign="top" paddingBottom="5" paddingRight="5" paddingLeft="5">
+					<s:Group buttonMode="true" toolTip="Edit Patient Profile" click=""  >
+						<s:Rect height="55" radiusX="5" width="55" x="0" y="3">
+							<s:fill>
+								<s:LinearGradient rotation="90">
+									<s:GradientEntry alpha="1.0" color="#94A0B2" ratio="0"/>
+									<s:GradientEntry alpha="1.0" color="#A6B4C0" ratio="1"/>
+								</s:LinearGradient>
+							</s:fill>
+							<s:filters>
+								<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+							</s:filters>
+						</s:Rect>
+						<s:BitmapImage smooth="true" source="" x="1" y="1"/>
+						<mx:Image id="id_ProfileImage" x="5" y="5" width="50" height="52" maintainAspectRatio="false" 
+								  source=""/>
+						<s:Rect height="12" radiusX="0.550801" radiusY="0.550801" width="55"  y="61">
+							<s:fill>
+								<s:SolidColor id="id_p_rect" color="#666666"/>
+							</s:fill>
+						</s:Rect>
+						<s:RichText color="#FFFFFF" fontFamily="Calibri" fontSize="12" tabStops="S0" text="Edit Profile"  y="63" x="0"/>
+					</s:Group>
+					
+					<mx:Spacer width="2" />
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" gap="10"/>
+						</s:layout>	
+						<s:VGroup width="100%" maxWidth="50"  horizontalAlign="left" gap="7">
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Quivus ID:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="External ID: "  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="SSN / ID:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="DOB:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Gender:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Phone:"  />
+						</s:VGroup>
+						<s:VGroup width="100%" horizontalAlign="left" paddingRight="2" gap="7">
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="patient-5412"  maxDisplayedLines="1" maxWidth="95" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="4588964"  maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="9-68666-655"  maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="10/August/1985"  maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="Male"  maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000"  fontFamily="Calibri" fontSize="12" text="+92335652541"   maxDisplayedLines="1" maxWidth="85"/>
+						</s:VGroup>
+						
+					</s:SkinnableContainer>	
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+						</s:layout>
+						<s:VGroup width="100%" horizontalAlign="left" gap="7">
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Insurance:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Policy #" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Expiry Date:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Type:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Ins. Balance:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Eligible:"  />
+						</s:VGroup>
+						
+						<s:VGroup width="100%"  horizontalAlign="left" paddingRight="2" gap="7">
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="--" toolTip=""  maxDisplayedLines="1" maxWidth="70" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="" toolTip="" maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="09/September/2015" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="--" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="6965" toolTip=""  maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0 S50" text="True"   maxDisplayedLines="1" maxWidth="70"/>
+						</s:VGroup>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.patientProfileColumnBG">
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+						</s:layout>
+						<s:VGroup width="100%" horizontalAlign="left" gap="7" >
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Rejected Claims:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Patient Balance:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Claims Overdue:"  />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Allergies:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Chronic Diagnosis:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" text="Pri. Care Provider:"  />
+						</s:VGroup>
+						
+						
+						<s:VGroup width="100%" horizontalAlign="left" paddingRight="2" gap="7">
+							<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text="1050"    maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text="6965"  maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#EE0202" fontFamily="Calibri Bold" fontSize="12" text="--"   maxDisplayedLines="1" maxWidth="70"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" maxDisplayedLines="1" maxWidth="70" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" text="" />
+						</s:VGroup>
+					</s:SkinnableContainer>
+				</s:HGroup>	
+				
+				
+			</s:NavigatorContent>
+			<s:NavigatorContent backgroundAlpha="0" fontSize="16" label="Other Detail" width="50%" height="50%">
+				<s:HGroup gap="0" width="100%" paddingBottom="5" paddingRight="5" paddingLeft="5">
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="2" />
+						</s:layout>	
+						<s:VGroup width="100%" maxWidth="95" gap="7" >
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay15" tabStops="S0 S50 S100 S150" text="Race:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay21" tabStops="S0 S50 S100 S150" text="Mother's M Name:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay27" tabStops="S0 S50 S100 S150" text="Father's Name:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" id="textDisplay0" tabStops="S0 S50 S100 S150" text="Occupation:" />
+						</s:VGroup>
+						
+						<s:VGroup width="100%" maxWidth="95" horizontalAlign="left" gap="7" >
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text="Asian"  maxDisplayedLines="1" maxWidth="90" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text="Aliza" maxDisplayedLines="1" maxWidth="90" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text="Petter"  maxDisplayedLines="1" maxWidth="90" />
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" text="Engineer"  maxDisplayedLines="1" maxWidth="90" />
+						</s:VGroup>	
+					</s:SkinnableContainer>
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+						
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+						</s:layout>
+						<s:VGroup width="100%" maxWidth="70" gap="7">
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Ethencity:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Phone:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Phone:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Employer:" />
+						</s:VGroup>
+						<s:VGroup width="100%" maxWidth="100" horizontalAlign="left" gap="7">
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text=""  maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="+966253541" maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="--" maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="Qazuntite" maxDisplayedLines="1" maxWidth="95"/>
+						</s:VGroup>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.otherInfoSectionBG">
+						<s:layout>
+							<s:HorizontalLayout paddingBottom="5" paddingTop="5" paddingLeft="5" paddingRight="5" />
+						</s:layout>
+						<s:VGroup width="100%" maxWidth="75" gap="7" >
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Marital Status:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Ability:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Language:" />
+							<s:RichText color="#333333" fontFamily="Calibri" fontSize="12"  text="Medicare #" />
+						</s:VGroup>
+						
+						<s:VGroup width="100%" maxWidth="95" horizontalAlign="left" paddingRight="5" gap="7" >
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="Divorced" maxDisplayedLines="1" maxWidth="95"/>
+							<s:Label id="id_ability" color="#000000" fontFamily="Calibri" fontSize="12"  text="--"  maxDisplayedLines="1" maxWidth="95"/>
+							<s:Label id="id_language" color="#000000" fontFamily="Calibri" fontSize="12"  text="German"  maxDisplayedLines="1" maxWidth="95"/>
+							<s:RichText color="#000000" fontFamily="Calibri" fontSize="12"  text="--" maxDisplayedLines="1" maxWidth="95"/>
+						</s:VGroup>
+					</s:SkinnableContainer>
+					
+				</s:HGroup>
+			</s:NavigatorContent>
+			
+		</mx:Accordion>
+		
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

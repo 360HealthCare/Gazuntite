@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="400" height="250"
+		 title="Write rejection reason" 
+		 chromeColor="#000000" color="#FFFFFF" cornerRadius="5" controlBarVisible="false">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			
+			protected function id_CancelReject_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function id_RejectSave_clickHandler(event:MouseEvent):void
+			{
+				Trim(ta_Rejection);
+				
+				if(ta_Rejection.text.length)
+				{
+					model.RejectionReason = ta_Rejection.text; 
+					dispatchEvent(new Event('hideRejectionPopupEvent', true, true));
+				}
+				else
+				{
+					Alert.show('Please write some text before submit', 'Info',4, FlexGlobals.topLevelApplication.mainContainer);
+					return;
+				}
+			}
+			
+			public static function Trim(txt:TextArea):void 
+			{
+				txt.text = txt.text.replace(/^\s+|\s+$/g, "");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:TextArea id="ta_Rejection" 
+				width="100%" height="90%" restrict="[a-z A-Z , . 0-9]" maxChars="250" color="#000000"/>
+	
+	<s:HGroup  width="100%" height="10%" horizontalAlign="right" verticalAlign="middle">
+		<s:Button id="id_RejectSave"
+				  label="Reject" toolTip="Save rejection reason" width="100"
+				  click="id_RejectSave_clickHandler(event)" styleName="blackButtonSkin"/>
+		<s:Button id="id_CancelReject" toolTip="Cancel rejection reason" width="100"
+				  label="Cancel" click="id_CancelReject_clickHandler(event)" styleName="blackButtonSkin"/>
+	</s:HGroup>
+</s:Panel>

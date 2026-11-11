@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark" 
+                   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+                   width="20" height="20" 
+                   alpha.disabledStates="0.5">
+    
+    <!-- host component -->
+    <fx:Metadata>
+    <![CDATA[ 
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.ToggleButton")]
+    ]]>
+    </fx:Metadata>
+    
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" stateGroups="overStates" />
+        <s:State name="down" stateGroups="downStates" />
+        <s:State name="disabled" stateGroups="disabledStates" />
+        <s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+        <s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+        <s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+        <s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+    </s:states>
+    
+	<s:Rect includeIn="up" width="19" height="19" horizontalCenter="0" radiusX="2"
+			verticalCenter="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#7A7A7A" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#444545" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#2D2E2E" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#3F4040" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Rect includeIn="down,over,up" x="0" y="0" width="100%" height="100%" radiusX="2"
+			width.down="20" height.down="20"
+			width.over="20" height.over="20"
+			visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="0x164AA5" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0x66A1F7" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="down,up" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:Rect includeIn="disabled,disabledAndSelected" x="0" y="0" width="100%" height="100%"
+			radiusX="2"
+			width.disabled="20" height.disabled="20"
+			width.disabledAndSelected="20" height.disabledAndSelected="20">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Path includeIn="disabled,disabledAndSelected,down,over,up" x="10" y="4"
+			data="M 2.688 4.051 C 3.64 4.051 4.026 4.051 4.026 4.051 L 4.026 6.131 L 7.731 3.105 L 4.058 0 L 4.058 2.32 C 4.058 2.32 3.64 2.32 3.164 2.32 C 2.688 2.32 0 2.889 0 5.875 C 0 5.917 0.785 4.051 2.688 4.051 Z"
+			winding="nonZero"
+			x.disabled="9" y.disabled="4"
+			x.disabledAndSelected="9" y.disabledAndSelected="4"
+			x.down="9" y.down="4"
+			x.over="9" y.over="4"
+			x.up="9" y.up="4">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Path>
+	
+	<s:Path includeIn="disabled,disabledAndSelected,down,over,up"
+			data="M 8.001 6.022 L 1 6.022 L 1 1.003 L 2.603 1.003 L 3.019 0 L 0 0 L 0 6.979 L 9.028 6.979 L 9.028 4.175 L 8.001 4.729 L 8.001 6.022 Z"
+			winding="nonZero"
+			x="10" y="7"
+			horizontalCenter="0" verticalCenter="0">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	
+	<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" y="0" x="0"
+			data="M 8.877 0 L 20 0 C 23.301 0 24.716 1.415 24.716 3.982 L 24.716 22.84 C 24.716 27.744 31.565 27.934 28.998 27.934 L 0.613 27.934 C -1.954 27.934 4.895 27.641 4.895 22.996 L 4.895 3.982 C 4.895 1.415 6.31 0 8.877 0 Z"
+			horizontalCenter="0">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	
+	<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" x="10" y="4"
+			data="M 2.688 4.051 C 3.64 4.051 4.026 4.051 4.026 4.051 L 4.026 6.131 L 7.731 3.105 L 4.058 0 L 4.058 2.32 C 4.058 2.32 3.64 2.32 3.164 2.32 C 2.688 2.32 0 2.889 0 5.875 C 0 5.917 0.785 4.051 2.688 4.051 Z"
+			winding="nonZero"
+			x.downAndSelected="9" y.downAndSelected="4"
+			x.overAndSelected="9" y.overAndSelected="4"
+			x.upAndSelected="9" y.upAndSelected="4">
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="2" strength="1"/>
+		</s:filters>
+	</s:Path>
+	
+	<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" horizontalCenter="0" y="7"
+			data="M 8.001 6.022 L 1 6.022 L 1 1.003 L 2.603 1.003 L 3.019 0 L 0 0 L 0 6.979 L 9.028 6.979 L 9.028 4.175 L 8.001 4.729 L 8.001 6.022 Z"
+			winding="nonZero">
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+
+</s:SparkButtonSkin>

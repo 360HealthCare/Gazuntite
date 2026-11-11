@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				minHeight="40" >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.services.valueObjects.provider.ProviderDTO;
+			
+			private var _provider:ProviderDTO;
+			
+			
+			[Bindable]
+			public function get provider():ProviderDTO
+			{
+				return _provider;
+			}
+
+			public function set provider(value:ProviderDTO):void
+			{
+				_provider = value;
+			}
+			
+			[Bindable]
+			public override function set data(value:Object):void
+			{
+				if(value is ProviderDTO)
+				{
+					this.provider = value as ProviderDTO;
+				}
+				
+				super.data = value;
+			}
+
+			protected function id_btnCall_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("startVideoChat", true ) );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>     
+	
+	<s:layout>
+		<s:HorizontalLayout gap="0"/>
+	</s:layout>
+	
+	<s:Group width="100%" height="100%" >
+		
+		<s:SkinnableContainer width="100%"
+							  height="100%"
+							  backgroundColor="0xe4e5e7"
+							  includeIn="normal, hovered">
+			<s:layout>
+				<s:VerticalLayout paddingBottom="5" 
+								  paddingLeft="5" 
+								  paddingRight="5" 
+								  paddingTop="5"
+								  verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" verticalAlign="bottom">
+				<s:Label text="{provider.FirstName}" styleName="patientListItem"/>
+				<s:Label text="{provider.LastName}" styleName="patientListItem"/>
+			</s:HGroup>
+			
+			<s:Label text="{provider.UserEmail}" styleName="patientListItemEmail"/>
+			
+		</s:SkinnableContainer>
+		
+		<!-- Selected state -->
+		
+		<s:BorderContainer width="100%"
+						   height="100%"
+						   borderWeight="0"
+						   cornerRadius="0" 
+						   dropShadowVisible="false"
+						   borderAlpha="0"
+						   includeIn="selected">
+			
+			<s:backgroundFill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry color="0x4d4d4d" ratio=".5"/>
+					<s:GradientEntry color="0x000000" ratio=".5"/>
+				</s:LinearGradient>
+			</s:backgroundFill>
+			
+			<s:layout>
+				<s:VerticalLayout paddingBottom="5" 
+								  paddingLeft="5" 
+								  paddingRight="5" 
+								  paddingTop="5"
+								  verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" verticalAlign="bottom">
+				<s:Label text="{provider.FirstName.toUpperCase()}" styleName="patientListItemSelected"/>
+				<s:Label text="{provider.LastName.toUpperCase()}" styleName="patientListItemSelected"/>
+			</s:HGroup>
+			
+			<s:Label text="{provider.UserEmail}" styleName="patientListItemEmailSelected"/>
+			
+			
+			
+		</s:BorderContainer>
+		
+	</s:Group>
+	
+	<s:Button id="id_btnCall" label="Call" click="id_btnCall_clickHandler(event)"
+			  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}" />
+	
+</s:ItemRenderer>

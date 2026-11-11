@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx" 	
+							skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+							xmlns:components="com.gazuntite.controls.extended.components.*"
+							creationComplete="popupwindow1_creationCompleteHandler(event)"
+							>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.InsOrganizationDTO;
+			import com.gazuntite.common.event.LoadAllInsuranceEvent;
+			import com.gazuntite.provider.eprescription.services.patient.dto.billing.ProviderInsuranceDTO;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			public var editIndex:int;
+			
+			private var Qualifirs:ArrayCollection = new ArrayCollection(["0B - State License Number",
+														 "1A - Blue Cross Provider Number",
+														 "1B - Blue Shield Provider Number",
+														 "1C - Medicare Provider Number",
+														 "1D - Medicaid Provider Number",
+														 "1G - Provider UPIN Number",
+														 "1H - CHAMPUS Identification Number",
+														 "1J - Facility ID Number",
+														 "B3 - Preferred Provider Org. Number",
+														 "BQ - HMO Code Number",
+														 "EI - Employer's ID Number",
+														 "FH - Clinic Number",
+														 "G2 - Provider Commercial Number",
+														 "G5 - Provider Site Number",
+														 "LU - Location Number",
+														 "SY - Social Security Number",
+														 "U3 - Unique Supplier ID Number (USIN)",
+														 "X5 - State Ind. Accident Provider Number"
+														]);
+			
+			private var CPOQualifiers:ArrayCollection = Qualifirs;
+			private var LG1Qualifiers:ArrayCollection = Qualifirs;
+			private var LG2Qualifiers:ArrayCollection = Qualifirs;
+			private var LG3Qualifiers:ArrayCollection = Qualifirs;
+			
+			private var _PrvInsID:ProviderInsuranceDTO;
+			
+			
+			public function get PrvInsID():ProviderInsuranceDTO
+			{
+				return _PrvInsID;
+			}
+
+			public function set PrvInsID(value:ProviderInsuranceDTO):void
+			{
+				_PrvInsID = value;
+			}
+
+			protected function id_rdoIns_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function id_txt_keyUpHandler(event:KeyboardEvent):void
+			{
+				var txt:TextInput = event.currentTarget as TextInput;				
+				
+				switch(txt.id)
+				{
+					
+					case "id_txtCPO":
+					{
+						if(txt.text.length > 0) 							
+							id_cmbCPO.enabled = true;
+						else
+							id_cmbCPO.enabled = false;
+						break;
+					}
+					case "id_txtLG1":
+					{
+						if(txt.text.length > 0) 
+							id_cmbLG1.enabled = true;
+						else
+							id_cmbLG1.enabled = false;
+						break;
+					}
+					case "id_txtLG2":
+					{
+						if(txt.text.length > 0) 
+							id_cmbLG2.enabled = true;
+						else
+							id_cmbLG2.enabled = false;
+						break;
+					}
+					case "id_txtLG3":
+					{
+						if(txt.text.length > 0) 
+							id_cmbLG3.enabled = true;
+						else
+							id_cmbLG3.enabled = false;
+						break;
+					}
+					
+				}
+				
+			}
+			
+			protected function popupwindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//loadInsurances();
+				if(this.title.indexOf("New") > -1)
+				{
+					id_rdoAllins.selected = true;
+					id_rdoIndividual.selected = true;
+					id_rdoGroupNPI.selected = true;
+					id_rdoEIN.selected = true;
+					id_rdoGroupTaxonomy.selected = true;
+					id_rdoNoMemo.selected = true;
+					id_rdoNoCPO.selected = true;
+					id_rdoNoLG1.selected = true;
+					id_rdoNoLG2.selected = true;
+					id_rdoNoLG3.selected = true;					
+				}
+				else
+				{
+					if(model.CurrentProviderInsurance.CertificationNumber.length > 0 )
+					{
+						id_rdoMemo.selected = true;
+						id_txtMemo.text = model.CurrentProviderInsurance.CertificationNumber;
+					}
+					else
+					{
+						id_rdoNoMemo.selected = true;
+						id_txtMemo.text = "";
+					}					
+					
+					if(model.CurrentProviderInsurance.EnrollmentTypeID == "2" )
+						id_rdoIndividual.selected = true;						
+					else
+						id_rdoGroup.selected = true;
+					
+					if(model.CurrentProviderInsurance.InsOrganizationID != "0" )
+						selectInsurance();
+					else
+						id_rdoAllins.selected = true;
+					
+					if(model.CurrentProviderInsurance.IsNPIFromPractce == "false" )
+					{
+						id_rdoIndNPI.selected = true;
+						id_txtNPI.text = model.CurrentProviderInsurance.NPI;
+					}
+					else
+					{
+						id_rdoGroupNPI.selected = true;
+						id_txtNPI.text = "";
+					}
+					if(model.CurrentProviderInsurance.IsTaxIDFromPractce == "false" )
+					{
+						if(model.CurrentProviderInsurance.TaxIdSSNQualifierTypeID == "11")
+						{
+							id_rdoTID.selected = true;
+							id_txtTID.text = model.CurrentProviderInsurance.TaxIdSSN;
+						}
+						else
+						{
+							id_rdoSSN.selected = true;
+							id_txtSSN.text = model.CurrentProviderInsurance.TaxIdSSN;
+						}
+					}
+					else
+					{
+						id_rdoEIN.selected = true;
+						id_txtTID.text = "";
+						id_txtSSN.text = "";
+					}
+					if(model.CurrentProviderInsurance.IsTaxonomyFromPractce == "false" )
+					{
+						id_rdoTaxonomy.selected = true;
+						id_txtTaxonomy.text = model.CurrentProviderInsurance.Taxonomy;
+					}
+					else
+					{
+						id_rdoGroupTaxonomy.selected = true;
+						id_txtTaxonomy.text = "";
+					}
+					if(model.CurrentProviderInsurance.POSNumber.length > 0 )
+					{
+						id_rdoCPO.selected = true;
+						id_txtCPO.text = model.CurrentProviderInsurance.POSNumber;
+						id_cmbCPO.selectedIndex = parseInt(model.CurrentProviderInsurance.POSQualifierTypeID) - 1;
+						id_cmbCPO.enabled = true;
+					}
+					else
+					{
+						id_rdoNoCPO.selected = true;
+						id_txtCPO.text = "";
+						id_cmbCPO.selectedIndex = -1;
+					}
+					if(model.CurrentProviderInsurance.LegacyNumber1.length > 0 )
+					{
+						id_rdoLG1.selected = true;
+						id_txtLG1.text = model.CurrentProviderInsurance.LegacyNumber1;
+						id_cmbLG1.selectedIndex = parseInt(model.CurrentProviderInsurance.Legacy1QualifierTypeID) - 1;
+						id_cmbLG1.enabled = true;
+					}
+					else
+					{
+						id_rdoNoLG1.selected = true;
+						id_txtLG1.text = "";
+						id_cmbLG1.selectedIndex = -1;
+					}
+					if(model.CurrentProviderInsurance.LegacyNumber2.length > 0 )
+					{
+						id_rdoLG2.selected = true;
+						id_txtLG2.text = model.CurrentProviderInsurance.LegacyNumber2;
+						id_cmbLG2.selectedIndex = parseInt(model.CurrentProviderInsurance.Legacy2QualifierTypeID) - 1;
+						id_cmbLG2.enabled = true;
+					}
+					else
+					{
+						id_rdoNoLG2.selected = true;
+						id_txtLG2.text = "";
+						id_cmbLG2.selectedIndex = -1;
+					}
+					if(model.CurrentProviderInsurance.LegacyNumber3.length > 0 )
+					{
+						id_rdoLG3.selected = true;
+						id_txtLG3.text = model.CurrentProviderInsurance.LegacyNumber3;
+						id_cmbLG3.selectedIndex = parseInt(model.CurrentProviderInsurance.Legacy3QualifierTypeID) - 1;
+						id_cmbLG3.enabled = true;
+					}
+					else
+					{
+						id_rdoNoLG3.selected = true;
+						id_txtLG3.text = "";
+						id_cmbLG3.selectedIndex = -1;
+					}
+						
+				}
+			}
+			
+			private function loadInsurances():void
+			{				
+				if(model.InsuranceOrganizationList == null || model.InsuranceOrganizationList.length == 0)
+				{
+					var lie:LoadAllInsuranceEvent = new LoadAllInsuranceEvent(function (list:ArrayCollection):void
+					{
+						model.InsuranceOrganizationList = list;
+						
+					});
+					CairngormEventDispatcher.getInstance().dispatchEvent(lie);
+				}				
+			}
+			
+			private function selectInsurance():void
+			{
+				for each (var ins:InsOrganizationDTO in model.InsuranceOrganizationList) 
+				{
+					if(ins.InsOrganizationID == model.CurrentProviderInsurance.InsOrganizationID)
+					{
+						id_InsurancList.selectedItem = ins;
+						id_rdoIns.selected = true;
+						break;
+					}
+				}
+				
+			}
+			
+			protected function id_Cancel_clickHandler(event:MouseEvent):void
+			{
+				removePopup();				
+			}
+			
+			private function validateFields():Boolean
+			{
+				var success:Boolean = new Boolean();
+				var errorStr:String = new String();
+				success = true;
+				var toSetFocus:Object;
+				
+				if(id_rdoIns.selected == true )
+				{
+					if(id_InsurancList.selectedIndex < 0)
+					{
+						success = false;
+						errorStr += "Please select Insurance \n";							
+						if (!toSetFocus)
+							toSetFocus = id_InsurancList;						
+					}					
+				}				
+				
+				if(id_rdoIndNPI.selected == true )
+				{
+					if(UtilityFunctions.TrimString(id_txtNPI.text).length == 0 || UtilityFunctions.TrimString(id_txtNPI.text).length != 10)
+					{
+						success = false;
+						errorStr += "Please enter 10 digit Individual NPI \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtNPI;						
+					}					
+				}
+				
+				if(id_rdoTaxonomy.selected == true  )
+				{
+					if(UtilityFunctions.TrimString(id_txtTaxonomy.text).length == 0 || UtilityFunctions.TrimString(id_txtTaxonomy.text).length != 10)
+					{
+						success = false;
+						errorStr += "Please enter 10 character Taxonomy \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtTaxonomy;							
+					}					
+				}
+				
+				if(id_rdoEIN.selected == false )
+				{
+					if(id_rdoTID.selected == true)
+					{
+						if(UtilityFunctions.TrimString(id_txtTID.text).length == 0 || UtilityFunctions.TrimString(id_txtTID.text).length != 9)
+						{
+							success = false;
+							errorStr += "Please enter 9 digit Tax Identifier \n";							
+							if (!toSetFocus)
+								toSetFocus = id_txtTID;							
+						}						
+					}
+					else
+					{
+						if(UtilityFunctions.TrimString(id_txtSSN.text).length == 0 ||UtilityFunctions.TrimString(id_txtSSN.text).length != 9 )
+						{
+							success = false;
+							errorStr += "Please enter 9 digit SSN \n";							
+							if (!toSetFocus)
+								toSetFocus = id_txtSSN;								
+						}						
+					}				
+				}
+							
+				
+				if(id_rdoMemo.selected == true)
+				{
+					if(UtilityFunctions.TrimString(id_txtMemo.text).length == 0 ||  UtilityFunctions.TrimString(id_txtMemo.text).length != 15  )
+					{
+						success = false;
+						errorStr += "Please enter 15 characters Mammography Certification Number \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtMemo;						
+					}					
+				}
+				
+				if(id_rdoCPO.selected == true )
+				{
+					if(UtilityFunctions.TrimString(id_txtCPO.text).length == 0 )
+					{
+						success = false;
+						errorStr += "Please enter Care Plan Oversight \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtCPO;						
+					}
+					if(id_cmbCPO.selectedIndex < 0 )
+					{
+						success = false;
+						errorStr += "Please select ID Qualifier for Care Plan Oversight \n";							
+						if (!toSetFocus)
+							toSetFocus = id_cmbCPO;						
+					}					
+				}								
+				
+				if(id_rdoLG1.selected == true )
+				{
+					if(UtilityFunctions.TrimString(id_txtLG1.text).length == 0 )
+					{
+						success = false;
+						errorStr += "Please enter Legacy Identifier 1 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtLG1;							
+					}
+					if(id_cmbLG1.selectedIndex < 0 )
+					{
+						success = false;
+						errorStr += "Please select ID Qualifier for Legacy Identifier 1 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_cmbLG1;							
+					}
+				}	
+				
+				if(id_rdoLG2.selected == true )
+				{
+					if(UtilityFunctions.TrimString(id_txtLG2.text).length == 0 )
+					{
+						success = false;
+						errorStr += "Please enter Legacy Identifier 2 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtLG2;						
+					}
+					if(id_cmbLG2.selectedIndex < 0 )
+					{
+						success = false;
+						errorStr += "Please select ID Qualifier for Legacy Identifier 2 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_cmbLG2;						
+					}
+				}				
+				
+				if(id_rdoLG3.selected == true )
+				{
+					if(UtilityFunctions.TrimString(id_txtLG3.text).length == 0 )
+					{
+						success = false;
+						errorStr += "Please enter Legacy Identifier 3 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_txtLG3;						
+					}
+					if(id_cmbLG3.selectedIndex < 0 )
+					{
+						success = false;
+						errorStr += "Please select ID Qualifier for Legacy Identifier 3 \n";							
+						if (!toSetFocus)
+							toSetFocus = id_cmbLG3;	
+					}
+				}
+				
+				if(success == false)
+				{
+					var alert:Alert = Alert.show(errorStr, "Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});					
+					PopUpManager.centerPopUp (alert);
+					
+				}
+				return success;
+			}	
+			
+			protected function id_OK_clickHandler(event:MouseEvent):void
+			{										
+				
+				if( ! validateFields()) return;
+				
+				PrvInsID = new ProviderInsuranceDTO();
+				
+				PrvInsID.ClinicBranchID = model.CurrentProviderInsurance.ClinicBranchID;
+				PrvInsID.CreatedBy = model.CurrentProviderInsurance.CreatedBy;
+				PrvInsID.ModifiedBy = model.CurrentProviderInsurance.ModifiedBy;
+				PrvInsID.FacilityID = model.CurrentProviderInsurance.FacilityID;
+				PrvInsID.ID = model.CurrentProviderInsurance.ID;
+				PrvInsID.IsDeleted = model.CurrentProviderInsurance.IsDeleted;				
+				PrvInsID.IsToSave = model.CurrentProviderInsurance.IsToSave;
+				PrvInsID.UserID = model.CurrentProviderInsurance.UserID;
+				PrvInsID.UserTypeID = model.CurrentProviderInsurance.UserTypeID;				
+				PrvInsID.StationID = model.CurrentProviderInsurance.StationID;				
+				
+				if(id_rdoIns.selected == true )
+				{					
+					PrvInsID.InsOrganizationID = (id_InsurancList.selectedItem as InsOrganizationDTO).InsOrganizationID;
+					PrvInsID.InsuranceName = (id_InsurancList.selectedItem as InsOrganizationDTO).InsuranceName;
+				}
+				else
+				{
+					PrvInsID.InsOrganizationID = "0";
+					PrvInsID.InsuranceName = "All";
+				}
+				//-------------------
+				if(id_rdoIndividual.selected == true)
+					PrvInsID.EnrollmentTypeID = "2";						
+				else
+					PrvInsID.EnrollmentTypeID = "1";
+				
+				if(id_rdoIndNPI.selected == true )
+				{					
+					PrvInsID.NPI = UtilityFunctions.TrimString(id_txtNPI.text);
+					PrvInsID.IsNPIFromPractce = "false";					
+				}
+				else
+				{
+					PrvInsID.IsNPIFromPractce = "true";
+					PrvInsID.NPI = "From Practice";
+				}
+				
+				if(id_rdoTaxonomy.selected == true  )
+				{					
+					PrvInsID.Taxonomy = UtilityFunctions.TrimString(id_txtTaxonomy.text);
+					PrvInsID.IsTaxonomyFromPractce = "false";
+				}
+				else
+				{
+					PrvInsID.IsTaxonomyFromPractce = "true";
+					PrvInsID.Taxonomy = "From Practice";
+				}
+				
+				if(id_rdoEIN.selected == true )
+				{
+					PrvInsID.IsTaxIDFromPractce = "true";
+					PrvInsID.TaxIdSSN = "From Practice";	
+					PrvInsID.TaxIdSSNQualifierTypeID = "11";
+				}
+				else
+				{
+					PrvInsID.IsTaxIDFromPractce = "false";
+					if(id_rdoTID.selected == true)
+					{						
+						PrvInsID.TaxIdSSN = UtilityFunctions.TrimString(id_txtTID.text);
+						PrvInsID.TaxIdSSNQualifierTypeID = "11";						
+					}
+					else
+					{						
+						PrvInsID.TaxIdSSN = UtilityFunctions.TrimString(id_txtSSN.text);
+						PrvInsID.TaxIdSSNQualifierTypeID = "16";						
+					}
+				}				
+				
+				if(id_rdoMemo.selected == true)									
+					PrvInsID.CertificationNumber = UtilityFunctions.TrimString(id_txtMemo.text);				
+				else
+					PrvInsID.CertificationNumber = "";
+				
+				if(id_rdoCPO.selected == true )
+				{					
+					PrvInsID.POSNumber = UtilityFunctions.TrimString(id_txtCPO.text);
+					PrvInsID.POSQualifierTypeID = String(id_cmbCPO.selectedIndex + 1);
+				}
+				else	
+				{
+					PrvInsID.POSNumber = "";	
+					PrvInsID.POSQualifierTypeID = "0";
+				}
+				
+				if(id_rdoLG1.selected == true )
+				{
+					PrvInsID.LegacyNumber1 = UtilityFunctions.TrimString(id_txtLG1.text);
+					PrvInsID.Legacy1QualifierTypeID = String(id_cmbLG1.selectedIndex + 1);
+				}
+				else	
+				{
+					PrvInsID.LegacyNumber1 = "";	
+					PrvInsID.Legacy1QualifierTypeID = "0";
+				}
+				
+				if(id_rdoLG2.selected == true )
+				{
+					PrvInsID.LegacyNumber2 = UtilityFunctions.TrimString(id_txtLG2.text);
+					PrvInsID.Legacy2QualifierTypeID = String(id_cmbLG2.selectedIndex + 1);
+				}
+				else	
+				{
+					PrvInsID.LegacyNumber2 = "";
+					PrvInsID.Legacy2QualifierTypeID = "0";
+				}
+				
+				if(id_rdoLG3.selected == true )
+				{
+					PrvInsID.LegacyNumber3 = UtilityFunctions.TrimString(id_txtLG3.text);
+					PrvInsID.Legacy3QualifierTypeID = String(id_cmbLG3.selectedIndex + 1);
+				}
+				else
+				{
+					PrvInsID.LegacyNumber3 = "";
+					PrvInsID.Legacy3QualifierTypeID = "0";
+				}
+				
+				if(IsDuplicateID()) return;
+				
+				model.CurrentProviderInsurance = PrvInsID;
+				
+				model.CurrentProviderInsurance.IsToSave = true;
+				
+				if(this.title.indexOf("New") > -1)
+				{
+					if(model.ProviderInsuranceList == null)
+						model.ProviderInsuranceList = new ArrayCollection();
+					model.ProviderInsuranceList.addItem(model.CurrentProviderInsurance);
+				}
+				else
+				{
+					model.ProviderInsuranceList[editIndex] = model.CurrentProviderInsurance;
+				}
+				
+				removePopup();
+			}
+			
+			private function IsDuplicateID(): Boolean
+			{
+				var IsDuplicate:Boolean = false;
+				
+				if(PrvInsID.InsOrganizationID == model.CurrentProviderInsurance.InsOrganizationID) return false;
+				
+				for each (var pi:ProviderInsuranceDTO in model.ProviderInsuranceList) 
+				{
+					var msg:String = "";					
+					
+					if(pi.InsOrganizationID == PrvInsID.InsOrganizationID && pi.StationID == PrvInsID.StationID  )					
+					{
+						IsDuplicate = true;
+						if(id_rdoAllins.selected)
+							msg = "Provider ID for All Insurances at same station already exists";
+						else
+							msg = "Provider ID for Insurance ["+ id_InsurancList.textInput.text +"] at same station already exists";
+						
+						var alert:Alert = Alert.show(msg, "Duplicate Provider Insurance ID", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+							if (id_rdoAllins.selected)
+								id_rdoAllins.setFocus();
+							else
+								id_InsurancList.setFocus();
+						});					
+						PopUpManager.centerPopUp (alert);	
+						break;
+					}					
+				} 
+				
+				
+				return IsDuplicate;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" paddingTop="5" paddingBottom="5" paddingRight="5" paddingLeft="5">
+		<s:HGroup width="100%">
+			<s:RadioButton id="id_rdoAllins" width="100" label="All" groupName="Ins" tabIndex="1" fontFamily="Calibri" fontSize="11" />			
+			<s:RadioButton id="id_rdoIns" width="150" label="Insurance Name" groupName="Ins" tabIndex="2" fontFamily="Calibri" fontSize="11" />
+			<components:LabelComboBox id="id_InsurancList" prompt="Insurance" width="50%" dataProvider="{model.InsuranceOrganizationList}" 
+									  labelField="InsuranceName" enabled="{id_rdoIns.selected}" tabIndex="3" />	
+		</s:HGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:HGroup width="60%" verticalAlign="middle">
+					<s:Label text="File Claim As:" width="100" fontFamily="Calibri" fontSize="11"/>
+					<s:RadioButton id="id_rdoIndividual" width="150" label="Individual" groupName="EnrType" tabIndex="4" fontFamily="Calibri" fontSize="11"/>			
+					<s:RadioButton id="id_rdoGroup" width="150" label="Group" groupName="EnrType" tabIndex="5" fontFamily="Calibri" fontSize="11" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<s:Label width="100%" text="ID Qualifier" textAlign="center" fontFamily="Calibri" fontSize="11"/>
+				</s:HGroup>				
+			</s:HGroup>
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoGroupNPI" width="100" label="From Practice" groupName="NPI" tabIndex="6" fontFamily="Calibri" fontSize="11" />			
+					<s:RadioButton id="id_rdoIndNPI" width="150" label="National Provider ID" groupName="NPI" tabIndex="7" fontFamily="Calibri" fontSize="11" />
+					<s:TextInput id="id_txtNPI" width="100" enabled="{id_rdoIndNPI.selected}" restrict="[0-9]" maxChars="10" tabIndex="8" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<s:Label width="100%" text="XX National Provider Identifier" textAlign="center" fontFamily="Calibri" fontSize="11"/>
+				</s:HGroup>		
+			</s:HGroup>
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoGroupTaxonomy" width="100" label="From Practice" groupName="Taxo" tabIndex="9" fontFamily="Calibri" fontSize="11"/>					
+					<s:RadioButton id="id_rdoTaxonomy" width="150" label="Taxonomy" groupName="Taxo" tabIndex="10" fontFamily="Calibri" fontSize="11" />
+					<s:TextInput id="id_txtTaxonomy" width="100" enabled="{id_rdoTaxonomy.selected}" tabIndex="11"
+								 restrict="[A-Z a-z 0-9]" maxChars="10" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<s:Label width="100%" text="PXC  Provider Taxonomy Code" textAlign="center" fontFamily="Calibri" fontSize="11"/>
+				</s:HGroup>	
+			</s:HGroup>
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">	
+					<mx:Box width="100" verticalAlign="middle" height="100%">
+						<s:RadioButton id="id_rdoEIN" width="100" label="From Practice" groupName="TPI" tabIndex="12" fontFamily="Calibri" fontSize="11" />
+					</mx:Box>						
+					<s:VGroup width="100%" >
+						<s:HGroup width="100%">
+							<s:RadioButton id="id_rdoTID" width="150" label="Tax Identifier" groupName="TPI" tabIndex="13" fontFamily="Calibri" fontSize="11"/>
+							<s:TextInput id="id_txtTID" width="100" enabled="{id_rdoTID.selected}" restrict="[0-9]" maxChars="9" tabIndex="14" />
+						</s:HGroup>
+						<s:HGroup width="100%">
+							<s:RadioButton id="id_rdoSSN" width="150" label="Social Security Number" groupName="TPI" tabIndex="15" fontFamily="Calibri" fontSize="11"/>
+							<s:TextInput id="id_txtSSN" width="100" enabled="{id_rdoSSN.selected}" restrict="[0-9]" maxChars="9" tabIndex="16" />
+						</s:HGroup>
+					</s:VGroup>					
+				</s:HGroup>
+				<s:HGroup width="40%" height="100%" verticalAlign="middle">
+					<s:Label width="100%" text="{id_rdoSSN.selected ? 'SY  Socail Security Number' : 'EI  Employer Identification Number' }" textAlign="center" fontFamily="Calibri" fontSize="11"/>
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoNoMemo" width="100" label="None" groupName="MC" tabIndex="17" fontFamily="Calibri" fontSize="11"/>			
+					<s:RadioButton id="id_rdoMemo" width="150" label="Mammography Cert" groupName="MC" tabIndex="18" fontFamily="Calibri" fontSize="11" />
+					<s:TextInput id="id_txtMemo" width="100" enabled="{id_rdoMemo.selected}" restrict="[A-Z a-z 0-9]" maxChars="15" tabIndex="19"/>
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<s:Label width="100%" text="{id_rdoMemo.selected ? 'EW  Mammography Certification Number' : '' }" textAlign="center" fontFamily="Calibri" fontSize="11"/>
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoNoCPO" width="100" label="None" groupName="CP" tabIndex="20" fontFamily="Calibri" fontSize="11"/>			
+					<s:RadioButton id="id_rdoCPO" width="150" label="Care Plan Oversight" groupName="CP" tabIndex="21" fontFamily="Calibri" fontSize="11" />
+					<s:TextInput id="id_txtCPO" width="100" enabled="{id_rdoCPO.selected}" keyUp="id_txt_keyUpHandler(event)" 
+								 restrict="[A-Z a-z 0-9]" maxChars="32" tabIndex="22"/>
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<components:LabelComboBox id="id_cmbCPO"  width="100%" dataProvider="{CPOQualifiers}" enabled="false" />
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoNoLG1" width="100" label="None" groupName="LG1" tabIndex="23" fontFamily="Calibri" fontSize="11" />			
+					<s:RadioButton id="id_rdoLG1" width="150" label="Legacy Identifier 1" groupName="LG1" tabIndex="24" fontFamily="Calibri" fontSize="11"/>
+					<s:TextInput id="id_txtLG1" width="100" enabled="{id_rdoLG1.selected}" tabIndex="25"
+								 keyUp="id_txt_keyUpHandler(event)" restrict="[A-Z a-z 0-9 . - _ + # ;]" maxChars="32" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<components:LabelComboBox id="id_cmbLG1"  width="100%" dataProvider="{LG1Qualifiers}" enabled="false" tabIndex="26" />
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoNoLG2" width="100" label="None" groupName="LG2" tabIndex="27" fontFamily="Calibri" fontSize="11" />			
+					<s:RadioButton id="id_rdoLG2" width="150" label="Legacy Identifier 2" groupName="LG2" tabIndex="28" fontFamily="Calibri" fontSize="11"/>
+					<s:TextInput id="id_txtLG2" width="100" enabled="{id_rdoLG2.selected}" tabIndex="29"
+								 keyUp="id_txt_keyUpHandler(event)" restrict="[A-Z a-z 0-9 . - _ + # ;]" maxChars="32" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<components:LabelComboBox id="id_cmbLG2"  width="100%" dataProvider="{LG2Qualifiers}" enabled="false" tabIndex="30"/>
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">	
+				<s:HGroup width="60%">
+					<s:RadioButton id="id_rdoNoLG3" width="100" label="None" groupName="LG3" tabIndex="31" fontFamily="Calibri" fontSize="11"/>			
+					<s:RadioButton id="id_rdoLG3" width="150" label="Legacy Identifier 3" groupName="LG3" tabIndex="32" fontFamily="Calibri" fontSize="11"/>
+					<s:TextInput id="id_txtLG3" width="100" enabled="{id_rdoLG3.selected}" tabIndex="33"
+								 keyUp="id_txt_keyUpHandler(event)" restrict="[A-Z a-z 0-9 . - _ + # ;]" maxChars="32" />
+				</s:HGroup>
+				<s:HGroup width="40%">
+					<components:LabelComboBox id="id_cmbLG3"  width="100%" dataProvider="{LG3Qualifiers}" enabled="false" tabIndex="34"/>
+				</s:HGroup>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button id="id_OK" width="100" label="OK" click="id_OK_clickHandler(event)" tabIndex="35" styleName="blackButtonSkin" toolTip="Ok" useHandCursor="true" buttonMode="true"/>
+			<s:Button id="id_Cancel" width="100" label="Cancel" click="id_Cancel_clickHandler(event)"  toolTip="Cancel" useHandCursor="true" buttonMode="true" tabIndex="36" styleName="blackButtonSkin"/>
+		</s:HGroup>
+	</s:VGroup>
+</components:PopupWindow>

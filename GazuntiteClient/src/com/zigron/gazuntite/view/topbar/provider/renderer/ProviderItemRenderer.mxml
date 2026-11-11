@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" minWidth="0"
+				minHeight="40" buttonMode="true" useHandCursor="true" >
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderDTO;
+			
+			private var _provider:ProviderDTO;
+			
+			
+			[Bindable]
+			public function get provider():ProviderDTO
+			{
+				return _provider;
+			}
+
+			public function set provider(value:ProviderDTO):void
+			{
+				_provider = value;
+			}
+			
+			[Bindable]
+			public override function set data(value:Object):void
+			{
+				if(value is ProviderDTO)
+				{
+					this.provider = value as ProviderDTO;
+				}
+				
+				super.data = value;
+			}
+
+			protected function id_btnCall_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("startVideoChat", true ) );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>     
+	
+	<s:Rect left="0" right="0" top="0" bottom="0" includeIn="selected">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0x4d4d4d" ratio=".5"/>
+				<s:GradientEntry color="0x000000" ratio=".5"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:HGroup width="100%" verticalAlign="middle" 
+			  paddingLeft="4"
+			  paddingRight="5" gap="5" 
+			  layoutDirection="ltr">
+		<s:VGroup width="100%"
+				  paddingBottom="5" 
+				  paddingLeft="0" 
+				  paddingRight="0" 
+				  paddingTop="5"
+				  verticalAlign="middle"
+				  gap="1"
+				  >
+			
+			<s:Label  text="{provider.FirstName+' ' +provider.LastName}" 
+					  toolTip="{provider.FirstName+' ' +provider.LastName}"
+					  width="100%"
+					  styleName="patientListItem" 
+					  styleName.selected="patientListItemSelected"
+					  maxDisplayedLines="1"   
+					  lineBreak="toFit"
+					  />
+			<s:Label text="{provider.UserEmail}" width="100%"
+					 toolTip="{provider.UserEmail}"
+					 styleName="patientListItemEmail" 
+					 styleName.selected="patientListItemEmailSelected" 
+					 maxDisplayedLines="1" lineBreak="toFit"
+					 />
+		</s:VGroup>
+		<!--<s:Button id="id_btnCall" label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+				  skinClass="com.zigron.gazuntite.skins.controls.button.CallButtonOnlineSkin"
+				  verticalCenter="0" left="3"
+				  />
+		
+		<s:Button label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+						skinClass="com.zigron.gazuntite.skins.controls.button.CallButtonAwaySkin"
+						verticalCenter="0" left="3"
+						/>
+		<s:Button label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+						skinClass="com.zigron.gazuntite.skins.controls.button.CallButtonBusySkin"
+						verticalCenter="0" left="3"
+						/>-->
+		<s:Button label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+						skinClass="com.gazuntite.skins.controls.button.VideoButtonOnlineSkin"
+						verticalCenter="0" left="3"
+						/>
+		<!--<s:Button label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+						skinClass="com.zigron.gazuntite.skins.controls.button.VideoButtonBusySkin"
+						verticalCenter="0" left="3"
+						/>
+		<s:Button label="Call" click="id_btnCall_clickHandler(event)"
+				  visible="{provider.IsAvailableForChat}" includeInLayout="{provider.IsAvailableForChat}"
+						skinClass="com.zigron.gazuntite.skins.controls.button.VideoButtonAwaySkin"
+						verticalCenter="0" left="3"
+						/>-->
+
+	</s:HGroup>
+	
+</s:ItemRenderer>

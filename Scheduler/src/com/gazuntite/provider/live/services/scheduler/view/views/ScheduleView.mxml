@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  xmlns:itemrenderer="com.gazuntite.provider.live.services.scheduler.view.itemrenderer.*" 
+					  xmlns:components1="com.gazuntite.provider.live.services.scheduler.view.components.*"
+					  styleName="blackTitleBGContainerSkin3"
+					  creationComplete="creComp()" 
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.dto.AppointmentDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllStationsByClinicIdEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.components.ScheduleGrid;
+			import com.gazuntite.provider.live.services.scheduler.view.event.RefreshScheduleAppointmentsEvent;
+			
+			import mx.managers.CursorManager;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			
+			//****************** Creation Complete Handler **************************************** 				
+			
+			public function creComp():void
+			{
+			//	addEventListener('refreshScheduleAppointments', refreshScheduleAppointments);
+			//	loadAllAppointments_handler(model.loggedInUserId, model.loggedInUserSelectedStationId , false, true);
+			}
+			//****************** Refresh Appointments after every action on Grid **************************
+			private function refreshScheduleAppointments(e:RefreshScheduleAppointmentsEvent):void
+			{
+				removeEventListener('refreshScheduleAppointments', refreshScheduleAppointments);
+				loadAllAppointments_handler(model.loggedInUserId, model.loggedInUserSelectedStationId , false, true);
+			}
+			//********************* Providers change handler & Load Appointments ****************************************************			
+			protected function cmbProviders_changeHandler(event:IndexChangeEvent):void
+			{
+				weeklySchedule.clearOldData();	
+				//todaySchedule.clearOldData();	
+				loadAllAppointments_handler(cmbProviders.selectedItem.UserID, model.loggedInUserSelectedStationId, false, true);
+				cmbLocation.selectedIndex = -1;
+			}
+			//********************* Location/sation change handler & Load Appointments ****************************************************			
+			protected function cmbLocation_changeHandler(event:IndexChangeEvent):void
+			{
+				weeklySchedule.clearOldData();	
+				//todaySchedule.clearOldData();	
+				loadAllAppointments_handler(cmbProviders.selectedItem.UserID, cmbLocation.selectedItem.ID,false, false);
+			}
+			// ******************* Populate the Appoiontments in Grids when Service got the results *****************************************
+			private function loadAllAppointments_handler(puid:int, sid:int, isProvider:Boolean=true, isLocations:Boolean=true ):void
+			{
+				if(model.ScheduledAppointmentList != null)
+				{
+					if(model.ScheduledAppointmentList.length)
+						model.ScheduledAppointmentList.removeAll();
+				}
+				
+				var LAappPSEvent:LoadAllAppointmentsEvent  = new LoadAllAppointmentsEvent(puid, sid, isProvider, isLocations, model.viewTypeWorkweek, populateAppointments, false);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LAappPSEvent);
+				CursorManager.setBusyCursor();
+				
+			}
+			//****************** Populate Appointments Handler ********************************************************************************			
+			private function populateAppointments(val:* = null):void
+			{
+				weeklySchedule.populateAppointments();
+				//todaySchedule.populateAppointments();
+				
+				if(model.StaticData.ProviderByClinicIDList != null)
+				{
+					if(model.StaticData.ProviderByClinicIDList.length > 0)
+					{
+						for(var i:uint =0; i < model.StaticData.ProviderByClinicIDList.length; i++)
+						{
+							if(model.loggedInUserId == model.StaticData.ProviderByClinicIDList[i].UserID && model.loggedInUserProviderId == model.StaticData.ProviderByClinicIDList[i].ID)
+							{
+								cmbProviders.selectedIndex = i;
+								cmbProviders.enabled = false;
+								cmbLocation.enabled  = true;
+							}	
+						}
+					}	
+				}
+			}
+			//********************* Call refresh View from main Scheduler refresh Button	*********************************************
+			public function refreshView():void
+			{
+				loadAllAppointments_handler(model.loggedInUserId, model.loggedInUserSelectedStationId , false, true);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="7" paddingTop="12" />
+	</s:layout>
+	<!--<s:RadioButtonGroup id="scheduleGroup" 	itemClick="enableDrugField()"/>-->
+	<s:Group   width="100%">
+		<s:Label text="{'Weekly Schedule'+' '+ '('+model.totalRecords_AllApp.toString()+')'}"  left="8"   top="3" fontFamily="Calibri"  color="#F1BE6E" fontWeight="bold" fontSize="13" visible="false" includeInLayout="false"/>
+		<components:LabelComboBox id="cmbProviders"  dataProvider="{model.StaticData.ProviderByClinicIDList}" labelField="ProviderName" prompt="--Providers--" top="0" left="5" width="100" 
+								  change="cmbProviders_changeHandler(event)" styleName="optionalComboBoxSkin"/>
+		<components:LabelComboBox id="cmbLocation" dataProvider="{model.StaticData.StationsByClinicIDList}" labelField="Name" prompt="--All Locations--" top="0" left="110" width="225" 
+								  change="cmbLocation_changeHandler(event)" styleName="optionalComboBoxSkin" />
+	</s:Group>
+	<s:VGroup width="100%">
+		<s:Scroller width="100%" top="25" maxHeight="340"  horizontalScrollPolicy="off" bottom="1" left="1">
+		<components1:WeeklySchedule id="weeklySchedule" width="100%" height="100%" />
+		</s:Scroller>
+	</s:VGroup>
+	
+</s:SkinnableContainer>

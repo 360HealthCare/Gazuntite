@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   xmlns:encounter="com.gazuntite.history.view.views.encounter.*"
+					   width="100%" height="100%" 
+					   creationComplete="cc()" xmlns:container="com.gazuntite.skins.controls.container.*"
+					   >
+	
+	<fx:Metadata>
+		[Event(name="closeHistoryOptionsPopup", type="flash.events.Event")]
+	</fx:Metadata>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var _onPopUpCloseCallback:Function;
+			
+			private function cc():void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, close);
+				id_optionsBar.selectedIndex = -1;
+			}
+			
+			private function optionsBarChangeHandler(event:IndexChangeEvent):void
+			{
+				if (id_optionsBar.selectedIndex == -1)
+				{
+					id_optionsView.visible = false;
+					id_bg.visible = false;
+					return;
+				}
+				
+				if (id_optionsBar.selectedIndex >= 0)
+				{
+					id_optionsView.visible = true;
+					id_bg.visible = true;
+					
+					switch (id_optionsBar.selectedIndex)
+					{
+						case 0:
+							
+							id_optionsView.selectedIndex = 0;
+							
+							break;
+						
+						case 1:
+							
+							id_optionsView.selectedIndex = 1;
+							
+							break;
+						
+						case 2:
+							
+							id_optionsView.selectedIndex = 2;
+							
+							break;
+					}
+				}
+			}
+			
+			private function closeClickHandler(event:MouseEvent):void
+			{
+				close(event);
+			}
+			
+			private function close(event:MouseEvent):void
+			{
+				removePopup();
+				FlexGlobals.topLevelApplication.removeEventListener(MouseEvent.CLICK, close);
+				
+				if (onPopUpCloseCallback)
+					onPopUpCloseCallback();
+			}
+
+			public function get onPopUpCloseCallback():Function
+			{
+				return _onPopUpCloseCallback;
+			}
+
+			public function set onPopUpCloseCallback(value:Function):void
+			{
+				_onPopUpCloseCallback = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<components:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="-29"/>
+	</components:layout>
+	
+	<s:SkinnableContainer width="170" height="75" skinClass="com.gazuntite.skins.controls.container.history.HistoryOptionPopupSkin">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" paddingTop="5"/>
+		</s:layout>
+		
+		<s:Spacer height="2" />
+		
+		<s:ButtonBar id="id_optionsBar" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.bar.OptionButtonBar"
+					 selectedIndex="-1"
+					 labelField="name"
+					 dataProvider="{id_optionsView}"
+					 change="optionsBarChangeHandler(event)" />
+		<s:Spacer height="3"/>
+	
+		<s:Button buttonMode="true" useHandCursor="true" toolTip="Close" click="closeClickHandler(event)"
+			skinClass="com.gazuntite.skins.controls.button.input.InputOptionButtonSkin"/>
+			
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer id="id_bg" width="100%" height="200" 
+						  skinClass="com.gazuntite.skins.controls.container.UpperArrowConatinerSkin" visible="false" includeInLayout="{id_bg.visible}">
+		<s:layout>
+			<s:VerticalLayout paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" horizontalAlign="center" />
+		</s:layout>
+		<components:LabelViewStack id="id_optionsView"  
+								   visible="false" includeInLayout="{id_optionsView.visible}" 
+								   width="100%" height="100%"  
+								   borderVisible="false" backgroundAlpha="0">
+			<s:ArrayList>
+				<container:ComingSoonView name="Summary" samlpeText="Summary View Coming Soon" width="100%" height="100%"/>
+				
+				<s:SkinnableContainer name="Encounter" width="100%" height="100%">
+					<encounter:PatientEncounterListView width="100%" height="100%"/>
+				</s:SkinnableContainer>
+				
+				<container:ComingSoonView name="Document" samlpeText="Document View Coming Soon" width="100%"/>
+			</s:ArrayList>
+			
+		</components:LabelViewStack>
+		
+	</s:SkinnableContainer>
+
+</components:PopupGroup>

@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="onCreated(event)"
+		 resize="onResize(event)"
+		 show="onShow(event)"
+		 xmlns:reviewofsystem="com.gazuntite.common.view.components.reviewofsystem.*" 
+		 xmlns:components="com.gazuntite.components.*" 
+		 xmlns:components1="com.gazuntite.common.view.components.*" 
+		 render="onRenderHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.components.reviewofsystem.skin.ROS_GeneralBlue_TB;
+			import com.gazuntite.common.view.components.reviewofsystem.skin.RoS_GeneralTB;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var m_oDataItem:IReviewOfSystemItem;
+			[Bindable]	public var tempSourceModel:Object;
+			[Bindable]	public var selectedItem:IReviewOfSystemItem;
+			[Bindable]	public var selectedItemRow:int = 0;
+			[Bindable]	public var listItemHeight:int = 28;
+		//cf	[Bindable]	public var tabWidth:Number = 105;
+			[Bindable]	public var tabWidth:Number = 155;
+			[Bindable]	protected var viewModel:PatientInputPhysicalReviewOfSystemViewModel = PatientInputPhysicalReviewOfSystemViewModel.getInstance();
+			[Bindable]	protected var selectedInnerItemRow:int = 0;
+			[Bindable]	protected var selectedInnerItemColumn:int = 0;
+			[Bindable]	protected var listInnerItemHeight:int = 27;
+			protected var selectedPage:int = 0;
+			
+			[Bindable]
+			public function get dataItem():IReviewOfSystemItem
+			{
+				return m_oDataItem;
+			}
+			
+			public function set dataItem(value:IReviewOfSystemItem):void
+			{
+				m_oDataItem = value;
+				onDataIsDirty = value.IsDirty;
+			}
+			
+			protected function onItemClicked(event:Event):void
+			{
+				viewModel.showRosItemLevel2DetailView = true;
+			}
+			
+			protected function onItemSelected(event:IndexChangeEvent):void
+			{
+				viewModel.showRosItemLevel2DetailView = false;
+				selectedItem = uiList.selectedItem ;
+				
+				var item_height:Number = listItemHeight;
+				var total_items:int = dataItem.children.length;
+				var item_per_page:int = Math.ceil(uiListContainer.height/item_height);
+				var total_pages:int = Math.ceil(total_items/item_per_page);
+				
+				selectedInnerItemRow = uiList.selectedIndex - item_per_page*selectedPage;
+			}
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+				//				tempSourceModel = TempModelPhysicalRos.instance.temList[0] as TempModelPhysicalRosItemLevelOne;
+				scrollToPage(0);
+				
+				addEventListener( "plusClick", function(event:GeneralEvent):void
+				{
+					if( dataItem.children.length > selectedInnerItemRow + 1 )
+						uiList.selectedIndex = selectedInnerItemRow + 1;
+					else
+						uiList.selectedIndex = 0;
+					
+					onItemSelected( null );
+					onItemClicked( null );
+				});
+			}
+			
+			protected function scrollToPage(newPage:Number):void
+			{
+				if (uiList.dataProvider == null)
+				{
+					return;
+				}
+				var item_height:Number = listItemHeight;
+				var total_items:int = uiList.dataProvider.length;
+				var item_per_page:int = Math.ceil(uiListContainer.height/item_height);
+				var total_pages:int = Math.ceil(total_items/item_per_page);
+				
+				if (newPage<0 || newPage>=total_pages)
+				{
+					return;
+				}
+				//viewModel.showRosItemLevel2DetailView = false; //for now only
+				
+				selectedPage = newPage;
+				var scroll_to_item:int = newPage*item_per_page;
+				var scroll_pos:int = scroll_to_item*item_height;
+				//				uiListContainer.verticalScrollPosition = scroll_pos;
+				uiScrollAnimatePath.valueTo = scroll_pos;
+				uiScrollAnimate.play();
+				uiPageLabel.text = (newPage+1).toString()+' of '+total_pages.toString();
+				
+				enableScrollButtons( total_pages > 1 );
+			}
+			
+			protected function onTopLevelSelectionChange(event:Event):void
+			{
+				viewModel.rosDetailSelectedItemIndex=-1; 
+				viewModel.rosSelectedItemIndex=-1;
+				selectedItem = null;
+				viewModel.showRosItemDetailViewTopLevel=false
+			}
+			
+			protected function onResize(event:ResizeEvent):void
+			{
+				scrollToPage(0);
+			}
+			
+			protected function onShow(event:FlexEvent):void
+			{
+				scrollToPage(0);
+			}
+			
+			protected function togglebutton1_clickHandler(event:MouseEvent):void
+			{
+				event.target.dispatchEvent( new Event('normalClick', true ) );
+			}
+			
+			protected function set onDataIsDirty(value:Boolean):void
+			{
+				if( value )
+				{
+					var hasAbnormal:Boolean = ReviewOfSystemHelper.IsAnyChildAbnormal(dataItem);
+					if(hasAbnormal)
+					{
+						id_AbnormalIndicator.visible = true;
+						id_NormalIndicator.visible = false;
+					}
+					else
+					{
+						id_AbnormalIndicator.visible = false;
+						id_NormalIndicator.visible = true;
+					}
+				}
+				else
+				{
+					id_AbnormalIndicator.visible = false;
+					id_NormalIndicator.visible = false;
+				}
+			}
+			
+			private function enableScrollButtons(value:Boolean):void
+			{
+				id_ScrollDown.enabled = value;
+				id_ScrollUp.enabled = value;
+			}
+			
+			protected function onRenderHandler(event:Event):void
+			{
+				if( null != dataItem )
+					onDataIsDirty = dataItem.IsDirty;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="uiScrollAnimate" target="{uiListContainer}" duration="300">
+			<s:motionPaths>
+				<s:SimpleMotionPath id="uiScrollAnimatePath" property="verticalScrollPosition" />
+			</s:motionPaths>
+			
+		</s:Animate>
+	</fx:Declarations>
+	
+	<fx:Binding source="dataItem.IsDirty" destination="onDataIsDirty" />
+	
+	<s:filters>
+		<s:DropShadowFilter alpha="0.75" angle="45.0" blurX="4.0" blurY="4.0" color="#000000" distance="2" hideObject="false"	inner="false" knockout="false" quality="3" strength="1"/>
+	</s:filters>
+	
+	<s:Group x="{-tabWidth}" y="{selectedItemRow*listItemHeight+27}" visible="{viewModel.showRosItemDetailViewTopLevel}" >
+		<s:ToggleButton width="160" height="100%"
+						skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.ROS_GeneralBlue_TB"
+						label="{dataItem.label.toUpperCase()}" toolTip="{dataItem.label.toUpperCase()}"
+						selected="@{viewModel.showRosItemDetailViewTopLevel}"
+						change="onTopLevelSelectionChange(event)"
+						buttonMode="true" useHandCursor="true"
+						/>
+<!--						skinClass="{!viewModel.showRosItemLevel2DetailView ? ROS_GeneralBlue_TB : RoS_GeneralTB}"-->
+		
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" right="15" verticalCenter="0">
+			<s:Button id="id_AbnormalIndicator" label="^" width="14" skinClass="com.gazuntite.skins.controls.button.input.AbnormalNotesButtonSkin"
+					  visible="true" includeInLayout="{id_AbnormalIndicator.visible}"/>
+			
+			<s:ToggleButton id="id_NormalIndicator" 
+							skinClass="com.gazuntite.controls.extended.skins.changeIndicator"
+							width="14" height="14" visible="true" includeInLayout="{id_NormalIndicator.visible}"
+							/>
+			
+			<s:ToggleButton selected="{dataItem.IsNormal == QSConstants.STRING_TRUE}"
+							skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.NTB1"
+							buttonMode="true" useHandCursor="true" toolTip="Normal"
+							click="togglebutton1_clickHandler(event)"
+							/>
+		</s:HGroup>
+	</s:Group>
+	
+	
+	<s:BorderContainer left="0" top="0" right="0" bottom="0" cornerRadius="3"  borderVisible="false"
+					   backgroundColor="{!viewModel.showRosItemLevel2DetailView ? 0x83A3FE : 0x83A3FE}"
+					   >
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+		</s:layout>
+		
+		<s:BorderContainer height="100%" cornerRadius="3" backgroundColor="#FFFFFF" borderVisible="false">
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"	distance="0" hideObject="false" inner="false" knockout="false"	quality="3" strength="1"/>
+			</s:filters>
+			
+			<s:layout>
+				<s:VerticalLayout	horizontalAlign="center" paddingTop="3" paddingBottom="2" paddingLeft="2" paddingRight="2" gap="3" />
+			</s:layout>
+			
+			<s:VGroup id="uiListContainer" height="100%" clipAndEnableScrolling="true" resize="onResize(event)">
+				<s:List id="uiList"  
+						dataProvider="{dataItem.children}"
+						itemRenderer="com.gazuntite.common.view.components.reviewofsystem.renderers.ReviewOfSystemItemRenderer2"
+						selectedIndex="@{viewModel.rosDetailSelectedItemIndex}"
+						change="onItemSelected(event)" borderVisible="false"
+						click="onItemClicked(event)"
+						>
+					<s:layout>
+						<s:VerticalLayout gap="-1"/>
+					</s:layout>
+				</s:List>			
+			</s:VGroup>
+			<s:HGroup width="{uiListContainer.width}" verticalAlign="middle" >
+				<s:Button id="id_ScrollDown" 
+						  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.DownBtnSkin"
+						  click="scrollToPage(selectedPage-1)"
+						  />
+				<s:Label id="uiPageLabel" width="100%" textAlign="center" text="1 of 1" fontFamily="CalibriCFFBold"/>
+				<s:Button id="id_ScrollUp" 
+						  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.UpBtnSkin"
+						  click="scrollToPage(selectedPage+1)"
+						  />
+			</s:HGroup>
+		</s:BorderContainer>
+		
+		<reviewofsystem:ReviewOfSystemItem2DetailView id="id_secondRenderer"
+													  width="100%" height="100%" 
+													  dataItem="{selectedItem}"
+													  visible="{viewModel.showRosItemLevel2DetailView}"
+													  includeInLayout="{viewModel.showRosItemLevel2DetailView}"
+													  selectedItemRow="{selectedInnerItemRow}"
+													  listItemHeight="{listItemHeight}"
+													  topOffset="4"
+													  tabWidth="160"
+													  />
+		
+		<s:Group width="100%" height="100%" visible="{!viewModel.showRosItemLevel2DetailView}" includeInLayout="{!viewModel.showRosItemLevel2DetailView}">
+			<components1:PleaseSelectView label="Select any item for input" horizontalCenter="0" verticalCenter="0" width="90%" />
+		</s:Group>
+		
+	</s:BorderContainer>
+	
+</s:Group>

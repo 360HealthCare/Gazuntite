@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="windowedapplication1_creationCompleteHandler(event)" xmlns:view="view.*" xmlns:view1="com.gazuntite.document.view.*">
+	<fx:Script>
+		<![CDATA[
+			import modelDto.DocomentDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var AllDocomentDTOList:ArrayCollection;
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* var xmlModel:DocomentManagment_XML = new DocomentManagment_XML();
+				AllDocomentDTOList = xmlModel.GetDocoments(); */
+				
+				AllDocomentDTOList = getDP(1000);
+				
+			}
+			
+		
+			private function getDP(length:int = 10):ArrayCollection
+			{
+				var DataSET:ArrayCollection = new ArrayCollection();
+					
+				for(var i:int = 0 ; i < length ; i++)
+				{
+					if(i%2 == 0)
+					DataSET.addItem({label:'label '+i , id:1, propx:'prop '+i, commonProp:'john' , groupID:i});
+					
+					else
+						DataSET.addItem({label:'label '+i , id:1, propx:'prop '+i, commonProp:'xyz' , groupID:i});
+						
+				}
+				
+				return DataSET;
+			}
+			
+			private var DataSET:ArrayCollection = new ArrayCollection([
+			
+				{label:'label 1', id:1, propx:'prop 1', commonProp:'john' , commonProp2:'12' , groupID:''},
+				{label:'label 2', id:2, propx:'prop 2', commonProp:'john' , commonProp2:'13' , groupID:''},
+				{label:'label 3', id:3, propx:'prop 3', commonProp:'xyz' , commonProp2:'12' , groupID:''},
+				{label:'label 4', id:4, propx:'prop 4', commonProp:'john' , commonProp2:'12' , groupID:''},
+				{label:'label 5', id:6, propx:'prop 6', commonProp:'xyz' , commonProp2:'13' , groupID:''},
+				{label:'label 7', id:7, propx:'prop 7', commonProp:'john' , commonProp2:'13' , groupID:''},
+				{label:'label 8', id:9, propx:'prop 9', commonProp:'xyz' , commonProp2:'12' , groupID:''},
+			
+			]);
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<view1:DocumentManagementPanel width="100%" />
+	<!--<view:ListView width="100%" dataProvider="{AllDocomentDTOList}" height="500" />-->
+</s:WindowedApplication>

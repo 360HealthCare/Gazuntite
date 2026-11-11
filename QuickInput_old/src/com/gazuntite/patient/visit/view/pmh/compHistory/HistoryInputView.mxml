@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="group1_creationCompleteHandler(event)" 
+		 xmlns:general="com.gazuntite.patient.visit.view.pmh.compHistory.general.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 xmlns:social="com.gazuntite.patient.visit.view.pmh.compHistory.social.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			private function OnSectionClick(event:MouseEvent):void
+			{
+				if( ! event.currentTarget.IsSelected )
+				{
+					collapseAndDeselectAll();
+					event.currentTarget.IsSelected 		= true;
+					event.currentTarget.AllowContents 	= true;
+					event.currentTarget.percentWidth 	= 100;
+					
+					event.currentTarget.focused 		= true;
+					
+					event.currentTarget.setFocus();
+					
+					event.currentTarget.title 			= event.currentTarget.title.toUpperCase();
+					
+					/* 	 id_GeneralSection.setStyle("skinClass", sparkPanelSkin);
+					id_FamilySection.setStyle("skinClass", sparkPanelSkin);
+					id_SocialSection.setStyle("skinClass", sparkPanelSkin); 
+					event.currentTarget.setStyle("skinClass", sparkPanelActiveSkin);  */
+					
+					/**
+					 * Ayesha: 16th May 2011
+					 * hiding any popUps on switching sections
+					 * */
+					QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.COMPREHENSIVE_HISTORY);
+				}
+			}
+			
+			public function collapseAndDeselectAll():void
+			{
+				id_GeneralSection.includeInLayout 	= true;
+				id_GeneralSection.visible 			= true;
+				id_FamilySection.includeInLayout	= true;
+				id_FamilySection.visible			= true;
+				id_SocialSection.includeInLayout	= true;
+				id_SocialSection.visible			= true;
+				
+				id_GeneralSection.title 			= UtilityFunctions.TitleCase( id_GeneralSection.title ); 
+				id_FamilySection.title 				= UtilityFunctions.TitleCase( id_FamilySection.title  ); 
+				id_SocialSection.title 				= UtilityFunctions.TitleCase( id_SocialSection.title  ); 
+				
+				id_GeneralSection.AllowContents = false;
+				id_GeneralSection.IsSelected 	= false;
+				id_GeneralSection.width		 	= 130;
+				id_GeneralSection.focused		= false;
+				
+				id_FamilySection.AllowContents 	= false;
+				id_FamilySection.IsSelected 	= false;
+				id_FamilySection.width		 	= 130;
+				id_FamilySection.focused		= false;
+				
+				id_SocialSection.AllowContents 	= false;
+				id_SocialSection.IsSelected 	= false;
+				id_SocialSection.width		 	= 130;
+				id_SocialSection.focused		= false;
+				
+				
+			}
+			
+			public function showOnlySection(secIndex:int):void
+			{
+				switch( secIndex )
+				{
+					case 1://"General":
+						id_GeneralSection.AllowContents = true;
+						id_GeneralSection.IsSelected 	= true;
+						id_GeneralSection.percentWidth 	= 100;
+						id_GeneralSection.miniView 		= false;
+						
+						id_FamilySection.includeInLayout 	= false;
+						id_FamilySection.visible 			= false;
+						id_SocialSection.includeInLayout	= false;
+						id_SocialSection.visible			= false;
+						break;
+					case 2://"Family":
+						id_FamilySection.AllowContents 	= true;
+						id_FamilySection.IsSelected 	= true;
+						id_FamilySection.percentWidth 	= 100;
+						
+						id_FamilySection.miniView 		= false;
+						
+						id_GeneralSection.includeInLayout 	= false;
+						id_GeneralSection.visible 			= false;
+						id_SocialSection.includeInLayout	= false;
+						id_SocialSection.visible			= false;
+						break;
+					case 3://"Social":
+						id_SocialSection.AllowContents 	= true;
+						id_SocialSection.IsSelected 	= true;
+						id_SocialSection.percentWidth 	= 100;
+						
+						id_GeneralSection.includeInLayout 	= false;
+						id_GeneralSection.visible 			= false;
+						id_FamilySection.includeInLayout	= false;
+						id_FamilySection.visible			= false;
+						break;
+					default: //"All":
+						collapseAndDeselectAll();
+						id_FamilySection.miniView 		= true;
+						id_GeneralSection.miniView 		= true;
+						break;
+				}
+			}
+			
+			public function clearMedicalHistory():void
+			{
+				if( model.GeneralMedicalHistoryList )
+					model.GeneralMedicalHistoryList.removeAll();
+				
+				model.GeneralMedicalHistoryList	= null;
+				
+				id_GeneralSection.ClearData( true );
+			}
+			
+			public function clearFamilyHistory():void
+			{
+				if( model.FamilyHistoryList )
+					model.FamilyHistoryList.removeAll();
+				
+				model.FamilyHistoryList		= null;
+				
+				id_FamilySection.ClearData( true );
+			}
+			
+			public function clearSocialHistory():void
+			{
+				if( model.SocialHistoryList )
+					model.SocialHistoryList.removeAll();
+				
+				model.SocialHistoryList		= null;
+				
+			}
+			
+			
+			
+			/* private function resetSkins():void
+			{
+			id_GeneralSection.setStyle("skinClass", sparkPanelSkin);
+			id_FamilySection.setStyle("skinClass", sparkPanelSkin);
+			id_SocialSection.setStyle("skinClass", sparkPanelSkin); 				 
+			}
+			
+			protected function id_GeneralSection_focusInHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub				
+			id_GeneralSection.setStyle("skinClass", sparkPanelActiveSkin);
+			}
+			
+			
+			protected function id_GeneralSection_focusOutHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub
+			resetSkins();
+			}
+			
+			
+			protected function id_FamilySection_focusInHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub
+			id_FamilySection.setStyle("skinClass", sparkPanelActiveSkin);
+			}
+			
+			
+			protected function id_FamilySection_focusOutHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub
+			resetSkins();
+			}
+			
+			
+			protected function id_SocialSection_focusInHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub
+			id_SocialSection.setStyle("skinClass", sparkPanelActiveSkin);
+			}
+			
+			
+			protected function id_SocialSection_focusOutHandler(event:FocusEvent):void
+			{
+			// TODO Auto-generated method stub
+			resetSkins();
+			} */
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				addEventListener("add_socialRecord",  function(event:Event):void
+				{
+					dispatchEvent( new Event("saveSocialHistoryEvent", true, true) );
+				});
+				
+				collapseAndDeselectAll();
+				id_GeneralSection.IsSelected 		= true;
+				id_GeneralSection.AllowContents 	= true;
+				id_GeneralSection.percentWidth 		= 100;
+				
+				id_GeneralSection.focused 			= true;
+				id_GeneralSection.setFocus();
+				
+				id_GeneralSection.title 			= id_GeneralSection.title.toUpperCase();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout gap="3" />
+	</s:layout>
+	
+	<general:GeneralSection id="id_GeneralSection" minWidth="138" width="100%" height="100%" AllowContents="true" title="General" 
+							click="OnSectionClick(event)" OnNotesClose="{collapseAndDeselectAll}" focused = "true" IsSelected="true"					
+							skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.sparkPanelSkin" 	/>
+	
+	<family:FamilySection id="id_FamilySection" width="100%" minWidth="138" height="100%" AllowContents="false" title="Family" 
+						  click="OnSectionClick(event)" focused = "false"
+						  skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.sparkPanelSkin"  /> 
+	
+	<social:SocialSection id="id_SocialSection" width="100%" minWidth="138" height="100%" AllowContents="false" title="Social" 
+						  click="OnSectionClick(event)" OnNotesClose="{collapseAndDeselectAll}" focused = "false" 
+						  skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.sparkPanelSkin2"	/>
+</s:Group>

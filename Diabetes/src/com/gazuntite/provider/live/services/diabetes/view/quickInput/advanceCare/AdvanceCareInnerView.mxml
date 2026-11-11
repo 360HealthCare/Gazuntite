@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:quickInput="com.gazuntite.provider.live.services.diabetes.view.quickInput.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:advanceCare="com.gazuntite.provider.live.services.diabetes.view.quickInput.advanceCare.*">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" height="100%" gap="-5" paddingTop="10" paddingLeft="2" paddingRight="2" horizontalAlign="center">
+		<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" width="90%" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:BorderContainer width="100%" height="100%" cornerRadius="3" borderColor="0xC1A39E" borderWeight="2">
+			<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false">
+				<s:ArrayList>
+					<advanceCare:ACQualityOfLifeView name="Quality of Life" width="100%" height="100%"/>
+					<advanceCare:ACAdvanceTreamment name="Advance Treatment" width="100%" height="100%"/>
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+	</s:VGroup>	
+</s:Group>

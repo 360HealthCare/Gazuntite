@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				creationComplete="itemrenderer1_creationCompleteHandler(event)"
+				width="100%" 
+				>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+
+			protected function itemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* id_Name.text = data.FirstName + " " + data.MiddleName + " " + data.LastName;
+				id_DOB.text  = ( data.DOB.month + 1 ) + "/" + data.DOB.date + "/" + data.DOB.fullYear ;
+				id_QID.text  = data.QuivusID; */
+			}
+			
+
+		]]>
+	</fx:Script>
+		<s:layout>
+			<s:VerticalLayout gap="1" verticalAlign="middle" />
+		</s:layout>
+
+		<s:HGroup width="100%" paddingTop="2" paddingBottom="2">
+			<s:HGroup width="40" paddingLeft="5">				
+				<s:Label color="#666666" text="Name:" fontFamily="Calibri" fontSize="12" verticalAlign="middle" />
+				
+			</s:HGroup>
+			<s:HGroup width="100">
+				<s:Label color="#000000" id="id_Name" text="{ data.FirstName + ' ' + data.MiddleName + data.LastName }" 
+						 fontFamily="Calibri" fontSize="11" verticalAlign="middle"
+						 maxDisplayedLines="1" maxWidth="99"/>
+			</s:HGroup>
+			
+			
+			<s:HGroup width="34" paddingLeft="4">
+				<s:Label color="#666666" text="D0B:" fontFamily="Calibri" fontSize="12" verticalAlign="middle" />
+				
+			</s:HGroup>
+			<s:HGroup width="80">
+				<s:Label color="#000000" id="id_DOB" text="{data.DOB}" 
+						 fontFamily="Calibri" fontSize="11" verticalAlign="middle" />
+			</s:HGroup>
+			
+			<!--<s:HGroup width="34" paddingLeft="4">
+				<s:Label color="#666666" text="SSN:" fontFamily="Calibri" fontSize="12" verticalAlign="middle"/>
+			
+			</s:HGroup>			
+			<s:HGroup width="100%" maxWidth="80" paddingRight="4">
+				<s:Label color="#000000" id="id_SSN" text="{ data.SSN }" fontFamily="Calibri" fontSize="12" verticalAlign="middle" />
+			</s:HGroup>-->
+			
+		</s:HGroup>
+		<mx:HRule width="100%" />
+</s:ItemRenderer>

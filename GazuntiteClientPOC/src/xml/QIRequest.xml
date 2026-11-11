@@ -1,0 +1,133 @@
+<QuickInputDTO xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.MainQuickInput">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<a:ActionDate>0001-01-01T00:00:00</a:ActionDate>
+<a:Assessment xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.MainQuickInput.Assessment">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:Diagnosis xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.Diagnosis" i:nil="true"/>
+<b:PatientFollowUp xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.FollowUp" i:nil="true"/>
+<b:PatientFollowupInstruction xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.FollowUp" i:nil="true"/>
+<b:PatientFollowupMerged xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.FollowUp"/>
+<b:Procedure xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.Procedure"/>
+<b:Recommendation xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.Recommendation" i:nil="true"/>
+</a:Assessment>
+<a:ClinicBranchId>0</a:ClinicBranchId>
+<a:IsSigned>false</a:IsSigned>
+<a:ModuleDictations xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.Dictation"/>
+<a:ModuleNotes xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.Notes"/>
+<a:PMH xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.MainQuickInput.PMH">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:Allergy xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput" i:nil="true"/>
+<b:ChiefComplaint xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput" i:nil="true"/>
+<b:ChronicDiagnosis xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput" i:nil="true"/>
+<b:ChronicMedication xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput" i:nil="true"/>
+<b:ComprehensiveHistory xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.ComprehensiveHistory" i:nil="true"/>
+<b:Immunization xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput">
+<c:ImmunizationDTO>
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<c:CreatedAt>0001-01-01T00:00:00</c:CreatedAt>
+<c:CreatedBy>0</c:CreatedBy>
+<c:DateAdmin>07/26/2012</c:DateAdmin>
+<c:DictationID>00000000-0000-0000-0000-000000000000</c:DictationID>
+<c:Dose>1234</c:Dose>
+<c:ExpiryDate i:nil="true"/>
+<c:ImmunizationType xmlns:d="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<d:ImmunizationTypeId>44</d:ImmunizationTypeId>
+<d:ImmunizationTypeName>7-Valent</d:ImmunizationTypeName>
+</c:ImmunizationType>
+<c:IsNA>false</c:IsNA>
+<c:IsRecordEditable>false</c:IsRecordEditable>
+<c:IsRefusal>false</c:IsRefusal>
+<c:LotNumber>123</c:LotNumber>
+<c:ManagedBy>0</c:ManagedBy>
+<c:Manufacturer>Test</c:Manufacturer>
+<c:ModifiedAt>0001-01-01T00:00:00</c:ModifiedAt>
+<c:ModifiedBy>0</c:ModifiedBy>
+<c:NextDoseDue>07/26/2012</c:NextDoseDue>
+<c:Note i:nil="true"/>
+<c:NoteSubject i:nil="true"/>
+<c:PatientImmunizationId>903</c:PatientImmunizationId>
+<c:RefusalReason i:nil="true"/>
+<c:Rout>test</c:Rout>
+<c:Series>series one</c:Series>
+<c:Site>site</c:Site>
+<c:TestedBy>0</c:TestedBy>
+<c:UpdatedAt>0001-01-01T00:00:00</c:UpdatedAt>
+<c:VisitDate>0001-01-01T00:00:00</c:VisitDate>
+<c:VisitId>9782</c:VisitId>
+</c:ImmunizationDTO>
+</b:Immunization>
+</a:PMH>
+<a:PatientId>0</a:PatientId>
+<a:Physical xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.QuickInput.MainQuickInput.Physical" i:nil="true"/>
+<a:SignedByUserId>0</a:SignedByUserId>
+<a:SignedByUserTypeId>0</a:SignedByUserTypeId>
+<a:SignedDate>0001-01-01T00:00:00</a:SignedDate>
+<a:Visit xmlns:b="http://schemas.datacontract.org/2004/07/Quivus.Model.Visit">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<b:AppointmentId>0</b:AppointmentId>
+<b:ClinicBranch xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.Clinic">
+<IsDeleted xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDeleted>
+<IsDirty xmlns="http://schemas.datacontract.org/2004/07/Quivus.Model">false</IsDirty>
+<c:Address i:nil="true"/>
+<c:BranchCode i:nil="true"/>
+<c:City i:nil="true"/>
+<c:ClinicBranchIdSeq>7</c:ClinicBranchIdSeq>
+<c:ClinicBranchName i:nil="true"/>
+<c:ClinicStatus i:nil="true"/>
+<c:ContactPerson i:nil="true"/>
+<c:DefaultStation xmlns:d="http://schemas.datacontract.org/2004/07/QuivusModel.Common" i:nil="true"/>
+<c:FaxNumber i:nil="true"/>
+<c:PhoneNumber i:nil="true"/>
+<c:State i:nil="true"/>
+<c:ZIP i:nil="true"/>
+</b:ClinicBranch>
+<b:CoSignedDate>0001-01-01T00:00:00</b:CoSignedDate>
+<b:CreatedAt>2012-07-26T11:25:16</b:CreatedAt>
+<b:CreatedBy>48546</b:CreatedBy>
+<b:CreatedStationID>1</b:CreatedStationID>
+<b:DictationID>00000000-0000-0000-0000-000000000000</b:DictationID>
+<b:EncounterTypeId>0</b:EncounterTypeId>
+<b:EncounterTypeName i:nil="true"/>
+<b:IsDressedForPhysical i:nil="true"/>
+<b:IsRecordEditable>false</b:IsRecordEditable>
+<b:IsValidDataExists>true</b:IsValidDataExists>
+<b:IsVirtualVisit>false</b:IsVirtualVisit>
+<b:ModifiedAt>0001-01-01T00:00:00</b:ModifiedAt>
+<b:ModifiedBy>0</b:ModifiedBy>
+<b:ModifiedDate>0001-01-01T00:00:00</b:ModifiedDate>
+<b:OwnerId>48546</b:OwnerId>
+<b:OwnerUserType xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<c:IsClinicUser>false</c:IsClinicUser>
+<c:IsProvider>false</c:IsProvider>
+<c:UserTypeId>3</c:UserTypeId>
+<c:UserTypeName i:nil="true"/>
+</b:OwnerUserType>
+<b:PatientId>48391</b:PatientId>
+<b:PlaceOfServiceTypeID>0</b:PlaceOfServiceTypeID>
+<b:PlaceOfServiceTypeName i:nil="true"/>
+<b:RecGuid>eb091d3b-0a53-42de-9571-cedaac4cfacc</b:RecGuid>
+<b:RecordStatus i:nil="true"/>
+<b:SignedByUserId>0</b:SignedByUserId>
+<b:SignedByUserType xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs" i:nil="true"/>
+<b:SignedDate>0001-01-01T00:00:00</b:SignedDate>
+<b:TemplateId>0</b:TemplateId>
+<b:TemplateVisitId>0</b:TemplateVisitId>
+<b:UserId>48546</b:UserId>
+<b:UserType xmlns:c="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<c:IsClinicUser>false</c:IsClinicUser>
+<c:IsProvider>false</c:IsProvider>
+<c:UserTypeId>3</c:UserTypeId>
+<c:UserTypeName i:nil="true"/>
+</b:UserType>
+<b:VisitDate>2012-07-26T16:26:00</b:VisitDate>
+<b:VisitId>9782</b:VisitId>
+<b:VisitStatus>UnSigned</b:VisitStatus>
+</a:Visit>
+<a:VisitId>0</a:VisitId>
+<a:isReviewed>false</a:isReviewed>
+</QuickInputDTO>

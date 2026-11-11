@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:BitmapImage smooth="true" source="@Embed('/assets/images/status_null1.png')" includeIn="disabled,disabledAndSelected,up" x="0" y="0"/>
+	<s:BitmapImage smooth="true" source="@Embed('/assets/images/away_icon.png')" includeIn="down,downAndSelected,over,overAndSelected,up,upAndSelected" x="0" visible.up="false" y="0"/>
+	<s:Label width="100%"  text="{hostComponent.label}" maxDisplayedLines="1"
+			  x="25" y="7" color="#FFFFFF" fontFamily="CalibriCFF" fontSize="14"/>
+</s:Skin>

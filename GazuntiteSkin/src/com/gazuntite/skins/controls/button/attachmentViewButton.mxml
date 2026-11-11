@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="18" includeIn="down,over,up" radiusX="2" visible.up="false" width="18" x="0.5" y="0.5">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#565656" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#292929" ratio="0.47058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#737373" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1" color="#727272" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#727272" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="2" hideObject="false" includeIn="down" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage x="3" y="2" smooth="true"  source="@Embed('/assets/images/attachment_icon.png')">
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#FFFFFF" includeIn="down,over" inner="true" knockout="false" quality="2" strength="5"/>
+		</s:filters>
+	</s:BitmapImage>
+	<s:transitions>
+		<s:Transition autoReverse="true" fromState="over" toState="up"/>
+	</s:transitions>
+</s:Skin>

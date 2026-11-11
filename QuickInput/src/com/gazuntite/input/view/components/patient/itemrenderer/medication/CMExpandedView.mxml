@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  creationComplete="cc()" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.MedRXDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var labelWidth:Number = 55;
+			[Bindable]	public var dto:MedRXDTO;
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="100%"  horizontalAlign="left" gap="20">
+		<s:VGroup horizontalAlign="left" width="60" verticalAlign="top">
+			<s:Label text="Drug Name:"	 styleName="patientFormLabel"/>
+			<s:Label text="Quantity:"	 styleName="patientFormLabel"/>
+			<s:Label text="NDC:"	 styleName="patientFormLabel"/>
+			<s:Label text="Sig:"	 styleName="patientFormLabel"/>
+			<s:Label text="Reason:"	 styleName="patientFormLabel"/>
+			<s:Label text="Notes:"	 styleName="patientFormLabel" />
+		</s:VGroup>
+		<s:VGroup horizontalAlign="left" width="100%">
+			<s:Label text="{dto.drugName +' ('+dto.GenericName+'), '+dto.StrengthDes}"	toolTip="{dto.drugName +' ('+dto.GenericName+'), '+dto.StrengthDes}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" width="100%"/>
+			<s:Label text="{dto.Quantity == '0' ? '' : dto.Quantity +' '+ dto.QuantityFormDES}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			<s:Label text="{dto.NDCCODE}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			<s:Label text="{dto.SIG}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			<s:Label text="{dto.Reason}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" width="100%"/>
+			<s:Label text="{dto.RecordNote}"	 maxDisplayedLines="2" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+		</s:VGroup>
+		<s:VGroup horizontalAlign="left" width="60" verticalAlign="top">
+			<s:Label text="Dose:"	 styleName="patientFormLabel"/>
+			<s:Label text="Frequency:"	 styleName="patientFormLabel"/>
+			<s:Label text="Route:"	 styleName="patientFormLabel"/>
+		</s:VGroup>
+		<s:VGroup horizontalAlign="left" width="100">
+			<s:Label text="{dto.Dose == '0'? '':dto.Dose  +' '+dto.DoseFormDES }"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			<s:Label text="{dto.frequencyDES}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			<s:Label text="{dto.RouteDes}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" gap="5" horizontalAlign="right" paddingRight="8">
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (dto.DictationID &amp;&amp; dto.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{dto.Notes}" note="@{dto.Notes}" isSaveButtonVisible="false" DictationID="{dto.DictationID}" IsDictaionEditMode="{false}"/>
+	
+</s:SkinnableContainer>

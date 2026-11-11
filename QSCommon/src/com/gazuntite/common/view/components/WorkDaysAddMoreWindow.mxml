@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*"  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.controls.extended.components.LabelComboBoxTime;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.CheckBox;
+			import mx.controls.Label;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			
+			import spark.components.ComboBox;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			public var _dp:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public var _dpView:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			public var isViewMode:Boolean ;
+			
+			public function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				//trace (id_AddGrid.selectedItem );
+				//var dto:Object = id_AddPhoneNumberGrid.selectedItem;
+				//_dp.removeItemAt(id_AddPhoneNumberGrid.selectedIndex);
+			} 
+			
+			public function chkbutton1_clickHandler(event:MouseEvent):void
+			{
+				if(id_AddGrid.selectedItem.isSelected)
+				{
+					id_AddGrid.dataProvider[id_AddGrid.selectedIndex].isSelected = false;
+				}
+				else
+				{
+					id_AddGrid.dataProvider[id_AddGrid.selectedIndex].isSelected = true;
+				}
+			} 
+			
+			public function id_WorkStart_changeHandler(event:IndexChangeEvent, time:String):void
+			{
+				id_AddGrid.dataProvider[id_AddGrid.selectedIndex].startTime = time;
+			}
+			
+			public function id_WorkEnd_changeHandler(event:IndexChangeEvent, time:String):void
+			{
+				id_AddGrid.dataProvider[id_AddGrid.selectedIndex].endTime = time;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:VGroup horizontalAlign="center" width="100%">
+		
+		<mx:DataGrid id="id_AddGrid"  minHeight="20" width="100%" rowCount="{id_AddGrid.dataProvider.length}" 
+					 dataProvider="{_dp}" verticalScrollBarStyleName="VScrollBar" maxHeight="230" 
+					 sortableColumns="false" visible="{!isViewMode}" includeInLayout="{!isViewMode}">
+			<mx:columns>
+				<mx:DataGridColumn width="0.1" headerText="" dataField="isSelected"
+								   editorDataField="selected" rendererIsEditor="true">
+					<mx:itemRenderer>
+						<fx:Component>	
+							<mx:CheckBox selected="{data.isSelected}" click="outerDocument.chkbutton1_clickHandler(event)" />
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn dataField="dayName" headerText="Day" width="0.5" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				<mx:DataGridColumn width="0.2" headerText="Start Time" dataField="startTime">
+					<mx:itemRenderer>
+						<fx:Component>	
+							<mx:HBox buttonMode="true" useHandCursor="true" width="90" paddingBottom="2" horizontalAlign="center" verticalAlign="middle">
+								<fx:Script>
+									<![CDATA[
+										import mx.events.FlexEvent;
+										
+										protected function id_WorkStart_creationCompleteHandler(event:FlexEvent):void
+										{
+											var ws:String = data.startTime;
+											if(null != ws)
+											{
+												for(var i:int=0; i<id_WorkStart.dataProvider.length; i++)
+												{
+													var obj:Object = new Object();
+													obj = id_WorkStart.dataProvider.getItemAt(i);
+													if(ws == obj.time)
+														id_WorkStart.selectedIndex = i;
+												}
+											} 
+										}
+									]]>
+								</fx:Script>
+								<components1:LabelComboBoxTime id="id_WorkStart"  
+															  width="100%" prompt="Work Start"  required="true" toolTip="Start Time"	creationComplete="id_WorkStart_creationCompleteHandler(event)"										
+															  restrict="[a m A M P M , . : ' 0-9]"   change="outerDocument.id_WorkStart_changeHandler(event, id_WorkStart.selectedItem.time)" />			
+							</mx:HBox>							
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				
+				<mx:DataGridColumn width="0.2" headerText="End Time" dataField="endTime">
+					<mx:itemRenderer>
+						<fx:Component>	
+							<mx:HBox buttonMode="true" useHandCursor="true" width="90" paddingBottom="2" horizontalAlign="center" verticalAlign="middle">
+								<fx:Script>
+									<![CDATA[
+										import mx.events.FlexEvent;
+										
+										protected function id_WorkEnd_creationCompleteHandler(event:FlexEvent):void
+										{
+											var we:String = data.endTime;
+											if(null != we)
+											{
+												for(var i:int=0; i<id_WorkEnd.dataProvider.length; i++)
+												{
+													var obj:Object = new Object();
+													obj = id_WorkEnd.dataProvider.getItemAt(i);
+													if(we == obj.time)
+														id_WorkEnd.selectedIndex = i;
+												}
+											} 
+										}
+									]]>
+								</fx:Script>
+								<components1:LabelComboBoxTime id="id_WorkEnd" 
+															  width="100%" prompt="Work End"  required="true" toolTip="End Time" creationComplete="id_WorkEnd_creationCompleteHandler(event)"											
+															  restrict="[a m A M P M , . : ' 0-9]"  change="outerDocument.id_WorkEnd_changeHandler(event, id_WorkEnd.selectedItem.time)"  />								
+							</mx:HBox>							
+						</fx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+			</mx:columns>
+		</mx:DataGrid>
+		
+		<components1:LabelDataGrid id="id_AddGridView"  minHeight="20" width="100%" rowCount="{id_AddGrid.dataProvider.length}" 
+								  dataProvider="{_dpView}" verticalScrollBarStyleName="VScrollBar" maxHeight="230" 
+								  sortableColumns="false" visible="{isViewMode}" includeInLayout="{isViewMode}"
+								  columnWidths="{['33%','33%', '33%']}">
+			<components1:columns>
+				<mx:DataGridColumn dataField="dayName" headerText="Day"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				<mx:DataGridColumn width="0.2" headerText="Start Time" dataField="startTime" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				<mx:DataGridColumn width="0.2" headerText="End Time" dataField="endTime" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			</components1:columns>
+		</components1:LabelDataGrid>
+	</s:VGroup>
+</s:Group>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.history.view.event.HistoryButtonsEvent;
+			import com.gazuntite.history.view.itemRenderer.IHistoryIR;
+			
+			import spark.components.IItemRenderer;
+			
+			private var _data:Object;
+			private var _itemrenderer:IHistoryIR;
+			
+			
+
+			public function get itemrenderer():IHistoryIR
+			{
+				return _itemrenderer;
+			}
+
+			public function set itemrenderer(value:IHistoryIR):void
+			{
+				_itemrenderer = value;
+			}
+
+			public function get data():Object
+			{
+				return _data;
+			}
+
+			public function set data(value:Object):void
+			{
+				_data = value;
+			}
+
+			protected function PreviewClick(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				deselectButtonByID(event.currentTarget.id);
+				var eve:HistoryButtonsEvent = new HistoryButtonsEvent(HistoryButtonsEvent.DocomentPreviewClicked);
+				eve.ItemRenderer = itemrenderer;
+				eve.DTOdata = data;
+				dispatchEvent(eve);
+				
+			}
+			
+			protected function NotesClick(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				deselectButtonByID(event.currentTarget.id);
+				var eve:HistoryButtonsEvent = new HistoryButtonsEvent(HistoryButtonsEvent.NotesButtonClicked);
+				eve.DTOdata = data;
+				eve.ItemRenderer = itemrenderer;
+				dispatchEvent(eve);
+				
+			}
+			
+			protected function DictationClick(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				deselectButtonByID(event.currentTarget.id);
+				var eve:HistoryButtonsEvent = new HistoryButtonsEvent(HistoryButtonsEvent.DictationButtonClicked);
+				eve.DTOdata = data;
+				eve.ItemRenderer = itemrenderer;
+				dispatchEvent(eve);
+			}
+			
+			private function deselectButtonByID(btnid:String):void
+			{
+				id_previewBtn.selected			= btnid == 'id_previewBtn' ? id_previewBtn.selected : false;
+				id_dictationBtn.selected		= btnid == 'id_dictationBtn' ? id_dictationBtn.selected : false;
+				id_notesBtn.selected			= btnid == 'id_notesBtn' ? id_notesBtn.selected : false;
+			}
+			
+			public function deselectAllButton():void
+			{
+				id_previewBtn.selected			= false;
+			   id_dictationBtn.selected			= false;
+			   id_notesBtn.selected			= false;
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout gap="1" horizontalAlign="center" verticalAlign="middle"/>
+	</s:layout>
+	
+	<s:ToggleButton id="id_previewBtn" width="20" height="20" label="P" toolTip="Preview" click="PreviewClick(event)"
+					skinClass="com.gazuntite.skins.controls.toggleButtonSkin.PdfViewerTBSkin" buttonMode="true" useHandCursor="true" />
+	<s:ToggleButton id="id_dictationBtn" width="20" height="20" label="N" toolTip="Dictation" click="DictationClick(event)"
+					skinClass="com.gazuntite.skins.controls.button.history.HistoryDicitatonButtonSkin" buttonMode="true" useHandCursor="true" />
+	<s:ToggleButton id="id_notesBtn" width="20" height="20" label="D" toolTip="Notes" click="NotesClick(event)"
+					skinClass="com.gazuntite.skins.controls.button.history.HistoryNotesButtonSkin" buttonMode="true" useHandCursor="true" />
+</s:Group>

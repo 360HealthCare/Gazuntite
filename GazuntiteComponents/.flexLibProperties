@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.gazuntite.controls.extended.skins.transparentTextAreaSkin"/>
+    <classEntry path="com.gazuntite.controls.extended.skins.StepStyleComboSkin"/>
+    <classEntry path="com.gazuntite.controls.extended.skins.RxComboTInputSkin"/>
+    <classEntry path="com.gazuntite.controls.extended.components.autoCompleteComboBox.AutoCompleteCollectionEvent"/>
+    <classEntry path="com.gazuntite.controls.extended.components.autoCompleteComboBox.renderers.DefaultAutoCompleteRenderer"/>
+    <classEntry path="com.gazuntite.controls.extended.components.autoCompleteComboBox.renderers.IAutoCompleteRenderer"/>
+    <classEntry path="com.gazuntite.controls.extended.components.autoCompleteComboBox.AutoCompleteComboBoxLite"/>
+    <classEntry path="com.gazuntite.utils.HTMLToolTip"/>
+    <classEntry path="com.gazuntite.components.search.SearchDropDown"/>
+    <classEntry path="com.gazuntite.components.search.SearchDropDownEvent"/>
+    <classEntry path="com.gazuntite.components.search.DefaultIconLabelRenderer"/>
+    <classEntry path="com.gazuntite.components.search.DefaultSearchDropDownSkin"/>
+    <classEntry path="com.gazuntite.components.search.SearchResultView"/>
+    <classEntry path="com.gazuntite.components.search.DefaultResultRenderer"/>
+    <classEntry path="com.gazuntite.controls.extended.components.ImageButton"/>
+    <classEntry path="com.gazuntite.controls.extended.skins.CamPopupWindowSkin"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

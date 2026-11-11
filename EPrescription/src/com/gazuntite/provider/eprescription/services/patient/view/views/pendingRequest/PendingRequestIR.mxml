@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				autoDrawBackground="false" 
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			[Bindable]
+			public var inEditMode:Boolean = false;
+			[Bindable]
+			public var model:Object;
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				model = value;
+			}
+			
+			protected function toggleEditView(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				
+				inEditMode = !inEditMode;
+				
+				if(inEditMode)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+			
+			private function getREfillData(obj:Object):String
+			{
+				var result:String = '';
+				
+				if(obj.PreisPRN)
+					result =obj.PreisPRN;
+				
+				if(result.toUpperCase() == 'TRUE')
+				{
+					result = 'AS NEEDED';
+				}
+				else
+				{
+					if(obj.PreRefill)
+						result = obj.PreRefill;
+				}
+				
+				return result;
+			}
+			
+			protected function id_approveBtn_clickHandler(event:MouseEvent):void
+			{
+				if(event.currentTarget.id == "id_approveBtn" )
+				{
+					dispatchEvent(new MouseEvent("ApproveBtnClicked",true,true));
+				}
+					
+				else if(event.currentTarget.id == "id_DenyBtn")
+				{
+					dispatchEvent(new MouseEvent("DenyBtnClicked",true,true));
+				}
+					
+				else if(event.currentTarget.id == "id_approveChangeBtn")
+				{
+					dispatchEvent(new MouseEvent("ApproveChangeBtnClicked",true,true));
+				}
+					
+				else if(event.currentTarget.id == "id_DentPrescriptionBtn" )
+				{
+					dispatchEvent(new MouseEvent("DentPrescriptionBtnClicked",true,true));
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:layout >
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="2" paddingTop="2" paddingLeft="2" paddingRight="2"/> 
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" 
+						  width="100%" height="35"    
+						  toolTip="Open/Close Details" click="toggleEditView(event)" useHandCursor="true" buttonMode="true">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Label text="{model.pharmacyPatientDTO.FirstName + ' ' + model.pharmacyPatientDTO.LastName}" 
+				 toolTip="{model.pharmacyPatientDTO.FirstName + ' ' + model.pharmacyPatientDTO.LastName}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="25%" verticalCenter="0"
+				 maxDisplayedLines="1" />
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label text="{model.prescriberDTO.FirstName + ' ' + model.prescriberDTO.LastName}" 
+				 toolTip="{model.prescriberDTO.FirstName + ' ' + model.prescriberDTO.LastName}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="25%" verticalCenter="0"
+				 maxDisplayedLines="1" />
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label text="{model.DisDirection}" 
+				 toolTip="{model.DisDirection}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="25%" verticalCenter="0"
+				 maxDisplayedLines="1" />
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:HGroup  height="100%" verticalAlign="middle" horizontalAlign="left" width="25%">
+			<s:Button id="id_approveBtn" click="id_approveBtn_clickHandler(event)" 
+					  buttonMode="true"  useHandCursor="true" toolTip="Approve" 
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.ApproveButtonSkin"
+					   /><!--visible="false" includeInLayout="false"-->					
+			<s:Button id="id_DenyBtn" click="id_approveBtn_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" toolTip="Deny" 
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.DenyButtonSkin"
+					   /><!--visible="false" includeInLayout="false"-->		
+			<s:Button id="id_approveChangeBtn" click="id_approveBtn_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" toolTip="Approve with changes"  
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.ApproveWithChangeButtonSkin"
+					   /><!--visible="false" includeInLayout="false"-->
+			<s:Button id="id_DentPrescriptionBtn" click="id_approveBtn_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" toolTip="Deny new prescription" 
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.EditDenyButtonSkin"
+					  /><!-- visible="false" includeInLayout="false"-->
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	<!--Expanded View -->
+	<s:SkinnableContainer width="{id_Header.width - 10}"   height="65" includeInLayout="{inEditMode}" visible="{inEditMode}" skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin">
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="4" gap="5"/>
+		</s:layout>
+		
+		<s:VGroup width="70" horizontalAlign="left">
+			<s:Label text="StoreName : " fontFamily="CalibriCFF" fontSize="14"  maxDisplayedLines="1"/>
+			<s:Label text="Address : " fontFamily="CalibriCFF" fontSize="14"   maxDisplayedLines="1"/>
+			<s:Label text="Phone : " fontFamily="CalibriCFF" fontSize="14"    maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup width="100%" horizontalAlign="left">
+			<s:Label text="{model.pharmacyDTO.StoreName}" toolTip="{model.pharmacyDTO.StoreName}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"    maxDisplayedLines="1"/>
+			<s:Label text="{model.pharmacyDTO.AddressLine1}" toolTip="{model.pharmacyDTO.AddressLine1}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"    maxDisplayedLines="1"/>
+			<s:Label text="{model.pharmacyDTO.PhonePrimary}" toolTip="{model.pharmacyDTO.PhonePrimary}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"    maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

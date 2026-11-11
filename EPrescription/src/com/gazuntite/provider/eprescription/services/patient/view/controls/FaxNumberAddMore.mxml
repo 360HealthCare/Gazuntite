@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:components="com.gazuntite.controls.extended.components.*"
+		  creationComplete="group1_creationCompleteHandler(event)" 
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.ValidationUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+		    private var m_oPhoneNumberTypes:ArrayCollection;
+			private var _phoneNumber:String;
+			
+			public function get phoneNumber():String
+			{
+				return _phoneNumber;
+			}
+
+			public function set phoneNumber(value:String):void
+			{
+				_phoneNumber = value;
+			}
+
+			[Bindable]
+			public function get PhoneNumberTypes():ArrayCollection
+			{
+				return m_oPhoneNumberTypes;
+			}
+
+			public function set PhoneNumberTypes(value:ArrayCollection):void
+			{
+				m_oPhoneNumberTypes = value;
+			}
+
+			public function resetFields():void
+			{
+				if (id_TelNumber)
+					id_TelNumber.text = "";
+				
+				if (id_ExtNumber)
+					id_ExtNumber.text = "";
+				
+				if (id_TelNumberKind)
+					id_TelNumberKind.selectedIndex = -1;
+			}
+			
+			public function getPhoneNumberDetails():Object
+			{
+				var result:Object;
+				
+				if (id_TelNumber && id_TelNumber.text)
+				{
+					if (!result)
+						result = {};
+					
+					result["phoneNumber"] = id_TelNumber.text;
+				}
+				
+				if (id_TelNumberKind && id_TelNumberKind.selectedItem)
+				{
+					/* if (result)
+						result["phoneNumberKind"] = (id_TelNumberKind.selectedItem as PhoneNumberTypeDTO); */
+				}
+				
+				if (id_ExtNumber)
+				{
+					if (result)
+						result["phoneExtension"] = id_ExtNumber.text;
+				}
+				
+				return result;
+			}
+			
+			public function isInValid(mustEnterRequiredFields:Boolean = false, errorStrToAppend:String = ""):Object
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				
+				ValidationUtils.Trim(id_TelNumber);
+				ValidationUtils.Trim(id_ExtNumber);
+				
+				if (id_TelNumber.text.length || id_ExtNumber.text.length || id_TelNumberKind.selectedIndex != -1)
+				{
+					if (id_TelNumber.text.length >= 10 && id_TelNumber.text.length <= 20)
+					{
+						if (!ValidationUtils.isValidPhone(id_TelNumber))
+						{
+							isNotValid = true;
+							
+							if (errorStrToAppend)
+								errorStr += errorStrToAppend + " ";
+							
+							errorStr += "phone number is invalid.\n";
+							
+							if (!toSetFocus)
+								toSetFocus = id_TelNumber;
+						}
+					}
+					else
+					{
+						isNotValid = true;
+						errorStr += "Specify minimum 10 and maximum 20 digits for ";
+						
+						if (errorStrToAppend)
+						{
+							errorStr += errorStrToAppend.toLowerCase() + " ";
+						}
+						
+						errorStr += "phone number.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumber;
+					}
+					
+					if (id_ExtNumber.text.length && !ValidationUtils.isValidPhoneExt(id_ExtNumber))
+					{
+						isNotValid = true;
+						
+						if (errorStrToAppend)
+							errorStr += errorStrToAppend + " ";
+						
+						errorStr += "phone number extension is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_ExtNumber;
+					}
+					
+					if (!ValidationUtils.isValidValueSelected(id_TelNumberKind))
+					{
+						isNotValid = true;
+						
+						if (errorStrToAppend)
+							errorStr += errorStrToAppend + " ";
+						
+						errorStr += "phone number type is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumberKind;
+					}
+				}
+				else
+				{
+					if (mustEnterRequiredFields)
+					{
+						isNotValid = true;
+						
+						errorStr += "Specify minimum 10 and maximum 20 digits for ";
+						
+						if (errorStrToAppend)
+							errorStr += errorStrToAppend.toLowerCase() + " ";
+						
+						errorStr += "phone number.\n";
+						
+						if (errorStrToAppend)
+							errorStr += errorStrToAppend + " ";
+						
+						errorStr += "phone number type is invalid.\n";
+						
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumber;
+					}else{
+						isNotValid = true;
+					}
+						
+				}
+				
+				var result:Object = {"isNotValid":isNotValid, "errorStr": errorStr, "toSetFocus": toSetFocus};
+				
+				return result;
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				if (id_TelNumber.text.length || id_TelNumberKind.selectedIndex != -1)
+					return true;
+				
+				return false;
+			}
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_TelNumber.tabIndex=tabIndex;
+				id_ExtNumber.tabIndex=tabIndex+1;
+				id_TelNumberKind.tabIndex=tabIndex+2;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup width="100%">
+		<components:LabelTextInput id="id_TelNumber" fontFamily="Calibri" fontSize="11" width="50%" prompt="Fax #" text="{phoneNumber}"
+								   skinClass="com.gazuntite.controls.extended.skins.LabelTextInputSkin"/>
+		<components:LabelTextInput id="id_ExtNumber" fontFamily="Calibri" fontSize="11" width="20%" prompt="Ext"/>
+		<components:LabelComboBox id="id_TelNumberKind" prompt="Phone type" width="55%" 
+								  labelField="NumberTypeName" 
+								  dataProvider="{PhoneNumberTypes}"/>
+	</s:HGroup>
+	
+</s:Group>

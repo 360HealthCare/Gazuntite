@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				height="40"
+				>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.document.dto.DocomentDTO;
+			import com.gazuntite.document.view.event.DocomentPreviewEvent;
+			
+			protected function id_previewButton_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new DocomentPreviewEvent(DocomentPreviewEvent.DOCOMENT_EVENT, data as DocomentDTO ,true));
+			}
+			
+			// set the Alternate color in each alternate row
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function onMouseOver():void
+			{
+				id_Header.setStyle('backgroundColor', 0xFFD08F);
+			}
+			private function onMouseOut():void
+			{
+				id_Header.setStyle('backgroundColor', itemIndex % 2 ? 0xC5D1DA : 0xFFFFFF);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="id_Header" 
+					   width="100%" height="100%"   
+					   useHandCursor="true" buttonMode="true"
+					   borderVisible="false" 
+					   mouseOver="onMouseOver()" mouseOut="onMouseOut()"
+					   >
+		<s:layout>
+			<s:HorizontalLayout paddingTop="2" paddingRight="5" paddingLeft="5" paddingBottom="1" verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:BitmapImage id="id_pdficon"  source="@Embed('../assets/pdf.png')" includeInLayout="{data.DocumentName.indexOf('pdf') != -1}" visible="{data.DocumentName.indexOf('pdf') != -1}"/>
+		<s:BitmapImage id="id_Imgicon"  source="@Embed('../assets/img.png')" includeInLayout="{data.DocumentName.indexOf('jpg') != -1 || data.DocumentName.indexOf('png') != -1}" visible="{data.DocumentName.indexOf('jpg') != -1 || data.DocumentName.indexOf('png') != -1}"/>
+		<s:BitmapImage id="id_docicon"  source="@Embed('../assets/doc.png')" includeInLayout="{data.DocumentName.indexOf('doc') != -1}" visible="{data.DocumentName.indexOf('doc') != -1}"/>
+		
+		<s:VGroup width="100%" height="100%">
+			<s:Label text="{data.DocumentName}" width="100%" color="0x333333" fontFamily="CalibriCFFBold" fontSize="13" maxDisplayedLines="1" />
+			<s:Label text="{data.SectionName}" width="100%" fontFamily="CalibriCFF" fontSize="12" maxDisplayedLines="1" />
+		</s:VGroup>
+		
+		<s:Button id="id_previewButton" 
+				  buttonMode="true" useHandCursor="true"
+				  toolTip="Preview" 
+				  verticalCenter="0" 
+				  click="id_previewButton_clickHandler(event)" 
+				  skinClass="com.gazuntite.skins.controls.button.dmg.PriviewDocButtonSkin"
+				  />
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

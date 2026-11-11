@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.DocumentLoader;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			
+			import flash.filesystem.File;
+			import flash.html.HTMLLoader;
+			import flash.html.HTMLPDFCapability;
+			
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.managers.PopUpManager;
+			import mx.utils.object_proxy;
+			
+			import spark.components.PopUpAnchor;
+			import spark.components.WindowedApplication;
+			
+			private var stageWebView:StageWebView;
+			private var isStageWebViewShown:Boolean;
+			
+			private var eLabDocumentLoader:DocumentLoader;
+			
+			[Bindable]
+			private var documentName:String;
+			private var documentUrl:String;
+			
+			private var _isOrder:Boolean;
+			private var _documentViewerPopUpLocation:Point;
+			
+			public function load(name:String, url:String):void
+			{
+				if (!name || !url)
+					return;
+				
+				if (!name.length || !url.length)
+					return;
+				
+				documentUrl = url;
+				
+				var lastIdx:int = url.lastIndexOf("/");
+				
+				documentName = url.substring(lastIdx + 1, url.length);
+				
+				if (isOrder)
+				{
+					id_Html.location = url;
+					
+					switchViewToHtml(true);
+					
+					return;
+				}
+				
+				if (!eLabDocumentLoader)
+					eLabDocumentLoader = new DocumentLoader();
+				
+				eLabDocumentLoader.documentLoadCallBack = onDocumentLoad;
+				eLabDocumentLoader.load(name, url);
+				switchViewToHtml(false);
+			}
+			
+			public function onDocumentLoad(file:File):void
+			{
+				if (!file)
+					return;
+				
+				if (!file.url)
+					return;
+				
+				if (!file.url.length)
+					return;
+				
+				try
+				{
+					/* id_Html.location = file.url;
+					
+					if (HTMLLoader.pdfCapability == HTMLPDFCapability.STATUS_OK)
+					{
+					var pop:PopupWindow = new PopupWindow();
+					pop.width = 500;
+					pop.height = 500;
+					pop.addElement( id_Html );
+					
+					//pop.ShowPopup( FlexGlobals.topLevelApplication as DisplayObject , true );
+					(FlexGlobals.topLevelApplication as WindowedApplication).addElement( id_Html );
+					}
+					else
+					{
+					file.openWithDefaultApplication();
+					} */
+					
+					cursorManager.removeBusyCursor();
+				}
+				catch(error:Error)
+				{
+					cursorManager.removeBusyCursor();
+				}
+			}
+			
+			private function switchViewToHtml(doSwitch:Boolean = true):void
+			{
+				id_Html.visible = doSwitch;
+				id_Html.includeInLayout = doSwitch;
+				
+				staticImage.visible = !doSwitch;
+				staticImage.includeInLayout = !doSwitch;
+			}
+			
+			private function urlLoadCompleteHandler(event:Event):void
+			{
+				trace();
+			}
+			
+			private function documentLoadingComplete(event:Event):void
+			{
+				cursorManager.removeBusyCursor();
+			}
+			
+			private function expandClickHandler():void
+			{
+				if (isOrder && !documentUrl)
+					return;
+				
+				var pop:ELabDocumentPopUpViewer = new ELabDocumentPopUpViewer();
+				var app:UIComponent = FlexGlobals.topLevelApplication as UIComponent;
+				
+				pop.x = 14;
+				pop.y = 77 + 4;
+				pop.width = app.width*0.5 - pop.x - 8;
+				pop.height = app.height - pop.y - 60;
+				
+				pop.documentName = documentName;
+				pop.documentUrl = documentUrl;
+				pop.isOrder = isOrder;
+				
+				PopUpManager.addPopUp(pop, app);
+			}
+			
+			[Bindable]
+			public function get isOrder():Boolean
+			{
+				return _isOrder;
+			}
+			
+			public function set isOrder(value:Boolean):void
+			{
+				_isOrder = value;
+			}
+			
+			public function get documentViewerPopUpLocation():Point
+			{
+				return _documentViewerPopUpLocation;
+			}
+			
+			public function set documentViewerPopUpLocation(value:Point):void
+			{
+				_documentViewerPopUpLocation = value;
+			}
+		]]>
+	</fx:Script>
+	<s:BorderContainer backgroundColor="0x4B4B4B" cornerRadius="2" height="100%" width="100%">
+		<s:VGroup id="id_main" width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+			
+			<s:Group width="100%" height="100%">
+				<mx:HTML id="id_Html" width="100%" height="100%" complete="documentLoadingComplete(event)"/>
+				<s:Scroller id="staticImage" width="100%" height="100%" visible="false" includeInLayout="false"
+							skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+					<s:Group width="100%" height="100%">
+						<!--<s:BorderContainer width="100%" height="100%" cornerRadius="4" backgroundColor="#FFFFFF" borderVisible="false">-->
+						<s:Image source="@Embed('com/gazuntite/provider/live/services/elab/view/assets/Document View.png')" horizontalCenter="0" verticalAlign="top"/>
+						<!--</s:BorderContainer>-->
+					</s:Group>
+				</s:Scroller>
+			</s:Group>
+			
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Button id="back" 
+						  left="5" bottom="5"
+						  buttonMode="true" useHandCursor="true" toolTip="Back"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.BackButtonSkin"/>
+				<s:Label id="documentNameLbl" 
+						 text="{documentName}" width="100%" 
+						 fontFamily="CalibriCFF" fontSize="14" textAlign="center" color="0xFFFFFF"/>
+				<s:ToggleButton id="expand" 
+								label="Expand" right="5" bottom="5" click="expandClickHandler()"
+								buttonMode="true" useHandCursor="true" toolTip="Expand"
+								skinClass="com.gazuntite.skins.controls.button.eLab.ExpandButtonSkin"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:BorderContainer>
+</s:Group>

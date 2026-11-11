@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:controls="com.gazuntite.provider.eprescription.services.patient.view.controls.*" 
+		 xmlns:itemEditors="com.gazuntite.provider.eprescription.services.patient.view.itemEditors.*" 
+		 xmlns:DropdownList="com.gazuntite.controls.extended.components.DropdownList.*" 
+		 xmlns:components1="com.gazuntite.common.view.components.*"
+		 xmlns:userProfile="com.gazuntite.provider.eprescription.services.patient.view.views.userProfile.*" 
+		 xmlns:components2="com.gazuntite.common.view.components.*" 
+		 creationComplete="creationCompleteHandler()" 
+		 >
+	
+	<fx:Script source="EditProfileView.as" />
+	
+	<fx:Binding source="model.SearchProviderDetailsResults.FirstName" destination="ProviderName" />
+	<fx:Binding source="model.SearchProviderDetailsResults.MiddleName" destination="ProviderName" />
+	<fx:Binding source="model.SearchProviderDetailsResults.LastName" destination="ProviderName" />
+	
+	<!-- ****************************  View Section for Edit Profile View ********************************* -->
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3" gap="-3"/>
+	</s:layout>	
+	
+	<s:TabBar id="id_mainTanButtons" 
+			  width="100%" dataProvider="{ id_ProfileViews }" buttonMode="true"  
+			  change="id_mainTanButtons_changeHandler(event)"/>
+	<mx:ViewStack id="id_ProfileViews" 
+				  width="100%" height="100%" backgroundAlpha="0" resizeToContent="true" creationPolicy="all"
+				  paddingTop="0" top="0" paddingLeft="0" paddingBottom="6" >
+		<!--change="id_ProfileViews_tabIndexChangeHandler(event)"-->
+		<components:CheckNavigator id="id_tab_basicinfo" 
+								   width="100%"  label="Basic Information"  hasChange="true" >
+			
+			<components:layout>
+				<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+			</components:layout>
+			<s:HGroup width="100%" horizontalAlign="right" paddingRight="5">
+				<s:Label text="Login Information" fontFamily="Calibri Bold" fontSize="14"  />
+				<s:Spacer width="100%" />
+				
+				<s:HGroup visible="{!id_viewmodePersonal.visible}">					
+					<s:Rect height="24" width="1">
+						<s:fill>										
+							<s:SolidColor color="#585860" />
+						</s:fill>
+					</s:Rect>
+					<s:Button id="id_sectionSave"
+							  toolTip="Save"  buttonMode="true" click="id_sectionSave_clickHandler(event)"   />
+				</s:HGroup>
+			</s:HGroup>
+			
+			<s:SkinnableContainer  width="100%">
+				<s:layout>
+					<s:HorizontalLayout paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="9" />
+				</s:layout>	
+				<s:VGroup gap="0" horizontalAlign="center">
+					<s:BorderContainer width="70" height="70" borderWeight="1" borderColor="0" borderAlpha="0.1" cornerRadius="4">
+						<mx:Image id="id_ProfileImage"  
+								  source="{AppUtils.getByteArray(model.SearchProviderDetailsResults.ImageData)}"  width="68" height="68" />				
+					</s:BorderContainer>
+					
+					<s:Button label="Upload" id="id_UploadImage" click="UploadImage_clickHandler(event)" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}"
+							  buttonMode="true" toolTip="Upload Image"  enabled="{!id_viewmodePersonal.visible}"/>
+					<s:Button id="id_ChangeMode" label="Edit Profile" fontSize="9" click="id_ChangeMode_clickHandler()" toolTip="Toggle Edit / View Mode" buttonMode="true" />	
+				</s:VGroup>
+				
+				<s:HGroup width="100%" verticalAlign="top" horizontalAlign="center">
+					<!--<s:Label text="Role" />
+					<components:LabelTextInput id="id_Role" prompt="Role" width="150" text="{model.SearchProviderDetailsResults.UserEmail}" />-->
+					<s:VGroup>					
+						<s:Label text="Role" fontFamily="Calibri" color="#666666" />
+						<s:Label id="id_Role" width="100%" text="{model.SearchProviderDetailsResults.Title}" fontSize="15" fontFamily="Calibri"/>
+					</s:VGroup>
+					<s:Spacer width="100%" />
+					<s:VGroup>					
+						<s:Label text="LogIn ID" fontFamily="Calibri" color="#666666" />
+						<s:Label id="id_LogInID" width="100%" text="{model.SearchProviderDetailsResults.UserEmail}" fontSize="15" fontFamily="Calibri"/>
+					</s:VGroup>
+					<s:Spacer width="100%" />
+					<s:VGroup id="id_passwordGrp" horizontalAlign="left" gap="2" visible="{!id_passwordGrpM.visible}" includeInLayout="{!id_passwordGrpM.includeInLayout}">					
+						<s:Label text="Password" fontFamily="Calibri" color="#666666"/>
+						<components:LabelTextInput id="id_OldPassword" prompt="Old Password" displayAsPassword="true" width="150" required="true" toolTip="Old Password"  maxChars="14"/>
+						<components:LabelTextInput id="id_Password" prompt="New Password" displayAsPassword="true" width="150" required="true" toolTip="New Password" maxChars="14"/>
+						<s:HGroup>						
+							<components:LabelTextInput id="id_PasswordConfirm" prompt="Confirm New Password" displayAsPassword="true" width="150"  required="true" toolTip="Confirm New Password" maxChars="14"/>
+							<s:Button id="id_PasswordChange" label="Change" fontSize="9" click="id_PasswordChange_clickHandler(event)" toolTip="Change Password" buttonMode="true"  />	
+							<s:Button id="id_PasswordCancelBtn" label="Cancel" fontSize="9" click="id_PasswordCancelBtn_clickHandler(event)" toolTip="Cancel" buttonMode="true" />	
+						</s:HGroup>
+					</s:VGroup>
+					
+					<s:VGroup id="id_passwordGrpM" width="100%" horizontalAlign="left" gap="2" visible="true" >					
+						<s:Label text="Password" fontFamily="Calibri" color="#666666"/>
+						<s:Label text="********" fontFamily="Calibri" color="#222222"/>
+						<s:Button id="id_ChangePassBtn" label="Change" fontSize="9" click="id_ChangePassBtn_clickHandler(event)" toolTip="Change Password" buttonMode="true" 
+								  visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}"/>	
+					</s:VGroup>
+					
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			
+			<s:VGroup width="100%" paddingTop="10">
+				<s:Label text="Personal Information" fontFamily="Calibri Bold" fontSize="14"  />
+				<s:SkinnableContainer id="id_viewmodePersonal" width="100%"
+									  includeInLayout="{id_viewmodePersonal.visible}">
+					<s:layout>
+						<s:HorizontalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="8" gap="15" />
+					</s:layout>
+					<s:VGroup gap="15" width="15%">
+						<s:Label text="Name:"  		width="80" fontFamily="Calibri" color="#666666" maxDisplayedLines="1" />	
+						<s:Label text="Phone:"  	width="80" fontFamily="Calibri" color="#666666"/>
+						<s:Label text="Address:"  	width="80" fontFamily="Calibri" color="#666666"/>			
+					</s:VGroup>
+					<s:VGroup gap="15" width="35%">
+						<s:Label  text="{ProviderName}" fontFamily="Calibri" maxWidth="150" maxDisplayedLines="1" toolTip="{ProviderName}"/>	
+						<s:Label id="id_phoneTxt"  text="{id_PhoneNumberAddMore.setPhoneNumberMasking(model.SearchProviderDetailsResults.Phone)}" 
+								 fontFamily="Calibri" maxWidth="150" maxDisplayedLines="1" toolTip="{id_PhoneNumberAddMore.setPhoneNumberMasking(model.SearchProviderDetailsResults.Phone)}"/>	
+						<s:Label id="id_addressTxt"   fontFamily="Calibri" width="100%" maxWidth="270" maxDisplayedLines="1" />			
+					</s:VGroup>
+					<s:VGroup gap="15" width="15%">
+						<s:Label text="Gender:"  width="80" fontFamily="Calibri" color="#666666"/>		
+						<s:Label text="Fax:"  width="80" fontFamily="Calibri" color="#666666"/>	
+						<s:Label text="SSN:"  width="80" fontFamily="Calibri" color="#666666"/>	
+					</s:VGroup>
+					<s:VGroup gap="15" width="35%">
+						<s:Label  text="{model.SearchProviderDetailsResults.Gender}" fontFamily="Calibri" width="100%" maxDisplayedLines="1" toolTip="{model.SearchProviderDetailsResults.Gender}"/>
+						<s:Label id="id_faxView" text="{setPhoneNumberMasking(model.SearchProviderDetailsResults.FaxNumber)}" fontFamily="Calibri" width="100%"  maxDisplayedLines="1" 
+								 toolTip="{setPhoneNumberMasking(model.SearchProviderDetailsResults.FaxNumber)}"/>
+						<s:Label  id="lbl_ssn"  fontFamily="Calibri" width="100%" maxDisplayedLines="1" />	
+					</s:VGroup>
+					
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer id="id_editmodePersonal" width="100%"
+									  visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}">
+					<s:layout>
+						<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+					</s:layout>
+					<s:HGroup width="100%">
+						<components:LabelComboBox id="id_Prefix"  
+												  prompt="Prefix" width="55" dataProvider="{prefixType}"
+												  labelField="PrefixName" toolTip="Prefix" change="comboChangeIndicator(event)" tabIndex="1"/>
+						<components:LabelTextInput id="id_FName" 
+												   restrict="[A-Z a-z , . - ' 0-9]" prompt="First Name" maxChars="35"  required="true" width="100%" tabIndex="2"										   
+												   text="{model.SearchProviderDetailsResults.FirstName}" toolTip="First Name" change="textInputChangeIndicator(event)" />
+						
+						<components:LabelTextInput  id="id_MName" 
+													prompt="Middle Name" width="80" restrict="[A-Z a-z , . - ' 0-9]" tabIndex="3"
+													text="{model.SearchProviderDetailsResults.MiddleName}" maxChars="35" toolTip="Middle Name"	/>
+						
+						<components:LabelTextInput id="id_LName" tabIndex="4"
+												   prompt="Last Name" width="100%" restrict="[A-Z a-z , . - ' 0-9]"
+												   maxChars="35" toolTip="Last Name" 
+												   text="{model.SearchProviderDetailsResults.LastName}"		 required="true"/>
+					</s:HGroup>
+					<s:HGroup width="100%" >
+						<components:LabelTextInput id="id_SSN" 
+												   prompt="SSN" width="20%" required="true"  toolTip="SSN"
+												   change="id_SSN_changeHandler(event)" restrict="[0-9]"
+												   text="{SSNIDValue}"  tabIndex="5" />
+						
+						<components:LabelTextInput id="id_Suffix"
+												   prompt="Suffix" width="15%"  restrict="[A-Z a-z , . - ' 0-9]" text="{model.SearchProviderDetailsResults.Suffix}"
+												   maxChars="10" toolTip="Suffix" tabIndex="6"/>
+						
+						<controls:PhoneNumberAddMore id="id_PhoneNumberAddMore" 
+													 width="35%" PhoneNumberTypes="{PhoneNumberTypes}" phoneNumber="{model.SearchProviderDetailsResults.Phone}" tabIndex="7" />
+						
+						<s:Button click="AddMorePhoneNumbers(event)" 
+								  label="Add Phone Numbers" 
+								  buttonMode="true" useHandCursor="true" toolTip="Add More" tabIndex="9" />
+						
+						<components:LabelComboBox id="id_Gender1" 
+												  prompt="Gender" dataProvider="{genderType}"  width="25%" tabIndex="10"
+												  labelField="label"  styleName="optionalComboBoxSkin"  toolTip="Gender" />
+					</s:HGroup>
+					
+					<s:HGroup width="100%">			
+						<components:LabelTextInput id="id_Address" fontFamily="Calibri" fontSize="11" prompt="Address" width="50%" restrict="[a-z A-Z 0-9 .,#()-_]"
+												   text="{model.SearchProviderDetailsResults.Address}"  required="true" toolTip="Address" tabIndex="11" maxChars="70" />
+						
+						<components:LabelTextInput id="id_Fax" 
+												   prompt="Fax" fontFamily="Calibri" fontSize="11" width="50%" restrict="[0-9]" 
+												   change="id_Fax_changeHandler(event)" tabIndex="12"
+												   text="{setPhoneNumberMasking(model.SearchProviderDetailsResults.FaxNumber)}" required="true"  toolTip="Fax Number"/>
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<components2:ZipCityStateCombine id="id_ZipCityStateCombine" width="100%" tabIndex="13" />
+					</s:HGroup>
+					
+				</s:SkinnableContainer>
+				<s:HGroup width="100%" horizontalAlign="right">
+					
+					<s:Button label="Next" fontSize="9" toolTip="Next Section" buttonMode="true" click="button2_clickHandler(event)" tabIndex="16"/>					
+				</s:HGroup>
+				
+			</s:VGroup>
+		</components:CheckNavigator>
+		
+		<!-- ************************************** PROVIDER TAB *******************************************************-->
+		
+		<components:CheckNavigator id="id_tab_provider" width="100%"  label="Provider Details" hasChange="false">
+			<components:layout>
+				<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+			</components:layout>
+			
+			<s:HGroup width="100%" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}">
+				<s:CheckBox id="id_chkProvider" 
+							label="Provider" styleName="lightGreyCheckBoxSkin" selected="false" change="id_chkProvider_changeHandler()" toolTip="Provider" />
+				
+				<s:HGroup width="100%" horizontalAlign="right" paddingRight="5">
+					<s:Rect height="24" width="1">
+						<s:fill>										
+							<s:SolidColor color="#585860" />
+						</s:fill>
+					</s:Rect>
+					<s:Button id="id_sectionSaveProvider" 
+							  toolTip="Save" buttonMode="true" 
+							  click="id_sectionSaveProvider_clickHandler(event)"  enabled="{id_chkProvider.selected}" />
+				</s:HGroup>
+			</s:HGroup>
+			
+			<s:SkinnableContainer id="id_viewmodePersonal_2" width="100%"
+								  includeInLayout="{id_viewmodePersonal.visible}" visible="{id_viewmodePersonal.visible}">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="8" gap="15" />
+				</s:layout>
+				<s:HGroup width="100%">					
+					<s:Label text="Speciality:"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  id="id_lblSpeciality" fontFamily="Calibri" width="100%"  maxDisplayedLines="1"/>	
+					<s:Spacer width="100%" />
+					<s:Label text="NPI:"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label id="id_NPIlbl"  text="{model.SearchProviderDetailsResults.NPI}" fontFamily="Calibri" width="100%"/>	
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			<s:SkinnableContainer width="100%"
+								  visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				
+				<s:HGroup width="100%">
+					<components:LabelComboBox id="id_speciality" 
+											  prompt="Specialty" width="100%" required="true" dataProvider="{SpecialityTypes}" labelField="label" toolTip="Speciality type"  />
+					<components:LabelTextInput id="id_NPI" 
+											   prompt="NPI" required="true" width="40%" restrict="[0-9]" maxChars="10"	 toolTip="NPI"									   										   
+											   text="{model.SearchProviderDetailsResults.NPI}"/>
+				</s:HGroup>
+				
+			</s:SkinnableContainer>
+			<s:SkinnableContainer width="100%"  >
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				<components2:WorkDaysAddMoreWindow id="id_workdaysAddMore" width="100%"  enabled="{id_chkProvider.selected}"/>
+			</s:SkinnableContainer>
+			<s:HGroup width="100%" horizontalAlign="right">
+				<s:Spacer width="100%" />
+				<s:Button label="Previous" fontSize="9" toolTip="Previous Section" buttonMode="true" click="previousButton_clickHandler(event)" />
+				
+				<s:Button label="Next" fontSize="9" toolTip="Next Section" buttonMode="true" click="button2_clickHandler(event)" />	
+			</s:HGroup>
+		</components:CheckNavigator>
+		
+		<!-- ***************************************** BILLING TAB ********************************************************-->
+		
+		<components:CheckNavigator id="id_tab_billing" width="100%"  label="Billing Details" hasChange="false">
+			<components:layout>
+				<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+			</components:layout>
+			<s:HGroup width="100%" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}">
+				<!--<s:CheckBox id="id_chkBillingProvider" label="Billing Provider" styleName="lightGreyCheckBoxSkin" selected="{LoggedInUserIsProvider}" change="id_chkBillingProvider_changeHandler(event)" />-->
+				<s:CheckBox id="id_chkBillingProvider" 
+							label="Billing Provider" styleName="lightGreyCheckBoxSkin" selected="false" change="id_chkBillingProvider_changeHandler(event)" />
+				
+				<s:HGroup width="100%" horizontalAlign="right" paddingRight="5">
+					<s:Rect height="24" width="1">
+						<s:fill>										
+							<s:SolidColor color="#585860" />
+						</s:fill>
+					</s:Rect>
+					<s:Button id="id_sectionSaveBillingProvider" toolTip="Save" buttonMode="true" click="id_sectionSaveBillingProvider_clickHandler(event)" 
+							  enabled="{id_chkBillingProvider.selected}" />
+				</s:HGroup>
+			</s:HGroup>			
+			<s:SkinnableContainer id="id_viewmodePersonal_3" width="100%" 
+								  includeInLayout="{id_viewmodePersonal.visible}" visible="{id_viewmodePersonal.visible}">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="8" gap="15" />
+				</s:layout>
+				<s:HGroup width="100%">	
+					<s:Label text="UPIN:"  width="60" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{model.SearchProviderDetailsResults.UPIN}" fontFamily="Calibri" width="140"/>
+					<s:Label text="TPI:"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{model.SearchProviderDetailsResults.TPI}" fontFamily="Calibri" width="140"/>	
+					<s:Label text="Liscense #"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{model.SearchProviderDetailsResults.LicenseNumber}" fontFamily="Calibri" width="100%" maxWidth="200"/>			
+				</s:HGroup>		
+				<s:HGroup width="100%">	
+					<s:Label text="EIN:"  width="60" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{model.SearchProviderDetailsResults.EIN}" fontFamily="Calibri" width="140"/>	
+					<s:Label text="CLIA Number:"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{model.SearchProviderDetailsResults.CLIANumber}" fontFamily="Calibri" width="140"/>					
+					<s:Label text="Signature Date:"  width="80" fontFamily="Calibri" color="#666666"/>				
+					<s:Label  text="{UtilityFunctions.FormatDate(model.SearchProviderDetailsResults.SignatureDate,'MM/DD/YYYY')}" fontFamily="Calibri" width="100%" maxWidth="200"/>
+				</s:HGroup>						
+				<s:HGroup width="100%">				
+					<s:CheckBox label="Medicare Participating" width="100%" selected="{model.SearchProviderDetailsResults.IsParticipating == 'true' ? true : false}" enabled="false" />
+					<s:CheckBox label="Is Hospice Employee" width="100%" selected="{model.SearchProviderDetailsResults.IsHospice == 'true' ? true : false}" enabled="false" />
+					<s:CheckBox label="Stop Submission" width="100%" selected="{model.SearchProviderDetailsResults.StopSubmission == 'true' ? true : false}" enabled="false" />
+					<s:CheckBox label="Signature On File" width="100%" selected="{model.SearchProviderDetailsResults.SignatureOnFile == 'true' ? true : false}" enabled="false" />
+				</s:HGroup>
+			</s:SkinnableContainer>	
+			
+			<s:SkinnableContainer width="100%"
+								  visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				
+				<s:HGroup width="100%">	
+					<components:LabelTextInput  id="id_UPIN" 
+												prompt="UPIN" width="100%" restrict="[A-Z a-z , . ' 0-9]"	maxChars="14"									
+												text="{model.SearchProviderDetailsResults.UPIN}" toolTip="UPIN" tabIndex="1" />
+					<components:LabelTextInput id="id_TPI" 
+											   restrict="[0-9]" maxChars="9" toolTip="TPI"
+											   prompt="TPI"  text="{model.SearchProviderDetailsResults.TPI}" width="100%" tabIndex="2" />
+					
+					<components:LabelTextInput  id="id_LicenseNo" 
+												prompt="License #" width="100%" restrict="[A-Z a-z , . ' 0-9]" maxChars="14" required="true"
+												text="{model.SearchProviderDetailsResults.LicenseNumber}" toolTip="License #" tabIndex="3" />			
+				</s:HGroup>
+				
+				<s:HGroup width="100%">	
+					<components:LabelTextInput id="id_EIN" 
+											   prompt="EIN" width="100%" restrict="[0-9]" maxChars="9" tabIndex="4"
+											   paddingLeft="3" paddingTop="5" paddingRight="3" paddingBottom="3" toolTip="EIN"
+											   text="{model.SearchProviderDetailsResults.EIN}"/>
+					<components:LabelTextInput  id="id_CLIA" 
+												prompt="CLIA Number" width="100%" restrict="[A-Z a-z , . ' 0-9]"	maxChars="10"									
+												text="{model.SearchProviderDetailsResults.CLIANumber}" toolTip="CLIA Number" tabIndex="5" /> 
+					<components:LabelDateField  id="id_SignDate" 
+												width="100%" prompt="Signature Date"  selectableRange="{{rangeEnd:new Date()}}"	 fontFamily="calibri" fontSize="11"	
+												yearNavigationEnabled="true" minYear="1901" maxYear="{new Date().getFullYear()}" toolTip="Signature Date" enabled="{id_chkSignature.selected}"
+												text="{model.SearchProviderDetailsResults.SignatureDate}" tabIndex="7"/>
+				</s:HGroup>
+				<s:HGroup width="100%">					
+					<s:CheckBox  id="id_chkParticipating" label="Medicare Participating" width="100%" tabIndex="8"
+								 selected="{model.SearchProviderDetailsResults.IsParticipating == 'true' ? true : false}"/>
+					<s:CheckBox  id="id_chkHospiceEmp" label="Hospice Employee" width="100%" tabIndex="9"
+								 selected="{model.SearchProviderDetailsResults.IsHospice == 'true' ? true : false}"/>
+					<s:CheckBox  id="id_chkStopSubmission" label="Stop Submission" width="100%" tabIndex="10"
+								 selected="{model.SearchProviderDetailsResults.StopSubmission == 'true' ? true : false}"/>
+					<s:CheckBox  id="id_chkSignature" label="Signature On File" width="100%" tabIndex="6"
+								 selected="{model.SearchProviderDetailsResults.SignatureOnFile == 'true' ? true : false}"/>
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			<s:SkinnableContainer id="id_viewmodePersonal_31" width="100%" 
+								  includeInLayout="true" visible="true">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="8" gap="15" />
+				</s:layout>
+				<s:Label text="Provider Insurance IDs" fontFamily="Calibri Bold" fontSize="14"  />
+				<components:LabelDataGrid id="id_PvInsGrid" width="100%" dataProvider="{model.ProviderInsuranceList}"
+										  useRollOver="false" editable="false"
+										  verticalScrollPolicy="auto"
+										  horizontalScrollPolicy="auto"
+										  resizableColumns="false"
+										  horizontalScrollBarStyleName="VScrollBar"
+										  headerStyleName="QIGridHeader" maxHeight="150" variableRowHeight="true"
+										  columnWidths="{['10%','20%','10%','10%','10%','10%','10%','10%','10%']}"
+										  tabIndex="1"
+										  >
+					<components:columns>
+						<mx:DataGridColumn headerText="Insurance Name" dataField="InsuranceName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="NPI" dataField="NPI" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Taxonomy Code" dataField="Taxonomy" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Tax ID/SSN" dataField="TaxIdSSN" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Memo Certification" dataField="CertificationNumber" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Care Plan OS Number" dataField="POSNumber" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Legacy 1" dataField="LegacyNumber1" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Legacy 2" dataField="LegacyNumber2" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />
+						<mx:DataGridColumn headerText="Legacy 3" dataField="LegacyNumber3" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" />						
+						<itemEditors:DataGridColumnDel headerText="" editable="false" visible="{ ! id_viewmodePersonal.visible}" itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.EditDeleteItemRender"/>						
+					</components:columns>					
+				</components:LabelDataGrid>
+				<s:HGroup width="100%" horizontalAlign="right" paddingRight="5">
+					<s:Spacer width="100%"/>						
+					<s:Button id="id_AddPvIns" width="100" tabIndex="2" enabled="{ ! id_viewmodePersonal.visible}" styleName="blackButtonSkin" useHandCursor="true" buttonMode="true" toolTip="Add"
+							  label="{(model.ProviderInsuranceList != null &amp;&amp; model.ProviderInsuranceList.length > 0) ?  '+ Add More' : '+ Add'}" click="id_AddPvIns_clickHandler(event)" />
+					<s:Button id="id_savePvIns" width="100" label="Save" click="id_savePvIns_clickHandler(event)" tabIndex="3" toolTip="Save"
+							  enabled="{ ! id_viewmodePersonal.visible}" styleName="blackButtonSkin" useHandCursor="true" buttonMode="true" />
+				</s:HGroup>
+				
+			</s:SkinnableContainer>
+			
+			<s:HGroup width="100%" horizontalAlign="right">
+				
+				<s:Spacer width="100%" />
+				<s:Button label="Previous" fontSize="9" toolTip="Previous Section" buttonMode="true" click="previousButton_clickHandler(event)" />							
+				
+				<s:Button label="Next" fontSize="9" toolTip="Next Section" buttonMode="true" click="button2_clickHandler(event)" />	
+			</s:HGroup>
+			
+		</components:CheckNavigator>
+		
+		<!-- ======================= E-PRESCRIPTION DETAILS TAB ================================= -->
+		
+		<components:CheckNavigator id="id_tab_epres" width="100%"  label="e-Prescription" hasChange="false">
+			<components:layout>
+				<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+			</components:layout>
+			<s:HGroup id="id_DEAGroup" width="100%" horizontalAlign="left" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}"> 
+				<s:CheckBox id="id_chkPrescriber" label="Prescriber" styleName="lightGreyCheckBoxSkin" change="id_chkPrescriber_changeHandler(event)" toolTip="Prescriber"/>
+				
+				<s:Spacer width="100%" />
+				<s:HGroup width="100%" horizontalAlign="right" paddingRight="5" visible="false">					
+					<s:Label text="Status" fontFamily="Calibri" color="#666666" />
+					<s:Label id="id_status" text="" fontFamily="Calibri" />					
+				</s:HGroup>
+				<s:HGroup width="100%" horizontalAlign="right" paddingRight="5">
+					<s:Rect height="24" width="1">
+						<s:fill>										
+							<s:SolidColor color="#585860" />
+						</s:fill>
+					</s:Rect>
+					<s:Button id="id_sectionSaveEPres" 
+							  toolTip="Save Prescriber"  buttonMode="true" click="id_sectionSaveEPres_clickHandler(event)"  enabled="{id_chkPrescriber.selected}" />
+				</s:HGroup>
+			</s:HGroup>
+			
+			<s:SkinnableContainer width="100%" >
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				
+				<s:HGroup width="100%">
+					<components:LabelTextInput id="id_DEA" 
+											   prompt="DEA" width="100%" restrict="[A-Z a-z , . ' 0-9]" maxChars="9"
+											   text="{model.SearchProviderDetailsResults.DAE}" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}"
+											   enabled="{id_chkPrescriber.selected}"  toolTip="DEA" />
+					<s:SkinnableContainer id="id_viewmodePersonal_4"  width="100%" height="50"
+										  includeInLayout="{id_viewmodePersonal.visible}" visible="{id_viewmodePersonal.visible}">
+						<s:layout>
+							<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="8" gap="15" />
+						</s:layout>
+						<s:HGroup width="100%">					
+							<s:Label text="DEA:"  width="40" fontFamily="Calibri" color="#666666"/>				
+							<s:Label  text="{model.SearchProviderDetailsResults.DAE}" fontFamily="Calibri" width="100%" color="#222222"/>
+						</s:HGroup>
+					</s:SkinnableContainer>
+					<!-- Add checkboxes dynamically base on Service result-->
+					<s:Group id="id_chkboxes" maxWidth="500" width="100%" enabled="{!id_viewmodePersonal.visible &amp;&amp; id_chkPrescriber.selected}" >
+						
+					</s:Group>
+				</s:HGroup>
+				
+				<s:VGroup id="id_statusPending" width="100%" horizontalAlign="center" visible="false" includeInLayout="{id_statusPending.visible}">
+					<s:RichText color="#333333" fontFamily="Calibri" fontSize="13" text="Your request has been sent for approval to Gazuntite administrator!" />					
+					<s:Button id="id_statusButton" label="PENDING FOR APPROVAL"
+							  enabled="false"/>
+				</s:VGroup>
+				
+				<s:Spacer height="10" />
+				<s:SkinnableContainer id="id_epresDetails" width="100%">
+					<s:layout>
+						<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="10" gap="14" />
+					</s:layout>													
+					
+					<s:HGroup width="100%">					
+						
+						<s:Label text="Active Start Date:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_startDate" text="" fontFamily="Calibri" width="100%" maxWidth="180"/>
+						<s:Spacer width="100%" />
+						<s:Label text="Active End Date:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_endDate" text="" fontFamily="Calibri" width="100%"/>	
+						
+					</s:HGroup>
+					<s:HGroup width="100%">					
+						
+						<s:Label text="SPI:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_spi" text="" fontFamily="Calibri" width="100%" maxWidth="180"/>
+						<s:Spacer width="100%" />
+						<s:Label text="Location ID:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_locationId" text="" fontFamily="Calibri" width="100%"/>	
+						
+					</s:HGroup>
+					<s:HGroup width="100%">					
+						
+						<s:Label text="File ID:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_fileId" text="" fontFamily="Calibri" width="100%" maxWidth="180"/>
+						<s:Spacer width="100%" />
+						<s:Label text="Portal ID:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_portalId" text="" fontFamily="Calibri" width="100%"/>	
+						
+					</s:HGroup>
+					<s:HGroup width="100%">					
+						
+						<s:Label text="BackUp Portal:"  width="100" fontFamily="Calibri" color="#666666"/>				
+						<s:Label id="id_backupPortal" text="" fontFamily="Calibri" width="100%" maxWidth="180"/>
+						<s:Spacer width="100%" />
+						<s:Label text="Account ID:"  width="100" fontFamily="Calibri" color="#666666" />				
+						<s:Label id="id_accountId" text="" fontFamily="Calibri" width="100%"/>	
+						
+					</s:HGroup>
+				</s:SkinnableContainer>
+				<s:HGroup width="100%" verticalAlign="middle" visible="{!id_viewmodePersonal.visible}" includeInLayout="{!id_viewmodePersonal.visible}"
+						  enabled="{id_chkPrescriber.selected}">
+					<s:CheckBox id="id_chkPrescriberAgent" change="id_chkPrescriberAgent_changeHandler(event)" selected="true" label="Add Prescriber Agents" />
+					<components:LabelComboBox id="id_prescriberAgents" enabled="false" width="50%" prompt="Add Prescriber Agent"  />
+					<s:CheckBox id="id_chkSupervisor" label="Supervisor" styleName="lightGreyCheckBoxSkin" change="id_chkSupervisor_changeHandler(event)" toolTip="Supervisor"/>
+					<s:DropDownList id="id_supervisorList" width="100%" enabled="false" prompt="Select Supervisor" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="center">
+					<s:Button id="id_savePres" styleName="blackButtonSkin" label="SUBSCRIBE / UPDATE" width="160" click="id_savePres_clickHandler(event)" buttonMode="true" toolTip="Save/Update Eprescription" 
+							  visible="{!id_viewmodePersonal.visible}"  enabled="{id_chkPrescriber.selected}"/>
+				</s:HGroup>
+				
+			</s:SkinnableContainer>
+			
+			<s:HGroup width="100%" horizontalAlign="right">
+				
+				<s:Button label="Previous" fontSize="9" toolTip="Previous Section" buttonMode="true" click="previousButton_clickHandler(event)" />						
+			</s:HGroup>
+			<!--	</s:NavigatorContent>-->
+		</components:CheckNavigator>
+		
+	</mx:ViewStack>
+	
+	<!-- ****************	Botton Action Buttons *********************** -->
+	
+	<s:HGroup width="100%" horizontalAlign="center">
+		
+		<s:Button id="id_subscribeBtn" 
+				  label="Save All" click="saveAll_ClickHandler()" fontFamily="Calibri" width="80" 
+				  styleName="blackButtonSkin" buttonMode="true" toolTip="Save All"  enabled="{!id_viewmodePersonal.visible}" />
+		<s:Button id="id_cancelBtn" 
+				  label="Cancel" click="cancelBtn_clickHandler()" fontFamily="Calibri" width="80"
+				  styleName="blackButtonSkin" buttonMode="true" toolTip="Cancel"/>
+	</s:HGroup>
+	
+</s:Group>

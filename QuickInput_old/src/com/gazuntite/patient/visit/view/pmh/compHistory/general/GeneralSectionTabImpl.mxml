@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:renderer="com.gazuntite.patient.visit.view.pmh.compHistory.renderer.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*"
+		 xmlns:notes="com.gazuntite.patient.visit.view.notes.*" 
+		 xmlns:general="com.gazuntite.patient.visit.view.pmh.compHistory.general.*"
+		 creationComplete="group1_creationCompleteHandler(event)" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.popUpSkins.dictationPopUp;
+			import com.gazuntite.common.dto.ICDCodeDTO;
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			//private var m_bHasChange:Boolean;
+			private var m_oMedicalHistoryDTO:MedicalHistoryDTO = new MedicalHistoryDTO();
+			private var m_sLabel:String = "Press Yes or None";
+			private var m_sLabel2:String = "";
+			private var m_bIsSelected:Boolean 		= false;
+			private var m_bShowNotes:Boolean 		= false;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _miniView:Boolean = false;
+			
+			[Bindable]
+			public function get miniView():Boolean
+			{
+				return _miniView;
+			}
+			
+			public function set miniView(value:Boolean):void
+			{
+				_miniView = value;
+			}
+			
+			[Bindable]
+			public function get ShowNotes():Boolean
+			{
+				return m_bShowNotes;
+			}
+			
+			public function set ShowNotes(value:Boolean):void
+			{
+				m_bShowNotes = value;
+			}
+			
+			[Bindable]
+			public function get Label2():String
+			{
+				return m_sLabel2;
+			}
+			
+			public function set Label2(value:String):void
+			{
+				m_sLabel2 = value;
+			}
+			
+			[Bindable]
+			public function get Label():String
+			{
+				return m_sLabel;
+			}
+			
+			public function set Label(value:String):void
+			{
+				m_sLabel = value;
+				//id_View.Label = value;
+			}
+			
+			[Bindable]
+			public function get IsSelected():Boolean
+			{
+				return m_bIsSelected;
+			}
+			
+			public function set IsSelected(value:Boolean):void
+			{
+				m_bIsSelected = value;
+			}
+			
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return id_NotesView.hasChange;// m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				//m_bHasChange = value;
+			}
+			
+			[Bindable]
+			public function get medicalHistoryDto():MedicalHistoryDTO
+			{
+				return m_oMedicalHistoryDTO;
+			}
+			
+			public function set medicalHistoryDto(value:MedicalHistoryDTO):void
+			{
+				m_oMedicalHistoryDTO = value;
+				id_View.id_DetailsView.medicalHistoryDto 	= m_oMedicalHistoryDTO;
+				id_GridView.medicalHistoryDto 				= m_oMedicalHistoryDTO;
+				/* if( m_oMedicalHistoryDTO )
+				{
+				id_NotesView.medicalHistoryDto 			= m_oMedicalHistoryDTO;
+				} */
+			}
+			
+			protected function OnTabCreationComplete(event:FlexEvent):void
+			{
+				//see the component creation coplete ... OnTabCreationComplete in General Section
+			}
+			
+			private function OnHeaderClick(event:IndexChangeEvent):void
+			{
+				if( event.newIndex == 1 )
+				{
+					OnNotesClick ( null );
+				}
+				else 
+				{
+					selectByIndex( event.newIndex );
+				}
+				
+				event.stopImmediatePropagation();
+			}
+			
+			private function selectByIndex(index:int):void
+			{
+				id_Views.selectedIndex 							 			= index;
+				id_GridHeader.id_SpinerList.currIndex  		 				= index;
+				id_NotesHeader.id_SpinerList.currIndex  		 			= index;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex 	= index;
+			}
+			
+			/* private function LoadForm(componentId:String):void
+			{
+			// id_View.id_DetailsView.id_PastBtn.selected 		= !medicalHistoryDto.IsPresent;
+			//id_View.id_DetailsView.id_PresentBtn.selected 	= FamilyHistoryDto.IsPresent; 
+			
+			//id_View.id_DetailsView.selectRelationship( FamilyHistoryDto.ReletionshipTypeID );
+			//id_View.id_DetailsView.selectDisease( FamilyHistoryDto.DiseaseID , componentId);
+			
+			} */
+			
+			private function OnNotesClick(event:MouseEvent):void
+			{
+				//this.ShowNotes 												= true;
+				id_Views.selectedIndex 							 			= 1; //select notes 
+				id_NotesHeader.id_SpinerList.currIndex  				 	= 1;
+				id_GridHeader.id_SpinerList.currIndex  				 		= 1;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex 	= 1;
+				/* id_NotesView.NotesText = medicalHistoryDto.MedicalHistoryNote;
+				id_NotesView.id_TextArea.addEventListener(TextOperationEvent.CHANGE, function(event:TextOperationEvent):void
+				{
+				medicalHistoryDto.MedicalHistoryNote = id_NotesView.NotesText; 
+				medicalHistoryDto.IsDirty = true;
+				
+				dispatchEvent( new Event( "notesChange", true, true ) );
+				}); */
+				
+				id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+			}
+			
+			protected function YesNoLabel_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_View.id_DetailsView.id_header.id_SpinerList.DataProvider = id_MenuList;
+				id_View.id_DetailsView.id_header.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				id_View.id_DetailsView.id_header.id_SpinerList.id_minBtn.toolTip = "Switch to Notes";
+				id_View.id_DetailsView.id_header.id_SpinerList.id_MaxBtn.toolTip = "Switch to Notes";
+				//				id_View.id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+				//				id_View.id_DetailsView.id_header.id_SpinerList.id_DDList.selectedIndex = 0;
+				
+				id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+				id_NotesView.id_BoxHeader.visible 			= false;
+				id_NotesView.id_BoxHeader.includeInLayout 	= false;
+				id_NotesView.id_notesBorder.height = 100;
+				
+				id_NotesHeader.id_SpinerList.DataProvider = id_MenuList;
+				id_NotesHeader.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				//				id_NotesHeader.id_SpinerList.currIndex = 1;
+				//				id_NotesHeader.id_SpinerList.id_DDList.selectedIndex = 1;
+				id_NotesHeader.id_SpinerList.id_minBtn.toolTip = "Switch to Form";
+				id_NotesHeader.id_SpinerList.id_MaxBtn.toolTip = "Switch to Form";
+				
+				id_GridHeader.id_SpinerList.DataProvider = id_MenuList;
+				id_GridHeader.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				//				id_GridHeader.id_SpinerList.currIndex = 2;
+				//				id_GridHeader.id_SpinerList.id_DDList.selectedIndex = 2;
+				id_GridHeader.id_SpinerList.id_minBtn.toolTip = "Switch to Notes";
+				id_GridHeader.id_SpinerList.id_MaxBtn.toolTip = "Switch to Form";
+				//				
+				id_View.id_Views.addEventListener(IndexChangedEvent.CHANGE, function(e:IndexChangedEvent):void
+				{
+					if(id_View.id_Views.selectedIndex == 1)
+					{
+						id_ButtonContainer.visible 	= true;
+						id_add.visible				= true;
+					}
+					else if(id_View.id_Views.selectedIndex == 0)
+					{
+						id_ButtonContainer.visible 	= false;
+						id_add.visible				= false;
+					}
+					
+				});
+				
+			}
+			
+			private function OnNotesCloseClick(event:MouseEvent):void
+			{
+				this.ShowNotes = false;
+				id_Views.selectedIndex = 0;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+				event.stopImmediatePropagation();
+			}
+			// add record of general
+			protected function id_add_clickHandler(event:MouseEvent):void
+			{
+				medicalHistoryDto.ICDDTO = id_View.id_DetailsView.id_ICDCode.selectedItem as ICDCodeDTO;
+				if(medicalHistoryDto.ICDDTO == null)
+				{
+					medicalHistoryDto.ICDDTO = new ICDCodeDTO();
+					medicalHistoryDto.ICDDTO.IcdCodeDescription = id_View.id_DetailsView.id_Description.textInput.text;
+				}
+				
+				if(id_View.id_DetailsView.id_Onset.selectedDate)
+				{
+					medicalHistoryDto.OnSet  = UtilityFunctions.FormatDate(id_View.id_DetailsView.id_Onset.selectedDate, "MM-DD-YYYY");
+				}
+				medicalHistoryDto.Note   = id_NotesView.id_TextArea.text;
+				
+				
+				medicalHistoryDto.PatientID 	= model.patientID;
+				medicalHistoryDto.IsNA 			= false;
+				medicalHistoryDto.IsNone 		= false;
+				medicalHistoryDto.IsDirty 		= true;
+				medicalHistoryDto.VisitDate 	= model.VisitDate;
+				
+				if(id_View.id_DetailsView.id_ActiveYes)
+					medicalHistoryDto.isActive = true;
+				else if(id_View.id_DetailsView.id_ActiveNo)
+					medicalHistoryDto.isActive = false;
+				
+				id_add.enabled = false; 
+				
+				if(null != model.GeneralMedicalHistoryList)
+					model.GeneralMedicalHistoryList.removeAll();
+				else
+					model.GeneralMedicalHistoryList = new ArrayCollection();
+				
+				model.GeneralMedicalHistoryList.addItem(medicalHistoryDto);
+				//update skins for icons....
+				dispatchEvent(new Event("clearNotesEvent",true, true ));
+				
+				//update controls
+				dispatchEvent( new Event("data_added", true, true) );
+				dispatchEvent( new Event("saveGeneralHistoryEvent", true, true) );
+				
+				selectByIndex(0); //show form;
+			}
+			
+			
+			
+			protected function id_Views_changeHandler(event:IndexChangedEvent):void
+			{
+				if( event.newIndex == 0 || event.newIndex == 1 )
+				{
+					//id_add.visible = true;
+					
+					id_ButtonContainer.visible = true;
+					if(id_View.id_Views.selectedIndex == 0) // yesno
+					{
+						id_ButtonContainer.visible = false;
+					}
+					else // details view
+					{
+						id_ButtonContainer.visible = true;
+						id_add.visible = true;
+					}
+					
+					
+					id_add.enabled = true;
+					//	event.newIndex == 1? id_ButtonContainer.paddingRight = 45: id_ButtonContainer.paddingRight = 10;
+				}
+				else
+				{
+					//id_add.visible = false;
+					id_add.enabled = false;
+					id_ButtonContainer.visible = false;
+				}
+				
+				if( id_View.id_DetailsView )
+				{
+					id_add.visible = true;
+					id_add.enabled = id_View.id_DetailsView.isGetEdited();
+				} 
+				
+				if(id_NotesView.id_TextArea.text.length>0)
+					id_add.enabled = true;
+			}
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_View.id_DetailsView.id_header.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_View.id_DetailsView.id_header.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick, false, 0, true);
+				
+				id_NotesHeader.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_NotesHeader.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick);
+				
+				id_GridHeader.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_GridHeader.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick);
+				
+				addEventListener("ICD_Change", function(event:Event):void
+				{
+					if( id_View.id_DetailsView.isGetEdited() || id_NotesView.NotesText.length > 2 )
+					{
+						id_add.enabled = true;
+						//id_add.visible = true;
+					}
+				});
+				
+				id_View.id_DetailsView.id_Description.textInput.addEventListener(TextOperationEvent.CHANGE, function(event:TextOperationEvent):void
+				{
+					if( id_View.id_DetailsView.id_Description.textInput.text.length > 3 )
+					{
+						dispatchEvent( new Event("ICD_Change", true, true));
+					}
+				});
+				
+				/* addEventListener('clearNotesEvent', function(event:Event):void
+				{
+				id_View.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+				id_NotesHeader.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+				
+				}); */
+				
+			}
+			
+			//private var dictationPopUp:dictationPopUp;
+			private function voiceBtnClickHandler(event:MouseEvent):void
+			{
+				/* var dictationDTO:ModuleDictationDTO = new ModuleDictationDTO();
+				
+				if (medicalHistoryDto)
+				dictationDTO.DictationID = medicalHistoryDto.DictationID;
+				
+				dictationPopUp = QIDictationManager.show(id_View.id_DetailsView.id_header.id_VoiceBtn.parent, dictationPopUp, dictationDTO, id_View.id_DetailsView.id_header.id_VoiceBtn);
+				QIPopUpManager.addPopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				dictationPopUp.move( dictationPopUp.x - 81, dictationPopUp.y);
+				dictationPopUp.id_closeBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if (dictationDTO && medicalHistoryDto)
+				{
+				medicalHistoryDto.DictationID = dictationDTO.DictationID;
+				medicalHistoryDto.IsDirty = true;
+				
+				if(medicalHistoryDto && medicalHistoryDto.DictationID && medicalHistoryDto.DictationID.length)
+				{
+				dispatchEvent(new Event("dictationChange",true, true ));
+				if(medicalHistoryDto.DictationID != Constants.GUID_FORMAT)
+				{
+				id_View.id_DetailsView.id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+				
+				id_NotesHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+				id_NotesView.id_BoxHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+				
+				id_GridHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+				}
+				}
+				
+				}
+				QIPopUpManager.removePopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				}); */
+				
+				//M , false, 0, true
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<s:ArrayList id="id_MenuList">
+			<fx:String>Form</fx:String>
+			<fx:String>Notes</fx:String>
+			<!--<fx:String>Grid</fx:String>-->
+		</s:ArrayList>
+		
+		
+	</fx:Declarations>
+	
+	<fx:Binding source="id_View.id_DetailsView.id_header.id_SpinerList.currIndex" destination="id_NotesHeader.id_SpinerList.currIndex" twoWay="true" />
+	
+	<s:VGroup width="100%" gap="-20">
+		
+		<mx:ViewStack id="id_Views" width="100%" height="120" resizeToContent="true" change="id_Views_changeHandler(event)"  creationPolicy="all" selectedIndex="{ShowNotes ? 1:0}" >
+			<s:NavigatorContent width="100%" >
+				<renderer:GeneralYesNo id="id_View" width="100%" height="100%" Label="{Label}" IsSelected="{IsSelected}" 
+									   creationComplete="YesNoLabel_creationCompleteHandler(event)" />
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" > <!-- 2 Notes View -->
+				<s:VGroup width="100%" gap="0">
+					<family:DetailViewHeader id="id_NotesHeader" width="100%" />
+					<notes:NotesBox id="id_NotesView" width="100%" height="89"  />
+				</s:VGroup>
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" > <!-- 3 Grid View -->
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				<family:DetailViewHeader id="id_GridHeader" width="100%" />
+				<general:GeneralGridView id="id_GridView" width="100%" height="90" miniView="{miniView}" />
+			</s:NavigatorContent>
+		</mx:ViewStack>
+		<s:HGroup id="id_ButtonContainer" width="100%" horizontalAlign="left" paddingLeft="4" paddingRight="4" paddingTop="4" visible="false" gap="1">			
+			<s:ToggleButton id="id_add" label="Add" enabled="false" tabIndex="5" click="id_add_clickHandler(event)" toolTip="Add Record" buttonMode="true"  
+							skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreRecordBtn" visible="true"/>
+			<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBGSmall" visible="{id_add.visible &amp;&amp; !id_add.enabled}"  />
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>

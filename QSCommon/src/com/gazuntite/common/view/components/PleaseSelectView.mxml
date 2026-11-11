@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  width="100%" height="50"
+					  skinClass="com.gazuntite.skins.controls.container.dmg.PleaseSelectBGSkin">
+	<fx:Script>
+		<![CDATA[
+			[Bindable]	public var label:String = '';
+		]]>
+	</fx:Script>
+	
+	<s:Label text="{label}" 
+			 horizontalCenter="0" verticalCenter="0"
+			 fontSize="14" fontFamily="CalibriCFF" color="0xFFFFFF"
+			 maxDisplayedLines="1" showTruncationTip="true" textAlign="center"
+			 width="100%" left="20" right="5"/>
+</s:SkinnableContainer>

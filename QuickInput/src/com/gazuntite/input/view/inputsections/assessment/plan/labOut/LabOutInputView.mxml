@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:labOut="com.gazuntite.input.view.inputsections.assessment.plan.labOut.*"
+		 creationComplete="cc()"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable] private var viewModel:PatientInputAssessmentLabOutViewModel = PatientInputAssessmentLabOutViewModel.getInstance();
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			[Bindable] public var TempRecordLevelNote:String = '';
+			
+			//M:11Nov2013
+			[Bindable]
+			public var RecordLevelDictationID:String;
+			
+			private function cc():void
+			{				
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_ITEM_EDIT_KEY_UP_EVENT, 
+					patientInputLabOutItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_ADD_EVENT, 
+					patientInputLabOutAddHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_EDIT_EVENT, 
+					managePatientLabHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_DELETE_EVENT, 
+					managePatientLabHandler, false, 0, true);
+			}
+			
+			private function patientInputLabOutItemEditKeyUpHandler(event:PatientInputAssessmentLabOutEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadLabTestForInputView(event.searchString, event.testTypeID, event.searchType);
+			}
+			
+			private function patientInputLabOutAddHandler(event:PatientInputAssessmentLabOutEvent):void
+			{
+				if (!event.labDTO)
+					return;
+				
+				if (!model.laboutDTOList)
+					model.laboutDTOList = new ArrayCollection();
+				
+				model.laboutDTOList.addItem(event.labDTO);
+				
+				event.labDTO.serialNumber = model.laboutDTOList.length;
+				
+				viewModel.managePatientLab(QIConstants.INPUT_VIEW);
+				
+				dispatchEvent(new PatientInputAssessmentFollowUpEvent(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, true));
+			}
+			
+			private function managePatientLabHandler(event:PatientInputAssessmentLabOutEvent):void
+			{
+				viewModel.managePatientLab(QIConstants.INPUT_VIEW);
+				
+				dispatchEvent(new PatientInputAssessmentFollowUpEvent(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, true));
+			}
+			
+			public function ClearLabOutView():void
+			{
+				if(id_LabOutFormView)
+				id_LabOutFormView.clearForm();
+				if(model.laboutDTOList)
+				model.laboutDTOList.removeAll();
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.laboutDTOList && model.laboutDTOList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.laboutDTOList = UtilityFunctions.SortArrayCollection(model.laboutDTOList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.laboutDTOList = UtilityFunctions.SortArrayCollection(model.laboutDTOList,'label',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+				
+			}
+			
+			
+			protected function id_LabOutFormView_keyDownHandler(event:KeyboardEvent):void
+			{
+				id_LabOutFormView.IsViewDirty = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.laboutDTOList" destination="DataList_changeHandler" />
+	<s:layout>
+		<s:VerticalLayout paddingLeft="2" paddingRight="2" paddingTop="10" paddingBottom="2" gap="0"/>
+	</s:layout>
+	
+	<s:Scroller width="100%" height="100%" 
+				horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<labOut:LabOutInputFormView id="id_LabOutFormView" width="100%" dictationNoteViewModel="{viewModel.inlineDictationNoteViewModel}" keyDown="id_LabOutFormView_keyDownHandler(event)" 
+										RecordLevelNote="@{RecordLevelNote}" RecordLevelDictationID="@{RecordLevelDictationID}"/>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+				<s:DropDownList id="uiSortDropDown" skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+								selectedIndex="0" buttonMode="true" toolTip="Sort List"
+								change="SortDataList()">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added"/>
+							<fx:Object label="Test Name"/>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%"/>
+			</s:SkinnableContainer>
+			
+			<s:List id="labOutInputList"
+					width="100%"
+					allowMultipleSelection="false"
+					borderVisible="false" 
+					dataProvider="{model.laboutDTOList}"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					itemRenderer="com.gazuntite.input.view.inputsections.assessment.plan.labOut.LabOutListItemRenderer"/>
+		</s:Group>
+	</s:Scroller>
+	
+</s:Group>

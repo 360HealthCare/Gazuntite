@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*" 
+				autoDrawBackground="false"
+				width="100%"
+				xmlns:dictation="com.gazuntite.dictation.view.dictation.*" 
+				xmlns:diagnosis="com.gazuntite.input.view.components.patient.itemrenderer.diagnosis.*"
+				initialize="init()" 
+				>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.assessment.diagnosis.PatientInputAssessmentDiagnosisEvent;
+			import com.gazuntite.skins.controls.container.input.RecordEditPopupSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable]  private var isEditViewOpen:Boolean = false;
+			[Bindable] private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable] public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable] private var diagnosisDTO:DiagnosisDTO;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				if(data)
+				{
+					diagnosisDTO = data as DiagnosisDTO;
+					
+					if (value == null || null == diagnosisDTO) //value as AllergyDTO fails somw how ... why object is being passed here in place of AllergyDTO ?
+						return;
+					
+					setDictationNoteButtonMode();
+					//	isEditViewOpen = false;
+					//	removeEditView();
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+					
+					invalidateDisplayList();
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', diagnosisDTO.serialNumber % 2 ? GeneralListItemSkin: GeneralListAlternateItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function init():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			// section 1 is Expand View & section 2 for Edit view
+			protected function toggleEditView(sectionNo:int):void
+			{				
+				if(!diagnosisDTO) 
+					return;
+				
+				if(sectionNo == 2 )
+				{
+					if(id_btnEdit.selected)
+					{
+						diagnosisDTO.inEditMode = false;
+						isEditViewOpen = true;
+						openEditView();
+						showGlow();
+						return;
+					}else
+					{
+						removeEditView();
+						glowAnimation.play(null, true);
+						glow1.alpha = 0;
+						isEditViewOpen 								= false;
+						id_btnEdit.selected 						= false;
+						return;
+					}
+				}else
+				{
+					removeEditView();
+					if(id_btnEdit.selected)
+						id_btnEdit.selected = false;
+					isEditViewOpen = false;
+				}
+				
+				diagnosisDTO.inEditMode = !diagnosisDTO.inEditMode;
+				setDictationNoteButtonMode();
+				showGlow();
+			}
+			
+			private function setDictationNoteButtonMode():void
+			{
+				if (!diagnosisDTO.inEditMode)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode 	= false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode 		= false;
+				}else if(diagnosisDTO.inEditMode)
+				{
+					id_ItemExpandView.viewModel.visible = false;
+				}
+				
+				showGlow();
+			}
+			
+			private function onDictationNoteButtonsClick(event:MouseEvent):void
+			{
+				if (!diagnosisDTO.inEditMode)
+					diagnosisDTO.inEditMode = true;
+				
+				event.stopPropagation();
+			}
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!diagnosisDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					diagnosisDTO.IsDirty = true;
+					diagnosisDTO.IsDeleted = true;
+					
+					var ev:PatientInputAssessmentDiagnosisEvent = new PatientInputAssessmentDiagnosisEvent(
+						PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_DELETE_EVENT, true);
+					
+					ev.diagnosisDTO = diagnosisDTO;
+					
+					dispatchEvent(ev);
+				});
+				
+				event.stopPropagation();
+			}
+			
+			private function showGlow():void
+			{
+				if (diagnosisDTO.inEditMode || isEditViewOpen)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+					id_ItemExpandView.viewModel.visible 	= false;
+				}
+			}
+			
+			protected function openEditView():void
+			{
+				if(!id_btnEdit.selected)
+					return;
+				else if(id_editExpandView.numChildren > 0)
+					removeEditView();
+				
+				var editor:DiagnosisHistoryItemEditView					= new DiagnosisHistoryItemEditView();
+				editor.diagnosisDTO 									= diagnosisDTO;
+				editor.width  											= id_editExpandView.width - 5;
+				editor.isFormDierty										= false;
+				
+				editor.setStyle('skinClass', RecordEditPopupSkin);
+				id_editExpandView.addElement(editor);
+				
+				if (editor.diagnosisDTO != null)// Populate the Form with Selected DTO
+				{
+					if (editor.diagnosisDTO.AssociateType == 'This Visit')
+					{
+						var strTemp:String = UtilityFunctions.FormatDate(editor.diagnosisDTO.VisitDate, 'MM/DD/YYYY');
+						editor.arrAssociateTypes.addItemAt(strTemp, 0);
+						editor.id_AssociateVisitsCmbo.selectedIndex = 0;
+					}
+					else if (editor.diagnosisDTO.AssociateType == 'Previous Visit')
+					{
+						editor.id_AssociateVisitsCmbo.selectedIndex = 0;
+						editor.id_VisitDatesCombo.prompt    = UtilityFunctions.FormatDate(editor.diagnosisDTO.VisitDate, 'MM/DD/YYYY');
+						editor.id_VisitDatesCombo.enabled 	= true;
+					}
+					else if (editor.diagnosisDTO.AssociateType == 'N/A')
+					{
+						editor.id_AssociateVisitsCmbo.selectedIndex = 1;
+					}
+					
+					editor.id_IcdCodeCmbo.text 							= diagnosisDTO.IcdDto.IcdCodeName;
+					editor.id_DiagnosisCmbo.text 						= diagnosisDTO.IcdDto.IcdCodeDescription;
+					editor.id_OnSet.text 								= diagnosisDTO.OnSet;
+					editor.id_Chronic.selected 							= diagnosisDTO.IsChronic;
+					
+					if(editor.id_DiagnosisCmbo.text.length)
+						editor.img_Diagnosis.source 					= QIConstants.IMG_GREEN;
+					if(editor.id_IcdCodeCmbo.text.length)
+						editor.img_IcdCode.source						= QIConstants.IMG_GREEN;
+					if(editor.id_OnSet.text.length)
+						editor.img_OnSet.source							= QIConstants.IMG_GREEN;
+				}
+				editor.addEventListener('saveStatus',function(event:Event):void{
+					
+					isEditViewOpen = false;
+					id_btnEdit.selected = false;
+					removeEditView();
+					
+				});
+ 			}
+			private function removeEditView():void
+			{
+				if(id_editExpandView)
+				{
+					if(id_editExpandView.numChildren > 0)
+						id_editExpandView.removeAllElements();
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="-4" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="{this.width - 7}" height="26" >
+		
+		<s:HGroup left="0" right="70" top="0" bottom="0"
+				  horizontalAlign="left"
+				  verticalAlign="middle"
+				  paddingLeft="8" paddingRight="8" gap="6"
+				  buttonMode="true" toolTip="Open/Close Details"
+				  click="toggleEditView(1)"
+				  >
+			<s:Label color="#333333" fontFamily="CalibriCFF" fontSize="14" maxDisplayedLines="1"
+					 text="{itemIndex + 1 +' . '+ diagnosisDTO.label}"
+					 toolTip="{diagnosisDTO.label}" verticalCenter="0"/>
+		</s:HGroup>
+		<s:HGroup right="5" gap="4" verticalCenter="0" height="100%" verticalAlign="middle" horizontalAlign="right">
+			<s:Image source="{QIConstants.IMG_NEW}" buttonMode="true" useHandCursor="true"/>
+			<s:ToggleButton id="id_btnEdit"
+							click="toggleEditView(2)"
+							buttonMode="true" toolTip="Edit the Record"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.EditRecordArrowTBSkin"
+							/>
+			<s:Button skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+					  buttonMode="true" useHandCursor="true" toolTip="Delete Diagnosis"
+					  click="deleteClickHandler(event)"/>
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 5}" top="21"  visible="{diagnosisDTO.inEditMode}" includeInLayout="{diagnosisDTO.inEditMode}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		<diagnosis:DiagnosisItemExpandView id="id_ItemExpandView"  width="100%" diagnosisDTO="{diagnosisDTO}"/>
+	</s:Group>
+	
+	<s:Group id="id_editExpandView" width="{id_Header.width - 5}" top="21"  visible="{id_btnEdit.selected}" includeInLayout="{id_btnEdit.selected}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+	</s:Group>
+	
+</s:ItemRenderer>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			[Bindable]
+			private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2" />
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="21" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="8" paddingRight="9"/>
+		</s:layout>
+		
+		<s:Label text="Code" width="10%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>
+		
+		<s:Line height="100%" >
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Label text="Description" width="50%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>
+		<s:Line height="100%" >
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Label text="Units" width="15%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>
+		<s:Line height="100%" >
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Label text="Proc. Charge" width="15%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>
+		<s:Line height="100%" visible="false" includeInLayout="false">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:Label visible="false" includeInLayout="false" text="Action" width="10%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>			
+	</s:SkinnableContainer>
+	
+	<s:List id="uiprocedureList"
+			dataProvider="{model.procedureDTOList}"
+			width="100%" allowMultipleSelection="false" minHeight="50"
+			borderVisible="false" verticalScrollPolicy="off" horizontalScrollPolicy="off"
+			itemRenderer="com.gazuntite.provider.live.services.billing.superBill.view.itemRenderer.procedure.ProcedureListItemRedderer"
+			/>
+	
+	<s:SkinnableContainer width="100%" height="23" skinClass="com.gazuntite.skins.superBill.YellowViewSkin">
+		<s:layout>
+			<s:HorizontalLayout gap="30" verticalAlign="middle" paddingRight="20"/>
+		</s:layout>
+		<s:Label text="Total Amount" width="50%" textAlign="right" fontFamily="CalibriCFFBold" fontSize="15" />
+		<s:RichText id="totalCharegs" color="#000000" width="50%" textAlign="left" fontFamily="CalibriCFFBold" fontSize="15" tabStops="S0" 
+					text="$ {numberFormatter.format(model.TotalProcedureCharges)}" toolTip="{'Total Amount: $ ' + numberFormatter.format(model.TotalProcedureCharges)}" />
+	</s:SkinnableContainer>
+	
+</s:SkinnableContainer>

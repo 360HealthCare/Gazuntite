@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:followUp="com.gazuntite.input.view.inputsections.assessment.plan.followUp.*" creationComplete="cc(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.supportClasses.Skin;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			//M:11Nov2013
+			[Bindable]
+			public var RecordLevelDictationID:String;
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			[Bindable] public var TempRecordLevelNote:String = '';
+			[Bindable]
+			private var viewModel:PatientInputAssessmentFollowUpViewModel = PatientInputAssessmentFollowUpViewModel.getInstance();
+			
+			private function cc(event:FlexEvent):void
+			{
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_ITEM_EDIT_KEY_UP_EVENT, 
+					followUpItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_ADD_EVENT, 
+					followUpAddHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_EDIT_EVENT, 
+					managePatientFollowUpHandler, false, 0, true);
+				addEventListener(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_FOLLOW_UP_DELETE_EVENT, 
+					managePatientFollowUpHandler, false, 0, true);
+			}
+			
+			private function followUpItemEditKeyUpHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadFollowUpServiceType(event.followUpDataControlTypeID, event.searchString);
+			}
+			
+			private function followUpAddHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				if (!event.followUpDTO)
+					return;
+				
+				if (!model.followUpDTOList)
+					model.followUpDTOList = new ArrayCollection();
+				
+				model.followUpDTOList.addItem(event.followUpDTO);
+				
+				event.followUpDTO.serialNumber = model.followUpDTOList.length;
+				
+				viewModel.manageFollowUp(QIConstants.INPUT_VIEW);
+			}
+			
+			private function managePatientFollowUpHandler(event:PatientInputAssessmentFollowUpEvent):void
+			{
+				viewModel.manageFollowUp(QIConstants.INPUT_VIEW);
+			}
+			
+			public function ClearFollowUpView():void
+			{
+				if(id_FollowUpFormView)
+					id_FollowUpFormView.clearForm();
+				if(model.followUpDTOList)
+					model.followUpDTOList.removeAll();
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.followUpDTOList && model.followUpDTOList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.followUpDTOList = UtilityFunctions.SortArrayCollection(model.followUpDTOList,'serialNumber',true,false);
+							break;
+						case 1: 												
+							model.followUpDTOList = UtilityFunctions.SortArrayCollection(model.followUpDTOList,'DrugName',false,false);
+							break;						
+						case 2: 												
+							model.followUpDTOList = UtilityFunctions.SortArrayCollection(model.followUpDTOList,'TestName',false,false);
+							break;						
+						case 3: 												
+							model.followUpDTOList = UtilityFunctions.SortArrayCollection(model.followUpDTOList,'FollowUpDate',false,false);
+							break;						
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+				
+			}
+			
+			
+			protected function id_FollowUpFormView_keyDownHandler(event:KeyboardEvent):void
+			{
+				CheckAndSetViewDirty(event); 
+			}
+			
+			protected function id_FollowUpFormView_clickHandler(event:MouseEvent):void
+			{
+				CheckAndSetViewDirty(event); 				
+			}
+			
+			private function CheckAndSetViewDirty(event:Event):void
+			{
+				var component:Object = null;
+				var IsViewDirty:Boolean = id_FollowUpFormView.IsViewDirty;
+				
+				if( event.target is Skin )
+					component = event.target.hostComponent;
+				else
+					component = event.target;
+				
+				/* if( component.id == "id_active") // special toggle button case --- button is used inplace of RadioButton :(
+				id_FollowUpFormView.IsViewDirty = true; 
+				
+				else*/
+				id_FollowUpFormView.IsViewDirty = UtilityFunctions.IsComponentDirty( component ) || IsViewDirty;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.followUpDTOList" destination="DataList_changeHandler" />
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="2" paddingRight="2" paddingTop="10" paddingBottom="2" gap="0"/>
+	</s:layout>
+	
+	<s:Scroller width="100%" height="100%" 
+				horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<followUp:FollowUpInputFormView id="id_FollowUpFormView" width="100%" dictationNoteViewModel="{viewModel.inlineDictationNoteViewModel}" 
+											keyUp="id_FollowUpFormView_keyDownHandler(event)" click="id_FollowUpFormView_clickHandler(event)" 
+											RecordLevelNote="@{RecordLevelNote}" RecordLevelDictationID="@{RecordLevelDictationID}"/>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+				<s:DropDownList id="uiSortDropDown" skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+								selectedIndex="0" buttonMode="true" toolTip="Sort List" change="SortDataList()">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added"/>
+							<fx:Object label="Drug"/>
+							<fx:Object label="Lab Test"/>
+							<fx:Object label="Follow-Up Date"/>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%"/>
+			</s:SkinnableContainer>
+			
+			<s:List id="labOutInputList" 
+					width="100%" allowMultipleSelection="false"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false" dataProvider="{model.followUpDTOList}"
+					itemRenderer="com.gazuntite.input.view.inputsections.assessment.itemRenderer.FollowUpListIR"/>
+			
+		</s:Group>
+	</s:Scroller>
+</s:Group>

@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin name="CustomDropDownListSkin"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		alpha.disabled="0.5" y="22"> 
+	<!-- states -->
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="open" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!-- host component -->
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("spark.components.DropDownList")]
+		]]>
+	</fx:Metadata> 
+	
+	<!--- The PopUpAnchor control that opens the drop-down list. -->
+	<s:PopUpAnchor id="popUp"  displayPopUp.normal="false" displayPopUp.open="true" includeIn="open"
+				   left="0" right="0" top="0" bottom="0" itemDestructionPolicy="auto"
+				   popUpPosition="below" popUpWidthMatchesAnchorWidth="false" >
+		
+		<!--- The drop down area of the skin. This includes borders, background colors, scrollers, and filters. -->
+		<s:Group id="dropDown"  minHeight="22" >
+			
+			<!-- drop shadow -->
+			<s:RectangularDropShadow blurX="20" blurY="20" alpha="1.0" distance="5" 
+									 angle="90" color="#000000" left="0" top="0" right="0" bottom="0"/>
+			
+			<!-- border -->
+			<s:Rect height="100%" radiusX="0" width="100%" x="0" y="0">
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#848484" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.29411764705882354"/>
+						<s:GradientEntry alpha="1.0" color="#343434" ratio="0.7843137254901961"/>
+						<s:GradientEntry alpha="1.0" color="#161717" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+				<s:stroke>
+					<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+						<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+						<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+					</s:LinearGradientStroke>
+				</s:stroke>
+			</s:Rect>
+			<s:Path left="6" width="18" height="8" data="M 22.59 19.57 L 0.01 19.57 11.30 0.01 Z "
+					y="-8" >
+				<s:fill>
+					<s:SolidColor color="0x838383"/>
+				</s:fill>
+			</s:Path>
+			
+			<s:Group  x="7" y="16">
+				<s:filters>
+					<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#CCCCCC" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+				</s:filters>
+				<s:Rect height="1" width="1" x="6.5" y="0.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="0.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="3.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="3.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="6.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="6.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="9.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="9.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="12.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="12.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="0.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="0.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="3.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="3.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="6.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="6.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="9.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="9.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="12.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="12.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="15.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="15.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="18.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="18.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="21.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="21.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="24.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="24.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="27.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="27.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="15.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="15.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="18.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="18.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="21.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="21.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="24.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="24.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="27.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="27.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="30.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="30.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="6.5" y="33.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="9.5" y="33.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="30.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="30.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="0.5" y="33.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+				<s:Rect height="1" width="1" x="3.5" y="33.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#FFFFFF"/>
+					</s:fill>
+				</s:Rect>
+			</s:Group>
+			
+			<!-- fill -->
+			<!--- Defines the appearance of drop-down list's background fill. -->
+			<s:Rect id="background" left="24" right="5" top="5" bottom="5"  >
+				<s:fill>
+					<!--- The color of the drop down's background fill. The default color is 0xFFFFFF. -->
+					<s:SolidColor id="bgFill" color="0xFFFFFF" />
+				</s:fill>
+			</s:Rect>
+			
+			<s:Scroller left="25" top="6" right="6" bottom="6" focusEnabled="false" minViewportInset="1" 
+						skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" maxHeight="100">
+				<!--- The container for the data items in the drop-down list. -->
+				<s:DataGroup id="dataGroup" itemRenderer="spark.skins.spark.DefaultItemRenderer" buttonMode="true" useHandCursor="true">
+					<s:layout>
+						<s:VerticalLayout gap="0" horizontalAlign="right"/>
+					</s:layout>
+				</s:DataGroup>
+			</s:Scroller>
+		</s:Group>
+	</s:PopUpAnchor>
+	
+	<!--- The anchor button used by the DropDownList. The default skin is DropDownListButtonSkin. -->
+	<s:Button id="openButton" left="0" right="0" top="0" bottom="0" focusEnabled="false"
+			  skinClass="spark.skins.spark.DropDownListButtonSkin" width="0" height="0"
+			  visible="false" includeInLayout="false"/>  
+	
+</s:Skin>

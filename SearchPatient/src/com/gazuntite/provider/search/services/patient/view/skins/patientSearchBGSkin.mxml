@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+ADOBE SYSTEMS INCORPORATED
+Copyright 2008 Adobe Systems Incorporated
+All Rights Reserved.
+
+NOTICE: Adobe permits you to use, modify, and distribute this file
+in accordance with the terms of the license agreement accompanying it.
+
+-->
+
+<!--- The default skin class for a Spark SkinnableContainer container.  
+
+@see spark.components.SkinnableContainer
+
+@langversion 3.0
+@playerversion Flash 10
+@playerversion AIR 1.5
+@productversion Flex 4
+-->
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabled="0.5">
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		/** 
+		* @copy spark.skins.spark.ApplicationSkin#hostComponent
+		*/
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata> 
+	
+	<s:states>
+		<s:State name="normal" /><s:State name="normalWithControlBar" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<!--- Defines the appearance of the SkinnableContainer class's background. -->
+	<s:Path width="100%" height="100%" data="M 251.94 0 L 33.5 0 L 3.06 0 L 0 0 L 0 3 L 0 33.5 L 0 112 C 0 113.657 1.37 115 3.06 115 L 251.94 115 C 253.63 115 255 113.657 255 112 L 255 3 C 255 1.343 253.63 0 251.94 0 Z" winding="nonZero">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#A1A3BD" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D3D4E2" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#A1A3BD" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.8" angle="90" blurX="5" blurY="5" color="0x000000" distance="2" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<!--
+	Note: setting the minimum size to 0 here so that changes to the host component's
+	size will not be thwarted by this skin part's minimum size.   This is a compromise,
+	more about it here: http://bugs.adobe.com/jira/browse/SDK-21143
+	-->
+	<!--- @copy spark.components.SkinnableContainer#contentGroup -->
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+	
+</s:Skin>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  width="100%" height="100%"
+					  backgroundColor="0x000000">
+	
+	
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xffffff" ratio=".1"/>
+				<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="10"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="10"/>
+		</s:layout>
+	
+		<s:Label text="Rapid Access"/>
+		
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

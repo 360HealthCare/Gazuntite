@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   creationComplete="cc(event)">
+	<fx:Metadata>
+		[Event(name="ItemClicked", type="flash.events.Event")]
+		[Event(name="CloseSearchBox", type="mx.events.CloseEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var _ListDataProvider:ArrayCollection;
+			
+
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+			}
+
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+				{
+					//closeHandler()
+				});
+				
+			}
+			
+			public function closeHandler( event:MouseEvent = null ):void
+			{
+				var e:CloseEvent = new CloseEvent( "CloseSearchBox", true );
+				dispatchEvent( e );
+			}
+			
+			public function refreshList(query:String):void
+			{
+				/* if( null == model.SearchPatientResults ) 
+				{
+					trace("model.SearchPatientResults is null");
+					return;
+				}
+				SearchString = query; */
+			}
+			
+			protected function id_SearchList_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event("ItemClicked",true));				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingTop="0" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.PatientSearchListSpinnerBG" >
+		<s:layout>
+			<s:VerticalLayout gap="3" verticalAlign="top" horizontalAlign="left" paddingLeft="7" paddingRight="6" paddingTop="5" paddingBottom="2"/>
+		</s:layout>
+		
+		<s:List id="id_SearchList"
+				width="100%" height="70" left="7" right="7" top="10" bottom="24"
+				dataProvider="{ListDataProvider}" borderVisible="false"
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+				labelField="TestName"
+				click="id_SearchList_clickHandler(event)"
+				/>	<!--click="id_SearchList_clickHandler(event)" 
+				valueCommit="id_SearchList_valueCommitHandler(event)"
+				creationComplete="id_SearchList_creationCompleteHandler(event)" -->
+		
+	</s:SkinnableContainer>
+</components:PopupGroup>

@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:alergies="com.gazuntite.patient.visit.view.pmh.alergies.*"
+		 xmlns:compHistory="com.gazuntite.patient.visit.view.pmh.compHistory.*"
+		 xmlns:chronicMedication="com.gazuntite.patient.visit.view.pmh.chronicMedication.*"
+		 xmlns:immunization="com.gazuntite.patient.visit.view.pmh.immunization.*"
+		 creationComplete="init(event)"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.PMHButtonSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIAllergiesBtnDeletedSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIChronicMedicationBtnDeletedSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QICloseRedButtonSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIComprehensiveHistoryBtnDeletedSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIImmunizationBtnDeletedSkin;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.view.commons.QICollapseableView;
+			
+			import flashx.textLayout.edit.SelectionState;
+			import flashx.textLayout.events.SelectionEvent;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			public var currentIndex:int = 1;
+			public var currentSelectedView:QICollapseableView;
+			
+			private var m_bHasChange:Boolean;
+			
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			[Bindable]
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+				
+				if( value || id_AlergiesPanel.hasChange || id_ChronicmedicationPanel.hasChange || id_HistoryPanel.hasChange || id_ImmunizationPanel.hasChange )
+				{
+					m_bHasChange = true;
+				}
+				else
+				{
+					m_bHasChange = false;
+				}
+			}
+			
+			protected function SwitchToNextPanel(event:SelectSection):void
+			{
+				SelectNextByID(event.SectionID);
+			}
+			
+			private function SelectNextByID( sectionID:String ):void
+			{
+				removeAllPopups();
+				collupseAllPanel();
+				switch( sectionID )
+				{
+					case "id_ImmunizationPanel":
+						setSelectedById( "id_AllergiesBtn" );
+						break;
+					case "id_AlergiesPanel":
+						setSelectedById( "id_HistoryBtn" );
+						break;
+					case "id_HistoryPanel":
+						setSelectedById( "id_ChronicMedicationBtn" );
+						break;
+					case "id_ChronicmedicationPanel":
+						setSelectedById( "id_ImmunizationBtn" );
+						break;
+					
+					default:
+						setSelectedById( "id_AllergiesBtn" );
+						break;
+				}
+			}
+			
+			public function removeAllPopups():void
+			{
+				/* id_AlergiesPanel.AllowOtherPopup		= false;
+				id_HistoryPanel.AllowOtherPopup		= false;
+				id_ImmunizationPanel.AllowOtherPopup	= false;
+				id_ChronicmedicationPanel.AllowOtherPopup	= false; */
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				addEventListener("SelectSection" , SwitchToNextPanel);
+				addEventListener(CloseEvent.CLOSE , onClosePanel);
+				//SelectNextByIndex();
+			}
+			
+			private function onClosePanel(event:CloseEvent):void
+			{
+				switch( event.target.id )
+				{
+					case "id_AllergiesBtn":
+					case "id_AlergiesPanel":
+						
+						id_AllergiesBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+
+						break;
+					
+					case "id_HistoryBtn":
+					case "id_HistoryPanel":
+						
+						id_HistoryBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+						
+						break;
+					
+					
+					case "id_ChronicMedicationBtn":
+					case "id_ChronicmedicationPanel":
+						
+						id_ChronicMedicationBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+						break;
+					
+					case "id_ImmunizationBtn":
+					case "id_ImmunizationPanel":
+						
+						id_ImmunizationBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+						
+						break; 
+					
+				}
+			}
+			
+			private function ShowPanel(event:MouseEvent):void
+			{
+				
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				
+				
+				//getCurrentSelectedPanel().ExpandedView = true; 
+				
+				getCurrentSelectedPanel() .AllowMoveToNextPanel( function():void
+				{
+					event.currentTarget.selected = true;
+					
+					setSelectedById( event.currentTarget.id )
+				}); 
+			}
+			
+			
+			
+			public function collupseAllPanel():void
+			{
+				
+				id_AlergiesPanel.ExpandedView 			= false;
+				id_ChronicmedicationPanel.ExpandedView 		= false;
+				id_HistoryPanel.ExpandedView 		= false; 
+				id_ImmunizationPanel.ExpandedView 	= false; 
+							
+			}
+			
+			public function DeSelectAllNavButton():void
+			{
+				id_AllergiesBtn.selected		=	false;
+				id_ChronicMedicationBtn.selected			=	false;
+				id_HistoryBtn.selected			=	false;
+				id_ImmunizationBtn.selected		=	false;
+			
+			}
+			
+			
+			public function DeSelectAllPageBtn():void
+			{
+				id_AllergiesPage.selected = false;
+				id_ChronicMedicationPage.selected = false;
+				id_HistoryPage.selected = false;
+				id_ImmunizationPage.selected = false;
+			}
+			
+			public function PinAll( value:Boolean ):void
+			{
+				id_AlergiesPanel.PinView 						= value;
+				id_AlergiesPanel.id_Header.id_Pin.selected 		= value;
+				
+				id_ImmunizationPanel.PinView 						= value;
+				//id_ImmunizationPanel.id_Header.id_Pin.selected 	= value;
+				
+				id_HistoryPanel.PinView 							= value;
+				//id_HistoryPanel.id_Header.id_Pin.selected 		= value;
+				
+				id_ChronicmedicationPanel.PinView 						= value;
+				//id_ChronicmedicationPanel.id_Header.id_Pin.selected 		= value;
+				
+				 if( !value )
+					currentSelectedView.ExpandedView = true; 
+				
+				removeAllPopups();
+			}
+			
+			private function getCurrentSelectedPanel():QICollapseableView
+			{
+				if( id_AlergiesPanel.ExpandedView )
+				{
+					return id_AlergiesPanel;
+				}
+				else if( id_ChronicmedicationPanel.ExpandedView )
+				{
+					return id_ChronicmedicationPanel;
+				}
+				else if( id_HistoryPanel.ExpandedView )
+				{
+					return id_HistoryPanel;
+				}
+				else if( id_ImmunizationPanel.ExpandedView )
+				{
+					return id_ImmunizationPanel;
+				}
+				
+				return id_AlergiesPanel;
+			}
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				currentIndex += 1 ;
+				SelectNextByIndex()
+				
+			}
+			
+			protected function previous_clickHandler(event:MouseEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				currentIndex -= 1 ;
+				SelectNextByIndex()
+				
+			}
+			
+			
+			protected function pagination_itemClickHandler(event:ItemClickEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				DeSelectAllPageBtn();
+				
+				getCurrentSelectedPanel() .AllowMoveToNextPanel ( function():void
+				{
+					setSelectedById( event.item as String );
+				});
+			}
+			
+			
+			public function SelectNextByIndex():void
+			{
+				if( currentIndex == 0 )
+					currentIndex = 4;
+				
+				switch( currentIndex )
+				{
+					case 1:
+						setSelectedById( "id_AllergiesBtn" );
+						break;
+					case 2:
+						setSelectedById( "id_HistoryBtn" );
+						break;
+					case 3:
+						setSelectedById( "id_ChronicMedicationBtn" );
+						break;
+					case 4:
+						setSelectedById( "id_ImmunizationBtn" );
+						break;
+					default:
+						setSelectedById( "id_AllergiesBtn" );
+						break;
+				}
+			}
+			
+			
+			public function checkPinAll():Boolean
+			{
+				 
+				return	id_AlergiesPanel.PinView 	&&
+					id_ChronicmedicationPanel.PinView 		&&
+					id_HistoryPanel.PinView		&&					
+					id_ImmunizationPanel.PinView			;
+				
+			}
+			
+			
+			private function inActivateBorders():void 
+			{				
+				
+				id_AlergiesPanel.ShowFocusBorder 		= false;
+				id_ChronicmedicationPanel.ShowFocusBorder 			= false;
+				id_HistoryPanel.ShowFocusBorder 		= false;
+				id_ImmunizationPanel.ShowFocusBorder		= false;
+			}
+			
+			private function setSelectedById(tabId:String):void
+			{
+				DeSelectAllNavButton();
+				DeSelectAllPageBtn();
+				
+				switch( tabId )
+				{
+					case "id_AllergiesBtn":
+					case "id_AlergiesPanel":
+						inActivateBorders(); 
+						currentSelectedView					= id_AlergiesPanel;
+						id_AllergiesBtn.selected			= true;
+						id_AlergiesPanel.ExpandedView 		= true;
+						id_AlergiesPanel.visible		 	= true;
+						id_AllergiesPage.selected			= true;
+						
+						
+						callLater( function():void
+						{
+							if(!id_AlergiesPanel.id_alergiesView.id_isNKDA.selected)
+								id_AlergiesPanel.id_alergiesView.id_onSet.setFocus();	
+														
+						});
+						
+						currentIndex						= 1;
+						id_AllergiesBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						id_Scroller.viewport.verticalScrollPosition = 5;
+						break;
+					
+					case "id_HistoryBtn":
+					case "id_HistoryPanel":
+						inActivateBorders();
+						currentSelectedView					= id_HistoryPanel;
+						id_HistoryBtn.selected					= true;
+						id_HistoryPanel.ExpandedView 			= true;
+						id_HistoryPanel.visible		 			= true;
+						id_HistoryPage.selected					= true;
+						
+						callLater( function():void
+						{
+						id_HistoryPanel.id_compHistory.id_HistoryView.id_GeneralSection.selectFirstTab = true;							
+						});
+						
+						currentIndex						= 2;
+						id_HistoryBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						if( checkPinAll() )
+							id_Scroller.viewport.verticalScrollPosition = id_AlergiesPanel.height;
+						else
+							id_Scroller.viewport.verticalScrollPosition = id_AlergiesPanel.height + 25; 
+						
+						break;
+					
+			
+					case "id_ChronicMedicationBtn":
+					case "id_ChronicmedicationPanel":
+						inActivateBorders();
+						currentSelectedView					= id_ChronicmedicationPanel;
+						id_ChronicMedicationBtn.selected				= true;
+						id_ChronicmedicationPanel.ExpandedView 		= true;
+						//id_PhysicalPanel.ShowFocusBorder 	= true;
+						id_ChronicmedicationPanel.visible		 	= true;
+						id_ChronicMedicationPage.selected			= true;
+						currentIndex						= 3;
+						//	id_PhysicalBorder.setStyle("borderAlpha", true);
+						id_ChronicMedicationBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						if( checkPinAll() )
+							id_Scroller.viewport.verticalScrollPosition = id_HistoryPanel.height + 45;
+						else
+							id_Scroller.viewport.verticalScrollPosition = id_AlergiesPanel.height + id_HistoryPanel.height;
+						
+						break;
+					
+					case "id_ImmunizationBtn":
+					case "id_ImmunizationPanel":
+						inActivateBorders();
+						currentSelectedView						= id_ImmunizationPanel;
+						id_ImmunizationBtn.selected				= true;
+						id_ImmunizationPanel.ExpandedView 			= true;
+						id_ImmunizationPanel.visible		 		= true;
+						id_ImmunizationPage.selected			= true;
+						
+						callLater( function():void
+						{
+						id_ImmunizationPanel.id_immunization.id_ImmunizationBodyView.id_AssociateVisitzCombo.setFocus();			
+						});
+						
+						currentIndex						= 4;
+						id_ImmunizationBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						if( checkPinAll() )
+							id_Scroller.viewport.verticalScrollPosition = id_AlergiesPanel.height + id_HistoryPanel.height + id_ChronicmedicationPanel.height;
+						else
+							id_Scroller.viewport.verticalScrollPosition = id_ChronicmedicationPanel.height + 65;
+						
+						break; 
+					
+				}
+				
+				
+			}
+			
+			public function ScrollUp():void
+			{
+				id_Scroller.viewport.verticalScrollPosition = id_Scroller.viewport.verticalScrollPosition + 15;
+				removeAllPopups();
+			}
+			
+			public function ScrollDown():void
+			{
+				id_Scroller.viewport.verticalScrollPosition = id_Scroller.viewport.verticalScrollPosition - 15;
+				removeAllPopups();
+			}
+			
+			public function collupseAllPanelexcept(current:String):void
+			{
+				if(current != id_AlergiesPanel.id)
+					id_AlergiesPanel.ExpandedView 			= false;
+				if(current != id_ChronicmedicationPanel.id)
+					id_ChronicmedicationPanel.ExpandedView 		= false;
+				if(current != id_HistoryPanel.id)
+					id_HistoryPanel.ExpandedView 		= false;
+				if(current != id_ImmunizationPanel.id)
+					id_ImmunizationPanel.ExpandedView 	= false; 
+				
+			}
+			
+			protected function QSViewStateChangeHandler(event:QSViewStateEvent):void
+			{
+
+				if(event.viewState == QSViewStateEvent.EXPANDED_VIEW && event.currentTarget != currentSelectedView)
+				{
+					collupseAllPanelexcept(event.currentTarget.id);
+					//collupseAllPanel();
+					DeSelectAllNavButton();
+					DeSelectAllPageBtn();
+					setSelectedById( event.currentTarget.id );
+				}
+					
+				else if(event.viewState ==  QSViewStateEvent.COLLAPSED_VIEW)
+				{
+					DeSelectAllNavButton();
+					DeSelectAllPageBtn();
+					currentSelectedView = null;
+				} 			
+			}
+			
+		
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="pagination" itemClick="pagination_itemClickHandler(event)"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:HGroup width="100%" horizontalAlign="center" height="40" verticalAlign="middle">
+		<s:Button skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBPMHPrevBtn" click="previous_clickHandler(event)" toolTip="Previous Section" buttonMode="true"/>
+		<s:HGroup width="100%" horizontalAlign="left">			
+			<s:ToggleButton id="id_AllergiesBtn"  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIAllergiesBtn" label="ALLERGIES"
+							 click="ShowPanel(event)" useHandCursor="true" buttonMode="true" toolTip="Allergies"
+							/>
+			<s:ToggleButton id="id_HistoryBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIComprehensiveHistoryBtn" label="COMPREHENSIVE HISTORY" 
+							 click="ShowPanel(event)" useHandCursor="true" buttonMode="true" toolTip="Comprehensive History"
+							/>
+			<s:ToggleButton id="id_ChronicMedicationBtn" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIChronicMedicationBtn"  label="CHRONIC MEDICATION"
+							 click="ShowPanel(event)" useHandCursor="true" buttonMode="true" toolTip="Chronic Medication"
+							/> 
+			<s:ToggleButton id="id_ImmunizationBtn" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIImmunizationBtn" label="IMMUNIZATION" 
+							 click="ShowPanel(event)" useHandCursor="true" buttonMode="true" toolTip="Immunization"
+							/>
+		</s:HGroup>
+		
+		<s:Button skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBPMHNextBtn" click="next_clickHandler(event)"
+				  toolTip="Next Section" buttonMode="true"/>
+	</s:HGroup>
+	
+	
+	
+	
+	<s:BorderContainer id="id_Area" width="100%" height="100%" cornerRadius="3" backgroundColor="#999AAA" 
+					   borderAlpha="0" borderColor="#999AAA" backgroundAlpha="0">
+		<s:layout>
+			<s:VerticalLayout paddingTop="0" horizontalAlign="left" gap="1"  />
+		</s:layout>
+		
+		
+		
+		<s:Scroller id="id_Scroller" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >
+			<s:Group width="100%" height="100%" >
+				<s:layout>
+					<s:VerticalLayout paddingTop="0" horizontalAlign="center" verticalAlign="top" gap="-5"  />
+				</s:layout>
+				
+				
+				<alergies:AlergiesPanel id="id_AlergiesPanel" width="100%" ExpandedView="false" includeInLayout="{id_AlergiesPanel.visible}"
+										HeadingLable="Allergies" QSViewStateChange="QSViewStateChangeHandler(event)" />
+				
+				<compHistory:HistoryPanel id="id_HistoryPanel" width="100%" ExpandedView="false" includeInLayout="{id_HistoryPanel.visible}"
+										  HeadingLable="Comprehensive History" QSViewStateChange="QSViewStateChangeHandler(event)" />
+				
+				<chronicMedication:MedicationPanel id="id_ChronicmedicationPanel" width="100%" ExpandedView="false" includeInLayout="{id_ChronicmedicationPanel.visible}"
+												   HeadingLable="Chronic Medication" QSViewStateChange="QSViewStateChangeHandler(event)" />
+				
+				<immunization:ImmunizationPanel id="id_ImmunizationPanel" width="100%" ExpandedView="false" includeInLayout="{id_ImmunizationPanel.visible}"
+												HeadingLable="Immunization" QSViewStateChange="QSViewStateChangeHandler(event)" />
+												 
+				
+				
+			</s:Group>
+		</s:Scroller>
+		
+		
+		
+		<s:HGroup width="100%" horizontalAlign="center" paddingTop="5" paddingBottom="0">
+			
+			<s:RadioButton id="id_AllergiesPage" 		groupName="pagination" value="id_AllergiesBtn" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Allergies" 		/>
+			<s:RadioButton id="id_HistoryPage" 		groupName="pagination" value="id_HistoryBtn" 	skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Comprehensive History"	/>
+			<s:RadioButton id="id_ChronicMedicationPage" 	groupName="pagination" value="id_ChronicMedicationBtn" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Chronic Medication"	/>
+			<s:RadioButton id="id_ImmunizationPage" 	groupName="pagination" value="id_ImmunizationBtn" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Immunization"	/>
+		</s:HGroup>
+	</s:BorderContainer>
+	
+	
+</s:Group>

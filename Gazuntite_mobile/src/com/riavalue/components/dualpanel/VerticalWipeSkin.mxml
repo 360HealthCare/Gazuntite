@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+    xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+    mask="{groupMask}">
+
+    <fx:Metadata>
+		[HostComponent("com.riavalue.components.dualpanel.DualPanel")]
+	</fx:Metadata>
+
+    <fx:Script>
+        <![CDATA[
+            
+        ]]>
+    </fx:Script>
+
+    <s:states>
+        <s:State name="front"/>
+        <s:State name="back"/>
+    </s:states>
+
+    <s:transitions>
+        <s:Transition toState="back"
+            autoReverse="true">
+
+            <s:Sequence>
+                <s:AddAction target="{backContainerHolder}"/>
+
+                <s:Parallel>
+                    <s:Move duration="{hostComponent.transitionDuration}"
+                        yTo="{-frontContainerHolder.height}"
+                        target="{frontContainerHolder}"/>
+
+                    <s:Move duration="200"
+                        yFrom="{frontContainerHolder.height}"
+                        target="{backContainerHolder}"/>
+                </s:Parallel>
+
+                <s:RemoveAction target="{frontContainerHolder}"/>
+            </s:Sequence>
+        </s:Transition>
+
+        <s:Transition toState="front"
+            autoReverse="true">
+
+            <s:Sequence>
+                <s:AddAction target="{frontContainerHolder}"/>
+
+                <s:Parallel>
+                    <s:Move duration="{hostComponent.transitionDuration}"
+                        yTo="{frontContainerHolder.height}"
+                        target="{backContainerHolder}"/>
+
+                    <s:Move duration="200"
+                        yFrom="{-frontContainerHolder.height}"
+                        target="{frontContainerHolder}"/>
+                </s:Parallel>
+
+                <s:RemoveAction target="{backContainerHolder}"/>
+            </s:Sequence>
+        </s:Transition>
+    </s:transitions>
+
+    <!-- mask -->
+    <s:Group id="groupMask"
+        left="0" right="0" top="0" bottom="0">
+        <s:Rect 
+            left="0" right="0" top="0" bottom="0">
+            <s:fill>
+                <s:SolidColor alpha="0"/>
+            </s:fill>
+        </s:Rect>
+    </s:Group>
+
+    <s:Group id="frontContainerHolder"
+        y.front="0" width="{hostComponent.width}" height="{hostComponent.height}"
+        includeIn="front"/>
+
+    <s:Group id="backContainerHolder"
+        y.back="0" width="{hostComponent.width}" height="{hostComponent.height}"
+        includeIn="back"/>
+
+    <s:Button id="prefsButton"
+        width="30"
+        right="0"
+        label="i"/>
+</s:Skin>

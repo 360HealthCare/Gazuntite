@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 width="100%" height="100%" xmlns:view="com.gazuntite.common.view.*" 
+		 xmlns:components1="com.gazuntite.components.*" 
+		 xmlns:view1="com.gazuntite.history.view.*" 
+		 xmlns:views="com.gazuntite.history.view.views.*" xmlns:components2="com.gazuntite.common.view.components.*" 
+		 
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.history.model.HistoryModelLocator;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model : HistoryModelLocator = HistoryModelLocator.getInstance();
+			
+			
+			private var _Note:String;
+			
+			[Bindable]
+			public function get Note():String
+			{
+				return _Note;
+			}
+			
+			public function set Note(value:String):void
+			{
+				_Note = value;
+			}
+			
+			protected function viewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				if(event.newIndex == 0)
+					dispatchEvent(new Event('ResetListButtonRefrence',true));
+				
+			}
+			
+			public function SwtichViewStackToIndex(newIndex:int):void
+			{
+				/* if(viewStack.selectedIndex == newIndex)
+				viewStack.selectedIndex = 0;
+				else */
+				viewStack.selectedIndex = newIndex;
+			}
+			
+			protected function viewStack_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function id_fileViewer_CloseDocomontViewHandler(event:Event):void
+			{
+				
+				viewStack.selectedIndex = 0;
+				/* viewStack.selectedIndex = ViewStackOldIndex;
+				
+				if(ViewStackOldIndex != 0 && ViewStackOldIndex != 1)
+				dispatchEvent(new Event("ResetDocomentListView",true)); */
+			}
+			
+			protected function id_notesaveBtn_clickHandler(event:MouseEvent):void
+			{
+				viewStack.selectedIndex = 0;
+			}
+			
+			protected function id_dictationsaveBtn_clickHandler(event:MouseEvent):void
+			{
+				viewStack.selectedIndex = 0;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Group id="id_Body" width="100%" height="100%" >
+		<components:LabelViewStack id="viewStack"  
+								   width="100%"  height="100%" 
+								   creationPolicy="all" 
+								   selectedIndex="0"
+								   change="viewStack_changeHandler(event)" 
+								   creationComplete="viewStack_creationCompleteHandler(event)" 
+								   borderVisible="false" 
+								   backgroundAlpha="0"
+								   contentBackgroundAlpha="0"
+								   visible="false"
+								   >
+			<s:ArrayList >
+				<s:Group width="100%" height="100%" >
+					<components2:PleaseSelectView label="Select any record to view detail" horizontalCenter="0" verticalCenter="0" width="100%" />
+				</s:Group>	
+				
+				<s:SkinnableContainer id="id_DocumentView" width="100%" height="100%" 
+									  skinClass="com.gazuntite.skins.controls.container.history.HistoryNotesBGSkin">
+					<s:layout>
+						<s:VerticalLayout paddingTop="4" paddingLeft="4" paddingRight="4" paddingBottom="4"/>
+					</s:layout>
+					<view:DocomentViewer id="id_fileViewer"
+										 CloseDocomontView="id_fileViewer_CloseDocomontViewHandler(event)"
+										 FilePath="http://quivus.com/Documents/Quivus/Drs%20Rentrop%20and%20Geater%20PLLC/2245%20South%20Lauderdale%20St/48389/Forms/d35160e5-2c18-19be-7b68-f751526dcf63.jpg" 
+										 filename="Patient Data"
+										 width="100%" height="100%" />
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer id="id_DictationView" 
+									  width="100%" height="100%" 
+									  skinClass="com.gazuntite.skins.controls.container.history.HistoryNotesBGSkin"
+									  >
+					<s:layout >
+						<s:VerticalLayout  paddingTop="4" paddingLeft="4" paddingRight="4" paddingBottom="4" gap="4" horizontalAlign="right" />
+					</s:layout>
+					
+					<views:HistoryDictationView width="100%" height="100%" />
+					<s:Button id="id_dictationsaveBtn" 
+							  click="id_dictationsaveBtn_clickHandler(event)" 
+							  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+							  toolTip="Save" buttonMode="true" useHandCursor="true"/>
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer id="id_NotesView" width="100%" height="100%" 
+									  skinClass="com.gazuntite.skins.controls.container.history.HistoryNotesBGSkin" >
+					<s:layout>
+						<s:VerticalLayout gap="4" horizontalAlign="right" paddingTop="4" paddingLeft="4" paddingRight="4" paddingBottom="4"/>
+					</s:layout>
+					<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.text.TextAreaBgSkin" width="100%" height="100%" >
+						<components:LabelTextArea width="100%" height="100%" 
+									text="{Note}" toolTip="Notes" 
+									borderVisible="false" prompt="Write Notes"
+									skinClass="com.gazuntite.controls.skins.LabelTextAreaRoundedSkin"
+									/>
+					</s:SkinnableContainer>
+					<s:Button id="id_notesaveBtn" 
+							  click="id_notesaveBtn_clickHandler(event)" 
+							  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+							  toolTip="Save" buttonMode="true" useHandCursor="true"
+							  />
+				</s:SkinnableContainer>
+			</s:ArrayList>
+		</components:LabelViewStack>
+	</s:Group>
+</s:Group>

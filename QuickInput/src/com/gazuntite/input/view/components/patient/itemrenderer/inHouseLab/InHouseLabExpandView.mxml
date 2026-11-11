@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+///////////////////////////////////////////////
+///    Author : TA					///
+///    Date   : 26 August, 2013				///
+///    Project: Gazuntite Online Clinic		///
+///////////////////////////////////////////////
+-->
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:component="com.gazuntite.view.patient.component.*"
+					  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin" xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.inHouseLab.InHouseLabDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	private var labelWidth:int = 100;
+			
+			private var _inHouseLabDTO:InHouseLabDTO;
+			private var labTestChanged:Boolean;
+			
+			[Bindable]
+			public function get inHouseLabDTO():InHouseLabDTO
+			{
+				return _inHouseLabDTO;
+			}
+			
+			public function set inHouseLabDTO(value:InHouseLabDTO):void
+			{
+				_inHouseLabDTO = value;
+			}
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="6" paddingRight="5" paddingTop="4" paddingBottom="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100% ">
+		<s:VGroup width="50%" verticalAlign="top">
+			<s:HGroup width="100%" verticalAlign="middle" height="21">
+				<s:BitmapImage id="img_TestName" source="{QIConstants.IMG_GREEN}"/>
+				<s:Label text="Test Name:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label text="{inHouseLabDTO.InHouseLabTestType.Name}" toolTip="{inHouseLabDTO.InHouseLabTestType.Name}" width="100%" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle" height="21">
+				<s:BitmapImage id="img_IcdCode" source="{QIConstants.IMG_GREEN}"/>
+				<s:Label text="CPT Code:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label text="{inHouseLabDTO.InHouseLabTestType.Code}" toolTip="{inHouseLabDTO.InHouseLabTestType.Code}" width="100%" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"/>
+			</s:HGroup>
+		</s:VGroup>	
+		<s:VGroup width="50%" verticalAlign="top">
+			<s:HGroup width="100%" verticalAlign="middle" height="21">
+				<s:Label text="Result:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label width="100%" text="{inHouseLabDTO.Result}" toolTip="{inHouseLabDTO.Result}"  maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle" height="21">
+				<s:Label text="Normal Range:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label text="{inHouseLabDTO.InHouseLabTestType.NormalRange}" toolTip="{inHouseLabDTO.InHouseLabTestType.NormalRange}"  maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			</s:HGroup>
+		</s:VGroup>	
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingRight="0" paddingLeft="15">
+		<s:Label text="Notes:"	 styleName="patientFormLabel" />
+		<s:Label text="{inHouseLabDTO.Note}" toolTip="{inHouseLabDTO.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (inHouseLabDTO.DictationID &amp;&amp; inHouseLabDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{inHouseLabDTO.Note}" note="@{inHouseLabDTO.Note}"	isSaveButtonVisible="false"
+										 DictationID="{inHouseLabDTO.DictationID}" IsDictaionEditMode="{false}"/>
+	
+</s:SkinnableContainer>

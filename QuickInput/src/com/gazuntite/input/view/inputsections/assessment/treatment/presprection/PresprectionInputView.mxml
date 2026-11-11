@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+					  creationComplete="cc(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.common.event.MarkValidDataExistsEvent;
+			import com.gazuntite.common.view.events.MarkVisitValidEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.view.inputsections.history.chronic.PatientInputMedicationPrescriptionViewModel;
+			import com.gazuntite.input.view.viewmodel.PatientInputEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			private var viewModel:PatientInputMedicationPrescriptionViewModel = PatientInputMedicationPrescriptionViewModel.getInstance();
+			
+			protected function cc(event:FlexEvent):void
+			{
+				addEventListener("LoadPatientMedications",LoadPatientMedications);
+				addEventListener(MarkVisitValidEvent.MarkVisitValid,MarkVisitValid);
+			}
+			
+			private function MarkVisitValid(e:MarkVisitValidEvent):void
+			{
+				/* var mvdEv:MarkValidDataExistsEvent = new MarkValidDataExistsEvent();
+				
+				mvdEv.visitID = e.visitID;
+				mvdEv.visitDate = e.visitDate.toString();
+				
+				mvdEv.functionName = onSuccessfullVisitSave;
+				
+				CairngormEventDispatcher.getInstance().dispatchEvent(mvdEv); */
+			}
+			
+			public function onSuccessfullVisitSave():void
+			{
+				var ev:PatientInputEvent = new PatientInputEvent(PatientInputEvent.REFRESH_PATIENT_ENCOUNTER_LIST, true);
+				dispatchEvent(ev);
+			}
+			
+			private function LoadPatientMedications(event:Event):void
+			{
+				viewModel.loadMedicationPrescription();
+				loadMedicationPrescription();
+			}
+			
+			public function loadMedicationPrescription():void
+			{
+				var securityHeaderXML:XML;
+				securityHeaderXML = <Header />;					
+				securityHeaderXML.@EUserName = "TESTUSER";
+				securityHeaderXML.@EPassword = "TESTPASS";
+				securityHeaderXML.@ClinicID	= "sad";
+				
+				var loadPatientPrescriptionEvent:LoadPatientMedEvent = new LoadPatientMedEvent(model.VisitID.toString(), model.patientDTO.GAXENID,7, onPrescriptionLoaded);				 // 7 is temprory
+				loadPatientPrescriptionEvent.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(loadPatientPrescriptionEvent);
+			}
+			
+			public function onPrescriptionLoaded(patientMedAC:ArrayCollection, patientChronicMedAC:ArrayCollection, patientMedAC_inactive:ArrayCollection, patientChronicMedAC_inactive:ArrayCollection):void
+			{
+				model.CurrentprescriptionDToList = patientMedAC;	//for QI Prescription
+			}
+			
+			public function ClearPresprectionFormView():void
+			{
+				if(id_presprectionFormView && id_presprectionFormView.id_newRxView && id_presprectionFormView.id_newRxView.id_InputView)
+					id_presprectionFormView.id_newRxView.id_InputView.OpenForQuickInputEpreprection(model.VisitID.toString(),model.VisitDate.toString());
+				model.prescriptionDToList.removeAll();
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.prescriptionDToList && model.prescriptionDToList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.prescriptionDToList = UtilityFunctions.SortArrayCollection(model.prescriptionDToList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.prescriptionDToList = UtilityFunctions.SortArrayCollection(model.prescriptionDToList,'drugName',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+				
+			}
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new SelectSection(SelectSection.SelectInnerTabEvent,'Procedure'));
+			}
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.prescriptionDToList" destination="DataList_changeHandler" />
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!--	<s:Scroller width="100%" height="100%" 
+	horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+	<s:Group width="100%" height="100%">
+	<s:layout>
+	<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<newrx:NewRXPanel width="100%" height="215"  visitID="{model.VisitID}" visitDate="{model.VisitDate}" selectedPatient="{model.patientDTO}" openforInputEpreprection="true"/>
+	
+	</s:Group>
+	</s:Scroller>-->
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0"  horizontalAlign="right"/>
+			</s:layout>
+			
+			<newrx:NewRXPanel id="id_presprectionFormView"
+							  width="100%" height="215"  
+							  visitID="{model.VisitID}" 
+							  visitDate="{model.VisitDate}" 
+							  selectedPatient="{model.patientDTO}"
+							  openforInputPrescription="true" 
+							  openforInputChronic="false" 
+							  IsforInput="true"
+							  />
+			
+			<s:Button id="next" toolTip="Next" buttonMode="true"  useHandCursor="true"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+					  label="Next"
+					  click="next_clickHandler(event)"/>
+			<s:Spacer height="4" />
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+				<s:DropDownList id="uiSortDropDown"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+								selectedIndex="0"
+								buttonMode="true" toolTip="Sort List"
+								change="SortDataList()"
+								>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Medication Name" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%" />
+			</s:SkinnableContainer>
+			
+			<s:List id="uiInboxList"
+					width="100%" allowMultipleSelection="true"
+					height="100%"
+					minHeight="50"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false"
+					dataProvider="{model.prescriptionDToList}"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.medication.CMedicationListItemRenderer"/>
+			
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

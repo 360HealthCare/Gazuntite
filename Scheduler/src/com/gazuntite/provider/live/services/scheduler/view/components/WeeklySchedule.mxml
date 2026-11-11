@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:itemrenderer="com.gazuntite.provider.live.services.scheduler.view.itemrenderer.*"
+		 initialize="init()" xmlns:components="com.gazuntite.provider.live.services.scheduler.view.components.*">
+	<s:layout>
+		<s:VerticalLayout gap="2"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			private var date:Date;
+			[Bindable]
+			private var arrDayinfo:ArrayCollection;
+			//*********** initlize method *******************************
+			private function init():void
+			{
+				date = new Date();
+				arrDayinfo = new ArrayCollection();
+				
+				getWorkingDays();
+				
+			}
+			//************ populate appointments in all week days grids***********************************
+			public function populateAppointments():void
+			{
+				clearOldData();
+				
+				for(var j:uint =0; j < model.ScheduledAppointmentList.length; j++)
+				{
+					var appDate:Date;
+					var strDate:String = model.ScheduledAppointmentList[j].Date;
+					appDate = new Date(strDate);
+					
+					if(df.format(appDate) == arrDayinfo.getItemAt(0)){
+						day1Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					}
+					if(df.format(appDate) == arrDayinfo.getItemAt(1)){
+						day2Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					}
+					if(df.format(appDate) == arrDayinfo.getItemAt(2)){
+						day3Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					}
+					if(df.format(appDate) == arrDayinfo.getItemAt(3)){
+						day4Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					}
+					if(df.format(appDate) == arrDayinfo.getItemAt(4)){
+						day5Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					} 
+					if(df.format(appDate) == arrDayinfo.getItemAt(5)){
+						day6Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					} 
+					if(df.format(appDate) == arrDayinfo.getItemAt(6)){
+						day7Grid.arrAppointments.addItem(model.ScheduledAppointmentList.getItemAt(j));
+					} 
+				}
+				setVisibilityOfGrids();
+			}
+			//*************** Decide about the visibilty of days Grid ****************************************
+			private function setVisibilityOfGrids():void
+			{
+				day1Grid.setVisibiltyGrid_handler();
+				day2Grid.setVisibiltyGrid_handler();
+				day3Grid.setVisibiltyGrid_handler();
+				day4Grid.setVisibiltyGrid_handler();
+				day5Grid.setVisibiltyGrid_handler();
+				day6Grid.setVisibiltyGrid_handler();
+				day7Grid.setVisibiltyGrid_handler();
+			}
+			// ************************ This Mthod return only Working week days ******************************
+			private function getWorkingDays():void
+			{
+				/**
+				 * Now show all week days
+				if(date.getDay() == 6 )
+				{
+					date.setDate(date.getDate()+ 1); //If the day is Saturday Skip that Day..as per req
+				}
+				if(date.getDay() == 0)
+				{
+					date.setDate(date.getDate()+ 1); //If the day is Sunday Skip that Day....as per req
+				}
+				**/
+			//	for(var i:uint =1; i<6; i++)
+				for(var i:uint =1; i<8; i++)
+				{
+					//trace('1',df.format(date));
+					arrDayinfo.addItem(df.format(date));
+					date.setDate(date.getDate()+ 1);
+					/**
+					 * Now show all week days
+					if(date.getDay() == 6 )
+					{
+						date.setDate(date.getDate()+ 1);
+					}
+					
+					if(date.getDay() == 0)
+					{
+						date.setDate(date.getDate()+ 1);
+					}
+					 **/
+				}
+			}
+			//**********************  Clear All Grids Row and DataProviders ******************************************** 
+			public function clearOldData():void
+			{
+				if(day1Grid.arrAppointments.length)
+					day1Grid.arrAppointments.removeAll();
+				
+				if(day2Grid.arrAppointments.length)
+					day2Grid.arrAppointments.removeAll();
+				
+				if(day3Grid.arrAppointments.length)
+					day3Grid.arrAppointments.removeAll();
+				
+				if(day4Grid.arrAppointments.length)
+					day4Grid.arrAppointments.removeAll();
+				
+				if(day5Grid.arrAppointments.length)
+					day5Grid.arrAppointments.removeAll();
+				
+				if(day6Grid.arrAppointments.length)
+					day6Grid.arrAppointments.removeAll();
+				
+				if(day7Grid.arrAppointments.length)
+					day6Grid.arrAppointments.removeAll();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="EEEE - MMMM DD, YYYY" />
+		<mx:DateFormatter id="df2" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	<components:ScheduleGrid id="day1Grid" dayInfo="{arrDayinfo.getItemAt(0)}" paddingLeft="5"  paddingRight="1" />
+	<components:ScheduleGrid id="day2Grid" dayInfo="{arrDayinfo.getItemAt(1)}" paddingLeft="5"  paddingRight="1"  />
+	<components:ScheduleGrid id="day3Grid" dayInfo="{arrDayinfo.getItemAt(2)}" paddingLeft="5"  paddingRight="1" />
+	<components:ScheduleGrid id="day4Grid" dayInfo="{arrDayinfo.getItemAt(3)}" paddingLeft="5"  paddingRight="1" />
+	<components:ScheduleGrid id="day5Grid" dayInfo="{arrDayinfo.getItemAt(4)}" paddingLeft="5"  paddingRight="1" />	
+	<components:ScheduleGrid id="day6Grid" dayInfo="{arrDayinfo.getItemAt(5)}" paddingLeft="5"  paddingRight="1" />	
+	<components:ScheduleGrid id="day7Grid" dayInfo="{arrDayinfo.getItemAt(6)}" paddingLeft="5"  paddingRight="1" />	
+</s:Group>

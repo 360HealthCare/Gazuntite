@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:dictation="com.gazuntite.components.dictation.*"
+					  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.followUp.FollowUpDTO;
+			import com.gazuntite.common.dto.assessment.recommendation.RecommendationDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.FootButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			private var _followUpDTO:FollowUpDTO;
+
+			[Bindable]
+			public function get followUpDTO():FollowUpDTO
+			{
+				return _followUpDTO;
+			}
+
+			public function set followUpDTO(value:FollowUpDTO):void
+			{
+				_followUpDTO = value;
+			}
+						
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" >
+		<s:VGroup width="25%" gap="3" verticalAlign="middle" horizontalAlign="left">
+			<s:Label text="Type:" width="100%" styleName="patientFormLabel" height="18" />
+			<s:Label text="Nature:" width="100%" styleName="patientFormLabel"  height="18" 
+					 visible="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 includeInLayout="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 />
+			<s:Label text="Method:" width="100%" styleName="patientFormLabel"  height="18" 
+					 visible="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 includeInLayout="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"/>
+			<s:CheckBox id="id_PRN"
+						skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" 
+						buttonMode="true" label="PRN" selected="{followUpDTO.IsPRN}" enabled="false" />
+			<s:Label text="Frequency Type:" width="100%" styleName="patientFormLabel" visible="{!followUpDTO.IsPRN}" includeInLayout="{!followUpDTO.IsPRN}" height="18"  />
+			<s:Label text="For:" width="100%" styleName="patientFormLabel" height="18"  
+					 visible="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" includeInLayout="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" />
+		</s:VGroup>
+		
+		<s:VGroup width="25%" gap="3" verticalAlign="middle" horizontalAlign="left">
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.IsOnCompletion? 'Upon Completion of':'Date'}" 
+					 maxDisplayedLines="1" showTruncationTip="true"  height="18" />
+			<s:Label width="100%" styleName="patientFormValue"  height="18" 
+					 text="{followUpDTO.IsAcute? 'Acute' : (followUpDTO.IsChronic? 'Chronic' : 'Preventive') }" 
+					 visible="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 includeInLayout="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.FollowUpMethodType.Name}"  height="18" 
+					 visible="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 includeInLayout="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label text="" width="100%" styleName="patientFormLabel" height="18" />	
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.IsAgeSelected? 'Age':'Duration'}" 
+					 visible="{!followUpDTO.IsPRN}" height="18" 
+					 includeInLayout="{!followUpDTO.IsPRN}"
+					 maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.ForDurationValue + ' ' + followUpDTO.ForInstructionDurationTypeDTO.Name}" maxDisplayedLines="1" showTruncationTip="true"
+					 visible="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" 
+					 includeInLayout="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" height="18" />
+		</s:VGroup>
+		
+		<s:VGroup width="25%" gap="3" verticalAlign="middle" horizontalAlign="left">
+			<s:Label text="{followUpDTO.IsByDate? 'Date' : (followUpDTO.IsDrugselected ? 'Drug' : 'Lab Test') }:"  
+					 width="100%" styleName="patientFormLabel" height="18" />
+			<s:Label text="Fitness Directions:" width="100%" styleName="patientFormLabel"  height="18" 
+					 visible="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 includeInLayout="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"/>
+			<s:Label text="" width="100%" styleName="patientFormLabel" height="18"
+					 visible="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 includeInLayout="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 />
+			<s:Label text="" width="100%" styleName="patientFormLabel" height="18" />
+			<s:Label text="{followUpDTO.AgeType.Name}:" width="125" styleName="patientFormLabel"  height="18" 
+					 visible="{followUpDTO.IsAgeSelected &amp;&amp; !followUpDTO.IsPRN }" includeInLayout="{followUpDTO.IsAgeSelected &amp;&amp; !followUpDTO.IsPRN}" />
+			<s:Label text="After Every:" width="125" styleName="patientFormLabel"  height="18" 
+					 visible="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" includeInLayout="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" />
+		</s:VGroup>
+		
+		<s:VGroup width="25%" gap="3" verticalAlign="middle" horizontalAlign="left">
+			<s:Label width="100%" styleName="patientFormValue"  maxDisplayedLines="1" showTruncationTip="true"  height="18" 
+					 text="{followUpDTO.IsByDate? followUpDTO.FollowUpDate:(followUpDTO.IsDrugselected ? followUpDTO.Drug.Name : followUpDTO.LabTest.Name)}"/>
+			<s:Label text="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive? followUpDTO.ServiceTypeDTO.followUpService:''}" 
+					 width="100%" styleName="patientFormValue"  visible="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}"
+					 includeInLayout="{followUpDTO.IsAcute || followUpDTO.IsChronic || followUpDTO.IsPreventive}" maxDisplayedLines="1" showTruncationTip="true"
+					 height="18" />
+			<s:Label width="100%" styleName="patientFormValue" text="" maxDisplayedLines="1" 
+					 showTruncationTip="true" height="18"
+					 visible="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 includeInLayout="{followUpDTO.FollowUpMethodType &amp;&amp;  UtilityFunctions.TrimString(followUpDTO.FollowUpMethodType.Name).length > 0 }"
+					 />
+			<s:Label text="" width="100%" styleName="patientFormLabel" height="18" />
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.AgeValueType.Name}" maxDisplayedLines="1" showTruncationTip="true"  height="18" 
+					 visible="{followUpDTO.IsAgeSelected &amp;&amp; !followUpDTO.IsPRN}" includeInLayout="{followUpDTO.IsAgeSelected &amp;&amp; !followUpDTO.IsPRN}" />
+			<s:Label width="100%" styleName="patientFormValue" text="{followUpDTO.AfterDurationValue + ' ' + followUpDTO.AfterInstructionDurationTypeDTO.Name}" maxDisplayedLines="1" showTruncationTip="true" 
+					 visible="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" 
+					 includeInLayout="{followUpDTO.IsDurationSelected &amp;&amp; !followUpDTO.IsPRN}" height="18"  />
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingRight="0" paddingLeft="1" >	
+		<s:Label text="Notes:"	 styleName="patientFormLabel" width="55"/>
+		<s:Label text="{followUpDTO.Note}" toolTip="{followUpDTO.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (followUpDTO.DictationID &amp;&amp; followUpDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{followUpDTO.Note}" note="@{followUpDTO.Note}" isSaveButtonVisible="false"
+										 DictationID="{followUpDTO.DictationID}" IsDictaionEditMode="false"/>
+</s:SkinnableContainer>

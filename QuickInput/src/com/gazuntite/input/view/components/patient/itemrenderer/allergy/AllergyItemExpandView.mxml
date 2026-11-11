@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+///////////////////////////////////////////////
+///    Author : TA					///
+///    Date   : 25 July, 2013				///
+///    Project: Gazuntite Online Clinic		///
+///////////////////////////////////////////////
+-->
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:components="com.gazuntite.controls.extended.components.*" xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.Allergy.AllergyDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var labelWidth:Number = 55;
+			[Bindable]	public var dto:AllergyDTO;
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" gap="10" >
+		<s:VGroup width="50%" gap="6">
+			<s:HGroup id="id_top" width="100%" verticalAlign="middle">
+				<s:BitmapImage id="id_icnOnsetGreen"
+							   width="{uiCheckImg.width}"
+							   source="{dto.OnSet.length ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"
+							   />
+				<s:Label text="OnSet:"	 styleName="patientFormLabel"/>
+				<s:Spacer width="10" />
+				<s:Label text="{UtilityFunctions.FormatDate(dto.OnSet, 'MM/DD/YYYY')}" toolTip="{UtilityFunctions.FormatDate(dto.OnSet, 'MM/DD/YYYY')}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" />
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:BitmapImage id="uiCheckImg"
+							   source="{dto.AllergyName.length ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"
+							   />
+				<s:Label text="Allergy:" width="{labelWidth}" styleName="patientFormLabel" />
+				<s:Label text="{dto.AllergyName}" toolTip="{dto.AllergyName}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true"/>
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:VGroup width="50%" gap="6">
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Reaction:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label text="{dto.Reaction}" toolTip="{dto.Reaction}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="Active:" width="{labelWidth}" styleName="patientFormLabel"/>
+				<s:Label text="{dto.isActive? 'Yes':'No'}" toolTip="{dto.isActive ? 'Yes':'No'}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+	</s:HGroup>
+	<s:HGroup width="100%" paddingRight="0" paddingLeft="15" paddingBottom="0" paddingTop="0">
+		<s:Label text="Notes:"	 styleName="patientFormLabel" width="{labelWidth}"/>
+		<s:Label text="{dto.Note}" toolTip="{dto.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (dto.DictationID &amp;&amp; dto.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{dto.Note}" note="@{dto.Note}" isSaveButtonVisible="false"
+										 DictationID="{dto.DictationID}" IsDictaionEditMode="{false}"/>
+	
+</s:SkinnableContainer>

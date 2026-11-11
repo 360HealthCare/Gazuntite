@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:view="com.gazuntite.provider.live.services.billing.superBill.view.*" 
+		 xmlns:diagnosis="com.gazuntite.provider.live.services.billing.superBill.view.diagnosis.*" 
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.ICDCodeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillDiagnosisInfoDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			import mx.utils.object_proxy;
+			
+			[Bindable]
+			private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			private var _selectedDiagnosis:ICDCodeDTO;
+			
+			private var _showInputView:Boolean = false;
+			private var _isInItemRenderer:Boolean = false;
+			
+			[Bindable]
+			public function get isInItemRenderer():Boolean
+			{
+				return _isInItemRenderer;
+			}
+			
+			public function set isInItemRenderer(value:Boolean):void
+			{
+				_isInItemRenderer = value;
+			}
+			
+			[Bindable]
+			public function get showInputView():Boolean
+			{
+				return _showInputView;
+			}
+			
+			public function set showInputView(value:Boolean):void
+			{
+				_showInputView = value;
+			}
+			
+			[Bindable]
+			public function get selectedDiagnosis():ICDCodeDTO
+			{
+				return _selectedDiagnosis;
+			}
+			
+			public function set selectedDiagnosis(value:ICDCodeDTO):void
+			{
+				_selectedDiagnosis = value;
+			}
+			
+			private var _diagnosisDTO:SuperBillDiagnosisInfoDTO = null;
+			
+			[Bindable]
+			public function get diagnosisDTO():SuperBillDiagnosisInfoDTO
+			{
+				return _diagnosisDTO;
+			}
+			
+			public function set diagnosisDTO(value:SuperBillDiagnosisInfoDTO):void
+			{
+				_diagnosisDTO = value;
+			}
+			
+			private function saveClickHandler():void
+			{
+				//if (isInvalid())
+				//return;
+				
+				if(diagnosisDTO == null)
+				{
+					//save new diagnosisDTO
+					diagnosisDTO = new SuperBillDiagnosisInfoDTO();
+					
+					diagnosisDTO.ICDCodeName = selectedDiagnosis.IcdCodeName;
+					diagnosisDTO.ICDCodeID = String(selectedDiagnosis.ID);
+					//diagnosisDTO.Order = id_order.text;
+					diagnosisDTO.IncludeInBilling = "true";
+					diagnosisDTO.IsCreatedFromSuperBill = "true";
+					
+					diagnosisDTO.ModifiedBy = "0";
+					diagnosisDTO.CreatedBy = String(model.LoggedInUserId);
+					diagnosisDTO.ICDCodeDescription = selectedDiagnosis.IcdCodeDescription;
+					
+					model.diagnosisDTOList.addItem(diagnosisDTO);
+					
+					cancel_clickHandler(null);
+				}
+				else
+				{
+					diagnosisDTO.ICDCodeName = selectedDiagnosis.IcdCodeName;
+					diagnosisDTO.ICDCodeID = String(selectedDiagnosis.ID);
+				}
+			}
+			
+			protected function showInputViewButton_clickHandler(event:MouseEvent):void
+			{
+				showInputView = ! showInputView;
+			}
+			
+			protected function cancel_clickHandler(event:MouseEvent):void
+			{
+				selectedDiagnosis = null;
+				showInputView = false;
+				reset();
+			}
+			
+			private function reset():void
+			{
+				id_order.text = "1";
+				
+				selectedDiagnosis = null;
+				diagnosisDTO = null;
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.superBill.SummaryHeaderSkin" 
+						  height="20" buttonMode="true" useHandCursor="true" visible="{!isInItemRenderer}" includeInLayout="{!isInItemRenderer}" >
+		<s:RichText left="5" color="#FFFFFF" fontFamily="CalibriCFFBold" fontSize="15"
+					tabStops="S0 S50" text="DIAGNOSIS" verticalCenter="0"/>
+		
+		<s:ToggleButton right="5" click="showInputViewButton_clickHandler(event)" toolTip="{showInputView ? 'Collapse':'Add Diagnosis'}"
+						color="#333333" fontFamily="CalibriCFF" fontSize="18" verticalCenter="0" visible="{model.isFromPendingBills}" includeInLayout="{model.isFromPendingBills}"
+						skinClass="com.gazuntite.skins.superBill.PlusExpandTBSkin" />
+	</s:SkinnableContainer>
+	
+	<s:VGroup width="100%" includeInLayout="{showInputView}" visible="{showInputView}" paddingTop="3">			
+		<s:HGroup width="100%" verticalAlign="middle">
+			<diagnosis:DiagnosisSelectionView id="id_DiagnosisSelectionView" selectedDiagnosis="@{selectedDiagnosis}" width="100%" isInputView="{showInputView}"   />
+			<s:TextInput id="id_order" 
+						 prompt="Order" visible="{selectedDiagnosis}"  
+									   toolTip="{'Diagnosis Order: ' + id_order.text }" text="1" restrict="[0-9]" 
+									   width="50" height="21" skinClass="com.gazuntite.skins.IPEControls.IPETextInputSkin"/>				
+			
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" visible="{selectedDiagnosis}" includeInLayout="{selectedDiagnosis}">					
+			<s:Button id="save" 
+					  toolTip="{isInItemRenderer ? 'Save' : 'Add'}" 
+					  buttonMode="true" useHandCursor="true"
+					  label="{isInItemRenderer ? 'Save' : 'Add'}"
+					  click="saveClickHandler()" enabled="{model.isFromPendingBills}"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"/>
+			<s:Button id="cancel" includeInLayout="{!isInItemRenderer}" visible="{!isInItemRenderer}"
+					  toolTip="Cancel" 
+					  buttonMode="true" useHandCursor="true"
+					  label="Cancel" click="cancel_clickHandler(event)"
+					  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"
+					  />					
+		</s:HGroup>			
+	</s:VGroup>
+	
+</s:Group>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   borderVisible="false" backgroundColor="0xE2E6E9">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:HGroup width="100%">
+			<s:Label text="Disposition:" width="15%" fontFamily="CalibriCFFBold" fontSize="13"/>
+			<s:RichText text="RTC in/on 1 month+/- 2days" width="85%" fontFamily="CalibriCFF" fontSize="13"/>
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:Label text="Instructions:" width="15%" fontFamily="CalibriCFFBold" fontSize="13"/>
+			<s:RichText text="Lorem ipsum dolor sit amet, consectetur adipisicin..." width="85%" fontFamily="CalibriCFF" fontSize="13" />
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:Label text="Paln:" width="15%" fontFamily="CalibriCFFBold" fontSize="13"/>
+			<s:RichText text="Lorem ipsum dolor sit amet, consectetur adipisicin..." width="85%" fontFamily="CalibriCFF" fontSize="13" />
+		</s:HGroup>
+	</s:VGroup>
+</s:BorderContainer>

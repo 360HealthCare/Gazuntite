@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		width="55" height="23">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<fx:DesignLayer d:id="2" d:userLabel="Layer 1">
+		<s:Path x="3.476" y="0.036" width="48" height="20"
+				data="M 2.16 0 L 37.44 0 C 38.628 0 39.6 0.972 39.6 2.16 L 39.6 14.4 L 0 14.4 L 0 2.16 C 0 0.972 0.972 0 2.16 0 Z"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false">
+			<s:fill>
+				<s:LinearGradient rotation="90"
+								  rotation.down="270"
+								  rotation.over="270">
+					<s:GradientEntry alpha="1.0" color="#969696" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#7F7F7F" ratio="0.44313725490196076"/>
+					<s:GradientEntry alpha="1.0" color="#737373" ratio="0.4470588235294118"/>
+					<s:GradientEntry alpha="1.0" color="#737373" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2"
+									color="#000000" distance="1" hideObject="false" inner="true"
+									knockout="false" quality="3" strength="1"/>
+			</s:filters>
+		</s:Path>
+		<s:Path x="-0.187" y="0.036" width="55" height="23"
+				data="M 5.76 0 L 41.04 0 C 42.229 0 42.937 1.002 43.2 2.16 L 46.8 18 L 0 18 L 3.601 2.16 C 3.863 1.001 4.572 0 5.76 0 Z"
+				visible.disabled="false"
+				visible.disabledAndSelected="false"
+				visible.down="false"
+				visible.over="false"
+				visible.up="false">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#1A1A1A" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#212121" ratio="0.5215686274509804"/>
+					<s:GradientEntry alpha="1.0" color="#040404" ratio="0.5254901960784314"/>
+					<s:GradientEntry alpha="1.0" color="#141414" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Path>
+		<s:Path x="23.35" y="2.65" width="7.35" height="13.041"
+				data="M 3.797 0.061 L 0 7.442 L 3.74 7.442 L 1.41 11.794 L 4.229 11.794 L 1.755 16.041 L 9.292 9.724 L 6.013 9.724 L 9.35 5.422 L 6.127 5.422 L 9.263 0 L 3.797 0.061 Z"
+				y.down="4.65"
+				visible.downAndSelected="false"
+				y.over="3.65"
+				visible.overAndSelected="false"
+				y.up="3.65"
+				visible.upAndSelected="false">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0.7568627450980392"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Path>
+		<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" x="22.35" y="2.65" width="10.35" height="18.041"
+				data="M 3.797 0.061 L 0 7.442 L 3.74 7.442 L 1.41 11.794 L 4.229 11.794 L 1.755 16.041 L 9.292 9.724 L 6.013 9.724 L 9.35 5.422 L 6.127 5.422 L 9.263 0 L 3.797 0.061 Z">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0.7568627450980392"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Path>
+	</fx:DesignLayer>
+</s:Skin>

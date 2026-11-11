@@ -1,0 +1,1000 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 currentState="noData" 		 
+		 xmlns:component="com.gazuntite.view.patient.component.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*" 
+		 xmlns:skins="com.gazuntite.input.view.skins.*" 
+		 xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*"
+		 creationComplete="CC(event)" xmlns:components1="com.gazuntite.common.view.components.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryMediumTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryUsageAmountTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.CommonAddictionDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientMartialStatusDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientSocialHistoryDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientSocialHistoryOtherDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientWorkStatusDTO;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.components.kapit.autoComplete.AutoComplete;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.event.visit.pmh.comphistory.LoadSocialHistoryByPatientIdEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.ManagePatientSocialHistoryEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.history.comprehensive.PatientInputHistoryComprehensiveViewModel;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.CheckBox;
+			import spark.components.DropDownList;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			private var viewModel:PatientInputHistoryComprehensiveViewModel = PatientInputHistoryComprehensiveViewModel.getInstance();			
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel() ;
+			
+			private var isToMoveNext:Boolean = false;
+			
+			[Bindable]
+			private var tobaccoStatusTypes:ArrayCollection = new ArrayCollection([
+				{ID:'1', Name: 'Current every day smoker'},
+				{ID:'2', Name: 'Current some day smoker'},
+				{ID:'3', Name: 'Former smoker'},
+				{ID:'4', Name: 'Never smoker'},
+				{ID:'5', Name: 'Smoker, current status unknown'},
+				{ID:'6', Name: 'Unknown if ever smoked'},
+				{ID:'7', Name: 'Heavy tobacco smoker'},
+				{ID:'8', Name: 'Light tobacco smoker'}
+			]);
+			[Bindable]
+			private var alcoholStatusTypes:ArrayCollection = new ArrayCollection([
+				{ID:'1', Name: 'Current Alcohol intaker'},
+				{ID:'2', Name: 'Formar Alcohol intaker'}
+			]);
+			[Bindable]
+			private var drugStatusTypes:ArrayCollection = new ArrayCollection([
+				{ID:'1', Name: 'Current Drug user'},
+				{ID:'2', Name: 'Formar Drug user'}
+			]);
+			
+			private var _tobaccoAddictionDTO:CommonAddictionDTO = new CommonAddictionDTO();
+			
+			[Bindable]
+			public function get tobaccoAddictionDTO():CommonAddictionDTO
+			{
+				return _tobaccoAddictionDTO;
+			}
+			
+			public function set tobaccoAddictionDTO(value:CommonAddictionDTO):void
+			{
+				_tobaccoAddictionDTO = value;
+			}
+			
+			[Bindable]	public var alcoholAddictionDTO:CommonAddictionDTO = new CommonAddictionDTO();
+			[Bindable]	public var drugsAddictionDTO:CommonAddictionDTO = new CommonAddictionDTO();
+			
+			[Bindable]	public var workStatusDTO:PatientWorkStatusDTO = new PatientWorkStatusDTO();
+			private var _maritalStatusDTO:PatientMartialStatusDTO = new PatientMartialStatusDTO();
+			
+			[Bindable]
+			public function get maritalStatusDTO():PatientMartialStatusDTO
+			{
+				return _maritalStatusDTO;
+			}
+			
+			public function set maritalStatusDTO(value:PatientMartialStatusDTO):void
+			{
+				_maritalStatusDTO = value;
+			}
+			
+			[Bindable]	public var otherDTO:PatientSocialHistoryOtherDTO = new PatientSocialHistoryOtherDTO();
+			
+			[Bindable]	private var tobaccoType:ArrayCollection	 = new ArrayCollection();
+			[Bindable]  private var alcoholType:ArrayCollection	 = new ArrayCollection();
+			[Bindable]  private var drugsType:ArrayCollection	 = new ArrayCollection();
+			[Bindable]	private var tobaccoAmount:ArrayCollection	 = new ArrayCollection();
+			[Bindable]	private var alcoholAmount:ArrayCollection	 = new ArrayCollection();
+			[Bindable]	private var drugsAmount:ArrayCollection	 = new ArrayCollection();
+			
+			private var _currentCategory:String = "";
+			
+			public function get currentCategory():String
+			{
+				return _currentCategory;
+			}
+			
+			public function set currentCategory(value:String):void
+			{
+				_currentCategory = value;
+				
+				switch(value)
+				{
+					case QIConstants.SOCIAL_TOBACCO_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{							
+							currentState = 'formTB';
+						}
+						
+						break;
+					}
+					case QIConstants.SOCIAL_ALCOHOL_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{
+							currentState = 'formAL';
+						}
+						
+						break;
+					}
+					case QIConstants.SOCIAL_DRUGS_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{
+							currentState	= "formDR";	
+						}
+						
+						break;
+					}
+					case QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{
+							currentState = "formWS";
+						}
+						
+						break;
+					}
+					case QIConstants.SOCIAL_OTHER_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{
+							currentState = "formOT";
+						}
+						
+						break;
+					}
+					case QIConstants.SOCIAL_MARITAL_STATUS_MODULE_NAME:
+					{
+						if(setTabState == 1)
+						{							
+							currentState = "marital";
+						}
+						
+						break;
+					}
+				}
+			}
+			
+			[Bindable]
+			public var isTabSelected:Boolean = false;
+			
+			private var _setState:int;
+			
+			public function get setTabState():int
+			{
+				return _setState;
+			}
+			
+			public function set setTabState(value:int):void
+			{
+				_setState = value;
+				
+				model.isDirtyCompSocialView = true;
+				
+				switch(value)
+				{
+					/*CASE 1:
+					{
+					//CURRENTSTATE = "FORM";
+					BREAK;
+					} */
+					case 2:
+					{
+						currentState = "none";
+						break;
+					}					
+					case 0:
+					{
+						model.isDirtyCompSocialView = false;
+						currentState = "default";
+						break;
+					}
+				}
+			}
+			
+			public function selectType( typeId:int ):void
+			{
+				if( null == model.historyMediumTypesDTOList ) return;
+				
+				if( (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME && tobaccoType.length > 0) ||
+					(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME && alcoholType.length > 0) ||
+					(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME && drugsType.length > 0 )
+				) return;
+				
+				for(var i:int = 0; i < model.historyMediumTypesDTOList.length; i ++ )
+				{
+					var dto:SocialHistoryMediumTypeDTO= model.historyMediumTypesDTOList.getItemAt( i ) as SocialHistoryMediumTypeDTO;
+					if( dto.Addication == typeId )
+					{
+						if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+							tobaccoType.addItem(dto);
+						else if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+							alcoholType.addItem(dto);
+						else if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+							drugsType.addItem(dto);
+					}
+				}   
+			}
+			
+			public function selectUsageAmount( UsageAmountId:int ):void
+			{
+				if( null == model.usageAmountTypeDTOList ) return;
+				
+				if( (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME && tobaccoAmount.length > 0) ||
+					(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME && alcoholAmount.length > 0) ||
+					(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME && drugsAmount.length > 0 )
+				) return;
+				
+				
+				for(var i:int = 0; i < model.usageAmountTypeDTOList.length; i ++ )
+				{
+					var dto:SocialHistoryUsageAmountTypeDTO = model.usageAmountTypeDTOList.getItemAt( i ) as SocialHistoryUsageAmountTypeDTO;
+					if( dto.AddictionID == UsageAmountId )
+					{
+						if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+							tobaccoAmount.addItem(dto);
+						else if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+							alcoholAmount.addItem(dto);
+						else if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+							drugsAmount.addItem(dto);
+					}
+				} 
+			}
+			
+			protected function handleSave(event:MouseEvent):void
+			{
+				isToMoveNext = false;
+				saveSocialHistory();
+			}
+			
+			private function isValidTobacooInformation():Boolean
+			{	
+				var isValid:Boolean = true;
+				
+				if (setTabState == 1)
+				{
+					if (tobaccoAddictionDTO.AddictionStatusID == 0)
+					{	
+						isValid = false;
+						Alert.show("Please select Tobacco Status.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function (event:CloseEvent):void
+							{
+								if (event.detail == Alert.OK)
+								{
+									id_tobaccoForm.id_types.setFocus();
+								}
+							});
+					}
+					else if (!tobaccoAddictionDTO.Type || (tobaccoAddictionDTO.Type && tobaccoAddictionDTO.Type.length <= 0))
+					{	
+						isValid = false;
+						Alert.show("Please select Type.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function( event:CloseEvent):void
+							{
+								if( event.detail == Alert.OK )
+								{
+									id_tobaccoForm.id_TypeCmbo.setFocus();
+								}
+							});
+					}
+				}
+				
+				return isValid;
+			}
+			
+			private function isValidAlcoholInformation():Boolean
+			{		
+				var isValid:Boolean = true;
+				
+				if (setTabState == 1)
+				{
+					if (alcoholAddictionDTO.AddictionStatusID == 0)
+					{	
+						isValid = false;
+						Alert.show("Please select Alcohol Status.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function (event:CloseEvent):void
+							{
+								if (event.detail == Alert.OK)
+								{
+									id_alcoholForm.id_types.setFocus();
+								}
+							});
+					}
+					else if (!alcoholAddictionDTO.Type || (alcoholAddictionDTO.Type.length <= 0))
+					{	
+						isValid = false;
+						Alert.show("Please select Type.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function(event:CloseEvent):void
+							{
+								if (event.detail == Alert.OK)
+								{
+									id_alcoholForm.id_TypeCmbo.setFocus();
+								}
+							});
+					}
+				}
+				
+				return isValid;
+			}
+			
+			private function isValidDrugInformation():Boolean
+			{		
+				var isValid:Boolean = true;
+				
+				if (setTabState == 1)
+				{
+					if (drugsAddictionDTO.AddictionStatusID == 0)
+					{		
+						isValid = false;
+						Alert.show("Please select Drug Status.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function (event:CloseEvent):void
+							{
+								if (event.detail == Alert.OK)
+								{
+									id_drugsForm.id_types.setFocus();
+								}
+							});
+					}
+					else if (!drugsAddictionDTO.Type || drugsAddictionDTO.Type.length <= 0)
+					{		
+						isValid = false;
+						Alert.show("Please select Type.","Required field", 
+							Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+							function (event:CloseEvent):void
+							{
+								if (event.detail == Alert.OK)
+								{
+									id_drugsForm.id_TypeCmbo.setFocus();
+								}
+							});
+					}
+				}
+				
+				return isValid;
+			}
+			
+			private function saveSocialHistory():void
+			{
+				
+				model.patientSocialHistoryManageDTO = new PatientSocialHistoryDTO();
+				switch(currentCategory)
+				{
+					case QIConstants.SOCIAL_TOBACCO_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							tobaccoAddictionDTO.isNone = true;
+							tobaccoAddictionDTO.AddictionStatusID = 0;
+							tobaccoAddictionDTO.Amount = "";
+							tobaccoAddictionDTO.AmountID = 0;
+							tobaccoAddictionDTO.DictationID = DictationConstants.GUID_FORMAT;
+							tobaccoAddictionDTO.EndDate = "";
+							tobaccoAddictionDTO.onset = "";
+							tobaccoAddictionDTO.isCounseled = false;
+							tobaccoAddictionDTO.Notes = "";
+							tobaccoAddictionDTO.Type = "";
+							tobaccoAddictionDTO.TypeID = 0;
+						}
+						else
+						{
+							if(!isValidTobacooInformation() ) return;
+							
+							if(!id_tobaccoForm.id_TypeCmbo.selectedItem && UtilityFunctions.TrimString(id_tobaccoForm.id_TypeCmbo.text).length > 0)
+							{
+								tobaccoAddictionDTO.TypeID = -1;
+								tobaccoAddictionDTO.Type = id_tobaccoForm.id_TypeCmbo.text;
+							}
+							if(!id_tobaccoForm.id_AmountCmbo.selectedItem && UtilityFunctions.TrimString(id_tobaccoForm.id_AmountCmbo.text).length > 0)
+							{
+								tobaccoAddictionDTO.AmountID = -1;
+								tobaccoAddictionDTO.Amount = id_tobaccoForm.id_AmountCmbo.text;
+							}
+						}
+						model.patientSocialHistoryManageDTO.CategoryID = 0;
+						model.patientSocialHistoryManageDTO.TobaccoAddictionList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.TobaccoAddictionList.addItem(tobaccoAddictionDTO);
+						break;
+					}
+					case QIConstants.SOCIAL_ALCOHOL_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							alcoholAddictionDTO.isNone = true;
+							alcoholAddictionDTO.AddictionStatusID = 0;
+							alcoholAddictionDTO.Amount = "";
+							alcoholAddictionDTO.AmountID = 0;
+							alcoholAddictionDTO.DictationID = DictationConstants.GUID_FORMAT;
+							alcoholAddictionDTO.EndDate = "";
+							alcoholAddictionDTO.onset = "";
+							alcoholAddictionDTO.isCounseled = false;
+							alcoholAddictionDTO.Notes = "";
+							alcoholAddictionDTO.Type = "";
+							alcoholAddictionDTO.TypeID = 0;
+						}
+						else
+						{
+							if(!isValidAlcoholInformation() ) return;
+							if(!id_alcoholForm.id_TypeCmbo.selectedItem && UtilityFunctions.TrimString(id_alcoholForm.id_TypeCmbo.text).length > 0)
+							{
+								alcoholAddictionDTO.TypeID = -1;
+								alcoholAddictionDTO.Type = id_alcoholForm.id_TypeCmbo.text;
+							}
+							if(!id_alcoholForm.id_AmountCmbo.selectedItem && UtilityFunctions.TrimString(id_alcoholForm.id_AmountCmbo.text).length > 0)
+							{
+								alcoholAddictionDTO.AmountID = -1;
+								alcoholAddictionDTO.Amount = id_alcoholForm.id_AmountCmbo.text;
+							}
+						}
+						
+						model.patientSocialHistoryManageDTO.CategoryID = 1;
+						model.patientSocialHistoryManageDTO.AlcoholAddictionList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.AlcoholAddictionList.addItem(alcoholAddictionDTO);
+						break;
+					}
+					case QIConstants.SOCIAL_DRUGS_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							drugsAddictionDTO.isNone = true;
+							alcoholAddictionDTO.isNone = true;
+							drugsAddictionDTO.AddictionStatusID = 0;
+							drugsAddictionDTO.Amount = "";
+							drugsAddictionDTO.AmountID = 0;
+							drugsAddictionDTO.DictationID = DictationConstants.GUID_FORMAT;
+							drugsAddictionDTO.EndDate = "";
+							drugsAddictionDTO.onset = "";
+							drugsAddictionDTO.isCounseled = false;
+							drugsAddictionDTO.Notes = "";
+							drugsAddictionDTO.Type = "";
+							drugsAddictionDTO.TypeID = 0;
+						}
+						else
+						{
+							if(!isValidDrugInformation() ) return;
+							
+							if(!id_drugsForm.id_TypeCmbo.selectedItem && UtilityFunctions.TrimString(id_drugsForm.id_TypeCmbo.text).length > 0)
+							{
+								drugsAddictionDTO.TypeID = -1;
+								drugsAddictionDTO.Type = id_drugsForm.id_TypeCmbo.text;
+							}
+							if(!id_drugsForm.id_AmountCmbo.selectedItem && UtilityFunctions.TrimString(id_drugsForm.id_AmountCmbo.text).length > 0)
+							{
+								drugsAddictionDTO.AmountID = -1;
+								drugsAddictionDTO.Amount = id_drugsForm.id_AmountCmbo.text;
+							}
+						}
+						model.patientSocialHistoryManageDTO.CategoryID = 2;
+						model.patientSocialHistoryManageDTO.DrugAddictionList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.DrugAddictionList.addItem(drugsAddictionDTO);
+						break;
+					}
+					case QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							workStatusDTO.isNone = true;
+							workStatusDTO.EmployementStatusID = 0;
+							workStatusDTO.isWorkStatusEmployedFullTime = false;
+							workStatusDTO.Notes = "";
+							workStatusDTO.DictationID = DictationConstants.GUID_FORMAT;
+							workStatusDTO.WorkStatusEmployedEmployerInfo = "";
+							workStatusDTO.WorkStatusUnEmployedinfo = "";
+							workStatusDTO.WorkStatusUnEmployedDate = "";
+							
+						}
+						model.patientSocialHistoryManageDTO.CategoryID = 3;
+						model.patientSocialHistoryManageDTO.WorkStatusList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.WorkStatusList.addItem(workStatusDTO);
+						break;
+					}
+					case QIConstants.SOCIAL_MARITAL_STATUS_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							maritalStatusDTO.isNone = true;
+							maritalStatusDTO.DictationID = DictationConstants.GUID_FORMAT;
+							maritalStatusDTO.MartialStatusID = -1;
+							maritalStatusDTO.MartialStatusNotes = "";
+						}
+						
+						model.patientSocialHistoryManageDTO.CategoryID = 4;
+						model.patientSocialHistoryManageDTO.MaritalStatusList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.MaritalStatusList.addItem(maritalStatusDTO);
+						break;
+					}
+					case QIConstants.SOCIAL_OTHER_MODULE_NAME:
+					{
+						if(setTabState == 2)
+						{
+							otherDTO.isNone = true;
+							otherDTO.DictationID = DictationConstants.GUID_FORMAT;
+							otherDTO.OtherNotes = "";
+						}
+						model.patientSocialHistoryManageDTO.CategoryID = 5;
+						model.patientSocialHistoryManageDTO.OtherList = new ArrayCollection();
+						model.patientSocialHistoryManageDTO.OtherList.addItem(otherDTO);
+						break;
+					}
+				}
+				
+				model.patientSocialHistoryManageDTO.PatientID  = model.patientDTO.ID;
+				model.patientSocialHistoryManageDTO.VisitID    = model.VisitID;
+				
+				var evt:ManagePatientSocialHistoryEvent = new ManagePatientSocialHistoryEvent( model.LoggedInUserSelectedBranchId, model.patientDTO.ID, model.LoggedInUserSessionID, clearSocialHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			//----------------- clear social history form -------------------
+			private function clearSocialHistory():void
+			{
+				if(isToMoveNext)
+					dispatchEvent( new SelectSection( SelectSection.SelectInnerTabEvent,'Chronic Medication'));
+				
+				var categoryTypeID:int = 0;
+				switch(currentCategory)
+				{
+					
+					case QIConstants.SOCIAL_TOBACCO_MODULE_NAME:
+					{
+						categoryTypeID = 1;
+						break;
+					}
+					case QIConstants.SOCIAL_ALCOHOL_MODULE_NAME:
+					{
+						categoryTypeID = 2;
+						break;
+					}
+					case QIConstants.SOCIAL_DRUGS_MODULE_NAME:
+					{
+						categoryTypeID = 3;
+						break;
+					}
+					case QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME:
+					{
+						categoryTypeID = 4;
+						break;
+					}
+					case QIConstants.SOCIAL_MARITAL_STATUS_MODULE_NAME:
+					{
+						categoryTypeID = 5;
+						break;
+					}
+					case QIConstants.SOCIAL_OTHER_MODULE_NAME:
+					{
+						categoryTypeID = 6;
+						break;
+					}
+				}
+				
+				var switchEvent:GeneralEvent = new GeneralEvent("switchSocialCategory", true);
+				switchEvent.value = categoryTypeID;
+				dispatchEvent(switchEvent);
+				
+				loadSocialHistory();
+			}
+			
+			//------- loadSocialHistory data -------------------------------------
+			private function loadSocialHistory():void
+			{
+				var loadSocialHistoryEvent:LoadSocialHistoryByPatientIdEvent = new LoadSocialHistoryByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(loadSocialHistoryEvent);
+			}
+			
+			private function OnIndexChangeEvent(event:AutoCompleteEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				if (event.currentTarget.id == "id_AmountCmbo" && event.currentTarget.selectedItem is SocialHistoryUsageAmountTypeDTO)
+				{
+					if (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+					{
+						tobaccoAddictionDTO.AmountID = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+						tobaccoAddictionDTO.Amount =( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).Name;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+					{
+						alcoholAddictionDTO.AmountID = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+						alcoholAddictionDTO.Amount = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).Name;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+					{
+						drugsAddictionDTO.AmountID = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).ID;
+						drugsAddictionDTO.Amount = ( event.currentTarget.selectedItem as SocialHistoryUsageAmountTypeDTO).Name;
+					}
+				}
+				else if (event.currentTarget.id == "id_AmountCmbo")
+				{
+					if (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+					{
+						tobaccoAddictionDTO.AmountID = -1;
+						tobaccoAddictionDTO.Amount = curTar.text;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+					{
+						alcoholAddictionDTO.AmountID = -1;
+						alcoholAddictionDTO.Amount = curTar.text;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+					{
+						drugsAddictionDTO.AmountID = -1;
+						drugsAddictionDTO.Amount = curTar.text;
+					}				
+				}
+				else if (event.currentTarget.id == "id_TypeCmbo" && event.currentTarget.selectedItem is SocialHistoryMediumTypeDTO)
+				{
+					if (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+					{
+						tobaccoAddictionDTO.TypeID = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).ID;
+						tobaccoAddictionDTO.Type =(event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).Name;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+					{
+						alcoholAddictionDTO.TypeID = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).ID;
+						alcoholAddictionDTO.Type = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).Name;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+					{
+						drugsAddictionDTO.TypeID = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).ID;
+						drugsAddictionDTO.Type = (event.currentTarget.selectedItem as SocialHistoryMediumTypeDTO).Name;
+					}
+				}
+				else if (event.currentTarget.id == "id_TypeCmbo")
+				{
+					if (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+					{
+						tobaccoAddictionDTO.TypeID = -1;
+						tobaccoAddictionDTO.Type = curTar.text;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+					{
+						alcoholAddictionDTO.TypeID = -1;
+						alcoholAddictionDTO.Type = curTar.text;
+					}
+					
+					if (currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+					{
+						drugsAddictionDTO.TypeID = -1;
+						drugsAddictionDTO.Type = curTar.text;
+					}
+				}
+			}
+			
+			private function OnDateChange(event:CalendarLayoutChangeEvent):void
+			{
+				if( event.currentTarget.id == "id_Onset" && event.currentTarget.selectedDate )
+				{
+					if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+						tobaccoAddictionDTO.onset = event.currentTarget.text;
+					if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+						alcoholAddictionDTO.onset = event.currentTarget.text;
+					if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+						drugsAddictionDTO.onset = event.currentTarget.text;
+				}
+				else if( event.currentTarget.id == "id_EndDate" && event.currentTarget.selectedDate )
+				{
+					if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+						tobaccoAddictionDTO.EndDate = event.currentTarget.text;
+					if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+						alcoholAddictionDTO.EndDate = event.currentTarget.text;
+					if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+						drugsAddictionDTO.EndDate = event.currentTarget.text;
+				}
+			}
+			
+			private function OnEducatedClick(event:MouseEvent):void
+			{
+				if((event.currentTarget as CheckBox).selected )
+				{
+					if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+						tobaccoAddictionDTO.isCounseled = true;
+					if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+						alcoholAddictionDTO.isCounseled = true;
+					if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+						drugsAddictionDTO.isCounseled = true;
+				}
+				else
+				{
+					if(currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+						tobaccoAddictionDTO.isCounseled = false;
+					if(currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+						alcoholAddictionDTO.isCounseled = false;
+					if(currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+						drugsAddictionDTO.isCounseled = false;
+				}
+				
+			}
+			
+			private function statusTypeChange(event:IndexChangeEvent):void
+			{
+				var statusID:int = (event.currentTarget as DropDownList).selectedItem.ID;
+				if (currentCategory == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+				{
+					tobaccoAddictionDTO.AddictionStatusID = statusID;
+					
+					if(statusID == 4 || statusID == 6)
+					{
+						id_tobaccoForm.enableOnset = false;
+						id_tobaccoForm.id_Onset.text = '';
+					}
+					else
+						id_tobaccoForm.enableOnset = true;
+					
+					if(statusID == 3 )
+						id_tobaccoForm.enableEndDatet = true;
+					else
+					{
+						id_tobaccoForm.enableEndDatet = false;
+						id_tobaccoForm.id_EndDate.text = '';
+					}
+				}
+				else if (currentCategory == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+				{
+					alcoholAddictionDTO.AddictionStatusID = statusID;
+					
+					if(statusID == 2 )
+						id_alcoholForm.enableEndDatet = true;
+					else
+					{
+						id_alcoholForm.enableEndDatet = false;
+						id_alcoholForm.id_EndDate.text = '';
+					}
+				}
+				else if (currentCategory == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+				{
+					drugsAddictionDTO.AddictionStatusID = statusID;
+					if(statusID == 2 )
+						id_drugsForm.enableEndDatet = true;
+					else
+					{
+						id_drugsForm.enableEndDatet = false;
+						id_drugsForm.id_EndDate.text = '';
+					}
+				}
+				
+			}
+			
+			protected function id_tobaccoForm_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_tobaccoForm.id_types.addEventListener(IndexChangeEvent.CHANGE, statusTypeChange);	
+				id_tobaccoForm.id_TypeCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_tobaccoForm.id_Onset.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_tobaccoForm.id_EndDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_tobaccoForm.id_AmountCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_tobaccoForm.id_educated.addEventListener(MouseEvent.CLICK, OnEducatedClick);	
+				id_tobaccoForm.id_types.prompt = "Smoking Status";
+			}
+			
+			protected function id_alcoholForm_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				id_alcoholForm.id_AmountCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_alcoholForm.id_educated.addEventListener(MouseEvent.CLICK, OnEducatedClick);
+				id_alcoholForm.id_EndDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_alcoholForm.id_Onset.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_alcoholForm.id_types.addEventListener(IndexChangeEvent.CHANGE, statusTypeChange);	
+				id_alcoholForm.id_TypeCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_alcoholForm.id_types.prompt = "Alcohol Status";
+			}
+			
+			protected function id_drugsForm_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_drugsForm.id_AmountCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_drugsForm.id_TypeCmbo.addEventListener(AutoCompleteEvent.SELECTED_ITEM_CHANGE, 			OnIndexChangeEvent);
+				id_drugsForm.id_Onset.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_drugsForm.id_EndDate.addEventListener(CalendarLayoutChangeEvent.CHANGE, 	OnDateChange);
+				id_drugsForm.id_types.addEventListener(IndexChangeEvent.CHANGE, statusTypeChange);
+				id_drugsForm.id_educated.addEventListener(MouseEvent.CLICK, OnEducatedClick); 
+				id_drugsForm.id_types.prompt = "Drug Status";
+			}
+			
+			public function clearForm():void
+			{
+				if (id_tobaccoForm)
+					id_tobaccoForm.clearForm();
+				
+				if (id_alcoholForm)
+					id_alcoholForm.clearForm();
+				
+				if (id_drugsForm)
+					id_drugsForm.clearForm();
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener("HXSocialSave", function(event:GeneralEvent):void
+				{
+					isToMoveNext = event.value;
+					saveSocialHistory();
+				});
+				
+				dictationNoteViewModel.inNoteMode = true;
+				dictationNoteViewModel.visible = true;
+				dictationNoteViewModel.inlineEditing = true;
+			}
+			
+			protected function id_save_clickHandler(event:MouseEvent):void
+			{
+				handleSave(null);
+			}
+			
+			protected function onDictationNoteButtonsClick2():void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				return;
+			}
+			protected function onDictationNoteButtonsClick():void
+			{
+				dictationNoteViewModel.inDictationMode = true;
+				return;
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (dictationNoteViewModel.inDictationMode)
+						dictationNoteViewModel.inDictationMode = false;
+					
+					if (dictationNoteViewModel.inNoteMode)
+						dictationNoteViewModel.inNoteMode = false;
+					dictationNoteViewModel.visible = false;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="right" paddingTop="4" paddingRight="4" gap="0"/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="none"/>		
+		<s:State name="formTB"/>
+		<s:State name="formAL"/>
+		<s:State name="formDR"/>		
+		<s:State name="marital"/>
+		<s:State name="formWS"/>
+		<s:State name="formOT"/>
+	</s:states>
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"
+			  includeIn="default" includeInLayout="{isTabSelected}" visible="{isTabSelected}"
+			  >		
+		<s:Group width="100%">			
+			<components1:PleaseSelectView label="Select an option" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+		</s:Group>
+	</s:VGroup>
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"
+			  includeIn="none"
+			  >
+		<s:BorderContainer width="100%" height="100%" cornerRadius="3" backgroundColor="0xD0DEF6"  borderColor="#5A5A5A" borderWeight="1">
+			<s:Label  text="None" fontSize="18" fontWeight="bold" fontFamily="CalibriCFFBold" horizontalCenter="0" verticalCenter="0"/>
+		</s:BorderContainer>
+		<social:SocialNoteDictationView width="100%" id="id_NoneNoteDictation" showDictaionNoteButttons="false"
+										creationComplete="id_NoneNoteDictation.id_save.addEventListener(MouseEvent.CLICK,handleSave)" />
+	</s:VGroup>
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="top" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="0" paddingTop="0" paddingBottom="4" 
+			  includeIn="marital"
+			  >
+		<social:SocialMaritalFormView id="id_MS" width="100%" 
+									  MaritalStatusDTO="@{maritalStatusDTO}"
+									  creationComplete="id_MS.id_save.addEventListener(MouseEvent.CLICK,handleSave)"/>
+	</s:VGroup>	
+	
+	<social:SocialItemFormView id="id_tobaccoForm" width="100%" height="100%" 
+							   creationComplete="id_tobaccoForm_creationCompleteHandler(event)"
+							   paddingLeft="4" paddingRight="0" paddingTop="1" paddingBottom="1" Amount="{tobaccoAmount}" Type="{tobaccoType}"
+							   includeIn="formTB" listTypes="{tobaccoStatusTypes}" commonDTO="{tobaccoAddictionDTO}" />
+	<social:SocialNoteDictationView width="100%" id="id_TBnoteDictation" includeIn="formTB" Note="@{tobaccoAddictionDTO.Notes}"
+									DictationID="@{tobaccoAddictionDTO.DictationID}" paddingLeft="4" paddingBottom="4"
+									creationComplete="id_TBnoteDictation.id_save.addEventListener(MouseEvent.CLICK,handleSave)" />
+	
+	<social:SocialItemFormView id="id_alcoholForm" width="100%" height="100%" 
+							   creationComplete="id_alcoholForm_creationCompleteHandler(event)" 
+							   paddingLeft="4" paddingRight="0" paddingTop="1" paddingBottom="1" Amount="{alcoholAmount}" Type="{alcoholType}"
+							   includeIn="formAL" listTypes="{alcoholStatusTypes}" commonDTO="{alcoholAddictionDTO}" />
+	<social:SocialNoteDictationView width="100%" id="id_ALnoteDictation" includeIn="formAL" Note="@{alcoholAddictionDTO.Notes}"
+									DictationID="@{alcoholAddictionDTO.DictationID}" paddingLeft="4" paddingBottom="4"
+									creationComplete="id_ALnoteDictation.id_save.addEventListener(MouseEvent.CLICK,handleSave)" />
+	
+	<social:SocialItemFormView id="id_drugsForm" width="100%" height="100%" 
+							   creationComplete="id_drugsForm_creationCompleteHandler(event)"
+							   paddingLeft="4" paddingRight="0" paddingTop="1" paddingBottom="1" Amount="{drugsAmount}" Type="{drugsType}"
+							   includeIn="formDR" listTypes="{drugStatusTypes}" commonDTO="{drugsAddictionDTO}" />
+	<social:SocialNoteDictationView width="100%" id="id_DRnoteDictation" includeIn="formDR" Note="@{drugsAddictionDTO.Notes}"
+									DictationID="@{drugsAddictionDTO.DictationID}" paddingLeft="4" paddingBottom="4"
+									creationComplete="id_DRnoteDictation.id_save.addEventListener(MouseEvent.CLICK,handleSave)" />
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="top" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="0" paddingTop="0" paddingBottom="4"
+			  includeIn="formWS"
+			  >		
+		<social:SocialWorkStatusFormView id="id_WS" width="100%" 
+										 WorkStatusDTO="@{workStatusDTO}"
+										 creationComplete="id_WS.id_save.addEventListener(MouseEvent.CLICK,handleSave)"/>
+	</s:VGroup>
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"
+			  includeIn="formOT"
+			  >		
+		<s:HGroup width="100%" horizontalAlign="right"  verticalAlign="bottom"  height="100%"  paddingRight="8">
+			<s:ToggleButton id="id_btnDictation"							
+							click="onDictationNoteButtonsClick()"
+							selected="@{dictationNoteViewModel.inDictationMode}"
+							toolTip="Record Level Dictation" tabIndex="0"
+							skinClass="{otherDTO.DictationID &amp;&amp; otherDTO.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+							/>
+			
+			<s:ToggleButton id="id_btnNote" 
+							click="onDictationNoteButtonsClick2()"
+							selected="@{dictationNoteViewModel.inNoteMode}"
+							toolTip="Record Level Notes" tabIndex="1"
+							skinClass="{otherDTO.OtherNotes.length ?NotesRedButtonSkin :WriteNoteButtonSkin}"
+							/>
+			
+		</s:HGroup>
+		<social:SocialMaritalDictationNoteView id="id_OTnoteDictation"
+											   width="100%"  note="@{otherDTO.OtherNotes}"  viewModel="{dictationNoteViewModel}" isSectionLevel="false"
+											   DictationID="@{otherDTO.DictationID}" IsDictaionEditMode="true" ShowSaveButton="{false}"
+											   />
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button buttonMode="true" id="id_save"
+					  skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin"
+					  right="0" verticalCenter="0"				  
+					  toolTip="Save"
+					  tabIndex="2"
+					  click="id_save_clickHandler(event)"					  
+					  />
+		</s:HGroup>
+	</s:VGroup>
+</s:Group>

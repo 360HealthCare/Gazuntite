@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" height="40">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Rect id="rect7" x="0" y="0" width="100%" height="100%" radiusX="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#D2D2D2" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#9C9C9C" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Group x="4" y="3">
+		<s:Rect x="0.5" y="0.5" width="72" height="32" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="1" y="1" width="71" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D2D3D9" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext6" x="4" y="12" color="#333333" fontFamily="Calibri"
+					fontSize="11" tabStops="S0" text="Temp"/>
+		<s:Rect x="31" y="1" width="41" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#79C7F2" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#50A4D4" ratio="0.5450980392156862"/>
+					<s:GradientEntry alpha="1.0" color="#68B8E7" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext7" x="36" y="12" color="#333333" fontFamily="Calibri"
+					fontSize="11" tabStops="S0" whiteSpaceCollapse="preserve">
+			<s:content><s:p><s:span><![CDATA[98.6 ]]></s:span><s:span baselineShift="superscript" fontSize="8">O</s:span><s:span>F</s:span></s:p></s:content>
+		</s:RichText>
+	</s:Group>
+	<s:Group x="81" y="3">
+		<s:Rect x="0.5" y="0.5" width="58" height="32" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="1" y="1" width="57" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D2D3D9" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext8" x="4" y="12" color="#333333" fontFamily="Calibri"
+					fontSize="11" tabStops="S0" text="BP"/>
+		<s:Rect x="18" y="1" width="40" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#E2AFB1" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#E56C74" ratio="0.5450980392156862"/>
+					<s:GradientEntry alpha="1.0" color="#E28D8E" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" id="richtext9" tabStops="S0" text="120/65" whiteSpaceCollapse="preserve" x="22" y="12"/>
+	</s:Group>
+	<s:Group x="144" y="3">
+		<s:Rect x="0.5" y="0.5" width="82" height="32" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="1" y="1" width="81" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D2D3D9" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext10" x="6" y="6" color="#333333" fontFamily="Calibri" fontSize="11"
+					lineHeight="100%" tabStops="S0" whiteSpaceCollapse="preserve">
+			<s:content><s:p><s:span>Sugar</s:span></s:p><s:p><s:span>Level</s:span></s:p></s:content>
+		</s:RichText>
+		<s:Rect x="34" y="1" width="48" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#79C7F2" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#50A4D4" ratio="0.5450980392156862"/>
+					<s:GradientEntry alpha="1.0" color="#68B8E7" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" id="richtext11" tabStops="S0" text="90 mg/dL" whiteSpaceCollapse="preserve" x="37" y="12"/>
+	</s:Group>
+	<s:Group x="231" y="3">
+		<s:Rect x="0.5" y="0.5" width="55" height="32" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="1" y="1" width="54" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D2D3D9" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext12" x="4" y="12" color="#333333" fontFamily="Calibri"
+					fontSize="11" tabStops="S0" text="Pulse"/>
+		<s:Rect x="31" y="1" width="24" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#79C7F2" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#50A4D4" ratio="0.5450980392156862"/>
+					<s:GradientEntry alpha="1.0" color="#68B8E7" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" id="richtext13" tabStops="S0" text="55" whiteSpaceCollapse="preserve" x="37" y="12"/>
+	</s:Group>
+	<s:Group x="291" y="3">
+		<s:Rect x="0.5" y="0.5" width="55" height="32" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#FFFFFF" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="1" y="1" width="54" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D2D3D9" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="richtext14" x="5" y="12" color="#333333" fontFamily="Calibri"
+					fontSize="11" tabStops="S0" text="Resp"/>
+		<s:Rect x="31" y="1" width="24" height="31" radiusX="3">
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#79C7F2" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#50A4D4" ratio="0.5450980392156862"/>
+					<s:GradientEntry alpha="1.0" color="#68B8E7" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+									distance="1" hideObject="false" inner="true" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" id="richtext15" tabStops="S0" text="32" whiteSpaceCollapse="preserve" x="37" y="12"/>
+	</s:Group>
+</s:SkinnableContainer>

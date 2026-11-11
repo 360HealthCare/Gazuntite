@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:reviewofsystem="com.gazuntite.common.view.components.reviewofsystem.*"
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  creationComplete="cc()" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleDictationDTO;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.dto.physical.ros.ROSDTO;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.view.components.CustomSaveAndMoveNextAlert;
+			import com.gazuntite.common.view.components.reviewofsystem.PatientInputPhysicalReviewOfSystemViewModel;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.input.event.visit.physical.ros.ManagePatientROSEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			
+			private var _moduleName:String;
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var viewModel:PatientInputPhysicalReviewOfSystemViewModel = new PatientInputPhysicalReviewOfSystemViewModel();//.getInstance();
+			[Bindable]	private var dictationNoteViewModel:PatientDictationNoteViewModel = viewModel.rosDictationNoteViewModel;
+			[Bindable]	private var notesDTO:ModuleNoteDTO;
+			[Bindable]	private var dictationDTO:ModuleDictationDTO;
+			private var m_acDataProvider:ArrayCollection;
+			[Bindable]	public var NavItems:ArrayCollection;
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return m_acDataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				m_acDataProvider = value;
+			}
+			/////////////////// ROS STATIC DATA PROVIDER ////////////////////////////////////////////
+			
+			private var firstLevelLabels:Array 		= ["General", "HEENT", "Respiratory", "Cardiovascular", "Breast", "Gastrointestinal", "Genitourinary", "Lymph/Endo", "Nuscle/Skel", "Skin", "Neurological", "Allergy" ,"Psychiatric", "Other", "Respiratory", "Cardiovascular", "Breast", "Gastrointestinal", "Genitourinary", "Lymph/Endo"];
+			private var SecondLevelLabels:Array 	= ["Avg. Weight", "Weight Loss/Gain", "Sense of Well Being", "Strength", "Conduct Usual Activities", "Exercise Tolerance", "Fatigue", "Fever/chills", "Weakness", "Trouble Sleeping", "General State of Health", "Other"];
+			private var HEENT2ndLevelLabels:Array 	= ["Head", "Eyes", "Ears", "Nose", "Throat"];
+			private var HEENT3rdLevelLabels:Array 	= ["Headaches", "Vertigo", "Light Headedness", "Head Injury", "Other"];
+			
+			private function createDP():void
+			{
+				if( null != dataProvider && dataProvider.length > 0 )
+					return;
+				
+				dataProvider = new ArrayCollection();
+				var i:int;
+				for(i = 0; i < firstLevelLabels.length; i++ )
+				{
+					var dto:ROSDTO = new ROSDTO();
+					dto.MainCategoryName = firstLevelLabels[i];
+					dto.ROSMainCategoryTypeID = i;
+					
+					if( i == 1 )
+						create2ndLevelHEENT( dto );
+					else
+						create2ndLevel( dto );
+					
+					dataProvider.addItem( dto );
+				}
+			}
+			
+			private function create2ndLevel(parent:ROSDTO):void
+			{
+				var list:ArrayCollection = new ArrayCollection();
+				var i:int;
+				for(i = 0; i < SecondLevelLabels.length; i++ )
+				{
+					var dto:ROSDTO = new ROSDTO();
+					dto.MainCategoryName = SecondLevelLabels[i];
+					dto.ROSMainCategoryTypeID = parent.ROSMainCategoryTypeID;
+					dto.ROSSubCategoryTypeID = i;
+					
+					dto.Note = parent.MainCategoryName + "::" + dto.MainCategoryName +" \n dto.Note " + i ;
+					
+					list.addItem( dto );
+				}
+				
+				parent.children = list;
+			}
+			
+			private function create2ndLevelHEENT(parent:ROSDTO):void
+			{
+				var list:ArrayCollection = new ArrayCollection();
+				var i:int;
+				for(i = 0; i < HEENT2ndLevelLabels.length; i++ )
+				{
+					var dto:ROSDTO = new ROSDTO();
+					dto.MainCategoryName = HEENT2ndLevelLabels[i];
+					dto.ROSMainCategoryTypeID = parent.ROSMainCategoryTypeID;
+					dto.ROSSubCategoryTypeID = i;
+					create3rdLevel( dto );
+					list.addItem( dto );
+				}
+				
+				parent.children = list;
+			}
+			
+			private function create3rdLevel(parent:ROSDTO):void
+			{
+				var list:ArrayCollection = new ArrayCollection();
+				var i:int;
+				for(i = 0; i < HEENT3rdLevelLabels.length; i++ )
+				{
+					var dto:ROSDTO = new ROSDTO();
+					dto.MainCategoryName = HEENT3rdLevelLabels[i];
+					dto.ROSMainCategoryTypeID = parent.ROSSubCategoryTypeID;
+					dto.ROSSubCategoryTypeID = i;
+					
+					dto.Note = parent.MainCategoryName + "::" + dto.MainCategoryName +" \n dto.Note " + i ;
+					
+					list.addItem( dto );
+				}
+				
+				parent.children = list;
+			}
+			
+			/////////////////// ROS STATIC DATA PROVIDER ////////////////////////////////////////////
+			private function cc():void
+			{
+				if (moduleName == QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME)
+				{
+					createDP();
+				}
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			[Bindable]
+			public function get moduleName():String
+			{
+				return _moduleName;
+			}
+			
+			public function set moduleName(value:String):void
+			{
+				_moduleName = value;
+				
+				if (moduleName.length < 0)
+					return;
+				
+				notesDTO = QIUtilityFunctions.getModuleNoteDTO(moduleName);
+				dictationDTO = QIUtilityFunctions.getModuleDictationDTO(moduleName);
+			}
+			
+			/* protected function uiSort_changeHandler(event:IndexChangeEvent):void
+			{
+			if (uiSort.selectedIndex == 0)
+			uiSort.toolTip = 'Recently Added';
+			else
+			uiSort.toolTip = 'Category';
+			} */
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				notesDTO = QIUtilityFunctions.getModuleNoteDTO(moduleName);
+				event.moduleName = moduleName;
+				event.data = notesDTO;
+				
+				//M added case for dictation
+				if(event.isNoteSave)
+				{
+					var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( notesDTO, QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				}
+				else
+				{
+					if (!dictationDTO)
+					{
+						var dictaionId:String = id_DictationNote.DictationID;
+						
+						dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME);
+						dictationDTO.DictationID = dictaionId;
+					}
+					
+					var dicEvent:ManageModuleDictationEvent = new ManageModuleDictationEvent( dictationDTO, QIConstants.REVIEW_OF_SYSTEM_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, model.ClinicBranchIdSeq, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( dicEvent );
+				}
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed")
+				if(isNoteSaved)
+				{
+					//dictationNoteViewModel.visible = false;
+					viewModel.rosDictationNoteViewModel.visible = false
+				}
+			}
+			
+			protected function saveDataHandler(event:Event):void
+			{
+				var mange:ManagePatientROSEvent = new ManagePatientROSEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( mange );
+			}
+			
+			public function id_allNormalButton_changeHandler(event:Event):void
+			{
+				if( null != id_ROSView )
+				{
+					id_ROSView.ToggleAllNormal( ! event.target.selected );
+				}
+			}
+			
+			/* protected function NextButton_clickHandler(event:MouseEvent):void
+			{
+			dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Physical/ROS Panel'));
+			}
+			
+			
+			protected function saveButton_clickHandler(event:MouseEvent):void
+			{
+			dispatchEvent( new Event("saveData", true) );
+			} */
+			
+			/////////////
+			
+			// save & Move next logic ......................
+			protected function Next_buttonClickHandler(event:MouseEvent):void
+			{
+				if( null != id_ROSView && id_ROSView.IsDataDirty() )
+				{
+					var hideOption:String = CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE ;
+					QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler, null, hideOption );
+				}
+				else
+					MoveToNextPanel();
+			}
+			
+			private function saveData():void
+			{
+				var mre:ManagePatientROSEvent = new ManagePatientROSEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( mre );
+			}
+			
+			public function ClearData():void
+			{
+				if( null != id_ROSView && null != model.rosDTOList )
+				{
+					model.rosDTOList.removeAll();
+					id_ROSView.clearData()
+				}
+				
+				ClearNotesDictation();
+				
+				notesDTO 		= null;
+				dictationDTO 	= null;
+				
+				if(id_DictationNote)
+				{
+					dictationNoteViewModel.visible = false;
+					id_DictationNote.note = '';
+					id_DictationNote.resetToDefault();
+				}
+			}
+			
+			private function ClearNotesDictation():void
+			{
+				notesDTO 		= null;
+				dictationDTO 	= null;
+			}
+			
+			private function MoveNextHandler(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						SaveAndMoveNext();
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						saveData();
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						DiscardAndMoveNext();
+						break;
+				}
+			}
+			
+			private function DiscardAndMoveNext():void
+			{
+				if( null != id_ROSView && null != model.rosDTOList )
+				{
+					id_ROSView.clearData();
+				}
+				
+				//ClearNotesDictation();
+				
+				MoveToNextPanel();
+			}
+			
+			private function SaveAndMoveNext():void
+			{
+				saveData();
+				MoveToNextPanel();
+			}
+			
+			private function MoveToNextPanel():void
+			{
+				id_ROSView.clearViewModel();
+				dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Physical'));
+			}
+			
+			protected function onGotoSectionEventHandler(event:Event):void
+			{
+				if( null != id_ROSView && null != model.rosDTOList )
+				{
+					id_ROSView.clearViewModel();
+				}
+			}
+			
+		]]>
+	</fx:Script>		
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="0"		/>
+	</s:layout>
+	<skins:PatientSubViewTitleBar id="titleBar" 
+								  width="100%" 
+								  label="REVIEW OF SYSTEM" 
+								  maxSectionCounter="5" 
+								  sectionNumber="3" 
+								  showInputPart="true" 
+								  inputCounter="0" showFlipButton="true"
+								  PrevSectionLabel="Chief Complaint/HPI"
+								  NextSectionLabel="Physical"
+								  MainSectionLabel="Physical"
+								  NavItems="{NavItems}"
+								  dictationNoteViewModel="{dictationNoteViewModel}" 
+								  showAllNormalButton="true"
+								  SectionLevelNote="@{id_DictationNote.note}"
+								  SectionLevelDictationID="{dictationDTO.DictationID}"
+								  
+								  gotoNextSectionEvent="onGotoSectionEventHandler(event)"
+								  gotoPrevSectionEvent="onGotoSectionEventHandler(event)"
+								  />
+	
+	<dictation2:PatientDictationNoteView id="id_DictationNote" 
+										 width="100%" minHeight="47" 
+										 viewModel="{dictationNoteViewModel}"
+										 IsDictaionEditMode="true"
+										 isSectionLevel="true" 
+										 note="@{notesDTO.Note}"
+										 DictationID="@{dictationDTO.DictationID}"
+										 />
+	<s:Scroller width="100%" height="100%"  
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" 
+				horizontalScrollPolicy="off" verticalScrollPolicy="auto">
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="5" />
+			</s:layout>
+			
+			<s:HGroup width="100%" height="100%" paddingTop="2" paddingBottom="2" paddingLeft="0" paddingRight="0">
+				<reviewofsystem:ReviewOfSystemMainEditView id="id_ROSView" dataProvider="{model.rosDTOList}" saveData="saveDataHandler(event)" width="100%" height="100%" minHeight="150"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle" paddingLeft="3">
+				<!--<s:CheckBox id="id_allNormalButton"
+				verticalCenter="0" skinClass="com.gazuntite.skins.controls.checkbox.AllNormalCheckBoxSkin"
+				toolTip="All Normal" buttonMode="true" useHandCursor="true"
+				change="id_allNormalButton_changeHandler(event)"
+				/>-->
+				
+				<s:ToggleButton id="id_allNormalButton" 
+								skinClass="com.gazuntite.skins.controls.button.AllNormalToggleButtonSkin"
+								toolTip="All Normal" buttonMode="true" useHandCursor="true"
+								change="id_allNormalButton_changeHandler(event)"
+								/>
+				
+				<s:Spacer width="100%" />				
+				<s:Button buttonMode="true"
+						  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+						  label="Next" 
+						  toolTip="Next"
+						  click="Next_buttonClickHandler(event)"/>
+			</s:HGroup>
+			
+			<!--<s:Rect height="4"/>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+			<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+			</s:layout>
+			
+			<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+			<s:DropDownList id="uiSort"  
+			selectedIndex="0"
+			buttonMode="true" 
+			toolTip="Recently Added"
+			skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+			change="uiSort_changeHandler(event)"
+			>
+			<s:dataProvider>
+			<s:ArrayCollection>
+			<fx:Object label="Recently Added"/>
+			<fx:Object label="Category"/>
+			</s:ArrayCollection>
+			</s:dataProvider>
+			</s:DropDownList>
+			<s:Spacer width="100%"/>
+			</s:SkinnableContainer>
+			
+			<s:List id="uiReviewOfSystemInputViewList"
+			width="100%"
+			allowMultipleSelection="false"
+			borderVisible="false"
+			dataProvider="{model.rosHistoryDTOList}"
+			verticalScrollPolicy="off"
+			horizontalScrollPolicy="off"
+			itemRenderer="com.gazuntite.common.view.components.reviewofsystem.renderers.ReviewOfSystemListIR"
+			/>-->
+		</s:Group>	
+	</s:Scroller>
+</s:SkinnableContainer>

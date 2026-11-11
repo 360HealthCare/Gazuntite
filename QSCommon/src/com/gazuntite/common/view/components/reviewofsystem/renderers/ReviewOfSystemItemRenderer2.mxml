@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				height="28" 
+				width="150"
+				render="OnRenderHandler(event)"
+				>
+	<!--cf				width="150"-->
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.components.reviewofsystem.IReviewOfSystemItem;
+			import com.gazuntite.common.view.components.reviewofsystem.ReviewOfSystemHelper;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			
+			private var m_oDataItem:IReviewOfSystemItem;
+			
+			[Bindable]
+			public function get dataItem():IReviewOfSystemItem
+			{
+				return m_oDataItem;
+			}
+			
+			public function set dataItem(value:IReviewOfSystemItem):void
+			{
+				m_oDataItem = value;
+			}
+			
+			[Bindable]
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				dataItem = value as IReviewOfSystemItem;
+				
+				if( null == value ) return;
+				
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			protected function onNormalClick(event:MouseEvent):void
+			{
+				if( event.currentTarget.selected )
+				{
+					dataItem.IsNormal = QSConstants.STRING_TRUE;
+					dataItem.IsAbNormal = QSConstants.STRING_FALSE;
+					dataItem.IsDirty = true;
+				}
+				else
+				{
+					dataItem.IsNormal = '';
+					dataItem.IsAbNormal = '';
+					dataItem.IsDirty = false;
+				}
+				
+				var ge:GeneralEvent = new GeneralEvent("childChanged", true);
+				ge.value = dataItem;
+				event.currentTarget.dispatchEvent( ge );
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+				
+			}
+			
+			protected function onAbNormalClick(event:MouseEvent):void
+			{
+				if(event.currentTarget.selected)
+				{
+					dataItem.IsNormal 	= QSConstants.STRING_FALSE;
+					dataItem.IsAbNormal = QSConstants.STRING_TRUE;
+					dataItem.IsDirty = true;
+				}
+				else
+				{
+					dataItem.IsNormal = '';
+					dataItem.IsAbNormal = '';
+					dataItem.IsDirty = false;
+				}
+				
+				var ge:GeneralEvent = new GeneralEvent("childChanged", true);
+				ge.value = dataItem;
+				event.currentTarget.dispatchEvent( ge );
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			private function set onNoteChange(value:String):void
+			{
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			protected function OnRenderHandler(event:Event):void
+			{
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="{dataItem.Note}" destination="onNoteChange" />
+	
+	<s:Rect left="0" right="0" top="0" bottom="0" alpha="1">
+		<s:stroke>
+			<s:SolidColorStroke caps="round" color="#545454" joints="miter" miterLimit="3" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D7D7D7" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#BDBBB5" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#D1D1D1" ratio="0.9058823529411765"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>	
+	
+	<s:RichText left="8" right="36" verticalCenter="0" color="#000000" fontFamily="Calibri"
+				fontSize="12" 
+				maxDisplayedLines="1" showTruncationTip="true"
+				text="{dataItem.label}"/>	
+	
+	
+	<s:ToggleButton id="id_btnNormal" 
+					right="24" verticalCenter="0"
+					skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.NTB1"
+					click="onNormalClick(event)"
+					selected="{dataItem.IsNormal == QSConstants.STRING_TRUE }"
+					buttonMode="true" useHandCursor="true" toolTip="Normal"/>
+	<s:ToggleButton id="id_btnAbnormal" 
+					right="4" verticalCenter="0"
+					skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.ATB1"
+					click="onAbNormalClick(event)"
+					selected="{dataItem.IsAbNormal == QSConstants.STRING_TRUE }"
+					buttonMode="true" useHandCursor="true" toolTip="Abnormal"/>
+	
+	<!--	<s:BitmapImage right="2" verticalCenter="-8" smooth="true" 
+	source="@Embed('/assets/images/Dot.png')"
+	/>
+	-->
+</s:ItemRenderer>

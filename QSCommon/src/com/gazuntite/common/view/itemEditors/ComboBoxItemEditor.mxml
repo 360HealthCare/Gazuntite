@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			 xmlns:s="library://ns.adobe.com/flex/spark" 
+			 xmlns:mx="library://ns.adobe.com/flex/mx" focusOut="comboBoxItemEditorFocusOut(event)"
+			 editable="true">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.dataGridClasses.DataGridListData;
+			import mx.controls.listClasses.ListData;
+			import mx.events.FlexEvent;
+			
+			private var _ownerData:Object;
+			private var _dateField:String;
+			private var complexFieldNameComponents:Array = [];
+			
+			private var _previouslySelectedItem:*;
+			
+			public function get previouslySelectedItem():*
+			{
+				return _previouslySelectedItem;
+			}
+
+			public function set previouslySelectedItem(value:*):void
+			{
+				_previouslySelectedItem = value;
+			}
+
+			private function comboBoxItemEditorFocusOut(event:FocusEvent):void
+			{
+				trace();
+			}
+			
+			protected function deriveComplexColumnData( value:Object ):Object 
+			{
+				var currentRef:Object = value;
+				
+				if (currentRef && complexFieldNameComponents)
+				{
+					for(var i:int=0; i < complexFieldNameComponents.length; i++)
+						currentRef = currentRef[complexFieldNameComponents[ i ]];
+				}
+				
+				return currentRef;
+			}
+			
+			override public function set data(value:Object):void
+			{
+				if (value)
+				{
+					var newSelectedItem:*;
+					
+					_ownerData = value;
+
+					if (listData && listData is DataGridListData)
+					{
+						var dateFieldVal:String = DataGridListData(listData).dataField;
+						
+						if ( dateFieldVal.indexOf( "." ) != -1 ) 
+						{
+							complexFieldNameComponents = dateFieldVal.split( "." );
+							newSelectedItem = deriveComplexColumnData(_ownerData);
+							
+							if (newSelectedItem && newSelectedItem !== undefined)
+							{
+								var dataFld:String = complexFieldNameComponents[complexFieldNameComponents.length - 1];
+								if (dataProvider)
+								{
+									for (var i:int = 0; i < dataProvider.length; i++)
+									{
+										if (dataProvider[i][dataFld] == newSelectedItem)
+										{
+											selectedItem = dataProvider[i];
+											previouslySelectedItem = selectedItem;
+											break;
+										}
+									}
+								}
+							}
+						}
+						else
+							super.data = value;
+					}
+					else
+						super.data = value;
+				}
+			}
+		]]>
+	</fx:Script>
+</mx:ComboBox>

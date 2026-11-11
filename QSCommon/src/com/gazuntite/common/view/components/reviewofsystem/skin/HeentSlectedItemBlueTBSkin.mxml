@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		height="40">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Rect left="0" right="0" height="40" radiusX="4"
+			height.downAndSelected="40"
+			height.overAndSelected="40"
+			visible.up="false"
+			height.upAndSelected="40">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" ratio="0"
+								 color.disabled="#A1A1A1"
+								 color.disabledAndSelected="#A1A1A1"
+								 color.down="#A1A1A1"
+								 color.downAndSelected="#A0B9FE"
+								 color.over="#A1A1A1"
+								 color.overAndSelected="#A0B9FE"
+								 color.up="#A1A1A1"
+								 color.upAndSelected="#A0B9FE"/>
+				<s:GradientEntry alpha="1.0" ratio="0.3215686274509804"
+								 color.disabled="#777777"
+								 color.disabledAndSelected="#777777"
+								 color.down="#777777"
+								 color.downAndSelected="#83A3FE"
+								 color.over="#777777"
+								 color.overAndSelected="#83A3FE"
+								 color.up="#777777"
+								 color.upAndSelected="#83A3FE"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:RichText id="labelDisplay" x="4" y="9"  color="#000000" fontFamily="CalibriCFFBold"
+				fontSize="12" fontWeight="bold" tabStops="S0" maxDisplayedLines="1"
+				whiteSpaceCollapse="preserve"/>
+	
+	<s:Group right="23" y="10"
+			 transformX.disabled="40"
+			 transformX.disabledAndSelected="40"
+			 transformX.down="40"
+			 transformX.downAndSelected="40"
+			 transformX.over="40"
+			 transformX.overAndSelected="40"
+			 transformX.upAndSelected="40">
+		<s:Rect x="0" y="0" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="0" y="4" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="0" y="8" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+	</s:Group>
+</s:Skin>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:view="com.gazuntite.document.view.*"
+		 creationComplete="cc(event)" 
+		 xmlns:components1="com.gazuntite.components.*" xmlns:components2="com.gazuntite.common.view.components.*" 
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.history.dto.PatientVisitProviderDTO;
+			import com.gazuntite.history.event.GetHistoryByProviderEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.history.view.itemRenderer.HistoryFamilyHistoryIR;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
+			import mx.events.CollectionEventKind;
+			import mx.events.FlexEvent;
+			
+			import spark.collections.SortField;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			[Bindable]
+			public var model : HistoryModelLocator = HistoryModelLocator.getInstance();
+			
+			private var selectedProvider:PatientVisitProviderDTO;
+			
+			private var _dataProvider:ArrayCollection;
+			
+			public var ViewStackOldIndex:int = -1;
+			public var searchString:String;
+			
+			private var m_sfilterQuery:String;
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				if( _dataProvider == value ) return;
+				
+				_dataProvider = value;
+				//_dataProvider.addEventListener(CollectionEventKind.REFRESH, FilterInnerList, true);
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewStack.selectedIndex = 1;
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				
+			}
+			
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_SearchInput_changeHandler(event:TextOperationEvent):void
+			{
+				
+			}
+			
+			public function FilterList(QueryString:String):void
+			{
+				m_sfilterQuery = QueryString;
+				
+				if( null == dataProvider.filterFunction )
+					dataProvider.filterFunction = ListFliterFunction;
+				
+				dataProvider.refresh();
+			}
+			
+			/* private function FilterInnerList(event:CollectionEventKind):Boolean
+			{
+			for (var i:int = 0; i < dataProvider.length; i++)
+			{
+			
+			}
+			} */
+			
+			private function ListFliterFunction(item:Object):Boolean
+			{
+				//ask for inner list filter
+				if( item.DTOCollection && null == item.DTOCollection.filterFunction )
+					item.DTOCollection.filterFunction = InnerListFliterFunction;
+				
+				item.DTOCollection.refresh();
+				
+				return item.DTOCollection.length > 0;
+			}
+			
+			private function InnerListFliterFunction(item:Object):Boolean
+			{
+				var ff:String = item.FilterFeild;
+				return ff.toLowerCase().indexOf( m_sfilterQuery.toLowerCase() ) != -1;
+			}
+			
+			protected function viewStack_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			protected function viewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				
+			}
+			
+			protected function id_GridListRB_changeHandler(event:Event):void
+			{
+				ViewStackOldIndex = viewStack.selectedIndex;
+				
+				/* if(id_listviewbtn.selected)
+				{
+				viewStack.selectedIndex = 0;
+				}
+				
+				else if (id_thumbtviewbtn.selected)
+				{
+				viewStack.selectedIndex = 1;
+				} */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="model.SelectedSectionHistoryList" destination="dataProvider" />
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="id_GridListRB" change="id_GridListRB_changeHandler(event)" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingBottom="3"  paddingTop="3"/><!--paddingLeft="3" paddingRight="3"-->
+	</s:layout>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BODY SECTION  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<s:SkinnableContainer id="id_Body" width="100%" height="100%" >
+		<components:LabelViewStack id="viewStack"  
+								   width="100%"  height="100%" 
+								   creationPolicy="all" 
+								   change="viewStack_changeHandler(event)" 
+								   creationComplete="viewStack_creationCompleteHandler(event)" 
+								   borderVisible="false" 
+								   backgroundAlpha="0"
+								   contentBackgroundAlpha="0"
+								   >
+			<s:ArrayList >
+				<s:BorderContainer width="100%" height="100%" cornerRadius="3" backgroundColor="0xFFFFFF" borderVisible="false">
+					<s:List id="id_list" 
+							dataProvider="{dataProvider}" 
+							allowMultipleSelection="false"
+							horizontalScrollPolicy="off"
+							borderVisible="false"
+							width="100%" height="100%" 
+							skinClass="com.gazuntite.skins.controls.scrollbar.communication.ProviderListSkin"
+							itemRenderer="com.gazuntite.history.view.itemRenderer.HistoryListIR"
+							/>
+				</s:BorderContainer>
+				<s:Group  width="100%" height="100%" >
+					<components2:PleaseSelectView label="Select any Provider To view record" width="90%" horizontalCenter="0" verticalCenter="0"/>
+				</s:Group>
+				
+				<s:Group  width="100%" height="100%" >
+					<s:Label text="No Record Found" horizontalCenter="0" verticalCenter="0" fontSize="14" fontFamily="CalibriCFFBold" color="0xFFFFFF"/>
+				</s:Group>
+				
+			</s:ArrayList>
+		</components:LabelViewStack>
+		
+	</s:SkinnableContainer>
+</s:Group>

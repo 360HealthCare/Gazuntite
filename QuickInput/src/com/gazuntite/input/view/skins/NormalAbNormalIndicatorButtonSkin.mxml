@@ -1,0 +1,61 @@
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="75" height="16">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Group x="0" y="0">
+		<s:Rect x="0.5" y="0.5" width="74" height="15"
+				visible.disabledAndSelected="false"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#3167A2" joints="miter" miterLimit="4"
+									weight="1"/>
+			</s:stroke>
+			<s:fill>
+				<s:SolidColor color="#3B7CC4"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#333333"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText x="16" y="3" color="#FFFFFF" fontFamily="Arial" fontSize="12" lineHeight="120%"
+					tabStops="S0" text="Normal"
+					visible.disabledAndSelected="false"
+					visible.downAndSelected="false"
+					visible.overAndSelected="false"
+					visible.upAndSelected="false"/>
+		<s:Rect includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" x="0.5" y="0.5" width="74"
+				height="15">
+			<s:fill>
+				<s:SolidColor color="#C4413B"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+			<s:stroke>
+				<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90"
+										weight="1">
+					<s:GradientEntry alpha="1.0" color="#A23531" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#A23531" ratio="1"/>
+				</s:LinearGradientStroke>
+			</s:stroke>
+		</s:Rect>
+		<s:RichText includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" x="10" y="3" color="#FFFFFF" fontFamily="Arial"
+					fontSize="12" tabStops="S0" text="Abnormal"/>
+	</s:Group>
+</s:Skin>

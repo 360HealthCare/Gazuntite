@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:general="com.gazuntite.input.view.inputsections.history.comprehensive.general.*" 
+					  xmlns:family="com.gazuntite.input.view.inputsections.history.comprehensive.family.*" 
+					  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*"
+					  creationComplete="CC(event)" xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  xmlns:components1="com.gazuntite.common.view.components.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.social.CommonAddictionDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientMartialStatusDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientSocialHistoryOtherDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientWorkStatusDTO;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			public const TAB_TOBACCO:String = "TAB_TOBACCO";
+			public const TAB_ALCOHOL:String = "TAB_ALCOHOL";
+			public const TAB_DRUGS:String = "TAB_DRUGS";
+			public const TAB_WORK:String = "TAB_WORK";
+			public const TAB_MARITAL:String = "TAB_MARITAL";
+			public const TAB_OTHER:String = "TAB_OTHER";
+			
+			[Bindable]
+			private var bgColor:uint = 0x83A3FE;
+			
+			[Bindable]	public var curTab:String = TAB_TOBACCO;
+			
+			[Bindable]
+			public var currentTabState:int = 0;
+			
+			private var commonDTO:CommonAddictionDTO;
+			
+			[Bindable]
+			private var containerHeight:Number = 180;
+					
+			[Bindable]
+			public var isTabSelected:Boolean = false;
+			
+			protected function CC(event:FlexEvent):void
+			{	
+				id_tobacco.uiToggleButton.selected = false;
+				id_alcohol.uiToggleButton.selected = false;
+				id_drugs.uiToggleButton.selected = false;
+				id_work.uiToggleButton.selected = false;
+				id_other.uiToggleButton.selected = false;
+				
+				id_tobacco.id_container.right = 7;
+				
+				addEventListener("clearSocialHistoryForm", clearSocialHistoryFormHandler, false, 0, true);
+				
+				addEventListener("switchSocialCategory",switchCategory);
+			}
+			
+			private function switchCategory(event:GeneralEvent):void
+			{	
+				switch(event.value)
+				{					
+					case 1:
+					{						
+						selectTab(TAB_ALCOHOL);
+						id_alcohol.onTabSelectionChange(null);	
+						id_Social.currentCategory = QIConstants.SOCIAL_ALCOHOL_MODULE_NAME;
+						break;
+					}
+					case 2:
+					{
+						selectTab(TAB_DRUGS);
+						id_drugs.onTabSelectionChange(null);
+						id_Social.currentCategory = QIConstants.SOCIAL_DRUGS_MODULE_NAME;
+						break;
+					}
+					case 3:
+					{
+						selectTab(TAB_WORK);
+						id_work.onTabSelectionChange(null);
+						id_Social.currentCategory = QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME;
+						break;
+					}
+					case 4:
+					{						
+						selectTab(TAB_MARITAL);
+						id_marital.onTabSelectionChange(null);
+						id_Social.currentCategory = QIConstants.SOCIAL_MARITAL_STATUS_MODULE_NAME;
+						break;
+					}
+					case 5:
+					{						
+						selectTab(TAB_OTHER);
+						id_other.onTabSelectionChange(null);
+						id_Social.currentCategory = QIConstants.SOCIAL_OTHER_MODULE_NAME;
+						break;
+					}
+				}
+			}
+			
+			public function selectTab(selectedTab:String):void
+			{
+				curTab = selectedTab;
+				
+				isTabSelected = true;
+				
+				switch (curTab)
+				{
+					case TAB_TOBACCO:
+						id_Social.currentCategory = QIConstants.SOCIAL_TOBACCO_MODULE_NAME;
+						id_Social.selectType(1);
+						id_Social.selectUsageAmount(1);
+						//bgColor = 0x83A3FE;
+						containerHeight = 180;
+						if(model.patientSocialHistoryDTO.TobaccoAddictionList && model.patientSocialHistoryDTO.TobaccoAddictionList.length)
+						{
+							commonDTO = getCommonDTO(model.patientSocialHistoryDTO.TobaccoAddictionList.getItemAt(0) as CommonAddictionDTO,1);
+							commonDTO.ModifiedBy = model.LoggedInUserId;
+							commonDTO.ModifiedAt = new Date().toString();							
+							id_Social.tobaccoAddictionDTO = commonDTO;
+						}
+						else
+						{
+							id_Social.tobaccoAddictionDTO = new CommonAddictionDTO();
+							id_Social.tobaccoAddictionDTO.CreatedBy = model.LoggedInUserId;
+							id_Social.tobaccoAddictionDTO.CreatedAt = new Date().toString();
+							id_Social.tobaccoAddictionDTO.addictionName = QIConstants.SOCIAL_TOBACCO_MODULE_NAME;
+						}						
+						
+						break;
+					case TAB_ALCOHOL:
+						id_Social.currentCategory = QIConstants.SOCIAL_ALCOHOL_MODULE_NAME;		
+						id_Social.selectType(2);
+						id_Social.selectUsageAmount(2);
+						//bgColor = 0x83A3FE;
+						containerHeight = 180;
+						if(model.patientSocialHistoryDTO.AlcoholAddictionList && model.patientSocialHistoryDTO.AlcoholAddictionList.length)
+						{
+							commonDTO = getCommonDTO(model.patientSocialHistoryDTO.AlcoholAddictionList[0] as CommonAddictionDTO,2);
+							commonDTO.ModifiedBy = model.LoggedInUserId;
+							commonDTO.ModifiedAt = new Date().toString();
+							id_Social.alcoholAddictionDTO = commonDTO;
+						}
+						else
+						{
+							id_Social.alcoholAddictionDTO = new CommonAddictionDTO();
+							id_Social.alcoholAddictionDTO.CreatedBy = model.LoggedInUserId;
+							id_Social.alcoholAddictionDTO.CreatedAt = new Date().toString();
+							id_Social.alcoholAddictionDTO.addictionName = QIConstants.SOCIAL_ALCOHOL_MODULE_NAME;
+						}
+						
+						break;
+					case TAB_DRUGS:
+						id_Social.currentCategory = QIConstants.SOCIAL_DRUGS_MODULE_NAME;
+						id_Social.selectType(3);
+						id_Social.selectUsageAmount(3);
+						//bgColor = 0x83A3FE;
+						containerHeight = 180;
+						if(model.patientSocialHistoryDTO.DrugAddictionList && model.patientSocialHistoryDTO.DrugAddictionList.length)
+						{
+							commonDTO = getCommonDTO(model.patientSocialHistoryDTO.DrugAddictionList[0] as CommonAddictionDTO,3);
+							commonDTO.ModifiedBy = model.LoggedInUserId;
+							commonDTO.ModifiedAt = new Date().toString();
+							id_Social.drugsAddictionDTO = commonDTO;
+						}
+						else
+						{
+							id_Social.drugsAddictionDTO = new CommonAddictionDTO();
+							id_Social.drugsAddictionDTO.CreatedBy = model.LoggedInUserId;
+							id_Social.drugsAddictionDTO.CreatedAt = new Date().toString();
+							id_Social.drugsAddictionDTO.addictionName = QIConstants.SOCIAL_DRUGS_MODULE_NAME;
+						}
+						
+						break;
+					 case TAB_WORK:
+						 id_Social.currentCategory = QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME;
+						 //bgColor = 0xC5CACF;
+						 containerHeight = 210;
+						 if(model.patientSocialHistoryDTO.WorkStatusList && model.patientSocialHistoryDTO.WorkStatusList.length)
+						 {
+							 id_Social.workStatusDTO = getWSDTO(model.patientSocialHistoryDTO.WorkStatusList[0] as PatientWorkStatusDTO);
+						 }
+						 else
+						 {
+							 id_Social.workStatusDTO = new PatientWorkStatusDTO();
+							 id_Social.workStatusDTO.CreatedBy = model.LoggedInUserId;
+							 id_Social.workStatusDTO.CreatedAt = new Date().toString();
+						 }
+						 
+						break;
+					case TAB_MARITAL:
+						id_Social.currentCategory = QIConstants.SOCIAL_MARITAL_STATUS_MODULE_NAME;
+						//bgColor = 0xC5CACF;
+						containerHeight = 240;
+						if(model.patientSocialHistoryDTO.MaritalStatusList && model.patientSocialHistoryDTO.MaritalStatusList.length)
+						{
+							id_Social.maritalStatusDTO = getMaritalDTO(model.patientSocialHistoryDTO.MaritalStatusList[0] as PatientMartialStatusDTO);
+						}
+						else
+						{
+							id_Social.maritalStatusDTO = new PatientMartialStatusDTO();
+							id_Social.maritalStatusDTO.CreatedBy = model.LoggedInUserId;
+							id_Social.maritalStatusDTO.CreatedAt = new Date().toString();
+						}
+						
+						break;
+					case TAB_OTHER:
+						id_Social.currentCategory = QIConstants.SOCIAL_OTHER_MODULE_NAME;
+						//bgColor = 0x83A3FE;
+						containerHeight = 220;
+						if(model.patientSocialHistoryDTO.OtherList && model.patientSocialHistoryDTO.OtherList.length)
+						{
+							id_Social.otherDTO = getOtherDTO(model.patientSocialHistoryDTO.OtherList[0] as PatientSocialHistoryOtherDTO);
+						}
+						else
+						{
+							id_Social.otherDTO = new PatientSocialHistoryOtherDTO();
+							id_Social.otherDTO.CreatedBy = model.LoggedInUserId;
+							id_Social.otherDTO.CreatedAt = new Date().toString();
+						}
+						
+						break; 
+					default:
+						Alert.show("Unknown Tab", "Error");
+				}
+			}
+			
+			private function getOtherDTO(otherDTO:PatientSocialHistoryOtherDTO):PatientSocialHistoryOtherDTO
+			{
+				var newDTO:PatientSocialHistoryOtherDTO = new PatientSocialHistoryOtherDTO();
+				
+				newDTO.CreatedAt = otherDTO.CreatedAt;
+				newDTO.CreatedBy = otherDTO.CreatedBy;
+				newDTO.DictationID = otherDTO.DictationID;
+				newDTO.ID = otherDTO.ID;
+				newDTO.isNone = otherDTO.isNone;
+				newDTO.OtherNotes = otherDTO.OtherNotes;
+				newDTO.ModifiedBy = model.LoggedInUserId;
+				newDTO.ModifiedAt = new Date().toString();
+				
+				return newDTO
+			}
+			
+			private function getMaritalDTO(maritalDTO:PatientMartialStatusDTO):PatientMartialStatusDTO
+			{
+				var newDTO:PatientMartialStatusDTO = new PatientMartialStatusDTO();
+				
+				newDTO.CreatedAt = maritalDTO.CreatedAt;
+				newDTO.CreatedBy = maritalDTO.CreatedBy;
+				newDTO.DictationID = maritalDTO.DictationID;
+				newDTO.ID = maritalDTO.ID;
+				newDTO.isNone = maritalDTO.isNone;
+				newDTO.MartialStatusID = maritalDTO.MartialStatusID;
+				newDTO.MartialStatusNotes = maritalDTO.MartialStatusNotes;
+				newDTO.ModifiedBy = model.LoggedInUserId;
+				newDTO.ModifiedAt = new Date().toString();
+				
+				return newDTO
+			}
+			
+			private function getWSDTO(wsDTO:PatientWorkStatusDTO):PatientWorkStatusDTO
+			{
+				var newDTO:PatientWorkStatusDTO = new PatientWorkStatusDTO();
+				
+				newDTO.CreatedAt  = wsDTO.CreatedAt;
+				newDTO.CreatedBy  = wsDTO.CreatedBy;
+				newDTO.DictationID  = wsDTO.DictationID;
+				newDTO.EmployementStatusID  = wsDTO.EmployementStatusID;
+				newDTO.ID  = wsDTO.ID;
+				newDTO.isNone  = wsDTO.isNone;
+				newDTO.isWorkStatusEmployedFullTime  = wsDTO.isWorkStatusEmployedFullTime;
+				newDTO.Notes  = wsDTO.Notes;
+				newDTO.WorkStatusEmployedEmployerInfo  = wsDTO.WorkStatusEmployedEmployerInfo;
+				newDTO.WorkStatusUnEmployedDate  = wsDTO.WorkStatusUnEmployedDate;
+				newDTO.WorkStatusUnEmployedinfo  = wsDTO.WorkStatusUnEmployedinfo;
+				newDTO.ModifiedBy = model.LoggedInUserId;
+				newDTO.ModifiedAt = new Date().toString();
+				
+				return newDTO
+			}
+			
+			private function getCommonDTO(source:CommonAddictionDTO, addictionID:int):CommonAddictionDTO
+			{
+				var newDTO:CommonAddictionDTO = new CommonAddictionDTO();
+				
+				newDTO.AddictionStatusID = source.AddictionStatusID;
+				newDTO.Amount = source.Amount;
+				newDTO.AmountID = source.AmountID;
+				newDTO.CreatedAt = source.CreatedAt;
+				newDTO.CreatedBy = source.CreatedBy;
+				newDTO.DictationID = source.DictationID;
+				newDTO.EndDate = source.EndDate;
+				newDTO.ID = source.ID;
+				newDTO.isCounseled = source.isCounseled;
+				newDTO.isNone = source.isNone;
+				newDTO.isPresent = source.isPresent;
+				newDTO.ModifiedAt = source.ModifiedAt;
+				newDTO.ModifiedBy = source.ModifiedBy;
+				newDTO.Notes = source.Notes;
+				newDTO.onset = source.onset;
+				newDTO.Type = source.Type;
+				newDTO.TypeID = source.TypeID;
+				
+				if(addictionID == 1)
+					newDTO.addictionName = QIConstants.SOCIAL_TOBACCO_MODULE_NAME;
+				else if(addictionID == 2)
+					newDTO.addictionName = QIConstants.SOCIAL_ALCOHOL_MODULE_NAME;
+				if(addictionID == 3)
+					newDTO.addictionName = QIConstants.SOCIAL_DRUGS_MODULE_NAME;
+				
+				return newDTO
+			}
+			
+			public function clearSocialHistoryFormHandler(event:Event):void
+			{
+				if(!id_tobacco) return;
+				
+				id_tobacco.uiToggleButton.selected = false;
+				id_tobacco.id_yes.selected = false;
+				id_tobacco.id_no.selected = false;
+				id_alcohol.uiToggleButton.selected = false;
+				id_alcohol.id_yes.selected = false;
+				id_alcohol.id_no.selected = false;
+				id_drugs.uiToggleButton.selected = false;
+				id_drugs.id_yes.selected = false;
+				id_drugs.id_no.selected = false;
+				id_work.uiToggleButton.selected = false;
+				id_work.id_yes.selected = false;
+				id_work.id_no.selected = false;
+				id_marital.uiToggleButton.selected = false;
+				id_marital.id_yes.selected = false;
+				id_marital.id_no.selected = false;
+				id_other.uiToggleButton.selected = false;
+				id_other.id_yes.selected = false;
+				id_other.id_no.selected = false;
+				
+				id_tobacco.id_container.right = 7;
+				id_alcohol.id_container.right = 7;
+				id_drugs.id_container.right = 7;
+				id_work.id_container.right = 7;
+				id_marital.id_container.right = 7;
+				id_other.id_container.right = 7;
+				
+				id_Social.clearForm();
+				
+				isTabSelected = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:HorizontalLayout
+			gap="-2" horizontalAlign="left"
+			paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+			/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup	gap="0"	width="150"	>
+		<skins:SideTabButton id="id_tobacco" label="Tobacco" width="100%"
+										tabSelected="{curTab==TAB_TOBACCO}"
+										tabState="@{currentTabState}"
+										click="selectTab(TAB_TOBACCO)"
+										/>
+		<skins:SideTabButton id="id_alcohol" label="Alcohol" width="100%"
+										tabSelected="{curTab==TAB_ALCOHOL}"
+										tabState="@{currentTabState}"
+										click="selectTab(TAB_ALCOHOL)"
+										/>
+		<skins:SideTabButton id="id_drugs" label="Drugs" width="100%"
+										tabSelected="{curTab==TAB_DRUGS}"
+										tabState="@{currentTabState}"
+										click="selectTab(TAB_DRUGS)"
+										/>
+		<skins:SideTabButton id="id_work" label="Work Status" width="100%"
+										  tabSelected="{curTab==TAB_WORK}"
+										  tabState="@{currentTabState}"
+										  click="selectTab(TAB_WORK)"
+										  />
+		<skins:SideTabButton id="id_marital" label="Marital Status" width="100%"
+										tabSelected="{curTab==TAB_MARITAL}"
+										tabState="@{currentTabState}"
+										click="selectTab(TAB_MARITAL)"
+										/>
+		<skins:SideTabButton id="id_other" label="Other" width="100%"
+										  tabSelected="{curTab==TAB_OTHER}"	
+										  tabState="@{currentTabState}"
+										  click="selectTab(TAB_OTHER)"
+										  />
+	</s:VGroup>
+	
+	<s:BorderContainer width="100%" height="{containerHeight}"
+					   backgroundColor="{bgColor}" borderVisible="false" left="0" top="0" right="0" bottom="0" cornerRadius="3"  >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="2" strength="1"/>
+		</s:filters>
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="{isTabSelected? 'top' : 'middle' }"  />
+		</s:layout>
+		<s:Group width="100%" includeInLayout="{!isTabSelected}" visible="{!isTabSelected}" >			
+			<components1:PleaseSelectView label="Select a category to view" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+		</s:Group>
+		<social:SocialItemEditDetailView id="id_Social" 
+										 width="100%" height="100%" 
+										 setTabState="{currentTabState}"
+										 includeInLayout="{isTabSelected}"
+										 visible="{isTabSelected}"
+										 isTabSelected="{isTabSelected}"
+										 />
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

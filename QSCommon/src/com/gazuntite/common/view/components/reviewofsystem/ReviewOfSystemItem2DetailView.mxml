@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:view="com.gazuntite.dictation.view.*"
+		 show="group1_showHandler(event)" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.skins.controls.button.Dictation_TB;
+			import com.gazuntite.skins.controls.button.Dictation_TB_Redbubble;
+			import com.gazuntite.skins.controls.button.Notes_TB2;
+			import com.gazuntite.skins.controls.button.Notes_TB2_Redbubble;
+			
+			import mx.events.FlexEvent;
+			
+			private var m_odataItem:IReviewOfSystemItem;
+			[Bindable]	protected var viewModel:PatientInputPhysicalReviewOfSystemViewModel = PatientInputPhysicalReviewOfSystemViewModel.getInstance();
+			[Bindable]	public var selectedItemRow:int = 0;
+			[Bindable]  public var listItemHeight:int = 27;
+			[Bindable]	public var tabWidth:int = 160;
+			[Bindable]	public var topOffset:int = 0;
+			[Bindable]	public var tabButtonOffset:int = 108;
+			[Bindable]	protected var inRecordModel:Boolean = false;
+			[Bindable]	protected var allowInput:Boolean = false;
+			[Bindable]	public var SecondLevelCategoryLeft:int = 0;
+			[Bindable]	public var SecondLevelButtonCategoryLeft:int = 0;
+			
+			[Bindable]
+			public function get dataItem():IReviewOfSystemItem
+			{
+				return m_odataItem;
+			}
+			
+			public function set dataItem(value:IReviewOfSystemItem):void
+			{
+				//id_DictationView = new DictationView();
+				
+				/* if(id_DictationView)
+				{
+				id_DictationView.resetToDefault();
+				//id_DictationView.SetPlayButtonMode();
+				} */
+				
+				m_odataItem = value;
+				onNoteChange = value.Note;
+				
+				inRecordModel = false;
+				
+				if(id_DictationView)
+				{				
+					id_DictationView.callLater(id_DictationView.SetPlayButtonMode4ROS);
+				}
+				
+				/* if(id_DictationView)
+				id_DictationView.resetToDefault(); */
+			}
+			
+			protected function onDetailLevelSelectionChange(event:Event):void
+			{
+				viewModel.rosDetailSelectedItemIndex=-1;
+			}
+			
+			protected function onNormalClick(event:MouseEvent):void
+			{
+				allowInput = event.currentTarget.selected;
+				
+				if( event.currentTarget.selected )
+				{
+					dataItem.IsNormal = QSConstants.STRING_TRUE;
+					dataItem.IsAbNormal = QSConstants.STRING_FALSE;
+					dataItem.IsDirty = true;
+				}
+				else
+				{
+					dataItem.IsNormal = '';
+					dataItem.IsAbNormal = '';
+					dataItem.IsDirty = false;
+				}
+				
+				var ge:GeneralEvent = new GeneralEvent("childChanged", true);
+				ge.value = dataItem;
+				event.currentTarget.dispatchEvent( ge );
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			protected function onAbNormalClick(event:MouseEvent):void
+			{
+				allowInput = event.currentTarget.selected;
+				if(event.currentTarget.selected)
+				{
+					dataItem.IsNormal 	= QSConstants.STRING_FALSE;
+					dataItem.IsAbNormal = QSConstants.STRING_TRUE;
+					dataItem.IsDirty = true;
+				}
+				else
+				{
+					dataItem.IsNormal = '';
+					dataItem.IsAbNormal = '';
+					dataItem.IsDirty = false;
+				}
+				
+				var ge:GeneralEvent = new GeneralEvent("childChanged", true);
+				ge.value = dataItem;
+				event.currentTarget.dispatchEvent( ge );
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			protected function group1_showHandler(event:FlexEvent):void
+			{
+				if( null != dataItem )
+				{
+					allowInput = ( dataItem.IsNormal == QSConstants.STRING_TRUE ) || ( dataItem.IsAbNormal == QSConstants.STRING_TRUE );
+					
+					ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+				}
+			}
+			
+			private function set onNoteChange(value:String):void
+			{
+				ReviewOfSystemHelper.setButtonSkin( dataItem, id_btnNormal, id_btnAbnormal );
+			}
+			
+			protected function handleSave():void
+			{
+				dispatchEvent( new GeneralEvent( "plusClick", true ) );			
+				
+				//MoveToNextPanel();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="{dataItem.Note}" destination="onNoteChange" />
+	<fx:Binding source="{dataItem.DictationID}" destination="onNoteChange" />
+	
+	<s:filters>
+		<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"	distance="1" hideObject="false" inner="false" knockout="false"	quality="2" strength="1"/>
+	</s:filters>
+	
+	<s:Group x="{-(tabWidth + SecondLevelCategoryLeft)}" y="{selectedItemRow*listItemHeight+topOffset}"	>
+		<s:ToggleButton 
+			label="{dataItem.label.toUpperCase()}" width="190"
+			skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.AvgWeightTB1"
+			selected="@{viewModel.showRosItemLevel2DetailView}"
+			change="onDetailLevelSelectionChange(event)"
+			buttonMode="true"	toolTip="{dataItem.label.toUpperCase()}"
+			/>
+		
+		<s:ToggleButton id="id_btnNormal" 
+						left="{tabButtonOffset + SecondLevelButtonCategoryLeft}" verticalCenter="0"
+						skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.NTB1"
+						click="onNormalClick(event)"
+						selected="{dataItem.IsNormal == QSConstants.STRING_TRUE}"
+						buttonMode="true" toolTip="Normal" />
+		
+		<s:ToggleButton id="id_btnAbnormal" 
+						left="{tabButtonOffset + 20 + SecondLevelButtonCategoryLeft}" verticalCenter="0"
+						skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.ATB1"
+						click="onAbNormalClick(event)"
+						selected="{dataItem.IsAbNormal == QSConstants.STRING_TRUE }"
+						buttonMode="true" toolTip="Abnormal"/>
+	</s:Group>
+	
+	
+	<s:Rect x="0" y="4" width="100%" height="100%" alpha="1" radiusX="3">
+		<!--		<s:filters>
+		<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+		distance="1" hideObject="false" inner="false" knockout="false"
+		quality="2" strength="1"/>
+		</s:filters>
+		-->		<s:fill>
+					<s:LinearGradient rotation="0">
+						<s:GradientEntry alpha="1" color="0x83A3FE" ratio="0"/>
+						<s:GradientEntry alpha="1" color="0xA0B9FE" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+	</s:Rect>		
+	<!-- background -->
+	<s:BorderContainer left="2" top="4" right="8" bottom="4" cornerRadius="3" borderVisible="false" backgroundAlpha="0" backgroundColor="#FFEE8B">
+		<s:layout>
+			<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingTop="5" paddingBottom="4"	verticalAlign="top" horizontalAlign="right" gap="0"	/>
+		</s:layout>
+		
+		<s:HGroup width="100%" horizontalAlign="right" gap="4" paddingRight="6" verticalAlign="middle">
+			<s:Label text="{dataItem.label.toUpperCase()}" width="100%" maxDisplayedLines="1" showTruncationTip="true" fontFamily="Calibri" fontSize="14" fontWeight="bold"/>
+		</s:HGroup>
+		
+		<s:Group width="100%" height="100%"	 visible="{allowInput &amp;&amp; (!inRecordModel)}" includeInLayout="{allowInput &amp;&amp; (!inRecordModel)}"  >
+			<s:Rect left="4" right="4" top="4" bottom="4" alpha="1" radiusX="3">
+				<s:fill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+						<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+					</s:LinearGradient>
+				</s:fill>
+				<s:filters>
+					<s:GlowFilter alpha="1.0" blurX="8" blurY="8" color="#0000FF" inner="false"
+								  knockout="false" quality="3" strength="1"/>
+				</s:filters>
+			</s:Rect>				
+			<s:TextArea prompt="Enter Notes" text="@{dataItem.Note}" 
+						left="6" right="6" top="6" bottom="6" 
+						borderVisible="false" contentBackgroundAlpha="0" fontFamily="CalibriCFF" fontStyle="normal" color="0x666666"
+						maxChars="500"/>
+		</s:Group>
+		
+		<s:SkinnableContainer id="uiDictationContainer" 
+							  width="100%" height="100%"	  
+							  visible="{allowInput &amp;&amp; inRecordModel}" includeInLayout="{allowInput &amp;&amp; inRecordModel}"
+							  skinClass="com.gazuntite.skins.controls.container.DictationNoteHightSkin"  >
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="top" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+			</s:layout>
+			
+			<view:DictationView id="id_DictationView" 
+								IsEditable="true" DictationID="@{dataItem.DictationID}" visible="{inRecordModel}" includeInLayout="{inRecordModel}"/>
+		</s:SkinnableContainer>
+		
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="bottom" gap="4" paddingRight="6" visible="{allowInput}" >
+			<!--<s:Button skinClass="com.gazuntite.skins.controls.button.eLab.AttachBtnSkin"
+			buttonMode="true" useHandCursor="true" toolTip="Attachment"
+			/>-->
+			<s:ToggleButton id="id_showDictaion" 
+							selected="@{inRecordModel}" 
+							skinClass="{ dataItem.DictationID == QSConstants.GUID_FORMAT ? Dictation_TB:Dictation_TB_Redbubble}"
+							buttonMode="true" useHandCursor="true" toolTip="Record Level Dictation"
+							
+							/>
+			<s:ToggleButton id="id_showNote" 
+							skinClass="{ dataItem.Note.length > 0 ? Notes_TB2_Redbubble:Notes_TB2}"
+							selected="{!inRecordModel}" change="inRecordModel = !id_showNote.selected"
+							buttonMode="true" useHandCursor="true" toolTip="Record Level Notes"
+							/>
+			<s:Button 
+				skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin" 
+				toolTip="Save"
+				click="handleSave()"
+				buttonMode="true" useHandCursor="true"/>
+			
+		</s:HGroup>
+	</s:BorderContainer>
+</s:Group>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="20" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="creComp()">
+	<!--
+	Author : TA
+	Date   : 11/06/2012
+	Place  : Zigron Inc
+	-->
+	<fx:Declarations>
+		<mx:DateFormatter id="formatter" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.TextInput;
+			import mx.events.CalendarLayoutChangeEvent;
+			
+			import spark.events.TextOperationEvent;
+			
+			private var _selectedDate:Date;
+			private var _text:String='';
+			private var _propmt:String='DOB';
+			
+			//---- creation Complete ----------
+			private function creComp():void
+			{
+				id_dob.tabIndex = tabIndex;
+			}
+			//--At the initlize of datefield hide the Textinput ---
+			protected function init():void 
+			{
+				var tf:TextInput = df.mx_internal::getTextInput();
+				tf.visible = false;
+				tf.includeInLayout = false;
+			}
+			//-- date change handler ---
+			protected function df_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+				id_dob.text 	= formatter.format(df.selectedDate.toString());
+				text 			= id_dob.text;
+				
+				selectedDate   = df.selectedDate;
+			}
+			// -- Text Input Change handler and apply masking on it -------
+			protected function id_txt_changeHandler(event:TextOperationEvent):void
+			{
+				var s:String	= id_dob.text.replace(/[^0-9]/g,"");
+				id_dob.text 	= s.substring(0,2) + (s.length>2?"/"+s.substring(2,4) + (s.length>4?"/"+s.substring(4,8):""):"");
+				id_dob.selectRange(id_dob.text.length, id_dob.text.length);
+				
+				text 			= id_dob.text;
+				
+				if(text.length)
+				{
+					selectedDate = null;
+				}
+				else
+				{
+					text = '';
+				}
+			}
+			
+			[Bindable]
+			public function get selectedDate():Date
+			{
+				return _selectedDate;
+			}
+			
+			public function set selectedDate(value:Date):void
+			{
+				_selectedDate = value;
+			}
+			
+			[Bindable]
+			public function get text():String
+			{
+				return _text;
+			}
+			
+			public function set text(value:String):void
+			{
+				_text = value;
+				if(_text.length)
+					id_dob.text = _text;
+			}
+			
+			[Bindable]
+			public function get propmt():String
+			{
+				return _propmt;
+			}
+			
+			public function set propmt(value:String):void
+			{
+				_propmt = value;
+			}
+			//---- clear date--------
+			public function clearDob():void
+			{
+				if(text.length > 0)
+					text = '';
+				if(selectedDate)
+					selectedDate = null;
+				if(id_dob.text.length)
+					id_dob.text = '';
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="left" verticalAlign="top" gap="2"/>
+	</s:layout>
+	<components:LabelTextInput id="id_dob" 
+							   width="100%" prompt="{propmt}" change="id_txt_changeHandler(event)" toolTip="DOB"
+							   required="true"/>
+	<mx:DateField id="df" 
+				  initialize="init()" width="20" change="df_changeHandler(event)" selectableRange="{{rangeEnd:new Date()}}"
+				  toolTip="Select Date of Birth" yearNavigationEnabled="true" 
+				  maxYear="{new Date().getFullYear()}" minYear="1901" focusEnabled="false" />
+</s:Group>

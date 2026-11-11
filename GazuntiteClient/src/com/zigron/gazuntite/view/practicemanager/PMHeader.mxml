@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:HorizontalLayout paddingRight="5" paddingLeft="5" verticalAlign="middle"  gap="0" />
+	</s:layout>
+	
+	<s:RichText color="#1C1C1C" fontSize="14" lineHeight="0" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" tabStops="S0 S50 S100" 
+				text="Practice Manager" trackingRight="1%" horizontalCenter="0" verticalCenter="0" fontFamily="Calibri" fontWeight="bold">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	
+	<s:Spacer width="100%" />
+	<s:Button skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin" right="4" verticalCenter="0"
+			  toolTip="More Options"
+			  useHandCursor="true" buttonMode="true"/>
+	
+	
+</s:SkinnableContainer>

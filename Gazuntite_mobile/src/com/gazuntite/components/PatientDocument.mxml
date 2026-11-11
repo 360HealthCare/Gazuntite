@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.components.*"
+		 width="100%" 
+		 height="100%"
+		 creationComplete="init(event)"
+		 xmlns:st="library://ns.tink.ws/flex/spark"
+		 xmlns:containers="ws.tink.spark.containers.*"
+		 xmlns:local="*"
+		 xmlns:itemRenderers="ws.tink.spark.itemRenderers.*" 
+		 xmlns:layouts="ws.tink.spark.layouts.*"
+		 xmlns:itemrenderers="com.gazuntite.components.itemrenderers.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.itemrenderers.QICoverFlowItemRenderer;
+			import com.gazuntite.events.PinViewEvent;
+			import com.gazuntite.skins.PatientExamSkin;
+			import com.riavalue.components.dualpanel.DualPanel;
+			import com.riavalue.layouts.*;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			import spark.components.Image;
+			import spark.components.List;
+			import spark.components.supportClasses.ItemRenderer;
+			import spark.effects.easing.Linear;
+			import spark.events.IndexChangeEvent;
+			
+			import ws.tink.*;
+			
+			[Bindable]
+			protected var dp:ArrayCollection = new ArrayCollection([]);
+			
+			public var title:String = "Patient Document";
+			
+			protected function init(event:FlexEvent):void
+			{
+				// dummy data for test binding
+				var a:ObjectProxy = new ObjectProxy();
+				a.title = "Allergies";
+				a.en = true; // important, in order to work smoothly we need to ensure the first data item is true
+				
+				var b:ObjectProxy = new ObjectProxy();
+				b.title = "Past Medical HX";
+				b.en = false;
+				
+				var c:ObjectProxy = new ObjectProxy();
+				c.title = "Social History";
+				c.en = false;
+				
+				dp.disableAutoUpdate();
+				dp.addItem(a);
+				dp.addItem(b);
+				dp.addItem(c);
+				
+				dp.refresh();
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer width="100%" 
+						  height="100%"
+						  skinClass="com.gazuntite.skins.GradientBackgroundViewSkin">
+		
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		
+		
+		
+	</s:SkinnableContainer>
+	
+</s:Group>

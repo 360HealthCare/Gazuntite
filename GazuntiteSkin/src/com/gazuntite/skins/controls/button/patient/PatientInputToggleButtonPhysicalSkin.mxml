@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:ATE="http://ns.adobe.com/ate/2009"
+		xmlns:ai="http://ns.adobe.com/ai/2009"
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		xmlns:flm="http://ns.adobe.com/flame/2008"
+		xmlns:lib="assets.graphics.*"
+		xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+		width="94" height="32">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Path includeIn="disabled,disabledAndSelected,down,over,overAndSelected,up,upAndSelected"
+			x="0.19" y="-0.41" width="86" height="20.5"
+			data="M 13.06 0 L 53.725 0 L 57.225 0 L 163.14 0 C 165.516 0 166.838 2.027 167.46 4.32 L 176.1 36.18 C 176.722 38.473 174.154 40.5 171.78 40.5 L 57.225 40.5 L 53.725 40.5 L 4.42 40.5 C 2.046 40.5 -0.522 38.473 0.1 36.18 L 8.739 4.32 C 9.362 2.027 10.684 0 13.06 0 Z"
+			width.disabled="94"
+			width.disabledAndSelected="94"
+			visible.down="false"
+			visible.over="false"
+			visible.overAndSelected="false"
+			width.up="94"
+			visible.upAndSelected="false">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#BFBDBD" ratio="0.5098039215686274"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	<s:Path includeIn="disabled,disabledAndSelected,down,over,overAndSelected,up,upAndSelected"
+			x="0.19" y="-0.41" height="20.5"
+			data="M 13.06 0 L 53.725 0 L 57.225 0 L 163.14 0 C 165.516 0 166.838 2.027 167.46 4.32 L 176.1 36.18 C 176.722 38.473 174.154 40.5 171.78 40.5 L 57.225 40.5 L 53.725 40.5 L 4.42 40.5 C 2.046 40.5 -0.522 38.473 0.1 36.18 L 8.739 4.32 C 9.362 2.027 10.684 0 13.06 0 Z"
+			visible.disabled="false" width.disabled="86"
+			visible.disabledAndSelected="false" width.disabledAndSelected="80"
+			width.down="94"
+			width.over="94"
+			visible.overAndSelected="false" width.overAndSelected="80"
+			visible.up="false" width.up="80"
+			visible.upAndSelected="false" width.upAndSelected="80">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="disabled,down" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="2" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#8F646C" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#7A4D55" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#713944" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#713944" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	<s:RichText includeIn="disabled,disabledAndSelected,down,over,up,upAndSelected" x="23.5" y="5.5"
+				color="#000000" fontFamily="Calibri" fontSize="12" fontWeight="bold" tabStops="S0"
+				text="Physical"
+				x.disabled="28" y.disabled="5"
+				x.disabledAndSelected="28" y.disabledAndSelected="5"
+				x.down="24" y.down="5" color.down="#FFFFFF" fontSize.down="14"
+				x.over="24" y.over="4" color.over="#FFFFFF" fontSize.over="14"
+				x.up="28" y.up="5"
+				visible.upAndSelected="false">
+		<s:filters>
+			<s:DropShadowFilter includeIn="over" alpha="0.75" angle="90" blurX="1" blurY="1"
+								color="#000000" distance="1" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="1" blurY="1"
+								color="#000000" distance="1" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	<s:Path includeIn="disabled,down,downAndSelected,over,overAndSelected,up,upAndSelected" x="0.19"
+			y="-0.41" width="80"
+			data="M 13.06 0 L 53.725 0 L 57.225 0 L 163.14 0 C 165.516 0 166.838 2.027 167.46 4.32 L 176.1 36.18 C 176.722 38.473 174.154 40.5 171.78 40.5 L 57.225 40.5 L 53.725 40.5 L 4.42 40.5 C 2.046 40.5 -0.522 38.473 0.1 36.18 L 8.739 4.32 C 9.362 2.027 10.684 0 13.06 0 Z"
+			visible.disabled="false" height.disabled="20.5"
+			visible.down="false" height.down="20.5"
+			width.downAndSelected="94" height.downAndSelected="32"
+			visible.over="false" height.over="20.5"
+			width.overAndSelected="94" height.overAndSelected="32"
+			visible.up="false" height.up="20.5"
+			width.upAndSelected="94" height.upAndSelected="32">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="downAndSelected" alpha="0.75" angle="90" blurX="2"
+								blurY="2" color="#000000" distance="2" hideObject="false"
+								inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#8F646C" ratio="0"
+								 color.overAndSelected="#B27984"/>
+				<s:GradientEntry alpha="1.0" color="#7A4D55" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#713944" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#713944" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	<s:RichText includeIn="downAndSelected,overAndSelected,up,upAndSelected" x="20" y="11"
+				color="#FFFFFF" fontFamily="Calibri" fontSize="14" fontWeight="bold"
+				tabStops="S0 S50" text="PHYSICAL"
+				y.downAndSelected="12"
+				visible.up="false">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

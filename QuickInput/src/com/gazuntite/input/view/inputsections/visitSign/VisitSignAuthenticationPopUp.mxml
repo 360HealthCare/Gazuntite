@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="com.gazuntite.controls.extended.components.*"
+					   width="400" height="130">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.input.event.visit.visit.VerifyUserEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			
+			import flash.profiler.showRedrawRegions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.MoveEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.effects.Move;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _isPopUpShown:Boolean;
+			private var _originName:String;
+			private var _actionName:String = 'visitSigned';
+			private var _visitID:int;
+			private var _signBtnLabel:String = 'Sign';
+			private var _onVisitSignCosignCallback:Function;
+			private var visitSignPopUp:VisitSignPopUp;
+			private var parentPopUp:DisplayObject;
+			
+			
+			public function get originName():String
+			{
+				return _originName;
+			}
+			
+			public function set originName(value:String):void
+			{
+				_originName = value;
+			}
+			
+			public function get actionName():String
+			{
+				return _actionName;
+			}
+			
+			public function set actionName(value:String):void
+			{
+				_actionName = value;
+			}
+			
+			public function get visitID():int
+			{
+				return _visitID;
+			}
+			
+			public function set visitID(value:int):void
+			{
+				_visitID = value;
+			}
+			
+			[Bindable]
+			public function get signBtnLabel():String
+			{
+				return _signBtnLabel;
+			}
+			
+			public function set signBtnLabel(value:String):void
+			{
+				_signBtnLabel = value;
+			}
+			
+			public function get onVisitSignCosignCallback():Function
+			{
+				return _onVisitSignCosignCallback;
+			}
+			
+			public function set onVisitSignCosignCallback(value:Function):void
+			{
+				_onVisitSignCosignCallback = value;
+			}
+			
+			public function onInvalidCredentials(popUpType:String = QIConstants.INVALID_CREDENTIALS):void
+			{
+				id_pwdInput.text = "";
+				id_pwdInput.setFocus();
+			}
+			
+			public function onVisitSignCosignedSuccess(popUpType:String = ""):void
+			{
+				if (onVisitSignCosignCallback)
+					onVisitSignCosignCallback();
+			}
+			
+			override public function ShowPopup(parent:DisplayObject):void
+			{
+				if (!_isPopUpShown)
+				{
+					_isPopUpShown = true;
+					super.ShowPopup(parent);
+					
+					parentPopUp = parent;
+					
+					id_pwdInput.setFocus();
+					
+					FlexGlobals.topLevelApplication.mainContainer.addEventListener(MoveEvent.MOVE, mainContainerMoveHandler, false, 0, true);
+					this.x = FlexGlobals.topLevelApplication.mainContainer.x + (FlexGlobals.topLevelApplication.mainContainer.width - this.width)/2;
+					this.y = FlexGlobals.topLevelApplication.mainContainer.y + (FlexGlobals.topLevelApplication.mainContainer.height - this.height)/2;
+				}
+			}
+			
+			override public function removePopup():void
+			{
+				super.removePopup();
+				
+				id_pwdInput.text = "";
+				
+				_isPopUpShown = false;
+			}
+			
+			private function mainContainerMoveHandler(event:MoveEvent):void
+			{
+				this.x = FlexGlobals.topLevelApplication.mainContainer.x + (FlexGlobals.topLevelApplication.mainContainer.width - this.width)/2;
+				this.y = FlexGlobals.topLevelApplication.mainContainer.y + (FlexGlobals.topLevelApplication.mainContainer.height - this.height)/2;
+			}
+			
+			private function onVerifyUserEventResult(result:String):void
+			{
+				var doShowPopUp:Boolean = false;
+				
+				if (!visitSignPopUp)
+					visitSignPopUp = new VisitSignPopUp();
+				
+				switch (result)
+				{
+					case QIConstants.INVALID_CREDENTIALS:
+						
+						doShowPopUp = true;
+						visitSignPopUp.popUpType = QIConstants.INVALID_CREDENTIALS;
+						visitSignPopUp.callback = onInvalidCredentials;
+						
+						break;
+					
+					case QIConstants.VISIT_SIGNED:
+						
+						doShowPopUp = true;
+						visitSignPopUp.popUpType = QIConstants.VISIT_SIGNED;
+						visitSignPopUp.callback = onVisitSignCosignedSuccess;
+						removePopup();
+						
+						break;
+					
+					case QIConstants.VISIT_CO_SIGNED:
+						
+						doShowPopUp = true;
+						visitSignPopUp.popUpType = QIConstants.VISIT_CO_SIGNED;
+						visitSignPopUp.callback = onVisitSignCosignedSuccess;
+						removePopup();
+						
+						break;
+				}
+				
+				if (doShowPopUp)
+				{
+					visitSignPopUp.ShowPopup(FlexGlobals.topLevelApplication.mainContainer);
+				}
+				
+			}
+			
+			private function signIn():void
+			{		
+				var verifyUserEvent:VerifyUserEvent = new VerifyUserEvent(id_pwdInput.text, visitID, onVerifyUserEventResult, originName, actionName);
+				CairngormEventDispatcher.getInstance().dispatchEvent(verifyUserEvent); 
+			}
+			
+			private function cancelClickHandler():void
+			{
+				removePopup();
+			}
+			
+			private function pwdInputClickHandler():void
+			{
+				id_SignBtn.setFocus();
+			}
+			
+			private function id_SignBtn_keyDownHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode ==Keyboard.ENTER)
+				{
+					signIn();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor>
+				<s:color>#000000</s:color>
+			</s:SolidColor>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke>
+				<s:color>#FFFFFF</s:color>
+				<s:weight>4</s:weight>
+			</s:SolidColorStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:VGroup horizontalAlign="center" verticalAlign="middle" paddingLeft="15" paddingRight="15" paddingTop="25" paddingBottom="25" width="100%">
+		<s:Label id="id_Label" text="Are you sure want to sign the visit?" fontFamily="Calibri" fontSize="11" color="#FFFFFF"/>
+		<components:LabelTextInput id="id_pwdInput" prompt="Type Password to Sign Visit" displayAsPassword="true" width="200" editable="true" click="pwdInputClickHandler()"
+									keyDown="id_SignBtn_keyDownHandler(event)" skinClass="com.adobe.gazuntite.skins.chrome.textInputSkins.LabelTextInputSkin" tabIndex="0"/>
+		
+		<s:HGroup gap="3" paddingTop="20">
+			
+			<s:Button id="id_SignBtn" label="{signBtnLabel}" click="signIn()" keyDown="id_SignBtn_keyDownHandler(event)" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin"
+					  buttonMode="true" toolTip="Sign Visit" tabIndex="1"/>
+			<s:Button id="id_CancelBtn" label="Cancel" click="cancelClickHandler()" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin"
+					  buttonMode="true" toolTip="Cancel" tabIndex="2"/>
+			
+		</s:HGroup>
+	</s:VGroup>
+	
+</components:PopupGroup>

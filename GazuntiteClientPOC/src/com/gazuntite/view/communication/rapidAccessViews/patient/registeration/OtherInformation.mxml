@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009"
+							 xmlns:s="library://ns.adobe.com/flex/spark"
+							 xmlns:mx="library://ns.adobe.com/flex/mx"
+							 xmlns:components="com.zigron.controls.extended.components.*"
+							 
+							 width="100%" creationComplete="cc()" 
+							 title="Other Information" xmlns:registeration="com.gazuntite.view.communication.rapidAccessViews.patient.registeration.*">
+	<components:layout>
+		<s:VerticalLayout gap="1" paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"/>
+	</components:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			import spark.components.ComboBox;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var model:SharedModel = new SharedModel();
+			
+			private var motherPhoneNumberAddMorePopUp:PhoneNumberAddMoreTitleWindow;
+			private var fatherPhoneNumberAddMorePopUp:PhoneNumberAddMoreTitleWindow;
+			private var languageAddMorePopUp:LanguageAddMoreTitleWindow;
+			private var motherPhoneNumbers:ArrayCollection;
+			private var fatherPhoneNumbers:ArrayCollection;
+			private var languages:ArrayCollection;
+			
+			private function cc():void
+			{
+				//languages = new ArrayCollection();
+			}
+			
+			/*public function SetIsDirty():void 
+			{				
+				if(id_Race.selectedIndex !=-1 && model.patientDTO.RaceType != id_Race.selectedItem )
+				{
+					model.patientDTO.IsDirty = true;
+				}
+				if(id_Ethenicity.selectedIndex !=-1 && model.patientDTO.EthinicityType == id_Ethenicity.selectedItem )
+				{
+					model.patientDTO.IsDirty = true;
+				}
+				if(id_Occupation.selectedIndex !=-1 && model.patientDTO.OccupationType == id_Occupation.selectedItem )
+				{
+					model.patientDTO.IsDirty = true;
+				}
+				
+				if( model.patientDTO.MotherMaidenName != id_OtherContactName.text || 
+					model.patientDTO.MedicareNumber != id_Medicare.text ||
+					model.patientDTO.EmployerName != id_Company.text ||
+					model.patientDTO.FatherName != id_OtherContactName1.text )
+				{
+					model.patientDTO.IsDirty = true;
+				}
+				
+				if(id_ExemptReport.selectedIndex!=-1 && model.patientDTO.IsReportingExempt != ( id_ExemptReport.selectedItem == "Yes" ) )
+				{
+					model.patientDTO.IsDirty = true;
+				}
+				
+				if( model.motherPrimaryPhoneDTO.PhoneNumber != id_MotherPhoneNumberAddmore.id_TelNumber.text ||
+					model.motherPrimaryPhoneDTO.Extension != id_MotherPhoneNumberAddmore.id_ExtNumber.text ||
+					( id_MotherPhoneNumberAddmore.id_TelNumberKind.selectedItem && 
+						model.motherPrimaryPhoneDTO.PhoneTypeName != id_MotherPhoneNumberAddmore.id_TelNumberKind.selectedItem.NumberTypeName )
+				)
+				{
+					model.motherPrimaryPhoneDTO.IsDirty = true;
+				}
+				
+				if( model.fatherPrimaryPhoneDTO.PhoneNumber != id_FatherPhoneNumberAddmore.id_TelNumber.text ||
+					model.fatherPrimaryPhoneDTO.Extension != id_FatherPhoneNumberAddmore.id_ExtNumber.text ||
+					( id_FatherPhoneNumberAddmore.id_TelNumberKind.selectedItem && 
+						model.fatherPrimaryPhoneDTO.PhoneTypeName != id_FatherPhoneNumberAddmore.id_TelNumberKind.selectedItem.NumberTypeName )
+				)
+				{
+					model.fatherPrimaryPhoneDTO.IsDirty = true;
+				}
+			}*/
+			
+			/*public function loadDataOtherInfo():void
+			{
+				try
+				{
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.RaceType ) )
+						selectRace( model.patientProfileDTO._PatientDTO.RaceType );  
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.EthinicityType ) )
+						selectEthenicity( model.patientProfileDTO._PatientDTO.EthinicityType ); 
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.MedicareNumber ) )
+						id_Medicare.text = model.patientProfileDTO._PatientDTO.MedicareNumber; 
+					
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.MotherMaidenName ) )
+						id_OtherContactName.text	= model.patientProfileDTO._PatientDTO.MotherMaidenName;	
+					if( ! AppUtils.IsNullOrEmpty( model.motherPrimaryPhoneDTO.PhoneNumber ) )
+						id_MotherPhoneNumberAddmore.id_TelNumber.text 	= id_FatherPhoneNumberAddmore.setPhoneNumberMasking(model.motherPrimaryPhoneDTO.PhoneNumber); 
+					//Start comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.motherPrimaryPhoneDTO.PhoneID ) )
+						id_MotherPhoneNumberAddmore.phoneID = model.motherPrimaryPhoneDTO.PhoneID; 
+					//END comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.motherPrimaryPhoneDTO.Extension ) )
+						id_MotherPhoneNumberAddmore.id_ExtNumber.text 				= model.motherPrimaryPhoneDTO.Extension; 
+					if( ! AppUtils.IsNullOrEmpty( model.motherPrimaryPhoneDTO.NumberTypeName ) )
+						selectPhoneType( model.motherPrimaryPhoneDTO.NumberTypeName, id_MotherPhoneNumberAddmore.id_TelNumberKind ); 
+					
+					model.motherPrimaryPhoneDTO.OwnerTypeID = Constants.MOTHER_OWNER_TYPE_ID;
+					
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.FatherName ) )
+						id_OtherContactName1.text	= model.patientProfileDTO._PatientDTO.FatherName; 
+					if( ! AppUtils.IsNullOrEmpty( model.fatherPrimaryPhoneDTO.PhoneNumber ) )
+						id_FatherPhoneNumberAddmore.id_TelNumber.text = id_FatherPhoneNumberAddmore.setPhoneNumberMasking(model.fatherPrimaryPhoneDTO.PhoneNumber); 
+					//Start comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.fatherPrimaryPhoneDTO.PhoneID ) )
+						id_FatherPhoneNumberAddmore.phoneID = model.fatherPrimaryPhoneDTO.PhoneID; 
+					//END comment - Tahir Alvi -  assign the same Phoen ID that come from DB
+					if( ! AppUtils.IsNullOrEmpty( model.fatherPrimaryPhoneDTO.Extension ) )
+						id_FatherPhoneNumberAddmore.id_ExtNumber.text 				= model.fatherPrimaryPhoneDTO.Extension; 
+					if( ! AppUtils.IsNullOrEmpty( model.fatherPrimaryPhoneDTO.NumberTypeName ) )
+						selectPhoneType( model.fatherPrimaryPhoneDTO.NumberTypeName, id_FatherPhoneNumberAddmore.id_TelNumberKind ); 
+					
+					model.fatherPrimaryPhoneDTO.OwnerTypeID = Constants.FATHER_OWNER_TYPE_ID
+					
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.OccupationType ) )
+						selectOccupation( model.patientProfileDTO._PatientDTO.OccupationType ); 
+					
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO._PatientDTO.EmployerName ) )
+						id_Company.text	= model.patientProfileDTO._PatientDTO.EmployerName;	 
+					
+					if( ! AppUtils.IsNullOrEmpty( model.patientProfileDTO.PatientLanguageList ) )
+					{
+						var pl:PatientLanguageDTO = model.patientProfileDTO.PatientLanguageList.getItemAt( 0 ) as PatientLanguageDTO;
+						if( ! AppUtils.IsNullOrEmpty( pl.LanguageID ) )
+							selectLanguage( pl.LanguageID );
+						
+						if( ! AppUtils.IsNullOrEmpty( pl.Country ) )
+							selectCountery( pl.Country.CountryID );
+						
+						if( ! AppUtils.IsNullOrEmpty( pl.PatientLanguageAbilityMode ) )
+							selectAbilityMode( pl.PatientLanguageAbilityMode.LangaugeAbilityModeDescription );
+						
+						if( ! AppUtils.IsNullOrEmpty( pl.IsPreffered ) )
+							id_LanguageAddMore.id_PrefLang.selected =  pl.IsPreffered ;
+						//set the ID in every upadet case 
+						if(! AppUtils.IsNullOrEmpty(pl.PatientLanguageId))
+							id_LanguageAddMore.PatientLanguageId = pl.PatientLanguageId;
+					}
+					id_ExemptReport.selectedIndex = model.patientProfileDTO._PatientDTO.IsReportingExempt ? 0 : 1;
+				}
+				catch(e:Error)
+				{
+					trace ( "OtherInfo::loadDataEPP", e.message );
+				}
+			}*/
+			
+			/*private function selectRace(g:RaceTypeDTO):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.RaceTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:RaceTypeDTO = list[ i ] as RaceTypeDTO;
+					if( type.RaceName == g.RaceName )
+					{
+						id_Race.selectedItem = type; hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectLanguage(g:int):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.LanguageTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:LanguageTypeDTO = list[ i ] as LanguageTypeDTO;
+					if( type.LanguageID == g )
+					{
+						id_LanguageAddMore.id_Language.selectedItem = type; 
+						hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectCountery(g:int):void
+			{
+				var list:ArrayCollection = model.addressBookStaticDataDTO.AllCountryList;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:CountryDTO = list[ i ] as CountryDTO;
+					if( type.CountryID == g )
+					{
+						id_LanguageAddMore.id_Country.selectedItem = type; 
+						hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectAbilityMode(g:String):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.LanguageAbilityModeDTOList;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:LanguageAbilityModeDTO = list[ i ] as LanguageAbilityModeDTO;
+					if( type.LangaugeAbilityModeDescription == g )
+					{
+						id_LanguageAddMore.id_AbilityMode.selectedItem = type; hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectOccupation(g:OccupationTypeDTO):void
+			{
+				var list:ArrayCollection =  model.registrationStaticDataDTO.OccupationTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:OccupationTypeDTO = list[ i ] as OccupationTypeDTO;
+					if( type.OccupationName == g.OccupationName )
+					{
+						id_Occupation.selectedItem = type; hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectEthenicity(g:EthinicityTypeDTO):void
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.EthinicityTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:EthinicityTypeDTO = list[ i ] as EthinicityTypeDTO;
+					if( type.EthinicityName == g.EthinicityName )
+					{
+						id_Ethenicity.selectedItem = type; hasChange = true;
+						break;
+					}
+				}
+			}
+			
+			private function selectPhoneType( ps:String, combo:ComboBox ):void
+			{
+				var list:ArrayCollection = model.addressBookStaticDataDTO.PhoneNumberTypes;
+				var i:int;
+				for( i = 0; i < list.length; i++ )
+				{
+					var type:PhoneNumberTypeDTO = list[ i ] as PhoneNumberTypeDTO;
+					if( type.NumberTypeName == ps )
+					{
+						combo.selectedItem = type; hasChange = true;
+						break;
+					}
+				}
+			}*/
+			
+			private function collapseButtonMouseClickHandler(event:MouseEvent):void
+			{
+				if (collapsed)
+					hideAllPopUps();
+				else
+					showAllPopUps();
+			}
+			
+			private function motherPhoneNumberAddMoreClickHandler(event:MouseEvent):void
+			{
+				motherPhoneNumbers = new ArrayCollection();
+				
+				if (!motherPhoneNumbers.length)
+				{
+					var result:Object = id_MotherPhoneNumberAddmore.isInValid(true);
+					if (result.hasOwnProperty("isNotValid") && result.isNotValid)
+					{
+						if (result.hasOwnProperty("errorStr") && result.errorStr)
+						{
+							Alert.show(result.errorStr, "Mother phone number entry error", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+							{
+								if (result.hasOwnProperty("toSetFocus") && result.toSetFocus)
+									result.toSetFocus.setFocus();
+							});
+						}
+						Alert.show('Please complete all mandatory mother phone fields','Info');
+						return;
+					}
+					motherPhoneNumbers.addItem(id_MotherPhoneNumberAddmore.getPhoneNumberDetails());
+				}
+				
+				if (!motherPhoneNumberAddMorePopUp)
+					motherPhoneNumberAddMorePopUp = new PhoneNumberAddMoreTitleWindow();
+				
+				// Add all other phone numbers into add more phone popup
+				/* if(model.patientProfileDTO)
+				{
+					if(model.patientProfileDTO.PatientAddressBook)
+					{
+						if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist)
+						{
+							if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length >0 )
+							{
+								for(var p:uint=1; p<model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length; p++)
+								{
+									var phoneDTO:PhoneDTO = model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.getItemAt(p) as PhoneDTO;
+									if(phoneDTO.OwnerTypeID == Constants.MOTHER_OWNER_TYPE_ID && !phoneDTO.IsPrimary)
+									{
+										var obj:Object 						= new Object();
+										var obj2:PhoneNumberTypeDTO			= new PhoneNumberTypeDTO();
+										obj.phoneNumber 					= phoneDTO.PhoneNumber;
+										obj2.NumberTypeName					= phoneDTO.NumberTypeName;
+										obj2.NumberTypeID					= phoneDTO.NumberTypeID;
+										obj.phoneNumberKind					= obj2;
+										obj.phoneExtension 					= phoneDTO.Extension;
+										obj.phoneID 						= phoneDTO.PhoneID;
+										motherPhoneNumbers.addItem(obj);
+									}
+								}
+							}
+						}
+					}
+				} */
+				
+				if (!motherPhoneNumberAddMorePopUp.phoneNumbers)
+					motherPhoneNumberAddMorePopUp.phoneNumbers = motherPhoneNumbers;
+				
+				var btn:Button = Button(event.currentTarget);
+				var pt:Point = btn.parent.localToGlobal(new Point (btn.x, btn.y));
+				pt.x += btn.width/2 - 190;
+				pt.y += btn.height;
+				motherPhoneNumberAddMorePopUp.display(this, pt);
+				motherPhoneNumberAddMorePopUp.id_PhoneNumberAddMore.id_TelNumber.setFocus();
+			}
+			
+			private function fatherPhoneNumberAddMoreClickHandler(event:MouseEvent):void
+			{
+				fatherPhoneNumbers = new ArrayCollection();
+				
+				if (!fatherPhoneNumbers.length)
+				{
+					var result:Object = id_FatherPhoneNumberAddmore.isInValid(true);
+					
+					if (result.hasOwnProperty("isNotValid") && result.isNotValid)
+					{
+						if (result.hasOwnProperty("errorStr") && result.errorStr)
+						{
+							Alert.show(result.errorStr, "Father phone number entry error", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+							{
+								if (result.hasOwnProperty("toSetFocus") && result.toSetFocus)
+								{
+									if (result.toSetFocus)
+										result.toSetFocus.setFocus();
+								}
+							});
+						}
+						Alert.show('Please complete all mandatory father phone fields','Info');
+						return;
+					}
+					fatherPhoneNumbers.addItem(id_FatherPhoneNumberAddmore.getPhoneNumberDetails());
+				}
+				
+				if (!fatherPhoneNumberAddMorePopUp)
+					fatherPhoneNumberAddMorePopUp = new PhoneNumberAddMoreTitleWindow();
+				// Add all other phone numbers into add more phone popup
+				/* if(model.patientProfileDTO)
+				{
+					if(model.patientProfileDTO.PatientAddressBook)
+					{
+						if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist)
+						{
+							if(model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length >0 )
+							{
+								for(var p:uint=1; p<model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.length; p++)
+								{
+									var phoneDTO:PhoneDTO = model.patientProfileDTO.PatientAddressBook.PhoneDTOlist.getItemAt(p) as PhoneDTO;
+									if(phoneDTO.OwnerTypeID == Constants.FATHER_OWNER_TYPE_ID && !phoneDTO.IsPrimary)
+									{
+										var obj:Object 						= new Object();
+										var obj2:PhoneNumberTypeDTO			= new PhoneNumberTypeDTO();
+										obj.phoneNumber 					= phoneDTO.PhoneNumber;
+										obj2.NumberTypeName					= phoneDTO.NumberTypeName;
+										obj2.NumberTypeID					= phoneDTO.NumberTypeID;
+										obj.phoneNumberKind					= obj2;
+										obj.phoneExtension 					= phoneDTO.Extension;
+										obj.phoneID 						= phoneDTO.PhoneID;
+										fatherPhoneNumbers.addItem(obj);
+									}
+								}
+							}
+						}
+					}
+				} */
+				if (!fatherPhoneNumberAddMorePopUp.phoneNumbers)
+					fatherPhoneNumberAddMorePopUp.phoneNumbers = fatherPhoneNumbers;
+				
+				var btn:Button = Button(event.currentTarget);
+				var pt:Point = btn.parent.localToGlobal(new Point (btn.x, btn.y));
+				pt.x += btn.width/2 - 190;
+				pt.y += btn.height;
+				fatherPhoneNumberAddMorePopUp.display(this, pt);
+				fatherPhoneNumberAddMorePopUp.id_PhoneNumberAddMore.id_TelNumber.setFocus();
+			}
+			
+			private function languageAddMoreClickHandler(event:MouseEvent):void
+			{
+				if(languages == null)
+					languages= new ArrayCollection();
+				
+				if (!id_LanguageAddMore.isGetEdited())
+				{
+					Alert.show("Kindly select at least one language.\n", "Language selection alert", 4, FlexGlobals.topLevelApplication.mainContainer, function():void{
+						id_LanguageAddMore.id_Language.setFocus();
+					});
+					return;
+				}
+				
+				if(!languages.length)
+				{
+					var res:Object = id_LanguageAddMore.isInValid();
+					
+					if (res.hasOwnProperty("isNotValid") && res.isNotValid)
+					{
+						if (res.hasOwnProperty("errorStr") && res.errorStr.length)
+						{
+							Alert.show(res.errorStr, "", 4, FlexGlobals.topLevelApplication.mainContainer, function ():void
+							{
+								if (res.hasOwnProperty("toSetFocus") && res.toSetFocus)
+									res.toSetFocus.setFocus();
+							});
+						}
+						Alert.show('Please select valid language','info');
+						return;
+					}
+					languages.addItem(id_LanguageAddMore.getLanguageDetails());
+				}
+				if(!languageAddMorePopUp)
+					languageAddMorePopUp = new LanguageAddMoreTitleWindow();
+				
+				// Add all other language into add more language popup
+				/* if(model.patientProfileDTO)
+				{
+					if(model.patientProfileDTO.PatientLanguageList)
+					{
+						if(model.patientProfileDTO.PatientLanguageList.length >0 )
+						{
+							for(var p:uint=1; p<model.patientProfileDTO.PatientLanguageList.length; p++)
+							{
+								var langDTO:PatientLanguageDTO = model.patientProfileDTO.PatientLanguageList.getItemAt(p) as PatientLanguageDTO;
+								var obj:Object 		             = new Object();
+								var objLanTypDTP:LanguageTypeDTO = new LanguageTypeDTO();
+								objLanTypDTP.LanguageCode        = langDTO.LanguageCode;
+								objLanTypDTP.LanguageID          = langDTO.LanguageID;
+								objLanTypDTP.LanguageName        = getLanguageName(langDTO.LanguageID);
+								obj.language					 = objLanTypDTP;
+								var abiDTO:LanguageAbilityModeDTO= new LanguageAbilityModeDTO();
+								abiDTO   						 = langDTO.PatientLanguageAbilityMode;
+								obj.abilityMode					 = abiDTO;
+								var countDTO:CountryDTO			 = new CountryDTO();
+								countDTO						 = langDTO.Country;
+								countDTO.CountryName			 = getCounteryName(langDTO.Country.CountryID);
+								obj.country					 	 = countDTO;
+								obj.isPreferred					 = langDTO.IsPreffered;
+								obj.PatientLanguageId			 = langDTO.PatientLanguageId;
+								obj.PatientId			 		 = langDTO.PatientId;
+								languages.addItem(obj);
+							}
+						}
+					}
+				} */
+				
+				languageAddMorePopUp.languages = languages;
+				languageAddMorePopUp.removeEventListener( "languageAdded", onLanguageAdded );
+				languageAddMorePopUp.addEventListener( "languageAdded", onLanguageAdded );
+				var btn:Button = Button(event.currentTarget);
+				var pt:Point = btn.parent.localToGlobal(new Point (btn.x, btn.y));
+				pt.x += btn.width/2 - 190;
+				pt.y += btn.height;
+				languageAddMorePopUp.display(this, pt);
+				languageAddMorePopUp.id_LanguageAddMore.id_Language.setFocus();
+			}
+			
+			private function onLanguageAdded(event:Event):void
+			{
+				hasChange = true;
+			}
+			
+			private function clearAllPopUps():void
+			{
+				if (motherPhoneNumberAddMorePopUp)
+					motherPhoneNumberAddMorePopUp.clearPopUp();
+				
+				if (fatherPhoneNumberAddMorePopUp)
+					fatherPhoneNumberAddMorePopUp.clearPopUp();
+				
+				if (languageAddMorePopUp)
+					languageAddMorePopUp.clearPopUp();
+			}
+			
+			public function hideAllPopUps():void
+			{
+				if (motherPhoneNumberAddMorePopUp)
+					motherPhoneNumberAddMorePopUp.visible = false;
+				
+				if (fatherPhoneNumberAddMorePopUp)
+					fatherPhoneNumberAddMorePopUp.visible = false;
+				
+				if (languageAddMorePopUp)
+					languageAddMorePopUp.visible = false;
+				// hide others as well, if is there any
+			}
+			
+			public function showAllPopUps():void
+			{
+				if (motherPhoneNumberAddMorePopUp && motherPhoneNumberAddMorePopUp.isAddPhoneNumberPopUpShown)
+					motherPhoneNumberAddMorePopUp.visible = true;
+				
+				if (fatherPhoneNumberAddMorePopUp && fatherPhoneNumberAddMorePopUp.isAddPhoneNumberPopUpShown)
+					fatherPhoneNumberAddMorePopUp.visible = true;
+				
+				if (languageAddMorePopUp && languageAddMorePopUp.isPopUpShown)
+					languageAddMorePopUp.visible = true;
+				//show all other popups as well, if is there any
+			}
+			
+			/*public function getOtherInformation():void 
+			{				
+				if(id_Race.selectedIndex!=-1)
+				{
+					model.patientDTO.RaceType 		= id_Race.selectedItem as RaceTypeDTO;
+				}
+				if(id_Ethenicity.selectedIndex!=-1)
+				{
+					model.patientDTO.EthinicityType = id_Ethenicity.selectedItem as EthinicityTypeDTO;
+				}
+				if(id_Occupation.selectedIndex!=-1){
+					model.patientDTO.OccupationType = id_Occupation.selectedItem as OccupationTypeDTO;
+				}
+				
+				model.patientDTO.MotherMaidenName = id_OtherContactName.text;
+				model.patientDTO.FatherName = id_OtherContactName1.text;
+				model.patientDTO.MedicareNumber = id_Medicare.text;
+				model.patientDTO.EmployerName = id_Company.text;
+				
+				//Tahir Alvi - Start --- Add languages ---------------
+				var temDTO:PatientLanguageDTO;
+				if (languages && languages.length)
+				{
+					if(model.patientLanguageDTOList && model.patientLanguageDTOList.length)
+					{
+						temDTO                        = model.patientLanguageDTOList.getItemAt(0) as PatientLanguageDTO;
+						temDTO.IsDeleted 			  = true;
+						model.patientLanguageDTOList.filterFunction = filterDeletedItems;
+						model.patientLanguageDTOList.refresh();
+					}
+					
+					for (var i:int = 0; i < languages.length; i++)
+					{
+						if(i == 0)
+							model.patientLanguageDTOList.addItemAt(QSUtilityFunctions.makePatientLanguageDTO(languages[i]),0);
+						else
+							model.patientLanguageDTOList.addItem(QSUtilityFunctions.makePatientLanguageDTO(languages[i]));
+					}
+				}
+				else
+				{
+					if(model.patientLanguageDTOList && model.patientLanguageDTOList.length)
+					{
+						temDTO                        = model.patientLanguageDTOList.getItemAt(0) as PatientLanguageDTO;
+						temDTO.IsDeleted 			  = true;
+						model.patientLanguageDTOList.filterFunction = filterDeletedItems;
+						model.patientLanguageDTOList.refresh();
+					}
+					model.patientLanguageDTOList.addItemAt(QSUtilityFunctions.makePatientLanguageDTO(id_LanguageAddMore.getLanguageDetails()), 0);
+				}
+				//End --- Add languages ---------------
+				
+				//Tahir Alvi - Adding mother phone numbers 
+				var phoneDto:PhoneDTO;
+				if (motherPhoneNumbers && motherPhoneNumbers.length)
+				{
+					// ********** START  remove primary phone number every time before adding phone for save 
+					if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+					{
+						for(var m:int=0; m<model.addressBookDTO.PhoneDTOlist.length; m++)
+						{
+							var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(m) as PhoneDTO;
+							if(tempDTO.OwnerTypeID == Constants.MOTHER_OWNER_TYPE_ID && tempDTO.IsPrimary){
+								tempDTO.IsDeleted = true;
+								break;
+							}
+						}
+						
+						model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+						model.addressBookDTO.PhoneDTOlist.refresh();
+					}
+					
+					for (var i:int = 0; i < motherPhoneNumbers.length; i++)
+					{
+						var isPrim:Boolean = false;
+						if (i == 0)
+						{
+							isPrim = true;
+							phoneDto = QSUtilityFunctions.makePhoneDTO(motherPhoneNumbers[i], isPrim, Constants.MOTHER_OWNER_TYPE_ID);
+							if( phoneDto.PhoneID != 0 ) 
+								phoneDto.IsDirty = true;
+						}else
+						{
+							phoneDto = QSUtilityFunctions.makePhoneDTO(motherPhoneNumbers[i], isPrim, Constants.MOTHER_OWNER_TYPE_ID);
+						}
+						model.addressBookDTO.PhoneDTOlist.addItem(phoneDto);
+					}
+				}
+				else
+				{
+					var motherPhDetails:Object = id_MotherPhoneNumberAddmore.getPhoneNumberDetails();
+					if (motherPhDetails)
+					{
+						// ********** START remove primary phone number every time before adding phone for save **********************
+						if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+						{
+							for(var n:int=0; n<model.addressBookDTO.PhoneDTOlist.length; n++)
+							{
+								var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(n) as PhoneDTO;
+								if(tempDTO.OwnerTypeID == Constants.MOTHER_OWNER_TYPE_ID && tempDTO.IsPrimary){
+									tempDTO.IsDeleted = true;
+									break;
+								}
+							}
+							model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+							model.addressBookDTO.PhoneDTOlist.refresh();
+						}
+						phoneDto = QSUtilityFunctions.makePhoneDTO(motherPhDetails, true, Constants.MOTHER_OWNER_TYPE_ID);
+						model.addressBookDTO.PhoneDTOlist.addItem(phoneDto);
+					}
+				}
+				//END ---- Adding mother phone numbers 
+				//Tahir Alvi - Adding father phone numbers 
+				var fPhoneDto:PhoneDTO;
+				if (fatherPhoneNumbers && fatherPhoneNumbers.length)
+				{
+					// ********** START  remove primary phone number every time before adding phone for save 
+					if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+					{
+						for(var f:int=0; f<model.addressBookDTO.PhoneDTOlist.length; f++)
+						{
+							var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(f) as PhoneDTO;
+							if(tempDTO.OwnerTypeID == Constants.FATHER_OWNER_TYPE_ID && tempDTO.IsPrimary){
+								tempDTO.IsDeleted = true;
+								break;
+							}
+						}
+						
+						model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+						model.addressBookDTO.PhoneDTOlist.refresh();
+					}
+					
+					for (var g:int = 0; g < fatherPhoneNumbers.length; g++)
+					{
+						var isPrim:Boolean = false;
+						if (g == 0)
+						{
+							isPrim = true;
+							fPhoneDto = QSUtilityFunctions.makePhoneDTO(fatherPhoneNumbers[g], isPrim, Constants.FATHER_OWNER_TYPE_ID);
+							if( fPhoneDto.PhoneID != 0 ) 
+								fPhoneDto.IsDirty = true;
+						}else
+						{
+							fPhoneDto = QSUtilityFunctions.makePhoneDTO(fatherPhoneNumbers[g], isPrim, Constants.FATHER_OWNER_TYPE_ID);
+						}
+						model.addressBookDTO.PhoneDTOlist.addItem(fPhoneDto);
+					}
+				}
+				else
+				{
+					var fatherPhDetails:Object = id_FatherPhoneNumberAddmore.getPhoneNumberDetails();
+					if (fatherPhDetails)
+					{
+						// ********** START remove primary phone number every time before adding phone for save **********************
+						if(model.addressBookDTO.PhoneDTOlist && model.addressBookDTO.PhoneDTOlist.length)
+						{
+							for(var n:int=0; n<model.addressBookDTO.PhoneDTOlist.length; n++)
+							{
+								var tempDTO:PhoneDTO = model.addressBookDTO.PhoneDTOlist.getItemAt(n) as PhoneDTO;
+								if(tempDTO.OwnerTypeID == Constants.FATHER_OWNER_TYPE_ID && tempDTO.IsPrimary){
+									tempDTO.IsDeleted = true;
+									break;
+								}
+							}
+							model.addressBookDTO.PhoneDTOlist.filterFunction = filterDeletedItems;
+							model.addressBookDTO.PhoneDTOlist.refresh();
+						}
+						fPhoneDto = QSUtilityFunctions.makePhoneDTO(fatherPhDetails, true, Constants.FATHER_OWNER_TYPE_ID);
+						model.addressBookDTO.PhoneDTOlist.addItem(fPhoneDto);
+					}
+				}
+				
+				if(id_ExemptReport.selectedIndex!=-1)
+					model.patientDTO.IsReportingExempt = id_ExemptReport.selectedItem == "Yes";
+			}*/
+			
+			private function filterDeletedItems(item:Object):Boolean
+			{
+				var b:Boolean = item["IsDeleted"];
+				return (!b);
+			}
+			
+			public function clearOtherInformation():void 
+			{	
+				id_Race.selectedIndex				= -1;
+				id_Ethenicity.selectedIndex			= -1;
+				id_Occupation.selectedIndex			= -1;
+				id_OtherContactName.text			= "";
+				id_OtherContactName1.text			= "";
+				id_Medicare.text					= "";
+				id_Company.text						= "";
+				id_ExemptReport.selectedIndex		= 0;
+				id_MotherPhoneNumberAddmore.resetFields();
+				id_FatherPhoneNumberAddmore.resetFields();
+				id_LanguageAddMore.resetFields();
+				motherPhoneNumbers = null;
+				fatherPhoneNumbers = null;
+				languages = null;
+				clearAllPopUps();
+				//clearRelatedDTOs();
+				hasChange = false;
+			}
+			
+			/* private function clearRelatedDTOs():void
+			{
+				if(model.patientDTO != null)
+					model.patientDTO 	= new PatientDTO();
+				
+				if(model.basicUserDTO != null)
+					model.basicUserDTO 	= new BaseUserDTO();
+				
+				if(model.addressBookDTO!=null && model.addressBookDTO.PhoneDTOlist!=null)
+					model.addressBookDTO.PhoneDTOlist.removeAll();
+			}
+			
+			public function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				ValidationUtils.Trim(id_Medicare);
+				ValidationUtils.Trim(id_OtherContactName);
+				ValidationUtils.Trim( id_OtherContactName1 );
+				
+				if (id_Race.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Race))
+				{
+					isNotValid = true;
+					errorStr += "Select valid race.\n";
+					if (!toSetFocus)
+						toSetFocus = id_Race;
+				}
+				
+				if (id_Ethenicity.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Ethenicity))
+				{
+					isNotValid = true;
+					errorStr += "Select valid ethnicity.\n";
+					if (!toSetFocus)
+						toSetFocus = id_Ethenicity;
+				}
+				
+				if (id_Medicare.text.length <= 20  && !ValidationUtils.isValidAlphaNumericWithoutSpaces(id_Medicare.text))
+				{
+					isNotValid = true;
+					errorStr += "Patient's medicare number is invalid.\n";
+					if (!toSetFocus)
+						toSetFocus = id_Medicare;
+				}
+				
+				if(id_OtherContactName.text.length > 0)
+				{
+					if(!ValidationUtils.isValidAlphaNumericWithSpaces(id_OtherContactName.text)){
+						isNotValid = true;
+						errorStr += "Mother's name is invalid.\n";
+						if (!toSetFocus)
+							toSetFocus = id_OtherContactName;
+					}
+				}
+				
+				if (id_MotherPhoneNumberAddmore.isGetEdited())
+				{
+					if (!motherPhoneNumbers || !motherPhoneNumbers.length)
+					{
+						var isPhNumValid:Object = id_MotherPhoneNumberAddmore.isInValid(true, "Mother's");
+						
+						if (isPhNumValid.hasOwnProperty("isNotValid") && isPhNumValid.isNotValid)
+						{
+							isNotValid = true;
+							if (isPhNumValid.hasOwnProperty("errorStr") && isPhNumValid.errorStr.length)
+							{
+								errorStr += isPhNumValid.errorStr;
+								
+								if (!toSetFocus && isPhNumValid.hasOwnProperty("toSetFocus") && isPhNumValid.toSetFocus)
+									toSetFocus = isPhNumValid.toSetFocus;
+							}	
+						}
+					}
+				}
+				
+				if(id_OtherContactName1.text.length > 0)
+				{
+					if(!ValidationUtils.isValidAlphaNumericWithSpaces(id_OtherContactName1.text))
+					{
+						isNotValid = true;
+						errorStr += "Father's name is invalid.\n";
+						if (!toSetFocus)
+							toSetFocus = id_OtherContactName1;
+					}
+				}
+				
+				if (id_FatherPhoneNumberAddmore.isGetEdited())
+				{
+					if (!fatherPhoneNumbers || !fatherPhoneNumbers.length)
+					{
+						var isPhNumValid:Object = id_FatherPhoneNumberAddmore.isInValid(true, "Father's");
+						
+						if (isPhNumValid.hasOwnProperty("isNotValid") && isPhNumValid.isNotValid)
+						{
+							isNotValid = true;
+							if (isPhNumValid.hasOwnProperty("errorStr") && isPhNumValid.errorStr.length)
+							{
+								errorStr += isPhNumValid.errorStr;
+								if (!toSetFocus && isPhNumValid.hasOwnProperty("toSetFocus") && isPhNumValid.toSetFocus)
+									toSetFocus = isPhNumValid.toSetFocus;
+							}	
+						}
+					}
+				}
+				
+				if (id_Occupation.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Occupation))
+				{
+					isNotValid = true;
+					errorStr += "Select valid Occupation.\n";
+					if (!toSetFocus)
+						toSetFocus = id_Occupation;
+				}
+				
+				if (id_Company.text.length > 0)
+				{
+					if (!ValidationUtils.isValidAlphaNumericWithSpaces(id_Company.text))
+					{
+						isNotValid = true;
+						errorStr += "Enter valid company name.\n";
+						if (!toSetFocus)
+							toSetFocus = id_Company;
+					}
+				}
+				
+				if (!languages || !languages.length)
+				{
+					var res:Object = id_LanguageAddMore.isInValid();
+					
+					if (res.hasOwnProperty("isNotValid") && res.isNotValid)
+					{
+						isNotValid = true;
+						
+						if (res.hasOwnProperty("errorStr") && res.errorStr.length)
+							errorStr += res.errorStr;
+						
+						if (!toSetFocus && res.hasOwnProperty("toSetFocus") && res.toSetFocus)
+							toSetFocus = res.toSetFocus;
+					}
+				}
+				
+				if (isNotValid)
+				{
+					Alert.show(errorStr, "Patient Registration Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				return isNotValid;
+			} */
+			//Tahir Alvi ---- For green ticker *********************************
+			protected function comboChangeIndicator(event:IndexChangeEvent):void 
+			{
+				if(id_Race.selectedIndex >= 0 ||id_Ethenicity.selectedIndex >= 0 || id_Occupation.selectedIndex >= 0 || id_ExemptReport.selectedIndex >= 0 )
+					hasChange= true;
+				else
+					hasChange= false;
+			}
+			
+			protected function textInputChangeIndicator(event:TextOperationEvent):void 
+			{
+				if(id_OtherContactName.text.length>0 ||id_OtherContactName1.text.length >0 || id_Medicare.text.length >0 || id_Company.text.length>0 )
+					hasChange= true;
+				else
+					hasChange= false;
+				
+				if(id_OtherContactName.text.length>0 )
+				{
+					id_MotherPhoneNumberAddmore.enabled = true;
+					id_motherBtn.enabled 				= true;
+				}
+				else
+				{
+					id_MotherPhoneNumberAddmore.enabled = false;
+					id_motherBtn.enabled 				= false;
+				}
+				
+				
+				if(id_OtherContactName1.text.length>0 )
+				{
+					id_FatherPhoneNumberAddmore.enabled = true;
+					id_fatherBtn.enabled 				= true;
+				}
+				else
+				{
+					id_FatherPhoneNumberAddmore.enabled = false;
+					id_fatherBtn.enabled 				= false;
+				}
+			}
+			
+			private var _isChanged:Boolean;
+			[Bindable]
+			public function get isChanged():Boolean
+			{
+				return _isChanged;
+			}
+			
+			public function set isChanged(value:Boolean):void
+			{
+				_isChanged = value;
+				
+				if(id_MotherPhoneNumberAddmore.haschange || id_FatherPhoneNumberAddmore.haschange || id_LanguageAddMore.haschange)
+					hasChange = true;
+				else
+					hasChange = false;
+			}
+			//Tahir Alvi - get the name of Language on basis of language ID
+			/* private function getLanguageName(g:int):String
+			{
+				var list:ArrayCollection = model.registrationStaticDataDTO.LanguageTypes;
+				var languageName:String = '';
+				for(var i:uint = 0; i < list.length; i++ ){
+					var type:LanguageTypeDTO = list[ i ] as LanguageTypeDTO;
+					if( type.LanguageID == g ){
+						languageName = type.LanguageName; 
+						break;
+					}
+				}
+				return languageName;
+			}
+			//Tahir Alvi - get the name of Country on basis of Country ID
+			private function getCounteryName(g:int):String
+			{
+				var list:ArrayCollection = model.addressBookStaticDataDTO.AllCountryList;
+				var countryName:String = '';
+				var i:int;
+				for( i = 0; i < list.length; i++ ){
+					var type:CountryDTO = list[ i ] as CountryDTO;
+					if( type.CountryID == g ){
+						countryName = type.CountryName;
+						break;
+					}
+				}
+				return countryName;
+			} */
+		]]>
+	</fx:Script>
+	<fx:Binding destination="isChanged" source="id_MotherPhoneNumberAddmore.haschange"/>
+	<fx:Binding destination="isChanged" source="id_FatherPhoneNumberAddmore.haschange"/>
+	<fx:Binding destination="isChanged" source="id_LanguageAddMore.haschange"/>
+	
+	<s:HGroup width="100%" gap="3">
+		
+		<s:VGroup width="34%" gap="1">
+			<components:LabelComboBox id="id_Race" width="100%" autoWidth="false"
+									  change="comboChangeIndicator(event)"
+									  dataProvider="{model.registrationStaticDataDTO.RaceTypes}"
+									  labelField="RaceName" prompt="Race" tabIndex="18"
+									  toolTip="Select race"/>
+			<components:LabelTextInput id="id_OtherContactName" width="100%"
+									   change="textInputChangeIndicator(event)" maxChars="100"
+									   prompt="Mother Maiden Name" restrict="[A-Z a-z , . 0-9]"
+									   tabIndex="21" toolTip="Enter mother maiden name"/>
+			<components:LabelTextInput id="id_OtherContactName1" width="100%"
+									   change="textInputChangeIndicator(event)" maxChars="200"
+									   prompt="Father Full Name" restrict="[A-Z a-z , . 0-9]"
+									   tabIndex="26" toolTip="Enter father full name"/>
+		</s:VGroup>
+		<s:VGroup width="46%" gap="1">
+			<components:LabelComboBox id="id_Ethenicity" width="100%" autoWidth="false"
+									  change="comboChangeIndicator(event)"
+									  dataProvider="{model.registrationStaticDataDTO.EthinicityTypes}"
+									  labelField="EthinicityName" prompt="Ethnicity" tabIndex="19"
+									  toolTip="Select ethenicity"/>
+			
+			<registeration:PhoneNumberAddMore id="id_MotherPhoneNumberAddmore" width="100%"
+											  enabled="false" tabIndex="22"/>
+			<registeration:PhoneNumberAddMore id="id_FatherPhoneNumberAddmore" width="100%"
+											  enabled="false" tabIndex="27"/>
+		</s:VGroup>
+		<s:VGroup width="20%" gap="3">
+			<components:LabelTextInput id="id_Medicare" width="100%"
+									   change="textInputChangeIndicator(event)" maxChars="20"
+									   prompt="Medicare#" tabIndex="20" toolTip="Enter medicare no"/>
+			<s:HGroup width="100%" verticalAlign="middle">
+				
+				<s:Button id="id_motherBtn" label="Add Phone Numbers" buttonMode="true"
+						  click="motherPhoneNumberAddMoreClickHandler(event)" enabled="false"
+						  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn"
+						  tabIndex="25" toolTip="Add Phone Numbers" useHandCursor="true"/>
+			</s:HGroup>
+			<s:HGroup width="100%" verticalAlign="middle">
+				
+				<s:Button id="id_fatherBtn" label="Add Phone Numbers" buttonMode="true"
+						  click="fatherPhoneNumberAddMoreClickHandler(event)" enabled="false"
+						  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn"
+						  tabIndex="30" toolTip="Add Phone Numbers" useHandCursor="true"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" gap="3">
+		<components:LabelComboBox id="id_Occupation" width="33%" autoWidth="false"
+								  change="comboChangeIndicator(event)"
+								  dataProvider="{model.registrationStaticDataDTO.OccupationTypes}"
+								  labelField="OccupationName" prompt="Occupation" tabIndex="31"
+								  toolTip="Select occupation"/>
+		<components:LabelTextInput id="id_Company" width="67%"
+								   change="textInputChangeIndicator(event)"
+								   enabled="{id_Occupation.textInput.text.length &gt; 0 ? true : false}"
+								   maxChars="200" prompt="Employer Name/College"
+								   restrict="[A-Z a-z , . 0-9]" tabIndex="32"
+								   toolTip="Enter employer name"/>
+	</s:HGroup>
+	<s:SkinnableContainer width="100%"  skinClass="com.adobe.quivus.skins.chrome.containerSkins.blockContainer">
+		<s:layout>
+			<s:HorizontalLayout gap="2" paddingBottom="3" paddingLeft="3" paddingRight="3"
+								paddingTop="3"/>
+		</s:layout>
+		<s:VGroup width="61%">
+			<registeration:LanguageAddMore id="id_LanguageAddMore" width="100%" tabIndex="33"/>
+		</s:VGroup>
+		<s:VGroup width="39%" gap="1" horizontalAlign="right" verticalAlign="middle">
+			
+			
+			<s:HGroup gap="10" horizontalAlign="right" verticalAlign="middle">
+				<!--<mx:Spacer width="10" />-->
+				<s:Label color="#4c4c4c" fontFamily="Calibri" fontSize="11"	 text="Exempt from reports?" verticalAlign="middle"/>
+				<components:LabelComboBox id="id_ExemptReport" autoWidth="false"
+										  change="comboChangeIndicator(event)" selectedIndex="0"
+										  tabIndex="35" toolTip="Select exempt report">
+					<components:dataProvider>
+						<s:ArrayList>
+							<fx:String>Yes</fx:String>
+							<fx:String>No</fx:String>
+						</s:ArrayList>
+					</components:dataProvider>
+				</components:LabelComboBox>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="right" verticalAlign="middle">
+				<s:Button label="Add More Languages" buttonMode="true"
+						  click="languageAddMoreClickHandler(event)"
+						  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn"
+						  tabIndex="38" toolTip="Add More" useHandCursor="true"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:SkinnableContainer>
+</components:CollapsiblePanel>

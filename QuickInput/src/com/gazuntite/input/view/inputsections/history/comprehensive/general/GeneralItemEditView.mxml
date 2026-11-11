@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:general="com.gazuntite.input.view.inputsections.history.comprehensive.general.*"
+					  creationComplete="CC(event)" xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:components1="com.gazuntite.common.view.components.*" 
+					  
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			public const TAB_MEDICAL:String = "TAB_MEDICAL";
+			public const TAB_CHILDHOOD:String = "TAB_CHILDHOOD";
+			public const TAB_SURGICAL:String = "TAB_SURGICAL";
+			public const TAB_OTHER:String = "TAB_OTHER";
+			
+			[Bindable]
+			private var isTabSelected:Boolean = false;
+			
+			[Bindable]
+			public var curTab:String = TAB_MEDICAL;
+			
+			[Bindable]
+			public var canInput:Boolean = false;
+			
+			[Bindable]
+			public var currentTabState:int = 0;
+			
+			public function selectTab(selectedTab:String):void
+			{
+				isTabSelected = true;
+				
+				curTab = selectedTab;
+				
+				switch (curTab)
+				{
+					case TAB_MEDICAL:		
+						id_General.generalCategory = QIConstants.MEDICAL_MODULE_NAME;
+						id_General.medicalHistoryDto = QIUtilityFunctions.getGeneralHistoryDTO(  QIConstants.MEDICAL_MODULE_NAME );
+						break;
+					case TAB_CHILDHOOD:						
+						id_General.generalCategory = QIConstants.CHILDHOOD_MODULE_NAME;
+						id_General.medicalHistoryDto = QIUtilityFunctions.getGeneralHistoryDTO(  QIConstants.CHILDHOOD_MODULE_NAME );
+						break;
+					case TAB_SURGICAL:						
+						id_General.generalCategory = QIConstants.SURGICAL_MODULE_NAME;
+						id_General.medicalHistoryDto = QIUtilityFunctions.getGeneralHistoryDTO(  QIConstants.SURGICAL_MODULE_NAME );
+						break;
+					case TAB_OTHER:						
+						id_General.generalCategory = QIConstants.OTHER_MODULE_NAME;
+						id_General.medicalHistoryDto = QIUtilityFunctions.getGeneralHistoryDTO(  QIConstants.OTHER_MODULE_NAME );
+						break;
+					default:
+						Alert.show("Unknown Tab", "Error");
+				}
+			}
+			
+			public function clearGeneralInputView():void
+			{
+				id_General.clearGeneralHistory(false);
+				
+				id_medical.uiToggleButton.selected = false;
+				id_medical.id_yes.selected = false;
+				id_medical.id_no.selected = false;
+				id_childhood.uiToggleButton.selected = false;
+				id_childhood.id_yes.selected = false;
+				id_childhood.id_no.selected = false;
+				id_surgical.uiToggleButton.selected = false;
+				id_surgical.id_yes.selected = false;
+				id_surgical.id_no.selected = false;
+				id_other.uiToggleButton.selected = false;
+				id_other.id_yes.selected = false;
+				id_other.id_no.selected = false;
+				
+				id_medical.id_container.right = 7;
+				id_childhood.id_container.right = 7;
+				id_surgical.id_container.right = 7;
+				id_other.id_container.right = 7;
+				
+				isTabSelected = false;
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				isTabSelected = false;
+				
+				id_medical.uiToggleButton.selected = false;
+				id_childhood.uiToggleButton.selected = false;
+				id_surgical.uiToggleButton.selected = false;
+				id_other.uiToggleButton.selected = false;
+				
+				id_medical.id_container.right = 7;
+				
+				addEventListener("switchHXGeneralCategory",switchCategory);
+			}
+			
+			private function switchCategory(event:GeneralEvent):void
+			{	
+				switch(event.value)
+				{					
+					case 1:
+					{						
+						selectTab(TAB_CHILDHOOD);
+						id_childhood.onTabSelectionChange(null);
+						break;
+					}
+					case 2:
+					{
+						selectTab(TAB_SURGICAL);
+						id_surgical.onTabSelectionChange(null);
+						break;
+					}
+					case 3:
+					{							
+						selectTab(TAB_OTHER);
+						id_other.onTabSelectionChange(null);
+						break;
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:HorizontalLayout gap="-2" horizontalAlign="left"	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="2" />
+	</s:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup gap="2" width="150" >
+		<skins:SideTabButton id="id_medical"
+								 label="Medical" width="100%"
+								 tabSelected="{curTab==TAB_MEDICAL}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_MEDICAL)"
+								 toolTip="Medical"
+								 />
+		<skins:SideTabButton id="id_childhood"
+								label="Childhood" width="100%"
+								 tabSelected="{curTab==TAB_CHILDHOOD}"	
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_CHILDHOOD)"
+								 toolTip="Childhood"
+								 />
+		<skins:SideTabButton id="id_surgical"
+								label="Surgical" width="100%"
+								 tabSelected="{curTab==TAB_SURGICAL}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_SURGICAL)"
+								 toolTip="Surgical"
+								 />
+		<skins:SideTabButton id="id_other"
+								label="Other" width="100%"
+								 tabSelected="{curTab==TAB_OTHER}"
+								 tabState="@{currentTabState}"
+								 click="selectTab(TAB_OTHER)"
+								 toolTip="Other"
+								 />
+	</s:VGroup>
+	
+	<s:BorderContainer width="100%" height="150"  backgroundColor="0x83A3FE" borderVisible="false" left="0" top="0" right="0" bottom="0" cornerRadius="3" >		
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="2" strength="1"/>
+			</s:filters>
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+		</s:layout>
+		<s:Group width="100%" includeInLayout="{!isTabSelected}" visible="{!isTabSelected}" >			
+			<components1:PleaseSelectView label="Select a category to view" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+		</s:Group>
+		<general:GeneralItemEditDetailView id="id_General" height="100%" 
+										   includeInLayout="{isTabSelected}"
+										   visible="{isTabSelected}"
+										   width="100%" isTabSelected="{isTabSelected}"
+										   setTabState="{currentTabState}"
+										   />
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

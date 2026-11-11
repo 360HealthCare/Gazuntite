@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			private var _selectedPatient:PatientDTO;
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+			}
+			
+			private var selectVisitPopup:SelectVisitPopup;
+			
+			private var _encounterID:String;
+
+			[Bindable]
+			public function get encounterID():String
+			{
+				return _encounterID;
+			}
+
+			public function set encounterID(value:String):void
+			{
+				_encounterID = value;
+			}
+
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function visitDate_clickHandler(event:MouseEvent):void
+			{
+				if( selectVisitPopup && selectVisitPopup.isPopUp )
+				{
+					selectVisitPopup.removePopup();
+					return;
+				}
+				//Alert.show("select visit date...","coming soon");		
+				selectVisitPopup = new SelectVisitPopup();
+				selectVisitPopup.ShowPopup( this );
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				selectVisitPopup.move( pt.x  + 20 , pt.y + event.currentTarget.height  + 5); 
+				
+				selectVisitPopup.loadSelectedPatientData(selectedPatient, model.LoggedInUserSelectedBranchId.toString());
+				
+				selectVisitPopup.addEventListener("visitSelected", function(event:Event):void
+				{
+					encounterID = selectVisitPopup.id_associatedVisit.selectedItem.VisitID;	
+					id_VisitDate.text = selectVisitPopup.id_associatedVisit.selectedItem.VisitDateLbl;	
+					selectVisitPopup.removePopup();
+				});
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout />
+	</s:layout>
+	
+	<s:Label text="Some Medicine, 100mg, 00021210..." width="100%" />
+	<s:Label id="id_VisitDate" text="02/27/2013" />
+	<s:Button label="Visit" click="visitDate_clickHandler(event)" />
+	
+</s:Group>

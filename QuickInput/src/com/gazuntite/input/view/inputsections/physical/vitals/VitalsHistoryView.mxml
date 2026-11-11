@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" xmlns:components="com.gazuntite.components.*"
+					  creationComplete="cc()" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:skins="com.gazuntite.input.view.skins.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.view.viewmodel.tempmodel.TempModel;
+			
+			import spark.events.DropDownEvent;
+			
+			[Bindable]
+			private var model :QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var viewModel:PatientInputPhysicalVitalsViewModel = PatientInputPhysicalVitalsViewModel.getInstance();
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_DELETE_EVENT, patientInputPhysicalVitalsDeleteHandler, false, 0, true);
+				addEventListener(PatientInputPhysicalVitalsEvent.PATIENT_INPUT_VITALS_EDIT_EVENT, patientInputPhysicalVitalsEditHandler, false, 0, true);
+			}
+			
+			private function patientInputPhysicalVitalsDeleteHandler(event:PatientInputPhysicalVitalsEvent):void
+			{
+				if (!event.vitalsDTO)
+					return;
+				
+				viewModel.managePatientVitals(event.vitalsDTO, onVitalsSaved);
+			}
+			
+			private function patientInputPhysicalVitalsEditHandler(event:PatientInputPhysicalVitalsEvent):void
+			{
+				if (!event.vitalsDTO)
+					return;
+				
+				event.vitalsDTO.IsDirty = true;
+				
+				viewModel.managePatientVitals(event.vitalsDTO, onVitalsSaved);
+			}
+			
+			private function onVitalsSaved(success:Boolean):void
+			{
+				if (!success)
+					return;
+				
+				viewModel.loadPatientVitals();
+			}
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				// TODO Auto-generated method stub
+				uiSortDropdown.dropDown.x = uiSortDropdown.x + 24 ; //add container left padding, should convert to global if we really want perfect
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingBottom="10"/>
+	</s:layout>
+	<skins:PatientSubViewTitleBar width="100%" label="VITALS"  
+								  NextSectionLabel="Chief Complaint/HPI"
+								  NavItems="{NavItems}"
+								  sectionNumber="1" maxSectionCounter="5" showHistoryPart="true"  
+								  MainSectionLabel="Physical"
+								  dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}" />
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}" 
+											   dictationNoteDataProvider="{model.vitalsDictationNoteHistoryDTOList}"/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0"/>
+			</s:layout>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+				<s:DropDownList id="uiSortDropdown"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+								selectedIndex="0"
+								open="onSortDropdownOpen(event)"
+								toolTip="{uiSortDropdown.selectedIndex == -1 ? 'Sort List': (uiSortDropdown.selectedItem as Object).label}">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added"/>
+							<fx:Object label="Vitals"/>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%"/>
+			</s:SkinnableContainer>
+			<s:List id="uiInboxList"
+					width="100%" height="100%"
+					allowMultipleSelection="false"
+					borderVisible="false"
+					dataProvider="{model.patientPreviousVitalsList}"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					itemRenderer="com.gazuntite.input.view.inputsections.physical.vitals.VitalsItemRenderer"/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

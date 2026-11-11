@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.gazuntite.dictation.view.DictationView"/>
+    <classEntry path="com.gazuntite.dictation.utils.DictationConstants"/>
+    <classEntry path="com.gazuntite.dictation.controller.DictationController"/>
+    <classEntry path="com.gazuntite.dictation.utils.DictationServiceMethods"/>
+    <classEntry path="com.gazuntite.dictation.command.UploadDictationCommand"/>
+    <classEntry path="com.gazuntite.dictation.delegate.UploadDictationDelegate"/>
+    <classEntry path="com.gazuntite.dictation.event.UploadDictationEvent"/>
+    <classEntry path="com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent"/>
+    <classEntry path="com.gazuntite.dictation.view.dictation.PatientDictationNoteHistoryView"/>
+    <classEntry path="com.gazuntite.dictation.view.dictation.PatientDictationNoteHistoryListIR"/>
+    <classEntry path="com.gazuntite.dictation.view.dictation.PatientDictationNoteView"/>
+    <classEntry path="com.gazuntite.dictation.view.dictation.NewPatientDictationNoteView"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

@@ -1,0 +1,94 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/* Light grey check boxes*/
+
+.lightGreyCheckBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.checkBoxSkins.lightGreyCheckBox");
+}
+
+s|CheckBox
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.checkBoxSkins.lightGreyCheckBox");
+}
+
+/*********************************************************************************************/
+/*Radio Buttons
+Blue background buttons*/
+
+.blueRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.blueRadioButton");
+}
+
+.midNightBluePastRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.midNightBluePastRadioButton");
+}
+
+.midNightBluePresentRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.midNightBluePresentRadioButton");
+}
+
+.midNightBlueEnglishRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.midNightBlueEnglishRadioButton");
+}
+
+.midNightBlueMetricRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.midNightBlueMetricRadioButton");
+}
+
+/*Red background buttons*/
+
+.redRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.redRadioButton");
+}
+
+/*Orange background buttons*/
+
+.orangeRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.orangeRadioButton");
+}
+
+.abnormalOrangeRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.abnormalOrangeRadioButton");
+}
+
+/*Grey background buttons*/
+
+.yesRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.yesRadioButton");
+}
+
+.noRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.noRadioButton");
+}
+
+.greyRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.greyRadioButton");
+}
+
+/*Green background buttons*/
+
+.greenNoRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.greenNoRadioButton");
+}
+/*Misc radio buttons*/
+
+.recordRadioButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.radioButtonSkins.recordRadioButton");
+}

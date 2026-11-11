@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<commons:QICollapseableView xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx" 
+							xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+							xmlns:ros="com.gazuntite.patient.visit.view.physical.ros.*"
+							creationComplete="qicollapseableview1_creationCompleteHandler(event)"
+							ShowSaveButton="true"
+							saveData="qicollapseableview1_saveDataHandler(event)"
+							QSViewStateChange="qicollapseableview1_QSViewStateChangeHandler(event)"
+							
+							>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarFocusSkin;
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarSkin;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.dto.ROSDTO;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleNotesEvent;
+			import com.gazuntite.patient.visit.event.physical.ros.LoadROSCategoryTypesEvent;
+			import com.gazuntite.patient.visit.event.physical.ros.ManagePatientROSEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.rosPhysical.ROSPhysicalFunctions;
+			import com.gazuntite.patient.visit.view.events.VitalsHeaderEvent;
+			import com.gazuntite.patient.visit.view.physical.rosPhysicalCommon.MainCatRenderer;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _SetIcon:Boolean;
+			
+			[Bindable]
+			public function get SetIcon():Boolean
+			{
+				return _SetIcon;
+			}
+			
+			public function set SetIcon(value:Boolean):void
+			{
+				_SetIcon = value;
+				if(value)
+				{
+					this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);	
+					this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);	
+					
+					if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_Header.setIcons(false,false);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_Header.setIcons(true,false);
+					else if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_Header.setIcons(false,true);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_Header.setIcons(true,true);
+					
+				}
+				else
+				{
+					this.notesDTO = null;
+					this.DictationDTO = null;
+					id_Header.setIcons(false,false);
+				}
+			}
+			
+			private var m_bdataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return m_bdataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				m_bdataProvider = value;
+				//ROSPhysicalFunctions.DTOList = value;
+			}
+			
+			
+			protected function qicollapseableview1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				id_Header.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, function(event:IndexChangeEvent):void
+				{
+					/*  if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_ROS ) )
+					{  */
+					id_ROSView.id_TreeList.selectItemByIndex( event.newIndex );
+					event.stopImmediatePropagation();
+					/* }  */
+				});
+				
+				id_ROSView.id_TreeList.addEventListener(ItemClickEvent.ITEM_CLICK, function(event:ItemClickEvent):void
+				{
+					/* if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_ROS ) )
+					{ */
+					var idx:int = id_Header.id_SpinerList.DataProvider.getItemIndex( event.currentTarget.ParentSelectedItem.data );
+					if( -1 == idx )
+						idx = 1
+					id_Header.id_SpinerList.currIndex = idx;
+					event.stopImmediatePropagation();
+					/* } */
+				});
+				
+				id_ROSView.id_TreeList.addEventListener("footerClick", function(event:ItemClickEvent):void
+				{
+					/* if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_ROS ) )
+					{  */
+					id_Header.id_SpinerList.currIndex = id_Header.id_SpinerList.DataProvider.getItemIndex( event.currentTarget.ParentSelectedItem.data );
+					event.stopImmediatePropagation();
+					/* } */
+				});
+				
+				id_Header.id_AllNormalBtn.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					/* if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_ROS ) )
+					{ */
+					if( QIUtilityFunctions.checkROSNotes() )
+					{
+						Alert.show("This action will clear all notes/dictation, Are you sure you want to clear all notes/dictation?","Clear Notes and Dictation", Alert.YES|Alert.NO, 
+							FlexGlobals.topLevelApplication.mainContainer, function(event:CloseEvent):void
+							{
+								if( event.detail == Alert.YES)
+								{
+									hasChange = QIUtilityFunctions.setROSToNormal(true);
+									//UpdateCheckStatus();
+								}
+								else if( event.detail == Alert.NO)
+								{
+									// NO button was clicked
+								}
+							});
+					}
+					else
+					{
+						hasChange = QIUtilityFunctions.setROSToNormal(false);
+					}
+					event.stopImmediatePropagation();
+					/* } */
+				});
+				
+				id_Header.id_OptionPopUp.displayPopUp = false;
+				
+				/* id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{						
+				id_Header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);						
+				});
+				
+				event.stopImmediatePropagation(); */
+				
+				/* if( UtilityFunctions.IsNullOrEmpty( dataProvider ) )
+				{
+				dataProvider 		= createDummyData(15);
+				model.rosDTOList 	= dataProvider;
+				} 
+				*/
+				/* var cgEvent:LoadROSCategoryTypesEvent = new LoadROSCategoryTypesEvent(!model.IsloggedInUserFemale);
+				CairngormEventDispatcher.getInstance().dispatchEvent( cgEvent ); */
+				
+				
+			}
+			
+			private function createDummyData( maxDataSize:int = 10, max2rdLevelDataSize:int = 23, max3rdLevelDataSize:int = 23 ):ArrayCollection
+			{
+				var dummy:ArrayCollection = new ArrayCollection();
+				var i:int;
+				for( i = 0; i < maxDataSize; i++ )
+				{
+					var pDTO:ROSDTO = new ROSDTO();
+					pDTO.MainCategoryName = "Parent " + i;
+					pDTO.ROSMainCategoryTypeID = i;
+					pDTO.label = "Parent " + i;
+					pDTO.children = new ArrayCollection();
+					var j:int;
+					var add:Boolean = true;
+					for( j = 0; j < max2rdLevelDataSize; j++ )
+					{
+						add = true;
+						var cDTO:ROSDTO = new ROSDTO();
+						cDTO.label = "Child " + i + " " + j;
+						cDTO.ROSSubCategoryTypeID = j * 2;
+						cDTO.ROSMainCategoryTypeID = pDTO.ROSMainCategoryTypeID;
+						cDTO.SubCategoryName = "Child " + i + " " + j;
+						if( i == 4 || i == 6 || i == 8 )
+						{
+							add = false;
+							if( j == 3 || j == 5 || j == 7 )
+							{
+								add = true;
+								cDTO.children = new ArrayCollection();
+								var k:int;
+								for( k = 0; k < max3rdLevelDataSize; k++ )
+								{
+									var ccDTO:ROSDTO = new ROSDTO();
+									ccDTO.label = "Child " + i + " " + j + " " + k;
+									ccDTO.ROSSubLevel3CategoryName = "Child " + i + " " + j + " " + k;
+									ccDTO.ROSSubLevel3CategoryTypeID = k * 3;
+									ccDTO.ROSSubCategoryTypeID = cDTO.ROSSubCategoryTypeID;
+									ccDTO.ROSMainCategoryTypeID = pDTO.ROSMainCategoryTypeID;
+									cDTO.children.addItem( ccDTO );
+								}
+							}
+						}
+						if( add )
+							pDTO.children.addItem( cDTO );
+					}
+					dummy.addItem( pDTO );
+				}
+				
+				return dummy;
+			}
+			
+			protected function qicollapseableview1_saveDataHandler(event:Event):void
+			{
+				var mre:ManagePatientROSEvent = new ManagePatientROSEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( mre );
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				/* var le:LoadROSCategoryTypesEvent = new LoadROSCategoryTypesEvent(!model.IsloggedInUserFemale);
+				CairngormEventDispatcher.getInstance().dispatchEvent( le ); */
+			}
+			
+			protected function qicollapseableview1_QSViewStateChangeHandler(event:QSViewStateEvent):void
+			{
+				if(event.viewState == QSViewStateEvent.EXPANDED_VIEW)
+				{
+					if(UtilityFunctions.IsNullOrEmpty(model.rosDTOList))
+					{
+						var cgEvent:LoadROSCategoryTypesEvent = new LoadROSCategoryTypesEvent(model.patientDTO.Gender.toLowerCase() == 'female' ? false:true);
+						CairngormEventDispatcher.getInstance().dispatchEvent( cgEvent );
+						id_ROSView.ShowStatusWindow("Please wait while ROS is loading ...");
+					}
+					
+					if( id_Header )
+					{
+						id_Header.HeadingLable = id_Header.HeadingLable.toUpperCase();
+						id_Header.setStyle("skinClass", QIinternalBarFocusSkin);
+						id_Header.id_headingLbl.setStyle("color", 0xffffff);
+						id_Header.id_expandBtn.selected = true;
+						
+					} 
+				}
+				else if(event.viewState == QSViewStateEvent.COLLAPSED_VIEW)
+				{
+					if( id_Header )
+					{
+						id_Header.HeadingLable = UtilityFunctions.TitleCase(id_Header.HeadingLable);
+						id_Header.setStyle("skinClass", QIinternalBarSkin);
+						id_Header.id_headingLbl.setStyle("color", 0x000000);
+						id_Header.id_expandBtn.selected = false;
+						
+					} 
+					
+					QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.ROS);
+				}
+			}
+			
+			override protected function id_Header_showNotesPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);
+				
+				super.id_Header_showNotesPanelHandler( event );
+				
+				
+			}
+			override protected function onNotesSave(event:Event):void
+			{
+				if(this.notesDTO.ModuleNoteId == 0) // new note
+				{
+					this.notesDTO.ManagedByUserId = model.LoggedInUserId;
+					this.notesDTO.CreatedBy = model.LoggedInUserId;
+					this.notesDTO.CreatedAt = new Date();
+					this.notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);
+					this.notesDTO.VisitID = model.VisitID;
+					this.notesDTO.PatientID = model.patientID;
+				}
+				else // edited Notes
+				{
+					this.notesDTO.ModifiedBy = model.LoggedInUserId;
+					this.notesDTO.ModifiedAt = new Date();
+					this.notesDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleNotesEvent = new ManageModuleNotesEvent(this.notesDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				trace("child class should implement dictation here");
+			}
+			
+			override protected function id_Header_showDictationPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);
+				
+				super.id_Header_showDictationPanelHandler( event );
+			}
+			
+			override protected function onDictationSave(event:Event):void
+			{
+				if(this.DictationDTO.ModuleDictationId == 0) // new Dication
+				{
+					this.DictationDTO.ManagedByUserId = model.LoggedInUserId;
+					this.DictationDTO.CreatedBy = model.LoggedInUserId;
+					this.DictationDTO.CreatedAt = new Date();
+					this.DictationDTO.ModuleTypeID = QIUtilityFunctions.getModuleIDByName(Constants.REVIEW_OF_SYSTEM_MODULE_NAME);
+					this.DictationDTO.VisitID = model.VisitID;
+					this.DictationDTO.PatientID = model.patientID;
+				}
+				else // edited Dication
+				{
+					this.DictationDTO.ModifiedBy = model.LoggedInUserId;
+					this.DictationDTO.ModifiedAt = new Date();
+					this.DictationDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleDictationEvent = new ManageModuleDictationEvent(this.DictationDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				//trace("child class should implement saveNotes here");
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="model.rosDTOList" destination="id_ROSView.DataProvider" />
+	<fx:Binding source="model.checkNotesExsist" destination="SetIcon" />
+	
+	
+	<commons:HeaderContents>
+		<ros:PanelHeader id="id_Header" width="100%"  HeadingLable="{HeadingLable}" ShowSaveButton="{ShowSaveButton}" m_oParentSelectedItem="{id_ROSView.id_TreeList.ParentSelectedItem}"
+						 showNotesPanel="id_Header_showNotesPanelHandler(event)" 
+						 showDictationPanel="id_Header_showDictationPanelHandler(event)"/>
+		<!--<commons:SectionHeader id="id_Header" width="100%" ShowVitalHeader="{ShowVitalHeader}"  ShowSaveButton="{ShowSaveButton}" 	
+		pinPanel="id_Header_pinPanelHandler(event)"
+		ALLNormal="id_Header_ALLNormalHandler(event)"
+		showNotesPanel="id_Header_showNotesPanelHandler(event)" 
+		ShowAllNormal="true"
+		showDictationPanel="id_Header_showDictationPanelHandler(event)"  />-->
+	</commons:HeaderContents>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		<s:SkinnableContainer id="sc_Diagnosis"  width="100%" >
+			<s:layout>
+				<s:VerticalLayout  verticalAlign="top" gap="0"  /> 
+			</s:layout>
+			<ros:ROSView id="id_ROSView" width="100%" height="100%" DataProvider="{model.rosDTOList}" />
+			<s:HGroup width="100%" horizontalAlign="right" paddingRight="5" paddingBottom="10" >
+				<s:Button label="Next" click="dispatchEvent( new SelectSection('SelectSection', 'id_ROSPanel', true, true) )" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" 
+						  toolTip="Next Section" buttonMode="true" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</commons:QICollapseableView>

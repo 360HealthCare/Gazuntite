@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init()"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.controls.events.FlipViewEvent;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.core.IVisualElement;
+			import mx.core.UIComponent;
+			import mx.events.EffectEvent;
+			
+			[Bindable]
+			public var flipDuration:Number = 500;
+			
+			[Bindable]
+			protected var fadeInView:UIComponent;
+			
+			[Bindable]
+			protected var fadeOutView:UIComponent;
+			private var _flipViews:Array;
+
+			public function get flipViews():Array
+			{
+				return _flipViews;
+			}
+
+			public function set flipViews(value:Array):void
+			{
+				_flipViews = value;
+				newViewSet = true;
+				invalidateProperties();
+			}
+
+			
+			[Bindable]
+			public var menuLabel:String = "Flip View";
+
+
+			protected var frontView:UIComponent;
+			[Bindable]
+			protected var backView:UIComponent;
+			protected var newViewSet:Boolean = false;
+			protected var backViewInitComplete:Boolean = true;
+			protected var showingFrontView:Boolean = true;
+
+			protected function init():void
+			{
+				this.addEventListener(FlipViewEvent.FLIP_VIEW_EVENT, onFlipRequested);
+			}
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				if (newViewSet)
+				{
+					newViewSet = false;
+					if (flipViews!=null)
+					{
+						uiViewContainer.removeAllElements();
+						frontView = flipViews[0] as UIComponent;
+						backView = flipViews[1] as UIComponent
+						uiViewContainer.addElementAt(backView, 0);
+						uiViewContainer.addElementAt(frontView, 1);
+						initView(backView);
+						initView(frontView);
+//						backView.rotationY = 180;
+						backView.alpha=0;
+//						BindingUtils.bindProperty(backView,'x', this, 'width', false, true);
+						backViewInitComplete = false;
+						uiViewContainer.invalidateDisplayList();
+						this.invalidateDisplayList();
+					}
+				}
+			}
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				if (!backViewInitComplete)
+				{
+					backViewInitComplete = true;
+					uiInitFlip.play();
+				}
+			}
+			protected function initView(view:UIComponent):void
+			{
+				view.percentWidth = 100;
+				view.percentHeight = 100;
+			}
+			
+			
+			public function doFlip():void
+			{
+				/* uiFlip.angleYTo = showingFrontView?180:0;
+				showingFrontView = !showingFrontView;
+				
+				fadeInView = showingFrontView?frontView:backView;
+				fadeOutView = showingFrontView?backView:frontView;
+				
+				uiFlip.play();
+				uiFadeIn.play();
+				uiFadeOut.play(); */
+				
+				showingFrontView = !showingFrontView;
+				
+				fadeInView = showingFrontView?frontView:backView;
+				fadeOutView = showingFrontView?backView:frontView;
+				
+				uiFlipOut.play();
+				uiFlipIn.play();
+				uiFadeIn.play();
+				uiFadeOut.play();
+			} 
+			
+			protected function onFlipRequested(event:Event):void
+			{
+				doFlip();
+				
+				event.stopImmediatePropagation();
+			}
+			
+			protected function onFlipEnd(event:EffectEvent):void
+			{
+				fadeInView.visible = true;
+				fadeOutView.visible = false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Rotate3D id="uiFlipIn" target="{fadeInView}" autoCenterTransform="true" focalLength="1000" duration="{flipDuration}" angleYFrom="180" angleYTo="360" effectEnd="onFlipEnd(event)"/>
+		<s:Rotate3D id="uiFlipOut" target="{fadeOutView}" autoCenterTransform="true" focalLength="1000" duration="{flipDuration}" angleYFrom="0" angleYTo="180" effectEnd="onFlipEnd(event)"/>
+		
+		<!--<s:Rotate3D id="uiFlip" target="{uiViewContainer}" autoCenterTransform="true" focalLength="1000" duration="{flipDuration}" effectEnd="onFlipEnd(event)"/>-->
+		<s:Fade id="uiFadeOut" target="{fadeOutView}" duration="0" alphaTo="0" startDelay="{flipDuration/2}"/>
+		<s:Fade id="uiFadeIn" target="{fadeInView}" duration="0" alphaTo="1" startDelay="{flipDuration/2}"/>
+		<s:Rotate3D id="uiInitFlip" target="{backView}" autoCenterTransform="true" focalLength="1000" duration="0" angleYTo="180"/>
+	</fx:Declarations>
+	<s:Group id="uiViewContainer" width="100%" height="100%"/>
+</s:Group>

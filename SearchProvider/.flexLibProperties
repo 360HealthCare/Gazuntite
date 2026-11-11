@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.provider.search.services.provider.appController.SearchProviderController"/>
+    <classEntry path="com.zigron.provider.search.services.provider.command.SearchProviderCommand"/>
+    <classEntry path="com.zigron.provider.search.services.provider.delegate.SearchProviderDelegate"/>
+    <classEntry path="com.zigron.provider.search.services.provider.model.SearchProviderModelLocator"/>
+    <classEntry path="com.zigron.provider.search.services.provider.util.XmlConstants"/>
+    <classEntry path="com.zigron.provider.search.services.provider.util.XmlUtils"/>
+    <classEntry path="com.zigron.provider.search.services.provider.event.SearchProviderEvent"/>
+    <classEntry path="com.zigron.provider.search.services.provider.util.PSConstants"/>
+    <classEntry path="com.zigron.provider.search.services.provider.util.PSServiceMethods"/>
+    <classEntry path="com.zigron.provider.search.services.provider.dto.SearchProviderResultsList"/>
+    <classEntry path="com.zigron.provider.search.services.provider.view.search.ProviderSearchListView"/>
+    <classEntry path="com.zigron.provider.search.services.provider.view.search.ProviderSearchResultView"/>
+    <classEntry path="com.zigron.provider.search.services.provider.dto.providerdto"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

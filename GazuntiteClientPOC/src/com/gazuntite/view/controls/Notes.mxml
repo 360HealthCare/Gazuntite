@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="100%"
+		 xmlns:spicefactory="http://www.spicefactory.org/parsley"
+		 creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.DisplayNotesAndDictationEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleClickAddNote(event:MouseEvent):void
+			{
+				sharedModel.notesTxt = noteTxt.text;
+				noteTxt.text = "";
+			}
+			
+			[MessageHandler]
+			public function handleDisplayNotesAndDictation(event:DisplayNotesAndDictationEvent):void
+			{
+				if(event.noteTxt != "")
+				{
+					noteTxt.text = event.noteTxt;
+				}else
+				{
+					noteTxt.text = "";
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	
+	<!--<s:TextInput id="subjectTxt" 
+				 prompt="Subject:"
+				 skinClass="spark.skins.mobile.TextInputSkin"/>-->
+	
+	<s:TextArea id="noteTxt" 
+				 height="50"
+				 width="80%"
+				 skinClass="spark.skins.spark.TextAreaSkin"/>
+	
+	<s:Button label="Add note"
+			  styleName="button"
+			  click="handleClickAddNote(event)"/>
+	
+</s:Group>

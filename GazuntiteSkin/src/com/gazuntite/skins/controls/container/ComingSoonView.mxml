@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			[Bindable]	public var samlpeText:String = 'Coming Soon';
+		]]>
+	</fx:Script>
+	
+	<!--<s:layout>
+		<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" />
+	</s:layout>-->
+	<s:BorderContainer backgroundColor="0xFFFFFF" cornerRadius="4" borderColor="0xFFFFFF" borderVisible="true"
+					   left="10" right="10" top="15" bottom="10" height="200" width="100%">
+		<s:Label text="{samlpeText}" fontFamily="CalibriCFF" fontSize="20" horizontalCenter="0" verticalCenter="0"/>
+		
+	</s:BorderContainer>
+	
+	
+	
+</s:Group>

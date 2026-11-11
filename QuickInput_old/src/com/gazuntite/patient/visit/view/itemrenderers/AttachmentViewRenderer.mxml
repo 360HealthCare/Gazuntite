@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+		
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QILabViewBtn;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import flash.filesystem.File;
+			import flash.filesystem.FileMode;
+			import flash.filesystem.FileStream;
+			
+			import mx.controls.dataGridClasses.DataGridListData;
+			import mx.utils.Base64Encoder;
+
+			private var fileToAttach:File;
+			private var attachmentContents:ByteArray;
+			private var dataField:String;
+			
+			private function clickButtonHandler():void
+			{
+				if (!fileToAttach)
+					fileToAttach = new File();
+				
+				fileToAttach.browse();
+				fileToAttach.addEventListener(Event.SELECT, fileSelectHandler, false, 0, true);
+			}
+			
+			private function fileSelectHandler(event:Event):void
+			{
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(fileToAttach, FileMode.READ);
+				
+				attachmentContents = new ByteArray();
+				
+				fileStream.readBytes(attachmentContents, 0, fileStream.bytesAvailable);
+				fileStream.close();
+				
+				if (data && data.hasOwnProperty(dataField))
+				{
+					data[dataField] = UtilityFunctions.convertBase64String(attachmentContents);
+						
+					if (attachmentContents.length)
+					{
+						label = "View"
+						id_Attach.enabled = false;
+					}
+					else
+					{
+						label = "Attach";
+						id_Attach.enabled = true;
+					}
+				}
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (listData && listData is DataGridListData)
+				{
+					dataField = DataGridListData(listData).dataField;
+					
+					if (data && data.hasOwnProperty(dataField))
+					{
+						if (data[dataField] && data[dataField] is ByteArray)
+						{
+							if (data[dataField].length)
+							{
+								label = "View";
+								id_Attach.enabled = false;
+							}
+							else
+							{
+								label = "Attach";
+								id_Attach.enabled = true;
+							}
+						}
+						else
+						{
+							label = "Attach";
+							id_Attach.enabled = true;
+						}
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" horizontalAlign="center"/>
+	</s:layout>
+	
+	<s:Button id="id_Attach" useHandCursor="true" buttonMode="true" label="{label}" 
+			  skinClass="{id_Attach.label =='View' ? QILabViewBtn :com.adobe.gazuntite.skins.chrome.buttonSkins.QILabAttachBtn  }"
+			  click="clickButtonHandler()"/>
+</s:MXDataGridItemRenderer>

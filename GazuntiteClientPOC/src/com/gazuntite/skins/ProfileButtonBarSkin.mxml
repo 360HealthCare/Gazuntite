@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" creationComplete="skin1_creationCompleteHandler(event)">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function skin1_creationCompleteHandler(event:FlexEvent):void
+			{
+				hostComponent.toolTip = hostComponent.label ;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect height="22" radiusX="10" width="120" x="0" y="0" visible.up="false" visible.over="false" visible.down="false" visible.disabled="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#CECECE" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="22" includeIn="disabled,down,over,up,upAndSelected" radiusX="10" width="120" x="0" y="0" visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color.over="#7F8B99" color.up="#A2A4A7" color.upAndSelected="#FFFFFF" ratio="0" color.down="#A2A4A7" alpha="1.0" color.disabled="#A2A4A7"/>
+				<s:GradientEntry color.over="#404D5B" color.up="#7F848B" color.upAndSelected="#CECECE" ratio="1" color.down="#7F848B" alpha="1.0" color.disabled="#7F848B"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:Label 
+		verticalAlign="middle" typographicCase.upAndSelected="uppercase" typographicCase.overAndSelected="uppercase"
+		fontFamily="Calibri Bold" fontSize="11" kerning="off"		
+		id="labelDisplay" textAlign="center" width="115"  
+		color.disabledAndSelected="#323C4C" color.downAndSelected="#323C4C" color.overAndSelected="#323C4C" color.upAndSelected="#323C4C"		
+		x="2.5" y="6" color.up="#65696D" color.over="#D1D5DA" color.down="#65696D" color.disabled="#65696D" 
+		
+		/>
+	
+	
+	<s:Path data="M 20.88 18.07 L 0.02 18.07 10.45 0.01 Z " height="9.05" includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" rotation="180" width="14.85" x="72.394" y="30.995">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.6" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#D0D0D0" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	
+	
+	
+	
+</s:Skin>

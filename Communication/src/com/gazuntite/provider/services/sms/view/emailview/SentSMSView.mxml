@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		 creationComplete="LoadSentEmail()"
+		 >
+	<fx:Metadata>
+		[Event(name="DeleteSelectedSMS", type="flash.events.Event")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.services.sms.event.GetSentSMSEvent;
+			import com.gazuntite.provider.services.sms.model.SMSModelLocator;
+			
+			import mx.collections.ListCollectionView;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			
+			[Bindable]
+			public var model: SMSModelLocator = SMSModelLocator.getInstance();
+			private var smsID:String;
+			
+			private var _userID:int;
+			private var _clinicBranchID:String;
+			[Bindable]
+			public function get userID():int
+			{
+				return _userID;
+			}
+			
+			public function set userID(value:int):void
+			{
+				_userID = value;
+			}
+			
+			[Bindable]
+			public function get clinicBranchID():String
+			{
+				return _clinicBranchID;
+			}
+			
+			public function set clinicBranchID(value:String):void
+			{
+				_clinicBranchID = value;
+			}
+			
+			private function LoadSentEmail():void
+			{
+				/* var smsSentEvent:GetSentSMSEvent =new GetSentSMSEvent(parseInt(clinicBranchID),userID,model.currentPage,callBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(smsSentEvent); */
+			}
+			
+			private function callBack():void
+			{
+				
+			}
+			
+			private function CheckUncheckAll():void
+			{
+				/* var allRows:int =	 model.smsResultList.ALLSentSMS.length;
+				
+				for (var i:int = 0; i < allRows; i++)
+				{
+				if (chkHeader.selected == true)
+				{
+				trace ("Checked is true");
+				ListCollectionView(dgSentSMS.dataProvider).getItemAt(i)["isSelected"]=true;
+				}
+				else
+				{
+				trace ("Checked is false");
+				ListCollectionView(dgSentSMS.dataProvider).getItemAt(i)["isSelected"]=false;
+				}
+				}
+				dgSentSMS.dataProvider = model.smsResultList.ALLSentSMS; */
+				
+				
+			}
+			
+			
+			
+			
+			protected function dgSentSMS_itemClickHandler(event:ListEvent):void
+			{
+				/*
+				// Get the target of this event (Datagrid)
+				var dataGrid:DataGrid = event.target as DataGrid;
+				
+				
+				
+				var allRows:int =	 model.smsResultList.ALLSentSMS.length;
+				var smsID:String = "";
+				
+				for (var i:int = 0; i < allRows; i++)
+				{
+				if(ListCollectionView(dgSentSMS.dataProvider).getItemAt(i)["isSelected"]==true)
+				//		if(dgSentSMS.columns[0][i] == true)
+				smsID	+=ListCollectionView(dgSentSMS.dataProvider).getItemAt(i)["smsID"]+"^";
+				
+				}
+				if(smsID.length > 0)
+				{
+				smsID=smsID.substring(0,smsID.length-1);
+				model.smsIDs = smsID;
+				
+				///////////// Change USer ID later On
+				//	var emailDeleteEvent : DeleteEmailEvent = new DeleteEmailEvent(emailID,470,GetEmailValuesCallBack);
+				//	CairngormEventDispatcher.getInstance().dispatchEvent(emailDeleteEvent);
+				}
+				/*
+				if(ListCollectionView(dgSentSMS.dataProvider).getItemAt(i)["isSelected"]==true)
+				var newValue:String = dataGrid.selectedItem["userID"];//[col.dataField];
+				*/
+			}
+			
+			
+			protected function btnGotoFirst_clickHandler(event:MouseEvent):void
+			{
+				CallServer(model.currentPage=1);
+				//var smsView:SentSMSView=new SentSMSView();
+				
+			}
+			
+			protected function btnGotoLast_clickHandler(event:MouseEvent):void
+			{
+				CallServer(model.currentPage=model.totalPage);
+			}
+			
+			protected function btnPrevious_clickHandler(event:MouseEvent):void
+			{
+				CallServer(model.currentPage -=1);
+			}
+			
+			
+			protected function btnNext_clickHandler(event:MouseEvent):void
+			{
+				CallServer(model.currentPage +=1);
+			}
+			
+			protected function btnRefresh_clickHandler(event:MouseEvent):void
+			{
+				CallServer(model.currentPage=1);
+			}
+			
+			private function CallServer(currentPage:int):void
+			{
+				//var smsSentEvent:GetSentSMSEvent =new GetSentSMSEvent(model.loggedInUserSelectedBranchId,model.loggedInUserId,model.currentPage,GetSMSValuesCallBack);
+				var smsSentEvent:GetSentSMSEvent =new GetSentSMSEvent(parseInt(clinicBranchID),userID,model.currentPage,GetSMSValuesCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(smsSentEvent);
+			}
+			
+			public  function GetSMSValuesCallBack(val:* = null):void
+			{
+				EnableNavigationButtons(model.currentPage,model.totalPage);
+			}
+			
+			public function  EnableNavigationButtons(currentPage:int, totalPages:int ):void //currentPage:int, totalPages:int ):void
+			{
+				
+				//currentPage =model.currentPage;
+				//totalPages = model.totalPage;
+				
+				//				btnGotoFirst.enabled = currentPage != 1;
+				//				btnGotoLast.enabled 		= currentPage != totalPages;
+				//				btnNext.enabled 		=  currentPage != totalPages;
+				//				btnPrevious.enabled 	=  currentPage != 1;
+			}
+			
+			protected function deleteBtn_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event('DeleteSelectedSMS',true));
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="1"  gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.controls.container.MailInboxToolbarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" />
+		</s:layout>
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+		<s:DropDownList  skinClass="com.gazuntite.skins.controls.list.MailInboxToolbarDropListSkin" selectedIndex="0">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Text Message" />
+					<fx:Object label="From" />
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Spacer width="100%" />
+		<s:Button id="deleteBtn" click="deleteBtn_clickHandler(event)" styleName="emailInboxToolbarDelete"/>
+	</s:SkinnableContainer>
+	
+	<s:List id="uiSmsList"
+			width="100%" 
+			height="100%"
+			borderVisible="false"
+			skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+			allowMultipleSelection="true"
+			verticalScrollPolicy="auto"
+			itemRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.SmsListItemRenderer"
+			dataProvider="{model.smsResultList.ALLSentSMS}"
+			>
+		<!--dataProvider="{model.m_oEmailResultList.EmailAll}"  
+		rowCount="{dgEmailInbox.dataProvider.length + 1}"
+		
+		>-->
+		<!--<s:dataProvider>
+		<s:ArrayCollection>
+		<fx:Object isSelected="true" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="false" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="true" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="false" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="false" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="true" Subject="Dr.Dennis M.Baker" />
+		<fx:Object isSelected="true" Subject="Dr.Dennis M.Baker" />
+		</s:ArrayCollection>
+		
+		</s:dataProvider>-->
+	</s:List>
+	
+	
+</s:Group>

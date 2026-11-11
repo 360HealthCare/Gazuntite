@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderStatusDTO;
+			
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Button label="{UtilityFunctions.TitleCase( ProviderStatusDTO.ONLINE )}" 
+			  skinClass="com.gazuntite.skins.controls.button.OnlineStatusButtonSkin"
+			  visible="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.ONLINE}"
+			  includeInLayout="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.ONLINE}"
+			  buttonMode="true" useHandCursor="true" toolTip="Online"/>
+	<s:Button label="{UtilityFunctions.TitleCase( ProviderStatusDTO.AWAY )}" 
+			  visible="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.AWAY}" 
+			  includeInLayout="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.AWAY}"
+			  skinClass="com.gazuntite.skins.controls.button.AwayStatusButtonSkin"
+			  buttonMode="true" useHandCursor="true" toolTip="Away"/>
+	<s:Button label="{UtilityFunctions.TitleCase( ProviderStatusDTO.BUSY )}" 
+			  visible="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.BUSY}" 
+			  includeInLayout="{model.LoggedInUserSessionDTO.Status == ProviderStatusDTO.BUSY}"
+			  skinClass="com.gazuntite.skins.controls.button.BusyStatusButtonSkin"
+			  buttonMode="true" useHandCursor="true" toolTip="Busy"/>
+</s:Group>

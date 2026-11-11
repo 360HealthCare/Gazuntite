@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:view="com.gazuntite.history.view.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  skinClass="com.gazuntite.skins.controls.container.dmg.DMGViewBgSkin"
+					  xmlns:views="com.gazuntite.history.view.views.*"
+					  xmlns:components1="com.gazuntite.components.*"
+					  creationComplete="cc(event)" xmlns:components2="com.gazuntite.common.view.components.*" 
+					  
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.history.dto.PatientVisitProviderDTO;
+			import com.gazuntite.history.event.GetHistoryByProviderEvent;
+			import com.gazuntite.history.event.GetPresprectionHistoryByProviderEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.history.view.event.HistoryButtonsEvent;
+			import com.gazuntite.history.view.itemRenderer.IHistoryIR;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			private var model : HistoryModelLocator = HistoryModelLocator.getInstance();
+			
+			private var ListitemRendererRefrence:IHistoryIR;
+			
+			[Bindable]
+			public var showDetailView:Boolean = false;
+			
+			private var isComboBoxOpen:Boolean= false;
+			
+			private var selectedProvider:PatientVisitProviderDTO;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+				addEventListener('ResetListButtonRefrence' , function(ev:*):void{
+					
+					if(null != ListitemRendererRefrence)
+						ListitemRendererRefrence.deselectAllButton();
+					//ResetListButtons(ListitemRendererRefrence);
+					
+				});
+				
+				addEventListener(HistoryButtonsEvent.DictationButtonClicked, function (e:HistoryButtonsEvent):void{
+					
+					if(e.ItemRenderer.listButtonBar.id_dictationBtn.selected)
+						id_selectionEditerView.SwtichViewStackToIndex(2); //switch to Dication View
+					else
+						id_selectionEditerView.SwtichViewStackToIndex(0);
+					
+					//ResetRreviousRendererRefrence(e.ItemRenderer);
+					if(null != ListitemRendererRefrence && ListitemRendererRefrence != e.ItemRenderer)
+						ListitemRendererRefrence.deselectAllButton();
+					ListitemRendererRefrence = e.ItemRenderer;
+				});
+				
+				addEventListener(HistoryButtonsEvent.NotesButtonClicked, function (e:HistoryButtonsEvent):void{
+					
+					if(e.ItemRenderer.listButtonBar.id_notesBtn.selected)
+					{
+						id_selectionEditerView.SwtichViewStackToIndex(3); //switch to Notes View
+						
+						 /* if(e.DTOdata.Notes != null)
+						id_selectionEditerView.Note = e.DTOdata.Notes;  */
+						 
+						if(e.DTOdata.Note != null)
+							id_selectionEditerView.Note = e.DTOdata.Note;
+					}
+						
+					else
+						id_selectionEditerView.SwtichViewStackToIndex(0);
+					
+					//ResetRreviousRendererRefrence(e.ItemRenderer);
+					if(null != ListitemRendererRefrence && ListitemRendererRefrence != e.ItemRenderer)
+						ListitemRendererRefrence.deselectAllButton();
+					ListitemRendererRefrence = e.ItemRenderer;
+				});
+				
+				addEventListener(HistoryButtonsEvent.DocomentPreviewClicked, function (e:HistoryButtonsEvent):void{
+					
+					if(e.ItemRenderer.listButtonBar.id_previewBtn.selected)
+						id_selectionEditerView.SwtichViewStackToIndex(1); //switch to Notes View
+					else
+						id_selectionEditerView.SwtichViewStackToIndex(0);
+					
+					//ResetRreviousRendererRefrence(e.ItemRenderer);
+					if(null != ListitemRendererRefrence && ListitemRendererRefrence != e.ItemRenderer)
+						ListitemRendererRefrence.deselectAllButton();
+					ListitemRendererRefrence = e.ItemRenderer;
+				});
+			}
+			
+			/* private function ResetRreviousRendererRefrence(renderer:Object):void
+			{
+			if(ListitemRendererRefrence != null && renderer != ListitemRendererRefrence)
+			ResetListButtons(renderer);
+			}
+			
+			private function ResetListButtons(renderer:Object):void
+			{
+			if(renderer != null)
+			{
+			renderer.id_listBtnBar.id_dictationBtn.selected = false;
+			renderer.id_listBtnBar.id_notesBtn.selected = false;
+			renderer.id_listBtnBar.id_previewBtn.selected = false;
+			}
+			} */
+			protected function uiSortDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				id_SearchInput.text = '';
+				lbl_selected.text = uiSortDropdown.selectedItem.label;//Assign the text
+				isComboBoxOpen = false;
+				
+				id_selectionEditerView.SwtichViewStackToIndex(0); //Reset the view
+				
+				SendtoServer();
+			}
+			protected function skinnablecontainer1_clickHandler(event:MouseEvent):void
+			{
+				if(isComboBoxOpen)
+				{
+					uiSortDropdown.closeDropDown(true);
+					isComboBoxOpen= false;
+				}
+				else
+				{
+					uiSortDropdown.openDropDown(); 
+					isComboBoxOpen= true;
+				}
+				/* 	 if(uiSortDropdown.)
+				uiSortDropdown.closeDropDown(true);
+				else */
+				
+			}
+			
+			public function LoadSelectedProviderData(SelectedProvider:PatientVisitProviderDTO):void
+			{
+				this.selectedProvider = SelectedProvider;
+				
+				id_SearchInput.text = ''; // clear search createria.
+				
+				id_selectionEditerView.SwtichViewStackToIndex(0)
+				id_selectionEditerView.viewStack.visible = false;
+				
+				if(null != ListitemRendererRefrence)
+					ListitemRendererRefrence.deselectAllButton();
+				
+				if(null != model.SelectedSectionHistoryList)
+					model.SelectedSectionHistoryList.removeAll();
+				
+				SendtoServer();
+			}
+			
+			private function SendtoServer():void
+			{
+				id_DetailView.viewStack.selectedIndex = 0;
+				
+				if(uiSortDropdown.selectedIndex + 1 == 1 || uiSortDropdown.selectedIndex + 1 == 2 || uiSortDropdown.selectedIndex + 1 == 13)
+				{
+					
+					var peve:GetPresprectionHistoryByProviderEvent = new GetPresprectionHistoryByProviderEvent();
+					
+					peve.sectionID = uiSortDropdown.selectedIndex + 1;
+					peve.callback = getHistoryCallback;
+					peve.GaxenID = selectedProvider.GAXEN_ID;
+					peve.PatientGaxenID = model.PatientGaxenID;
+					
+					CairngormEventDispatcher.getInstance().dispatchEvent(peve);
+					
+				}
+				else 
+				{
+					var eve:GetHistoryByProviderEvent = new GetHistoryByProviderEvent();
+					
+					eve.sectionID = uiSortDropdown.selectedIndex + 1;
+					eve.callback = getHistoryCallback;
+					eve.providerID = selectedProvider.ProviderId;
+					
+					CairngormEventDispatcher.getInstance().dispatchEvent(eve);
+				}
+			}
+			
+			private function getHistoryCallback():void
+			{
+				id_selectionEditerView.viewStack.visible = model.SelectedSectionHistoryList.length > 0 ? true:false ;
+				id_DetailView.viewStack.selectedIndex = model.SelectedSectionHistoryList.length > 0 ? 0 : 2;
+			}
+			
+			protected function id_SearchInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.charCode == Keyboard.ENTER )
+				{
+					var query:String = id_SearchInput.text;
+					if( query.length > 2 || query.length == 0)
+						id_DetailView.FilterList(query);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingTop="4" paddingLeft="4" paddingRight="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="27" >
+		<s:HGroup id="id_header" verticalAlign="middle" gap="5"  width="60%" height="27" >
+			
+			<s:SkinnableContainer id="id_ListHeader"
+								  width="100%"  height="25" 
+								  enabled="{id_DetailView.viewStack.selectedIndex != 1}"
+								  useHandCursor="true" buttonMode="true"
+								  click="skinnablecontainer1_clickHandler(event)"
+								  toolTip="{'Arrange By: ' +uiSortDropdown.selectedItem.label}"
+								  skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBetailBGSkin"
+								  >
+				<s:HGroup width="100%" height="100%" verticalAlign="middle" paddingLeft="8" paddingRight="2" gap="4">
+					<s:Label text="Arrange By:" fontSize="12" fontFamily="CalibriCFF"/>
+					<s:Label id="lbl_selected" 
+							 fontFamily="CalibriCFFBold"
+							 width="100%" maxDisplayedLines="1" text="Allergies"/>
+					<s:Button skinClass="com.gazuntite.skins.controls.combobox.StepperComboOpenButtonSkin"/>
+				</s:HGroup>
+				
+				<s:ComboBox id="uiSortDropdown"
+							selectedIndex="0" top="24" width="100%" height="1"
+							change="uiSortDropdown_changeHandler(event)"
+							skinClass="com.gazuntite.skins.controls.combobox.cmbHolderSkin"
+							itemRenderer="com.gazuntite.history.view.itemRenderer.DDItemrederer"
+							>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Allergies" />
+							<fx:Object label="Chronic Medication" />
+							<fx:Object label="General History" />
+							<fx:Object label="Family History" />
+							<fx:Object label="Social History" />
+							<fx:Object label="Immunization" />
+							<fx:Object label="Vitals" />
+							<fx:Object label="CC/HPI" />
+							<fx:Object label="ROS" />
+							<fx:Object label="Physical" />
+							<fx:Object label="Lab-In" />
+							<fx:Object label="Diagnosis" />
+							<fx:Object label="Prescription" />
+							<fx:Object label="Procedure" />
+							<fx:Object label="Lab-Out" />
+							<fx:Object label="Recommendation" />
+							<fx:Object label="Follow-up" />
+							
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:ComboBox>
+			</s:SkinnableContainer>
+			
+		</s:HGroup>
+		
+		<s:SkinnableContainer width="40%" height="25" 
+							  skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin"
+							  enabled="{id_DetailView.viewStack.selectedIndex != 1}"
+							  >
+			<s:TextInput id="id_SearchInput"
+						 left="3" right="26" 
+						 height="20" 
+						 prompt="Search"
+						 toolTip="Search"
+						 keyUp="id_SearchInput_keyUpHandler(event)"
+						 contentBackgroundAlpha="0" borderVisible="false" 
+						 fontFamily="CalibriCFF" fontStyle="normal" color="0x666666"
+						 verticalCenter="0"
+						 />
+			<s:Button id="id_searchBtn"
+					  right="4" verticalCenter="2" rotation="90"
+					  skinClass="com.gazuntite.skins.controls.container.dmg.DMGSearchPatientIconSkin"
+					  toolTip="Search" buttonMode="true" useHandCursor="true"
+					  />
+		</s:SkinnableContainer>
+	</s:HGroup>
+	
+	<s:Group  width="100%" height="100%" includeInLayout="{!showDetailView}" visible="{!showDetailView}">
+		<components2:PleaseSelectView label="To view record, select any doctor" horizontalCenter="0" verticalCenter="0" width="90%" />
+	</s:Group>
+	
+	<s:HGroup  width="100%" height="100%"  includeInLayout="{showDetailView}" visible="{showDetailView}">
+		<views:SelectionDetailView id="id_DetailView"  height="100%" width="60%"/>
+		<views:SectionEditorView id="id_selectionEditerView" Note="{}" height="100%" width="40%" />
+	</s:HGroup>
+	
+</s:SkinnableContainer>

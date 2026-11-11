@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.controls.container.ePrescription.PatientSearchListSpinnerBG"
+					  creationComplete="cc(event)" >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.RemoveFavoritePharmaciesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.PharmacySelectedEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]
+			private var model:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			private var _DataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return _DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				_DataProvider = value;
+			}
+			
+			private var _labelFeild:String = '';
+			
+			[Bindable]
+			public function get labelFeild():String
+			{
+				return _labelFeild;
+			}
+			
+			public function set labelFeild(value:String):void
+			{
+				_labelFeild = value;
+			}
+			
+			private var _selectedItem:Object;
+			
+			[Bindable]
+			public function get selectedItem():Object
+			{
+				return _selectedItem;
+			}
+			
+			public function set selectedItem(value:Object):void
+			{
+				_selectedItem = value;
+			}
+			
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function Value_changeHandler(event:Event):void
+			{
+				
+				if( null != id_list.selectedItem )
+				{
+					id_outValue.text = id_list.selectedItem.StoreName; 
+					id_outValue.text += " "+ id_list.selectedItem.Phone; 
+					id_outValue.toolTip = id_outValue.text
+					id_favBtn.visible = true;
+				}
+				else
+				{
+					id_outValue.text = '';
+					id_favBtn.visible = false;
+				}
+				selectedItem = id_list.selectedItem;
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("AddPharmacy",true));
+			}
+			
+			protected function OK_Cancle_clickHandler(event:MouseEvent):void
+			{
+				/* if(event.currentTarget.id == 'id_OK' && id_list.selectedItem != null)
+				{
+					var ps:PharmacySelectedEvent = new PharmacySelectedEvent(PharmacySelectedEvent.PHARMACY_SELECTED);;
+					ps.selection = id_list.selectedItem;
+					dispatchEvent( ps );
+				}
+				else
+				{
+					dispatchEvent( new Event( "CancelClick", true ) );
+				}
+				
+				id_outValue.text = '';
+				id_favBtn.visible = false;
+				id_list.selectedIndex = -1; */
+			}
+			
+			/* protected function Cancel_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event( "CancelClick", true ) );
+				id_outValue.text = '';
+				id_favBtn.visible = false;
+				id_list.selectedIndex = -1;
+			} */
+			
+			
+			private function SetPharmacytoUnFavorit():void
+			{
+				if(id_list.selectedItem != null)
+				{
+					var selecedPharmacy:PharmaciesResult = id_list.selectedItem as PharmaciesResult;
+					
+					var getPharmacy: RemoveFavoritePharmaciesEvent = new RemoveFavoritePharmaciesEvent( model.PatientID, selecedPharmacy.NCPDPID, RefreshFavPharmacyList); // temporary hardCode patientID 48436
+					CairngormEventDispatcher.getInstance().dispatchEvent(getPharmacy);
+					
+					id_outValue.text = '';
+				}
+				
+			}
+			
+			private function RefreshFavPharmacyList(x:XML):void
+			{
+				dispatchEvent( new Event("ReLoadPatientPharmacy",true ));
+				id_outValue.text = '';
+				id_favBtn.visible = false;
+				id_list.selectedIndex = -1;
+			}
+			
+			protected function id_favBtn_clickHandler(event:MouseEvent):void
+			{
+				SetPharmacytoUnFavorit();
+			}
+			
+			protected function id_list_clickHandler(event:MouseEvent):void
+			{
+				if(event.currentTarget.id == 'id_list' && id_list.selectedItem != null)
+				{
+					var ps:PharmacySelectedEvent = new PharmacySelectedEvent(PharmacySelectedEvent.PHARMACY_SELECTED);;
+					ps.selection = id_list.selectedItem;
+					dispatchEvent( ps );
+				}
+				else
+				{
+					dispatchEvent( new Event( "CancelClick", true ) );
+				}
+				
+				id_outValue.text = '';
+				id_favBtn.visible = false;
+				id_list.selectedIndex = -1;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="3" paddingLeft="5" paddingRight="5" paddingTop="3" paddingBottom="3"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="left">
+		<s:Label text="FAVORITES" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFF"/>
+		<s:Spacer width="100%" />
+		<s:Button label="Add New" 
+				  click="button1_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="Add New"
+				  skinClass="com.gazuntite.skins.controls.button.ePrescription.AddNewButtonSkin"/>
+	</s:HGroup>
+	
+	<s:List id="id_list" 
+			height="55" width="100%"
+			left="3" right="3" top="3" bottom="3" change="Value_changeHandler(event)"
+			dataProvider="{DataProvider}" labelField="{labelFeild}" 
+			itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.FavoritPharmacyListItemRenderer"
+			click="id_list_clickHandler(event)"
+			skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+			borderVisible="false" horizontalScrollPolicy="off"/>
+	
+	<s:Group width="100%" visible="false" includeInLayout="false">
+		<s:Image id="id_favBtn" visible="false"
+				 buttonMode="true" click="id_favBtn_clickHandler(event)"
+				 source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/starred.png')"
+				 useHandCursor="true" left="5" verticalCenter="0" toolTip="Remove from Favorite"/>
+		<s:Label id="id_outValue" text="# of Rec(s) : {id_list.dataProvider.length}"
+				 color="#FFFFFF" fontFamily="CalibriCFF" fontSize="13" left="24" right="50"  verticalCenter="0" maxDisplayedLines="1"/>
+		<s:Button id="id_OK" 
+				  click="OK_Cancle_clickHandler(event)" buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"
+				  toolTip="Select Favorite Pharmacy" right="25" verticalCenter="0" />
+		<s:Button id="id_Cancel" 
+				  click="OK_Cancle_clickHandler(event)"  buttonMode="true" useHandCursor="true" skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"
+				  toolTip="Close Favorite Pharmacy" right="0" verticalCenter="0" />
+	</s:Group>
+	
+</s:SkinnableContainer>

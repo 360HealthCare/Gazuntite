@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.EmailToggleButton"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.SmsToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.VideoToogleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.RecentPatientToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.ClosePatientToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.textInput.SearchPatientTextInputSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.InputToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.HistoryToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.toggleButtonSkin.ProfileToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.button.patient.WriteNoteToggleButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.button.patient.DictationPlayButtonSkin"/>
+    <classEntry path="com.zigron.gazuntite.skins.controls.scrollbar.DictationHScrollBarSkin"/>
+    <classEntry path="com.gazuntite.skins.controls.toggleButtonSkin.RecordSectionToggleButtonSkin"/>
+    <classEntry path="com.gazuntite.skins.controls.container.TransparentBGSkin"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

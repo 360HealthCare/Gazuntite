@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init(event)"
+		 width="100%"
+		 height="100%"
+		 maxWidth="130">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			protected var _dataProvider:ArrayCollection;
+			
+			[Bindable]
+			protected var _labelField:String;
+			
+			[Bindable]
+			protected var _selectedItemText:String
+			
+			[Bindable]
+			protected var _buttonLabel:String;
+			
+			[Bindable]
+			protected var _required:Boolean = false;
+			
+			[Bindable]
+			protected var _isEditForm:Boolean = false;
+			
+			public function get isEditForm():Boolean
+			{
+				return _isEditForm;
+			}
+			
+			public function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+				
+				if(_isEditForm == true)
+				{
+					myCB.styleName = "grayButton";
+				}else
+				{
+					myCB.styleName = "calloutBtn";
+				}
+			}
+			
+			public function get required():Boolean
+			{
+				return _required;
+			}
+			
+			public function set required(value:Boolean):void
+			{
+				_required = value;
+			}
+			
+			public function get selectedItemText():String
+			{
+				return _selectedItemText;
+			}
+			
+			public function set selectedItemText(value:String):void
+			{
+				_selectedItemText = value;
+			}
+			
+			public function get buttonLabel():String
+			{
+				return _buttonLabel;
+			}
+			
+			public function set buttonLabel(value:String):void
+			{
+				_buttonLabel = value;
+			}
+			
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(value:String):void
+			{
+				_labelField = value;
+			}
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				_selectedItemText = textInput.text;//dateTimeFormatter.format(dt.selectedDate);
+				closeDropDown();
+			}
+			
+			protected function closeDropDown():void
+			{
+				textInput.text = "";
+				myCB.closeDropDown();
+			}
+			
+			protected function dt_changeHandler(event:Event):void
+			{
+				textInput.text = dateTimeFormatter.format(dt.selectedDate);
+				_selectedItemText = textInput.text;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations> 
+		<s:DateTimeFormatter id="dateTimeFormatter" dateTimePattern="MM/dd/yy"/> 
+	</fx:Declarations> 
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<s:CalloutButton id="myCB" 
+					 styleName="calloutBtn"
+					 horizontalPosition="auto"
+					 verticalPosition="auto"
+					 label="{_buttonLabel}"
+					 width="100%"
+					 maxHeight="21"
+					 skinClass="com.gazuntite.skins.CalloutBtnSkin">
+		<s:calloutLayout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:calloutLayout>
+		
+		<s:TextInput id="textInput"
+					 prompt="Type or use date control" 
+					 width="130"
+					 height="28"/>
+		
+		<s:DateSpinner id="dt" 
+					   displayMode="date"
+					   height="80"
+					   change="dt_changeHandler(event)" /> 
+		
+		<s:VGroup>
+			
+			<s:Button label="Use this Date" 
+					  click="button1_clickHandler(event)"
+					  styleName="button"/>
+			
+			<s:Button label="Clear" 
+					  styleName="button"
+					  click="{selectedItemText =''; myCB.closeDropDown()}"/>
+			
+		</s:VGroup>
+		
+	</s:CalloutButton>
+	
+	<s:Rect id="requiredLine" 
+			height="2" 
+			width="100%" 
+			includeInLayout="{_required}" 
+			visible="{_required}"
+			radiusX="0"
+			radiusY="0">
+		<s:fill>
+			<s:SolidColor color="#ff0600"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Group width="100%">
+		<s:BorderContainer borderColor="0x4b6b97" 
+						   borderWeight="1" 
+						   height="21"
+						   width="100%"
+						   click="{myCB.openDropDown()}">
+			
+			<s:layout>
+				<s:HorizontalLayout paddingLeft="3" 
+									verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Label text="{_selectedItemText}"
+					 width="100%"
+					 maxDisplayedLines="1"
+					 horizontalCenter="0" 
+					 verticalCenter="0"
+					 color="0x000000"/>
+			
+		</s:BorderContainer>
+	</s:Group>
+	
+	
+	
+	
+</s:Group>

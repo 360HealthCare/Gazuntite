@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:sf="http://www.spicefactory.org/parsley"
+				   creationComplete="group1_creationCompleteHandler(event)" 
+				   width="100%" height="100%"
+				   xmlns:controls="com.gazuntite.view.controls.*">
+	
+	<fx:Metadata>
+		[ManagedEvents("changePatient")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ChangePatientEvent;
+			import com.gazuntite.events.ClearTextInputEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.provider.ProviderDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.components.supportClasses.ItemRenderer;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			private var providerNameList:ArrayCollection;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			/* protected var plist:ProviderList; */
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* plist = new ProviderList();
+				providerNameList = new XMLListCollection( plist.providerXML.children()); */
+				
+				providerNameList = new ArrayCollection();
+				providerNameList.addAll( sharedModel.providerList.AllProviders );
+				
+				id_list.selectedItem = sharedModel.selectedProvider;
+				
+				var e:ChangePatientEvent = new ChangePatientEvent(ChangePatientEvent.CHANGE_PATIENT);
+				dispatchEvent(e);
+			}
+			
+			
+			public function filter_proividerList(item:Object):Boolean
+			{
+				var query:String = id_textbox.text;
+				var firstName:String = item.FirstName;
+				var midName:String = item.MiddleName;
+				var lastName:String = item.LastName;
+				
+				if(firstName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(midName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(lastName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				
+				
+				return false;
+			} 
+			
+			protected function textinput1_changeHandler(event:TextOperationEvent=null):void
+			{
+				
+				providerNameList.filterFunction = filter_proividerList; 
+				providerNameList.refresh(); 
+				
+			} 
+			
+			/* protected function list1_clickHandler(event:MouseEvent):void
+			{
+			var myxml event.currentTarget.selectedItem as XML;
+			
+			var dto:Object = new Object();
+			dto.firstname = 
+			
+			} */
+			
+			protected function id_textbox_clearTextInputHandler(event:ClearTextInputEvent):void
+			{
+				id_textbox.text = '';
+				//providerNameList = new XMLListCollection( plist.providerXML.children());
+				textinput1_changeHandler();
+			}
+			
+			protected function id_list_changeHandler(event:IndexChangeEvent):void
+			{
+				if(event.currentTarget.selectedItem)
+				{
+					sharedModel.selectedProvider = event.currentTarget.selectedItem as ProviderDTO;
+					
+					var e:ChangePatientEvent = new ChangePatientEvent(ChangePatientEvent.CHANGE_PATIENT);
+					dispatchEvent(e);
+					
+					
+					/* id_ProviderProfileView.id_ProviderGeneralView.firstName 	= providerxml.FirstName;
+					id_ProviderProfileView.id_ProviderGeneralView.middleName 	= providerxml.MiddleName;					
+					id_ProviderProfileView.id_ProviderGeneralView.lastName 		= providerxml.LastName;
+					id_ProviderProfileView.id_ProviderGeneralView.email 		= providerxml.UserEmail;
+					id_ProviderProfileView.id_ProviderGeneralView.userID 		= providerxml.UserId;  
+					
+					id_ProviderProfileView.id_ProviderGeneralView.address 		= providerxml.address;  
+					id_ProviderProfileView.id_ProviderGeneralView.notes 		= providerxml.notes;  
+					id_ProviderProfileView.id_ProviderGeneralView.homePage 		= providerxml.homePage;  
+					id_ProviderProfileView.id_ProviderGeneralView.gmapPage 		= providerxml.gmapPage;  
+					id_ProviderProfileView.id_ProviderGeneralView.LastUpdated 	= providerxml.LastUpdated; */  
+				}
+			}
+			
+			
+			public function updateNeighborHoodStatus(statusList:ArrayCollection):void
+			{
+				var i:int = 0;
+				var j:int = 0;
+				
+				var email:String;
+				var provider:ProviderDTO;
+				
+				for(i = 0; i < providerNameList.length; i++ )
+				{
+					provider = providerNameList.getItemAt( i ) as ProviderDTO;
+					provider.IsAvailableForChat = false;
+					for(j = 0; j < statusList.length; j++ )
+					{
+						email = statusList.getItemAt( j ).name;
+						if( sharedModel.doctorEmail == email ) 
+							continue;
+						
+						if(email == provider.UserEmail)
+						{
+							provider.IsAvailableForChat = true;
+						}
+					}
+					
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" gap="0"/>
+	</s:layout>
+	
+	<s:BorderContainer width="100%"
+					   height="35"
+					   borderWeight="1"
+					   borderColor="0x287695"
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="1">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0x8d9ba6" ratio=".1"/>
+				<s:GradientEntry color="0xaeb6bd" ratio=".9"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="5"
+								paddingTop="5"
+								paddingLeft="3"
+								paddingRight="3"/>
+		</s:layout>
+		
+		<controls:TextInputIcon id="id_textbox" 
+								width="100%"
+								fontWeight="bold" 
+								prompt="Clinical User Search"
+								change="textinput1_changeHandler(event)" 
+								clearTextInput="id_textbox_clearTextInputHandler(event)"
+								iconPath="assets/textInputSearchIcon.png"
+								skinClass="com.gazuntite.skins.TextInputIconSkin"/>
+		
+	</s:BorderContainer>
+	
+	<s:List id="id_list" 
+			width="100%" 
+			height="100%" 
+			change="id_list_changeHandler(event)"
+			dataProvider="{providerNameList}" 
+			contentBackgroundColor="0x000000"
+			horizontalScrollPolicy="off"
+			contentBackgroundAlpha="0"
+			itemRenderer="com.gazuntite.view.communication.providerComm.ProviderItemRenderer"/>
+	
+	
+</s:Group>

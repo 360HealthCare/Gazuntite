@@ -1,0 +1,5 @@
+<LoginRequest xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomRequest.User" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<KickOutOldSession>false</KickOutOldSession>
+<Password>quivus123</Password>
+<UserID>sahibzada.sami@zigron.com</UserID>
+</LoginRequest>

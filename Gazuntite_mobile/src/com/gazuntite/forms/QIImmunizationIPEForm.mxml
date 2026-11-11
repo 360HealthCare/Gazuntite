@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init(event)" 
+		 xmlns:components="com.zigron.controls.extended.components.*"
+		 width="100%" 
+		 height="100%" 
+		 xmlns:ipeControls="qs.ipeControls.*"
+		 xmlns:adobe="com.adobe.layouts.*" 
+		 xmlns:components1="com.gazuntite.components.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+		[Event(name="toggleFormOptions", type="com.gazuntite.events.ToggleFormOptionsEvent")]
+	</fx:Metadata>
+	
+	<!-- DF: this is old but we'll hold on to it for now -->
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.ToggleFormOptionsEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			import mx.validators.Validator;
+			
+			[Bindable]
+			protected var _selectedRecord:ObjectProxy;
+			
+			public function get selectedRecord():ObjectProxy
+			{
+				return _selectedRecord;
+			}
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+			}
+			
+			protected function handleShowAllOptions(event:MouseEvent, full:Boolean=true):void
+			{
+				var e:ToggleFormOptionsEvent = new ToggleFormOptionsEvent(ToggleFormOptionsEvent.TOGGLE_FORM_OPTIONS);
+				e.full = full;
+				dispatchEvent(e);
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xd7d7d7" ratio=".33" />
+				<s:GradientEntry color="0xffffff" ratio=".66"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="0"
+							  paddingRight="0"
+							  paddingTop="0"
+							  gap="0"
+							  horizontalAlign="center"/>
+		</s:layout>
+		
+		<s:Group width="100%" height="100%">
+			
+			<ipeControls:IPEForm id="ipeForm" 
+								 editable="true" 
+								 width="100%"
+								 styleName="ipeForm">
+				
+				<ipeControls:layout>
+					<s:VerticalLayout paddingBottom="0"
+									  paddingLeft="5"
+									  paddingRight="5"
+									  paddingTop="0"
+									  gap="5"/>
+				</ipeControls:layout>
+				
+				<s:HGroup width="100%">
+					<components1:IPEFormItem width="110%" height="100%">
+						
+						<s:Label text="Associated with:" 
+								 styleName="ipeFormLabel"/>
+			
+						<ipeControls:IPELabelCombobox id="myCB"
+													  width="100%"
+													  height="100%"
+													  labelField="associatedWith" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.associatedWith}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object associatedWith="This Visit" immunization="7-Valent 1" dose="1000000"/>
+									<fx:Object associatedWith="Last Visit" immunization="7-Valent 2" dose="2000000"/>
+									<fx:Object associatedWith="Whenever" immunization="7-Valent 3" dose="3000000"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="100%" height="100%">
+						
+						<s:Label text="Immunization:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox id="myCB2"
+													  width="100%"
+													  height="100%"
+													  labelField="immunization" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.immunization}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object associatedWith="This Visit" immunization="7-Valent 1" dose="1000000"/>
+									<fx:Object associatedWith="Last Visit" immunization="7-Valent 2" dose="2000000"/>
+									<fx:Object associatedWith="Whenever" immunization="7-Valent 3" dose="3000000"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="70%" height="100%">
+						
+						<s:Label text="Dose:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox id="myCB3"
+													  width="100%"
+													  height="100%"
+													  labelField="dose" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.dose}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object associatedWith="This Visit" immunization="7-Valent 1" dose="1000000"/>
+									<fx:Object associatedWith="Last Visit" immunization="7-Valent 2" dose="2000000"/>
+									<fx:Object associatedWith="Whenever" immunization="7-Valent 3" dose="3000000"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+				</s:HGroup>
+				
+				<!-- Optional fields -->
+				
+				<s:HGroup width="100%">
+					<components1:IPEFormItem width="110%" height="100%">
+						
+						<s:Label text="Manufacturer:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="manufacturer" 
+													  requireSelection="false"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.manufacturer}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object manufacturer="Manufacturer 1"/>
+									<fx:Object manufacturer="Manufacturer 2"/>
+									<fx:Object manufacturer="Manufacturer 3"/>
+									<fx:Object manufacturer="Manufacturer 4"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="110%" height="100%">
+						
+						<s:Label text="Body/Side route:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="body" 
+													  requireSelection="false"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.body}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object body="Body/Side Route 1"/>
+									<fx:Object body="Body/Side Route 2"/>
+									<fx:Object body="Body/Side Route 3"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="60%" height="100%">
+						
+						<s:Label text="Lot #:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="lot" 
+													  requireSelection="false"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.lot}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object lot="Lot # 1"/>
+									<fx:Object lot="Lot # 2"/>
+									<fx:Object lot="Lot # 3"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					
+					<components1:IPEFormItem width="100%" height="100%">
+						
+						<s:Label text="Date Admin:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPEDateField showIcon="false" 
+												  enableIcon="false"  
+												  editOnEnter="false" 
+												  editOnClick="true"  
+												  commitOnEnter="false" 
+												  commitOnBlur="true">
+							<ipeControls:selectedDate>
+								<fx:Date />
+							</ipeControls:selectedDate>
+						</ipeControls:IPEDateField>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="100%" height="100%">
+						
+						<s:Label text="Next Due:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPEDateField showIcon="false" 
+												  enableIcon="false"  
+												  editOnEnter="false" 
+												  editOnClick="true"  
+												  commitOnEnter="false" 
+												  commitOnBlur="true">
+							<ipeControls:selectedDate>
+								<fx:Date />
+							</ipeControls:selectedDate>
+						</ipeControls:IPEDateField>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="100%" height="100%">
+						
+						<s:Label text="Expiry Date:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPEDateField showIcon="false" 
+												  enableIcon="false"  
+												  editOnEnter="false" 
+												  editOnClick="true"  
+												  commitOnEnter="false" 
+												  commitOnBlur="true">
+							<ipeControls:selectedDate>
+								<fx:Date />
+							</ipeControls:selectedDate>
+						</ipeControls:IPEDateField>
+					</components1:IPEFormItem>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					
+					<components1:IPEFormItem width="100%" height="100%">
+						
+						<s:Label text="Refusal"
+								 styleName="ipeFormLabel"/>
+						<s:CheckBox id="refusalCB" 
+									label="Refusal" 
+									
+									selected="{_selectedRecord.refuasl}"/>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="100%" 
+											 height="100%"
+											 enabled="{refusalCB.selected}">
+						
+						<s:Label text="Reason:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="reason" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.reason}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object reason="Reason 1"/>
+									<fx:Object reason="Reason 2"/>
+									<fx:Object reason="Reason 3"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<components1:IPEFormItem width="100%"
+											 height="100%"
+											 enabled="{refusalCB.selected}">
+						
+						<s:Label text="Site:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="site" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.site}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object site="Site 1"/>
+									<fx:Object site="Site 2"/>
+									<fx:Object site="Site 3"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					
+					<components1:IPEFormItem width="100%" 
+											 height="100%"
+											 enabled="{refusalCB.selected}">
+						
+						<s:Label text="Series:" 
+								 styleName="ipeFormLabel"/>
+						<ipeControls:IPELabelCombobox width="100%"
+													  height="100%"
+													  labelField="series" 
+													  requireSelection="true"
+													  showIcon="false" 
+													  enableIcon="false"  
+													  editOnEnter="false" 
+													  editOnClick="true"  
+													  commitOnEnter="false" 
+													  commitOnBlur="true"
+													  text="{_selectedRecord.series}">
+							<ipeControls:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object series="Series 1"/>
+									<fx:Object series="Series 2"/>
+									<fx:Object series="Series 3"/>
+								</s:ArrayCollection>
+							</ipeControls:dataProvider>
+						</ipeControls:IPELabelCombobox>
+					</components1:IPEFormItem>
+					
+					<!--<s:HGroup  >
+					<s:Button skinClass="com.gazuntite.skins.NotesFormBtnSkin" 
+					useHandCursor="true"
+					buttonMode="true"
+					toolTip="Notes"/>
+					
+					<s:Button skinClass="com.gazuntite.skins.DictationFormBtnSkin"
+					useHandCursor="true"
+					buttonMode="true"
+					toolTip="Dictation"/>
+					</s:HGroup>-->
+					
+					<s:Button label="Save"
+							  styleName="button"/>
+					
+					<s:Spacer width="100%"/>
+					
+				</s:HGroup>
+				
+			</ipeControls:IPEForm>
+			
+			<!--<s:filters>
+			<s:DropShadowFilter distance="1"
+			strength=".33"/>
+			</s:filters>-->
+			
+		</s:Group>
+		
+		
+	</s:BorderContainer>
+	
+</s:Group>

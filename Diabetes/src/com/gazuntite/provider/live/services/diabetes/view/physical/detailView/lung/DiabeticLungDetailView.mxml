@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event('BackClicked',true));
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" />
+	</s:layout>
+	<s:Label text="Lungs Detail View Coming Soon" />
+	
+	<s:Button label="Back" toolTip="Back"
+			  useHandCursor="true" buttonMode="true"
+			  click="button1_clickHandler(event)"
+			  skinClass="com.gazuntite.skins.controls.button.BackSectionButtonSkin"/>
+	
+</s:Group>

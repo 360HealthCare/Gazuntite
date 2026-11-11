@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:view="com.gazuntite.video.chat.view.*"
+					   creationComplete="cc(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.video.chat.manager.VideoChatManager;
+			import com.gazuntite.video.chat.view.VideoChatView;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			private var chatManager:VideoChatManager = VideoChatManager.getInstance();
+			
+			protected function cc(event:FlexEvent):void
+			{
+				loginUI.groupname.text = chatManager.chatGroupName;
+				
+				loginUI.loginButton.addEventListener( MouseEvent.CLICK, onLogin ); 
+				//loginUI.closeButton.addEventListener( MouseEvent.CLICK, onClose ); 
+				
+				chatManager.addEventListener( "hookUI", onHookUI ); 
+			}
+			
+			private function onHookUI(event:Event):void
+			{
+				loginUI.visible = false;
+				loginUI.includeInLayout = false;
+				
+				var chatView:VideoChatView = new VideoChatView;
+				chatView.percentHeight = 100;
+				chatView.percentWidth  = 100;
+				addElement( chatView );
+				
+				chatView.currentState = VideoChatManager.LOBBY;
+				
+				chatView.addEventListener( CloseEvent.CLOSE, function(event:CloseEvent):void
+				{
+					loginUI.visible = true;
+					loginUI.includeInLayout = true;
+					chatView.stopChatting();
+					removeElement( chatView );
+				});
+			}
+			
+			private function onLogin(event:Event):void
+			{
+				chatManager.login(loginUI.username.text );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<!--<view:VideoChatView width="100%" height="100%" />-->
+	
+	<view:LoginUI  id="loginUI" verticalCenter="0" horizontalCenter="0" horizontalAlign="center"
+				   width="100%" height="100%" />
+</s:WindowedApplication>

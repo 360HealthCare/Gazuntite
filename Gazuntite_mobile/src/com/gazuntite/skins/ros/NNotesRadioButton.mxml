@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect height="15" width="15" x="0.5" y="0" visible.disabled="false" visible.disabledAndSelected="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#666666" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFCB00" ratio="0" color.over="#6FC9FF" alpha.over="1.0" color.overAndSelected="#6FC9FF" alpha.overAndSelected="1.0"/>
+				<s:GradientEntry alpha="1.0" color="#FF9300" ratio="1" color.over="#009CFF" alpha.over="1.0" color.overAndSelected="#009CFF" alpha.overAndSelected="1.0"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="2" hideObject="false" color="#FF9300" inner="true" strength="1" alpha="0.5" quality="2" knockout="false" angle="90"/>
+			<s:DropShadowFilter includeIn="downAndSelected" blurX="2" blurY="2" distance="2" hideObject="false" color="#FF5800" inner="true" strength="1" alpha="0.5" quality="2" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="15" includeIn="disabled,disabledAndSelected" width="15" x="0.5" y="0">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#666666" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:SolidColor color="#999999"/>
+		</s:fill>
+		<s:filters>
+		</s:filters>
+	</s:Rect>
+	<s:RichText color="#333333" columnCount="1" fontFamily="Calibri Bold" fontSize="11"  kerning="on" tabStops="S0"  whiteSpaceCollapse="preserve" x="5" y="4" y.down="3" text="N"/>
+	<s:Group x="2">		
+	<s:Rect height="1" width="1" x="5.5">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#AF0000" color.disabled="#CCCCCC" color.disabledAndSelected="#CCCCCC" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect height="2" width="1" x="6" y="1.5">
+		<s:fill>
+			<s:SolidColor color="#AF0000" color.disabled="#CCCCCC" color.disabledAndSelected="#CCCCCC"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="2" rotation="90" width="1" x="9" y="0.5">
+		<s:fill>
+			<s:SolidColor color="#AF0000" color.disabled="#CCCCCC" color.disabledAndSelected="#CCCCCC"/>
+		</s:fill>
+	</s:Rect>
+	</s:Group>
+</s:Skin>

@@ -1,0 +1,125 @@
+<Configurations type="PRODUCTION_DEV">
+	<settings>
+		<property name="LOG_LEVEL" value="debug" options="all|info|debug|warning|error|fatal" />
+		<property name="FILTERS" value="*" options="'com.*','*' (Package name with qoutes seperated by comma)" />
+	
+	</settings>
+	<service type="LOCAL">
+		<property name="DOCUMENT_MANAGEMENT_RESTFULSERVICE" value="http://quivus.com/QuivusAirProduction/QLiveProvider/DocumentManager/Service/RestFulService/DocumentManagementRestfulService.svc/" />
+		<property name="EPRESCRIPTION_RESTFULSERVICE" value="http://beta.quivus.com/Eprescriptionstagging/Service/EPrescriptionService.svc/" />				
+		<property name="EPRESCRIPTION_PROVIDER_SERVICE" value="http://www.quivus.com/quivusairdev/QuivusMainManagerService/QuivusManagerProviderSearchRestfullService/QuivusManagerProviderSearchRestfullService.svc/" />
+		<property name="EPRESCRIPTION_USER_SERVICE" value="http://www.quivus.com/QuivusAirDev/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="EPRESCRIPTION_QM_SERVICE" value="http://www.quivus.com/QuivusAirDev/QuivusMainManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="EPRESCRIPTION_ADRESSBOOK_SERVICE" value="http://www.quivus.com/QuivusAirDev/AddressBookService/AddressBookRestfullService/AddressBookERestfullService.svc/" />
+		<property name="PATIENT_SEARCH_RESTFULSERVICE" value="http://quivus.com/QuivusAirProduction/QUserSearchService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="SCHEDULER_SERVICE_RESTFULSERVICE" value="" />
+		<property name="BILLING_RESTFUL_SERVICE" value="http://localhost:49431/BillingService.svc/" />
+		<property name="BILLING_REPORT_BASE_URL" value="http://localhost:64475/ReportViewer.aspx" />
+		<property name="FTP_SERVICE_URL" value="ftp.quivus.com" />
+		<property name="FTP_SERVICE_USERNAME" value="fs23013" />
+		<property name="FTP_SERVICE_PASSWORD" value="zigron83199" />
+		<property name="FTP_SERVICE_PORT" value="21" />
+		<property name="FTP_SERVICE_ROOT_FOLDER_NAME" value="Quivus" />
+		<property name="DICTATION_SERVER_URL" value="http://quivus.com/QuivusAirDev/DictationService/QuivusDictationService.svc/" />
+		<property name="DICTATION_FOLDER_NAME" value="temp/Dictation" />
+		<property name="DICTATION_SERVICE_METHOD" value="POST" />
+		<property name="RESTFUL_SERVICE_BASE_URL" value="" />
+		<property name="BUILD_TYPE" value="AIR" options="AIR|Native" />
+		<property name="SECURITY_SERVICE_BASE_URL" value="" />
+		<property name="QUIVUS_SECURITY_SERVICE_BASE_URL" value="http://quivus.com/QuivusAir/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+	</service>
+	<service type="PRODUCTION_BETA">
+		<property name="DOCUMENT_MANAGEMENT_RESTFULSERVICE" value="http://beta.quivus.com/QuivusAirProduction/QLiveServiceProvider/DocumentManager/Service/RestFulService/DocumentManagementRestfulService.svc/" />
+		<property name="EPRESCRIPTION_RESTFULSERVICE" value="http://beta.quivus.com/Eprescriptionstagging/Service/EPrescriptionService.svc/" />				
+		<property name="EPRESCRIPTION_PROVIDER_SERVICE" value="http://beta.quivus.com/QuivusAirProduction/QuivusManagerService/QuivusManagerProviderSearchRestfullService/QuivusManagerProviderSearchRestfullService.svc/" />
+		<property name="EPRESCRIPTION_USER_SERVICE" value="http://beta.quivus.com/QuivusAirProduction/QUserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="EPRESCRIPTION_QM_SERVICE" value="http://beta.quivus.com/QuivusAirProduction/QuivusManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="EPRESCRIPTION_ADRESSBOOK_SERVICE" value="http://beta.quivus.com/QuivusAirProduction/QAddressBookService/AddressBookRestfullService/AddressBookERestfullService.svc/" />
+		<property name="PATIENT_SEARCH_RESTFULSERVICE" value="http://beta.quivus.com/QuivusAirProduction/QUserSearchService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="SCHEDULER_SERVICE_RESTFULSERVICE" value="http://beta.quivus.com/QuivusAirProduction/QLiveServiceProvider/QScheduler/Service/SchedulerService.svc/" />
+		<property name="BILLING_RESTFUL_SERVICE" value="http://beta.quivus.com/QuivusAirProduction/QBillingService/BillingService.svc/" />
+		<property name="BILLING_REPORT_BASE_URL" value="http://beta.quivus.com/QuivusAirProduction/ReportingPortal/ReportViewer.aspx" />
+		<property name="FTP_SERVICE_URL" value="ftp.quivus.com" />
+		<property name="FTP_SERVICE_USERNAME" value="fs23013" />
+		<property name="FTP_SERVICE_PASSWORD" value="zigron83199" />
+		<property name="FTP_SERVICE_PORT" value="21" />
+		<property name="FTP_SERVICE_ROOT_FOLDER_NAME" value="Quivus" />
+		<property name="DICTATION_SERVER_URL" value="http://beta.quivus.com/QuivusAirProduction/QDictationService/QuivusDictationService.svc/" />
+		<property name="DICTATION_FOLDER_NAME" value="temp/Dictation" />
+		<property name="DICTATION_SERVICE_METHOD" value="POST" />
+		<property name="RESTFUL_SERVICE_BASE_URL" value="http://beta.quivus.com/QuivusAirProduction/QuivusManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="BUILD_TYPE" value="AIR" options="AIR|Native" />
+		<property name="SECURITY_SERVICE_BASE_URL" value="http://beta.quivus.com/QuivusAirProduction/QSecurityService/Service/Rest/QuivusSecurityService.svc/" />
+		<property name="QUIVUS_SECURITY_SERVICE_BASE_URL" value="" />
+	</service>
+	<service type="PRODUCTION">
+		<property name="DOCUMENT_MANAGEMENT_RESTFULSERVICE" value="http://quivus.com/QuivusAirProduction/QLiveProvider/DocumentManager/Service/RestFulService/DocumentManagementRestfulService.svc/" />
+		<property name="EPRESCRIPTION_RESTFULSERVICE" value="http://beta.quivus.com/Eprescriptionstagging/Service/EPrescriptionService.svc/" />				
+		<property name="EPRESCRIPTION_PROVIDER_SERVICE" value="http://www.quivus.com/quivusairdev/QuivusMainManagerService/QuivusManagerProviderSearchRestfullService/QuivusManagerProviderSearchRestfullService.svc/" />
+		<property name="EPRESCRIPTION_USER_SERVICE" value="http://www.quivus.com/QuivusAirDev/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="EPRESCRIPTION_QM_SERVICE" value="http://www.quivus.com/QuivusAirDev/QuivusMainManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="EPRESCRIPTION_ADRESSBOOK_SERVICE" value="http://www.quivus.com/QuivusAirDev/AddressBookService/AddressBookRestfullService/AddressBookERestfullService.svc/" />
+		<property name="PATIENT_SEARCH_RESTFULSERVICE" value="http://quivus.com/QuivusAirProduction/QUserSearchService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="SCHEDULER_SERVICE_RESTFULSERVICE" value="http://quivus.com/QuivusAirProduction/QLiveProvider/QScheduler/Service/SchedulerService.svc/" />
+		<property name="FTP_SERVICE_URL" value="ftp.quivus.com" />
+		<property name="FTP_SERVICE_USERNAME" value="fs23013" />
+		<property name="FTP_SERVICE_PASSWORD" value="zigron83199" />
+		<property name="FTP_SERVICE_PORT" value="21" />
+		<property name="FTP_SERVICE_ROOT_FOLDER_NAME" value="Quivus" />
+		<property name="DICTATION_SERVER_URL" value="http://quivus.com/QuivusAirProduction/QDictationService/QuivusDictationService.svc/" />
+		<property name="DICTATION_FOLDER_NAME" value="temp/Dictation" />
+		<property name="DICTATION_SERVICE_METHOD" value="POST" />
+		<property name="RESTFUL_SERVICE_BASE_URL" value="http://www.quivus.com/QuivusAirproduction/QManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/ " />
+		<property name="BUILD_TYPE" value="AIR" options="AIR|Native" />
+		<property name="SECURITY_SERVICE_BASE_URL" value="" />
+		<property name="QUIVUS_SECURITY_SERVICE_BASE_URL" value="" />
+	</service>
+	<service type="PRODUCTION_DEV">
+		<property name="DOCUMENT_MANAGEMENT_RESTFULSERVICE" value="http://quivus.com/QuivusAirDev/QLiveprovider/DManager/Service/RestFulService/DocumentManagementRestfulService.svc/" />
+		<property name="EPRESCRIPTION_RESTFULSERVICE" value="http://beta.quivus.com/Eprescriptionstagging/Service/EPrescriptionService.svc/" />				
+		<property name="EPRESCRIPTION_PROVIDER_SERVICE" value="http://www.quivus.com/quivusairdev/QuivusMainManagerService/QuivusManagerProviderSearchRestfullService/QuivusManagerProviderSearchRestfullService.svc/" />
+		<property name="EPRESCRIPTION_USER_SERVICE" value="http://www.quivus.com/QuivusAirDev/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="EPRESCRIPTION_QM_SERVICE" value="http://www.quivus.com/QuivusAirDev/QuivusMainManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="EPRESCRIPTION_ADRESSBOOK_SERVICE" value="http://www.quivus.com/QuivusAirDev/AddressBookService/AddressBookRestfullService/AddressBookERestfullService.svc/" />
+		<property name="PATIENT_SEARCH_RESTFULSERVICE" value="http://quivus.com/QuivusAirDev/UserSearchService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="SCHEDULER_SERVICE_RESTFULSERVICE" value="http://quivus.com/QuivusAirDev/QLiveProvider/QScheduler/Service/SchedulerService.svc/" />
+		<property name="BILLING_RESTFUL_SERVICE" value="http://quivus.com/QuivusAirDev/QBillingService/BillingService.svc/" />
+		<property name="BILLING_REPORT_BASE_URL" value="http://quivus.com/ReportingPortal/ReportViewer.aspx" />
+		<property name="FTP_SERVICE_URL" value="ftp.quivus.com" />
+		<property name="FTP_SERVICE_USERNAME" value="fs23013" />
+		<property name="FTP_SERVICE_PASSWORD" value="zigron83199" />
+		<property name="FTP_SERVICE_PORT" value="22" />
+		<property name="FTP_SERVICE_ROOT_FOLDER_NAME" value="Quivus" />
+		<property name="DICTATION_SERVER_URL" value="http://quivus.com/QuivusAirDev/DictationService/QuivusDictationService.svc/" />
+		<property name="DICTATION_FOLDER_NAME" value="temp/Dictation" />
+		<property name="DICTATION_SERVICE_METHOD" value="POST" />
+		<property name="RESTFUL_SERVICE_BASE_URL" value="http://www.quivus.com/QuivusAirDev/QuivusMainManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="BUILD_TYPE" value="AIR" options="AIR|Native" />
+		<property name="SECURITY_SERVICE_BASE_URL" value="http://www.quivus.com/QuivusAir/QuivusSecurity/Service/Rest/QuivusSecurityService.svc/" />
+		<property name="QUIVUS_SECURITY_SERVICE_BASE_URL" value="http://www.quivus.com/QuivusAirDev/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+	</service>
+	<service type="LIVE">
+		<property name="DOCUMENT_MANAGEMENT_RESTFULSERVICE" value="" />
+		<property name="EPRESCRIPTION_RESTFULSERVICE" value="http://beta.quivus.com/Eprescriptionstagging/Service/EPrescriptionService.svc/" />				
+		<property name="EPRESCRIPTION_PROVIDER_SERVICE" value="http://www.quivus.com/quivusairdev/QuivusMainManagerService/QuivusManagerProviderSearchRestfullService/QuivusManagerProviderSearchRestfullService.svc/" />
+		<property name="EPRESCRIPTION_USER_SERVICE" value="http://www.quivus.com/QuivusAirDev/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+		<property name="EPRESCRIPTION_QM_SERVICE" value="http://www.quivus.com/QuivusAirDev/QuivusMainManagerService/QuivusManagerRestfullService/QuivusManagerRestfullService.svc/" />
+		<property name="EPRESCRIPTION_ADRESSBOOK_SERVICE" value="http://www.quivus.com/QuivusAirDev/AddressBookService/AddressBookRestfullService/AddressBookERestfullService.svc/" />
+		<property name="PATIENT_SEARCH_RESTFULSERVICE" value="" />
+		<property name="SCHEDULER_SERVICE_RESTFULSERVICE" value="" />
+		<property name="BILLING_RESTFUL_SERVICE" value="http://www.quivus.com/QuivusAir/BillingService/BillingService.svc/" />
+		<property name="FTP_SERVICE_URL" value="ftp.quivus.com" />
+		<property name="FTP_SERVICE_USERNAME" value="" />
+		<property name="FTP_SERVICE_PASSWORD" value="" />
+		<property name="FTP_SERVICE_PORT" value="21" />
+		<property name="FTP_SERVICE_ROOT_FOLDER_NAME" value="Quivus" />
+		<property name="DICTATION_SERVER_URL" value="http://www.quivus.com/QuivusAir/QuivusDictationService/QuivusDictationService.svc/" />
+		<property name="DICTATION_FOLDER_NAME" value="temp/Dictation" />
+		<property name="DICTATION_SERVICE_METHOD" value="POST" />
+		<property name="RESTFUL_SERVICE_BASE_URL" value="" />
+		<property name="BUILD_TYPE" value="AIR" options="AIR|Native" />
+		<property name="SECURITY_SERVICE_BASE_URL" value="http://www.quivus.com/QuivusAir/QuivusSecurity/Service/Rest/QuivusSecurityService.svc/" />
+		<property name="QUIVUS_SECURITY_SERVICE_BASE_URL" value="http://quivus.com/QuivusAir/UserService/Service/RestfulService/UserManagerRestfulService.svc/" />
+	</service>
+
+</Configurations>

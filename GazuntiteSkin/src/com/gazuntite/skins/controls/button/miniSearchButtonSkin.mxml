@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="18" includeIn="down,over,up,disabled" radiusX="2" width="32" x="0" y="0" visible.up="false" visible.disabled="false">
+		<s:filters>
+			<s:DropShadowFilter blurX="1" blurY="1" distance="1" hideObject="false" color="0x000000" inner="false" strength="1" alpha="0.5" quality="3" knockout="false" angle="90" alpha.down="0.25"/>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="1" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.75" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="#FFFFFF" alpha="1.0" ratio="0"/>
+				<s:GradientEntry color="#CCCCCC" alpha="1.0" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Path data="M 6.27 5.40 L 0.03 5.40 3.15 -0.01 Z " height="5" rotation="180" width="9" x="30.043" y="12.991">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:SolidColor color="#333333"/>
+		</s:fill>
+	</s:Path>
+	<s:BitmapImage smooth="true" source="@Embed('/assets/images/googleicon.png')" x="1" y="1"/>
+</s:Skin>

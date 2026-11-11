@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="35" height="35">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Rect includeIn="disabled,disabledAndSelected,down,over,up,upAndSelected" x="0.5" y="0.5"
+			width="35" height="35" radiusX="2"
+			visible.down="false"
+			visible.over="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#404143" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#1B1B1C" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90"
+									weight="1">
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Rect includeIn="downAndSelected,overAndSelected,upAndSelected" x="1" y="1" width="35"
+			height="50" radiusX="2"
+			height.downAndSelected="54"
+			height.overAndSelected="54"
+			height.upAndSelected="54">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="0x4896F3" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0x215695" ratio="0.49019607843137253"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90"
+									weight="2">
+				<s:GradientEntry alpha="1.0" color="#4896F3" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#205491" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:Rect includeIn="down,downAndSelected,over,overAndSelected,upAndSelected" x="1" y="1"
+			width="35" height="35" radiusX="2"
+			>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#404143" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#1B1B1C" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90"
+									weight="2">
+				<s:GradientEntry alpha="1.0" color="#4896F3" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#205491" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down,over" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage x="5" y="3" smooth="true" source="@Embed('/assets/images/patientimg.png')"/>
+</s:Skin>

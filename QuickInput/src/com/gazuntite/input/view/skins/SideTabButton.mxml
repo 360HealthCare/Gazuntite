@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%">
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			public var label:String;
+			
+			[Bindable]
+			public var tabSelected:Boolean = false;
+			
+			[Bindable]
+			public var tabState:int = 0;
+			
+			public function onTabSelectionChange(event:Event):void
+			{
+				tabState = 0;
+				if(id_yes.selected)
+				{
+					tabState = 1;
+					id_no.selected = false;
+				}
+				else if(id_no.selected)
+				{
+					tabState = 2;
+					id_yes.selected = false;
+				}
+				if (!uiToggleButton.selected)
+				{				
+					uiToggleButton.selected = true;					
+				}
+			}
+			
+			protected function button_changeHandler(event:Event):void
+			{
+				tabState = 0;
+				switch((event.target as ToggleButton).id)
+				{
+					case 'id_yes':
+					{
+						if(id_yes.selected)
+						{
+							tabState = 1;
+							id_no.selected = false;
+						}
+						break;
+					}
+					case 'id_no':
+					{
+						if(id_no.selected)
+						{
+							tabState = 2;
+							id_yes.selected = false;
+						}
+						break;
+					}
+				}
+					
+				if (!uiToggleButton.selected)
+				{				
+					uiToggleButton.selected = true;					
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:ToggleButton id="uiToggleButton" 
+					label="{uiToggleButton.selected?label.toUpperCase():label}" 
+					selected="{tabSelected}" change="onTabSelectionChange(event)"
+					left="0" right="0" top="0" bottom="0" 
+					skinClass="com.gazuntite.input.view.skins.SideTabButtonSkin"
+					/>
+	<s:SkinnableContainer id="id_container" height="22" right="{tabSelected? 11: 7}" verticalCenter="0" 
+						  skinClass="com.gazuntite.input.view.skins.SquareRadioButtonContainerSkin"	  >
+		<s:layout>
+			<s:HorizontalLayout		paddingLeft="1" paddingRight="1" paddingTop="1" paddingBottom="1"	gap="2"	/>
+		</s:layout>		
+		<s:ToggleButton id="id_yes"
+						right="6" verticalCenter="0" change="button_changeHandler(event)" 
+						skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+						label="Y" toolTip="Yes" useHandCursor="true" buttonMode="true"
+						/>
+		<s:ToggleButton right="6" id="id_no" verticalCenter="0" change="button_changeHandler(event)" 
+						skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+						label="N" toolTip="No"  useHandCursor="true" buttonMode="true"
+						/>
+	</s:SkinnableContainer>
+</s:Group>

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.components.controls.*"
+					  width="100%"
+					  height="100%"
+					  creationComplete="init(event)"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+			
+	</fx:Metadata>
+	
+	<!-- this is just for testing Parsley -->
+	<fx:Metadata>
+		[ManagedEvents("saveFormData")]
+		[ManagedEvents("getImmunizationTypes")]
+		[ManagedEvents("getTestNameEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.GetImmunizationTypesEvent;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.labIn.GetTestNameEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			public override function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+				
+				if(value == true)
+				{
+					this.currentState = "presentation";
+				}else
+				{
+					this.currentState = "normal";
+				} 
+				
+			}
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+				setForm();
+			}
+			
+			protected function validateForm():Boolean
+			{
+				if(cb1.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(cb2.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				
+				
+				return true;
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				/* if(cl1.selectedItemText == "")
+				{
+				return false;
+				}
+				
+				if(cl2.selectedItemText == "")
+				{
+				return false;
+				}
+				*/
+				
+				
+				
+				return true;
+			}
+			
+			protected function addRecord(event:MouseEvent):void
+			{
+				
+				if(validateForm())
+				{
+					// dummy data for test binding
+					var r:ObjectProxy = new ObjectProxy();
+					r.testCode = cb1.selectedItemText;
+					r.testName = cb2.selectedItemText;
+					
+					
+					if(this.currentState == "full")
+					{
+						
+						
+						
+					}
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = r;
+					
+					if(_isEditForm)
+					{
+						e.isUpdate = true;
+					}else
+						
+					{
+						clearForm();
+					}
+					
+					dispatchEvent(e);
+					
+				} 
+			}
+			
+			protected function updateRecord(event:MouseEvent):void
+			{
+				
+				/* if(validateEditForm())
+				{
+				// dummy data for test binding
+				var r:ObjectProxy = new ObjectProxy();
+				r.associatedWith = cl1.selectedItemText;
+				r.immunization = cl2.selectedItemText;
+				
+				
+				var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+				e.payload = r;
+				e.isUpdate = true;
+				
+				dispatchEvent(e);
+				
+				}  */
+			}
+			
+			protected function setForm():void
+			{
+				this.currentState = "presentation";
+				//cl1.selectedItemText = _selectedRecord.associatedWith;
+				//cl2.selectedItemText = _selectedRecord.immunization;
+				
+			}
+			
+			protected function clearForm():void
+			{
+				cb1.selectedItemText = "";
+				cb2.selectedItemText = "";
+				id_description.text = "";
+				
+				
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				dispatchEvents();
+			}
+			
+			private function dispatchEvents():void
+			{
+				var e1:GetTestNameEvent = new GetTestNameEvent();
+				dispatchEvent( e1 );							
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<forms:states>
+		<s:State name="normal"/>
+		<s:State name="presentation"/>
+	</forms:states>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="0"
+						  paddingLeft="3"
+						  paddingRight="3"
+						  paddingTop="0"
+						  gap="1"
+						  horizontalAlign="center"
+						  verticalAlign="top"/>
+	</forms:layout>
+	
+	<s:BorderContainer id="presentationForm" 
+					   width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xf3f3f3"/>
+				<s:GradientEntry color="0xffffff"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		
+		<s:HGroup width="100%">
+			
+			<s:Image source="assets/done.png" includeInLayout="{_isEditForm}"/>
+			<s:Image source="assets/edit.png" includeInLayout="{!_isEditForm}"/>
+				
+				
+				<s:HGroup width="100%"
+						  id="g1"
+						  styleName="ipeForm" 
+						  horizontalAlign="center">
+					
+					<controls:CalloutLabelText id="cb1" 
+											   styleName="grayText" 
+											   labelField="testCode" 
+											   buttonLabel="Test Code:"
+											   required="true" 
+											   isEditForm="{_isEditForm}"
+											   dataProvider="{sharedModel.LabInTestNameList}">
+						<!--<controls:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object testCode="123" testName="test name1" />
+								<fx:Object testCode="124" testName="test name2"/>
+								<fx:Object testCode="125" testName="test name3" />
+								<fx:Object testCode="126" testName="test name4" />
+								<fx:Object testCode="127" testName="test name5" />
+								
+							</s:ArrayCollection>
+						</controls:dataProvider>-->
+					</controls:CalloutLabelText>
+					
+					<controls:CalloutLabelText id="cb2"
+											   styleName="grayText" 
+											   labelField="testName" 
+											   buttonLabel="Test Name:"
+											   required="true"
+											   isEditForm="{_isEditForm}" 
+											   dataProvider="{sharedModel.LabInTestNameList}"
+											   >
+						<!--<controls:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object testCode="123" testName="test name1" />
+								<fx:Object testCode="124" testName="test name2"/>
+								<fx:Object testCode="125" testName="test name3" />
+								<fx:Object testCode="126" testName="test name4" />
+								<fx:Object testCode="127" testName="test name5" />
+								
+							</s:ArrayCollection>
+						</controls:dataProvider>-->
+					</controls:CalloutLabelText>
+					
+				</s:HGroup>
+				
+			</s:HGroup>
+		
+			<s:TextArea id="id_description" width="100%" height="50" skinClass="spark.skins.mobile.TextInputSkin"/>
+			
+			<s:HGroup width="100%">
+				
+				<s:Button id="actionBtn"
+						  styleName="button"
+						  label="{_buttonLabel}"
+						  click="addRecord(event)"/>
+				
+				<!--<controls:NotesAndDictationCalloutButton width="21"
+														 skinClass="com.gazuntite.skins.RecordLevelNotesDictationBtnSkin"/>-->
+				
+			</s:HGroup>
+			
+			
+		
+		
+		
+	</s:BorderContainer>
+	
+	
+	<!-- end presentation form -->
+	
+	
+</forms:MobileFormBase>

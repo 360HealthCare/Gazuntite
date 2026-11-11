@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.AdvanceCareView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.AdvanceCareFormView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.AdvanceCareInnerView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.ACQualityOfLifeView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.ACAdvanceTreamment"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.AdvanceCareSectionView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.quickInput.AdvanceCareHistoryView"/>
+    <classEntry path="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.DiabeticHistoryIR"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

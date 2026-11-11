@@ -1,0 +1,88 @@
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.DoctorSearchBlueCallout"
+					  creationComplete="init(event)" 
+					  xmlns:controls="com.gazuntite.view.controls.*" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:ipe="com.gazuntite.controls.ipeControls.extended.*"
+					  xmlns:sf="http://www.spicefactory.org/parsley"
+					  visible="{sharedModel.doctorSearchVisible}"
+					  includeInLayout="{sharedModel.doctorSearchVisible}" 
+					  xmlns:callouts="com.gazuntite.view.controls.callouts.*">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import com.gazuntite.events.IPESelectionEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				addEventListener(MouseEvent.CLICK, handleMouseClick);
+			}
+			
+			protected function handleMouseClick(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+			}
+			
+			
+			protected function ipecalloutlabeltext1_ipeSelectionChangedHandler(event:IPESelectionEvent):void
+			{
+				//sharedModel.doctorAddress = ipeCalloutLabelText.selectedItemText;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="5" 
+						  paddingLeft="5" 
+						  paddingRight="5" 
+						  paddingTop="5"/>
+	</s:layout>
+	
+	<!--<ipe:IPECalloutLabelText id="ipeCalloutLabelText" 
+							 labelField="address"
+							 showButton="true" 
+							 fontWeight="bold"
+							 ipeSelectionChanged="ipecalloutlabeltext1_ipeSelectionChangedHandler(event)">
+		
+		<ipe:dataProvider>
+			<s:ArrayCollection>
+				<fx:Object address="95 South Main St."/>
+				<fx:Object address="123 Somewhereland"/>
+				<fx:Object address="456 Somewhereland"/>
+			</s:ArrayCollection>
+		</ipe:dataProvider>
+	</ipe:IPECalloutLabelText>-->
+	
+	<callouts:StatusView width="100%"  
+						 right="200"
+						 top="80"/>
+
+	
+	<s:Button width="100%" 
+			  label="SIGN OUT" 
+			  toolTip="Sign Out"
+			  height="24"
+			  buttonMode="true"
+			  useHandCursor="true"
+			  color="0xffffff"
+			  chromeColor="0x2b323b"/>
+	
+</s:SkinnableContainer>

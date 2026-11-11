@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:diabetesGuideLine="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.diabetesGuideLine.*"
+		 creationComplete="cc(event)"
+		 xmlns:diseaseManagement="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.*" 
+		 xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" xmlns:search="com.gazuntite.components.search.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.search.SearchDropDownEvent;
+			import com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.ProcedureSearchIR;
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabetesSearchEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/diseaseManagement/assets/search_text.png")]
+			[Bindable]	public var searchText:Class;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			private var _ListDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+			
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+			}
+			
+			protected function id_list_creationCompleteHandler(event:FlexEvent):void
+			{
+				ListDataProvider = new ArrayCollection();
+				
+				ListDataProvider.source = [
+					
+					{serialNumber:1, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:2, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:3, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:4, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:5, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:6, ICDCode:'123.3', TestName:'bala bala'}, 
+					{serialNumber:7, ICDCode:'123.3', TestName:'bala bala'} 
+				];
+			}
+			
+			
+			
+			protected function searchdropdown1_startSearchHandler(event:SearchDropDownEvent):void
+			{
+				trace(event.SearchQuery, event.searchTypePrompt, event.searchTypeIndex, event.SelectedItem);
+				//do service call here for searching and when search result is ready pass arraycollection to SearchDropDown
+				
+				resultCallBack();
+			}
+			
+			protected function resultCallBack():void
+			{
+				id_searchDD.ShowResult( new ArrayCollection([
+					
+					{serialNumber:1, ICDCode:'128.0', TestName:'Blood Sugar'}, 
+					{serialNumber:2, ICDCode:'143.5', TestName:'Breadth Alcohol'}, 
+					{serialNumber:3, ICDCode:'143.3', TestName:'Flu Test'},
+					{serialNumber:4, ICDCode:'433.6', TestName:'TB Skin Test'},
+					{serialNumber:4, ICDCode:'043.9', TestName:'Hgb'}
+					
+				]) );
+			}
+			
+			
+			protected function id_searchDD_searchResultSelectionChangeHandler(event:SearchDropDownEvent):void
+			{
+				ListDataProvider.addItemAt(event.SelectedItem,0);
+				
+			}
+			
+			/* protected function id_next_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event('MoreToNextTab', true));
+			} */
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="right" gap="2" paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+	</s:layout>
+	
+	
+	<search:SearchDropDown id="id_searchDD"
+						   width="100%" height="30" PromptFieldName="label" startSearch="searchdropdown1_startSearchHandler(event)" 
+						   searchResultSelectionChange="id_searchDD_searchResultSelectionChangeHandler(event)" ShowResultAsPopup="true"
+						   ResultRenderer="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.ProcedureSearchIR">
+		<search:DataProvider>
+			<s:ArrayCollection>
+				<fx:Object label="Code" icon="{searchText}" />
+				<fx:Object label="Description" icon="{searchText}" />
+			</s:ArrayCollection>
+		</search:DataProvider>
+	</search:SearchDropDown>
+	
+	<s:VGroup width="100%" height="100%" gap="-2" >
+		<s:SkinnableContainer width="100%" height="30" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+			
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle"/>
+			</s:layout>
+			<!--<s:HGroup width="100%" height="100%" verticalAlign="middle">-->
+			<s:Label width="12%" text="Sr.#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" /><!--paddingLeft="6"-->
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label width="39%" text="ICD Code" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" /><!--paddingLeft="6"-->
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label width="40%" text="Test Name" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left"/><!-- paddingLeft="6"-->
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label width="17%" text="Actions" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left"/><!-- paddingLeft="6"-->
+			<!--</s:HGroup>-->
+		</s:SkinnableContainer>
+		
+		<s:List id="id_list"
+				width="100%" height="100%"
+				horizontalScrollPolicy="off" 
+				creationComplete="id_list_creationCompleteHandler(event)"
+				dataProvider="{ListDataProvider}"
+				itemRenderer="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.ProcedureListIR"
+				skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+				/>
+	</s:VGroup>
+	
+	
+		
+</s:Group>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" 
+		 xmlns:ipeControls="qs.ipeControls.*" 
+		 xmlns:controls="com.gazuntite.view.controls.*" 
+		 xmlns:forms="com.gazuntite.view.quickInput.forms.*" 
+		 xmlns:allergies="com.gazuntite.view.quickInput.forms.allergies.*" >
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			/* protected function addSaveRecord(event:SaveFormDataEvent):void
+			{
+				trace("bubbling saved record");
+			} */
+			
+			
+			[Bindable]
+			protected var _selectedRecord:ObjectProxy;
+			
+			[Bindable]
+			protected var _showButton:Boolean = true;
+			
+			[Bindable]
+			protected var _isEditForm:Boolean = true;
+			
+			public function get isEditForm():Boolean
+			{
+				return _isEditForm;
+			}
+			
+			public function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+			}
+			
+			public function get showButton():Boolean
+			{
+				return _showButton;
+			}
+			
+			public function set showButton(value:Boolean):void
+			{
+				_showButton = value;
+			}
+			
+			public function get selectedRecord():ObjectProxy
+			{
+				return _selectedRecord;
+			}
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+				if(value != null)
+				{
+					setForm();
+				}
+			}
+			
+			
+			protected function addSaveRecord(event:SaveFormDataEvent):void
+			{
+				if(_isEditForm)
+					event.isUpdate = true;
+				else
+					event.isUpdate = false;
+			}
+			
+			/* protected function init(event:FlexEvent):void
+			{
+				
+			} */
+			
+			protected function setForm():void
+			{
+				imfb.selectedRecord = _selectedRecord;
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout 
+			horizontalAlign="center"/>
+	</s:layout>
+	
+<!--	<allergies:AllergyMobileFormBase id="imfb"
+									 width="100%"
+									 saveFormData="addSaveRecord(event)" 
+									 buttonLabel="Add Record" />-->
+	
+	<allergies:AllergyMobileFormBase id="imfb"
+									 width="100%"
+									 saveFormData="addSaveRecord(event)" 
+									 buttonLabel="Save Record" 
+									 isEditForm="{_isEditForm}"
+									 showButton="{_showButton}"/>
+	
+</s:Group>

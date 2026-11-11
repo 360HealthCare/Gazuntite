@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  width="25" 
+					  width.down="50%"
+					  height="85%" 
+					  creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.LiveProviderServiceView;
+			import com.gazuntite.skins.TabBarSkin;
+			
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			protected var l:LiveProviderServiceView;
+			
+			[Bindable]
+			protected var _labelText:String;
+			
+			[Bindable]
+			protected var open:Boolean = false;
+			
+			public function get labelText():String
+			{
+				return _labelText;
+			}
+			
+			public function set labelText(value:String):void
+			{
+				_labelText = value;
+			}
+			
+			// fill the entire coverflow
+			protected function createSubviews():void
+			{
+				/* l = new LiveProviderServiceView();
+				l.y = 30;
+				addElement(l); */
+				
+			}
+			
+			protected function checkState():void
+			{
+				if(open == true)
+				{
+					open = false;
+					this.currentState = "normal";
+					
+					// release memory by getting rid of child views
+					//vs.removeAllElements();
+					
+					//vs.removeAllChildren();
+					
+					//removeElement(l);
+					
+					
+				}else
+				{
+					open = true;
+					this.currentState = "down";
+					
+				}
+				
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleOpenEffectEnd(event:EffectEvent):void
+			{
+				// only init child views when needed to save memory and performance
+				createSubviews();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:transitions>
+		<s:Transition fromState="normal" 
+					  toState="down">
+			<s:Parallel duration="200" 
+						effectEnd="handleOpenEffectEnd(event)">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="down" 
+					  toState="normal">
+			<s:Parallel duration="350">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<s:filters>
+		<s:DropShadowFilter distance="5"
+							angle="90"
+							strength=".55"/>
+	</s:filters>
+	
+	<s:Button skinClass="com.gazuntite.skins.OpenReviewButtonSkin"
+			  includeIn="normal"
+			  x="3" 
+			  y="3"/>
+	
+	<s:Button skinClass="com.gazuntite.skins.CloseReviewButtonSkin"
+			  includeIn="down"
+			  x.down="3"
+			  y.down="3"/>
+	
+	<s:Label id="actionBarTitle"
+			 text="Review and Sign" 
+			 styleName="actionBarTitleBlack"
+			 x="5"
+			 y="150" 
+			 rotation="-90"/>
+	
+	<!-- Open/close the action bar -->
+	<s:Button click="checkState()"
+			  width="150"
+			  height="40"
+			  alpha="0"
+			  buttonMode="true"
+			  useHandCursor="true"/>
+	
+	
+</s:SkinnableContainer>

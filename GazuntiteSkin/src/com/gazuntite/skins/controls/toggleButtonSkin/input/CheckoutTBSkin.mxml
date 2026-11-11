@@ -1,0 +1,93 @@
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="70" height="22">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Rect x="0" y="0" width="70" height="22" radiusX="3"
+			visible.disabled="false"
+			visible.down="false"
+			visible.over="false"
+			visible.up="false">
+		<!--<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#000000"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>-->
+		<s:fill>
+			<s:SolidColor color="#0063A5"
+						  color.disabledAndSelected="#999999"/>
+		</s:fill>
+		<s:fill.disabledAndSelected>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#999999" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill.disabledAndSelected>
+	</s:Rect>
+	
+	<s:Rect x="0" y="0" width="70" height="22" radiusX="3"
+			visible.disabledAndSelected="false"
+			visible.downAndSelected="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#00A0D7" ratio="0"
+								 color.disabled="#999999"
+								 color.over="#16BBF2"/>
+				<s:GradientEntry alpha="1.0" color="#0063A5" ratio="1"
+								 color.disabled="#666666"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<!--<s:DropShadowFilter alpha="1" angle="90" blurX="0" blurY="0" color="#00416A" distance="1"
+								hideObject="false" inner="false" knockout="false" quality="3"
+								strength="1"/>-->
+			<!--<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>-->
+		</s:filters>
+	</s:Rect>
+	<s:RichText id="labelDisplay1"
+				x="9" y="5" color="#FFFFFF" 
+				fontFamily="CalibriCFF" fontSize="14"
+				tabStops="S0 S50" text="Checkout"
+				color.disabled="#CCCCCC"
+				color.disabledAndSelected="#CCCCCC"
+				visible.downAndSelected="false"
+				visible.overAndSelected="false"
+				visible.upAndSelected="false">
+		<!--<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>-->
+	</s:RichText>
+	<s:RichText id="labelDisplay0" 
+				includeIn="downAndSelected,overAndSelected,upAndSelected" x="6"
+				y="5" color="#FFFFFF" 
+				fontFamily="CalibriCFF" 
+				fontSize="13" tabStops="S0 S50"
+				text="CHECKOUT"
+				fontWeight.downAndSelected="bold"
+				fontWeight.overAndSelected="bold">
+		<!--<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>-->
+	</s:RichText>
+</s:Skin>

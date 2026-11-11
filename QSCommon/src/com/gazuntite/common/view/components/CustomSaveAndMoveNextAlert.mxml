@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   title="Confirm?"
+					   minWidth="250"
+					   skinClass="com.gazuntite.skins.controls.container.AlertTitleWindow"
+					   close="popupwindow1_closeHandler(event)"
+					   >
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			import mx.states.OverrideBase;
+			
+			public static const SAVE_AND_MOVE_NEXT:String 		= "Save and move next";
+			public static const SAVE_AND_ADD_MORE:String 		= "Save and add more";
+			public static const DISCARD_AND_MOVE_NEXT:String 	= "Discard changes and move next";
+			
+			public var selectedValue:String = '';
+			
+			private var onYes:Function, yesParam:Array, onNo:Function, noParams:Array;
+			
+			public function show(onYes:Function, onNo:Function = null):void
+			{
+				this.onYes	  = onYes;
+				this.onNo	  = onNo;
+				
+				ShowPopup( getTopLevelParentContainer() );
+				
+				PopUpManager.centerPopUp( this );
+			}
+			
+			protected function OK_clickHandler(event:MouseEvent):void
+			{
+				if( selectedValue.length == 0 )
+					return;
+				
+				if(null != onYes)
+					onYes.call(null);
+
+				removePopup();
+			}
+			
+			protected function Cancel_clickHandler(event:MouseEvent):void
+			{
+				if(null != onNo)
+					onNo.call(null);
+				
+				removePopup();
+			}
+			
+			protected function rbgAction_changeHandler(event:Event):void
+			{
+				selectedValue = rbgAction.selectedValue.toString()
+				
+			}
+			
+			private static function getTopLevelParentContainer():DisplayObject
+			{
+				if(FlexGlobals.topLevelApplication.hasOwnProperty("mainContainer"))
+				{
+					return FlexGlobals.topLevelApplication["mainContainer"] as DisplayObject;
+				}
+				
+				return FlexGlobals.topLevelApplication as DisplayObject;
+			}
+			
+			protected function popupwindow1_closeHandler(event:CloseEvent):void
+			{
+				removePopup();
+			}
+			
+			public function hideOption(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						id_save_and_move_next.visible = false;
+						id_save_and_move_next.includeInLayout = false;
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						id_save_and_add_more.visible = false;
+						id_save_and_add_more.includeInLayout = false;
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						id_discard_and_move_next.visible = false;
+						id_discard_and_move_next.includeInLayout = false;
+						break;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbgAction" change="rbgAction_changeHandler(event)" />
+	</fx:Declarations>
+	
+	
+	
+	<components:layout>
+		<s:VerticalLayout paddingBottom="8" paddingLeft="30" paddingRight="30" paddingTop="15" />
+	</components:layout>
+	
+	
+	
+	<s:RadioButton id="id_save_and_move_next" label="{SAVE_AND_MOVE_NEXT}" groupName="rbgAction" />
+	<s:RadioButton id="id_save_and_add_more" label="{SAVE_AND_ADD_MORE}" groupName="rbgAction" />
+	<s:RadioButton id="id_discard_and_move_next" label="{DISCARD_AND_MOVE_NEXT}" groupName="rbgAction" />
+	
+	<s:HGroup width="100%" paddingTop="15">
+		<s:Button label="OK" click="OK_clickHandler(event)" width="100" skinClass="com.gazuntite.skins.controls.alert.AlertButtonSkin" />
+		<s:Button label="Cancel" click="Cancel_clickHandler(event)" width="100" skinClass="com.gazuntite.skins.controls.alert.AlertButtonSkin" />
+	</s:HGroup>
+	
+</components:PopupWindow>

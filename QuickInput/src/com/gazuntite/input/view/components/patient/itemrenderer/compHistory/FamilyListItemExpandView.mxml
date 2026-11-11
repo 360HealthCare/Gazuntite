@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.FamilyHistoryDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			private var _familyHistoryDto:FamilyHistoryDTO;
+			
+			[Bindable]
+			public function get familyHistoryDto():FamilyHistoryDTO
+			{
+				return _familyHistoryDto;
+			}
+			
+			public function set familyHistoryDto(value:FamilyHistoryDTO):void
+			{
+				_familyHistoryDto = value;
+			}
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" >			
+		<s:Label text="Relation:" width="60" styleName="patientFormLabel"/>
+		<s:Label text="{familyHistoryDto.ReletionshipType.Name}" width="100%" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" />
+	</s:HGroup>
+	<s:HGroup width="100%" >
+		<s:Label text="ICD:" width="60" styleName="patientFormLabel"/>
+		<s:Label text="{familyHistoryDto.IcdCodeName}" width="100%" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" />
+	</s:HGroup>
+	<s:HGroup width="100%" >
+		<s:Label text="Disease:" width="60" styleName="patientFormLabel"/>
+		<s:Label text="{familyHistoryDto.DiseaseType.Description}" width="100%" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingRight="8" >
+		<s:Label text="Notes:"	width="60" styleName="patientFormLabel" />
+		<s:Label text="{familyHistoryDto.FamilyHistoryNote}" toolTip="{familyHistoryDto.FamilyHistoryNote}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{familyHistoryDto.DictationID &amp;&amp; familyHistoryDto.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{familyHistoryDto.FamilyHistoryNote}" 
+										 DictationID="{familyHistoryDto.DictationID}" IsDictaionEditMode="false"
+										 note="@{familyHistoryDto.FamilyHistoryNote}"	isSaveButtonVisible="false"/>
+	
+</s:SkinnableContainer>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:components="com.gazuntite.controls.extended.components.*" 
+	xmlns:view="com.gazuntite.provider.search.services.patient.view.*"
+	skinClass="com.gazuntite.skins.controls.button.eLab.FilterViewSkin"
+	>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.provider.live.services.elab.dto.ELabFilterCriteriaDTO;
+			import com.gazuntite.provider.live.services.elab.dto.LabTypeDTO;
+			import com.gazuntite.provider.live.services.elab.dto.MethodDTO;
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.elab.view.event.ELabGridFilterEvent;
+			import com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.formatters.DateFormatter;
+			
+			[Bindable]
+			private var model:ELabsAppModelLocator = ELabsAppModelLocator.getInstance();
+			private var selectedPatient:PatientDTO;
+			
+			private function initializeFilterCriteria():ELabFilterCriteriaDTO
+			{
+				var filterCriteria:ELabFilterCriteriaDTO = new ELabFilterCriteriaDTO();
+				filterCriteria.FieldID = 0;
+				filterCriteria.SearchTerm = "";
+				filterCriteria.PageNo = 1;
+				filterCriteria.PatientID = 0;
+				filterCriteria.FromDate = "";
+				filterCriteria.ToDate = "";
+				filterCriteria.LabTypeID = "0";
+				filterCriteria.MethodTypeID = "0";
+				
+				return filterCriteria;
+			}
+			
+			private function getSearchFilterCriteria():ELabFilterCriteriaDTO
+			{
+				var filterCriteria:ELabFilterCriteriaDTO = initializeFilterCriteria();
+				
+				if (selectedPatient)
+				{
+					filterCriteria.PatientID = selectedPatient.ID;
+				}
+				
+				if (id_Laboratories.selectedItem)
+				{
+					var labTypeDTO:LabTypeDTO = id_Laboratories.selectedItem as LabTypeDTO;
+					
+					if (labTypeDTO)
+					{
+						filterCriteria.LabTypeID = labTypeDTO.ID;
+					}
+				}
+				
+				if (id_OrderMethod.selectedItem)
+				{
+					var methodDTO:MethodDTO = id_OrderMethod.selectedItem as MethodDTO;
+					
+					if (methodDTO)
+					{
+						filterCriteria.MethodTypeID = methodDTO.ID;
+					}
+				}
+				
+				if (id_FromDate.text.length > 0 && id_ToDate.text.length > 0)
+				{
+					if (ValidationUtils.isValidDateRange(id_FromDate.selectedDate, id_ToDate.selectedDate))
+					{
+						var dateFormatter:DateFormatter = new DateFormatter();
+						dateFormatter.formatString = "MM-DD-YYYY";
+						
+						filterCriteria.FromDate = dateFormatter.format(id_FromDate.text);
+						filterCriteria.ToDate = dateFormatter.format(id_ToDate.text);
+					}
+					else
+					{
+						Alert.show("From date should be smaller than To date", "info", Alert.OK, FlexGlobals.topLevelApplication.mainContainer);
+					}
+				}
+				
+				return filterCriteria;
+			}
+			
+			private function searchPatientViewPatientSelectedHandler(event:PatientSelectedEvent):void
+			{
+				try
+				{
+					selectedPatient	= event.selection as PatientDTO;
+					
+					var fName:String = selectedPatient.FirstName ? selectedPatient.FirstName :"";
+					var mName:String = selectedPatient.MiddleName? selectedPatient.MiddleName:"";
+					var lName:String = selectedPatient.LastName  ? selectedPatient.LastName  :"";
+					
+					id_SearchPatientView.id_patientSearch.text = selectedPatient.FirstName + 
+						" " + selectedPatient.MiddleName + " " + selectedPatient.LastName;
+				}
+				catch(e:Error)
+				{
+					trace("patientExamControls", e );
+				}
+			}
+			
+			private function applyClickHandler():void
+			{
+				var ev:ELabGridFilterEvent = new ELabGridFilterEvent(ELabGridFilterEvent.APPLY_FILTER_CLICKED, true);
+				
+				var filterCriteria:ELabFilterCriteriaDTO = getSearchFilterCriteria();
+				
+				ev.eLabFilterCriteria = filterCriteria;
+				
+				dispatchEvent(ev);
+			}
+			
+			private function cancelClickHandler():void
+			{
+				var ev:ELabGridFilterEvent = new ELabGridFilterEvent(ELabGridFilterEvent.CANCEL_FILTER_CLICKED, true);
+				dispatchEvent(ev);
+			}
+			
+			public function setFocusToFirstField():void
+			{
+				id_FromDate.setFocus();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer right="5" left="5" top="5" bottom="30" cornerRadius="3">
+		<s:layout>
+			<s:VerticalLayout gap="3" />
+		</s:layout>
+		
+		<s:VGroup paddingLeft="6" paddingRight="6" paddingTop="6" paddingBottom="6" gap="5">
+			<s:HGroup textAlign="left" verticalAlign="middle" >
+				<components:LabelDateField id="id_FromDate" width="100" prompt="From" fontFamily="calibri" fontSize="11" useHandCursor="true" buttonMode="true"/>
+				<components:LabelDateField id="id_ToDate"  width="100" prompt="To" 	 fontFamily="calibri" fontSize="11"	 useHandCursor="true" buttonMode="true"/>
+			</s:HGroup>
+			
+			<s:SkinnableContainer styleName="patientSearchBGContainerSkin" width="100%">
+				<view:AutoCompleteSearch id="id_SearchPatientView"  width="205" 
+										 PatientSelected="searchPatientViewPatientSelectedHandler(event)" />
+				
+			</s:SkinnableContainer>
+			
+			<s:HGroup verticalAlign="middle">
+				<components:LabelComboBox id="id_OrderMethod" dataProvider="{model.MethodListDto.Methods}"
+										  prompt="Order Method" labelField="Name" 
+										  useHandCursor="true" buttonMode="true"
+										  width="107" height="24" fontFamily="Calibri" fontSize="11"  
+										  skinClass="com.gazuntite.controls.extended.skins.StepStyleComboSkin"
+										  />
+				
+				<components:LabelComboBox id="id_Laboratories" dataProvider="{model.LaboratoryListDto.Laboratories}" 
+										  prompt="Laboratory" width="93" height="24" fontFamily="Calibri" fontSize="11"  
+										  skinClass="com.gazuntite.controls.extended.skins.StepStyleComboSkin"
+										  useHandCursor="true" buttonMode="true"
+										  />
+			</s:HGroup>
+		</s:VGroup>
+		
+		
+		<s:HGroup width="100%" horizontalAlign="right" height="20">
+			<s:Button id="apply" 
+					  label="Apply" toolTip="Apply" click="applyClickHandler()"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"
+					  useHandCursor="true" buttonMode="true"
+					  />
+			<s:Button id="cancel" 
+					  label="Cancel" toolTip="Cancel" click="cancelClickHandler()"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"
+					  useHandCursor="true" buttonMode="true"
+					  />
+		</s:HGroup>
+		
+	</s:BorderContainer>
+</s:SkinnableContainer>

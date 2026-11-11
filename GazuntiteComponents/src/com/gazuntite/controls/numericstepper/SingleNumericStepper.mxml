@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 horizontalAlign="center" gap="4"
+		 >
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			public var label:String;
+			
+			[Bindable]
+			public var value:Number;
+			
+			[Bindable]
+			public var minimum:Number = 0;
+			
+			[Bindable]
+			public var maximum:Number = 300;
+			
+			
+			protected const clickSwitchAreaWidth:Number = 24;
+			[Bindable]
+			protected var showMinValue:Boolean = true;
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:RichText color="#464646" fontFamily="Calibri"
+				fontSize="14"
+				text="{label}"/>
+	<s:NumericStepper id="uiNumericStepper" 
+					  skinClass="com.gazuntite.skins.controls.numericstepper.SingleNumericStepperSkin"
+					  width="96" height="24"
+					  minimum="{minimum}" maximum="{maximum}"
+					  value="@{value}"
+					  />
+</s:VGroup>

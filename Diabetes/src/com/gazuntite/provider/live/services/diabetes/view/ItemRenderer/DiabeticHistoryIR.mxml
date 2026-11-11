@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				width="100%"
+				creationComplete="cc(event)" 
+				xmlns:quickInput="com.gazuntite.provider.live.services.diabetes.view.quickInput.*"
+				xmlns:components="com.gazuntite.components.*"
+				xmlns:advanceCare="com.gazuntite.provider.live.services.diabetes.view.quickInput.advanceCare.*" xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	
+			public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				//followUpDTO = data as FollowUpDTO;
+				
+				setDictationNoteButtonMode();
+				
+				invalidateDisplayList();
+			}
+			
+			private function init():void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function toggleEditView():void
+			{
+				//followUpDTO.inEditMode = !followUpDTO.inEditMode;
+				editModeView.visible = !editModeView.visible;
+				setDictationNoteButtonMode();
+				
+				showGlow();
+			}
+			
+			private function onDictationNoteButtonsClick(event:MouseEvent):void
+			{
+				if (!data.inEditMode)
+					toggleEditView();
+				
+				event.stopPropagation();
+			}
+			
+			
+			private function setDictationNoteButtonMode():void
+			{
+				/* if (!followUpDTO.inEditMode)
+				{
+				if (viewModel.inDictationMode)
+				viewModel.inDictationMode = false;
+				
+				if (viewModel.inNoteMode)
+				viewModel.inNoteMode = false;
+				} */
+			}
+			
+			private function showGlow():void
+			{
+				if (editModeView.visible)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				} 
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="-4" paddingBottom="1" />
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="{this.width - 7}" height="26" buttonMode="true" toolTip="Open/Close Details"
+						  click="toggleEditView()">
+		<s:HGroup width="100%" paddingLeft="5" paddingRight="5" height="100%" verticalAlign="middle">
+			<s:Label id="id_SerialLabel" width="100%" color="#333333" fontFamily="CalibriCFF" fontSize="14" maxDisplayedLines="1" 
+					 text="{data.SerialNo +'. '+data.AgentName}" verticalCenter="0"/>
+			<s:Image source="@Embed('com/gazuntite/provider/live/services/diabetes/asserts/images/new.png')"/>
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer id="editModeView" width="{id_Header.width - 5}" top="35" visible="false" includeInLayout="{editModeView.visible}"
+						  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin">
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="4"/>
+		</s:layout>
+		<advanceCare:AdvanceCareSectionView width="100%" height="100%" data="{data}"/>
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

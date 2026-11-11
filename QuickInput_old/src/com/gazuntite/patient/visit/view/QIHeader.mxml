@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8"?>
+<commons:QICollapseableView xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx"
+							xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+							creationComplete="cc()" 
+							xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" 
+							xmlns:components1="com.gazuntite.controls.extended.components.*" 
+							>
+	<fx:Script>
+			
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtnSelected;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtnSelected;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButtonFilled;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsButtonFilled2;
+			import com.gazuntite.patient.visit.dto.EncounterTypeDTO;
+			import com.gazuntite.patient.visit.event.visit.LoadEncounterTypesEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.AppUtils;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.common.dto.PlaceOfServiceTypeDTO;
+			import com.gazuntite.common.event.LoadPlaceOfServiceTypesEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model: QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			private var _isNewVisit:Boolean;
+			private var m_bIsModelUpdated:Boolean;
+			private var moduleConstantName:String = Constants.QUICK_INPUT_MODULE_NAME;
+			private var importVisitPopUp:ImportVisitPopUp;
+			
+			[Bindable]
+			public function get isNewVisit():Boolean
+			{
+				return _isNewVisit;
+			}
+			
+			public function set isNewVisit(value:Boolean):void
+			{
+				_isNewVisit = value;
+			}
+			
+			
+			private function cc():void
+			{
+
+					var loadPOSEvent:LoadPlaceOfServiceTypesEvent = new LoadPlaceOfServiceTypesEvent("qi",onTypesOfServiceLoaded);
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadPOSEvent);
+					
+					var loadencounterEvent:LoadEncounterTypesEvent = new LoadEncounterTypesEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadencounterEvent);
+
+			}
+			
+			
+			private static function onTypesOfServiceLoaded(placeOfServiceList:ArrayCollection):void
+			{
+				var model : QIModelLocator = QIModelLocator.getInstance();
+				model.placeOfServiceList	= placeOfServiceList;
+			}
+			
+			// Encounter Type Change handler
+			protected function id_EncounterType_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				if(event)
+					event.stopImmediatePropagation();
+				
+			}
+			// Place of service change handler
+			protected function id_PlaceOfService_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				model.placeOfServiceID 		  						= id_PlaceOfService.selectedItem.ServiceTypeID;
+				model.placeOfServiceName      						= id_PlaceOfService.selectedItem.POSDescription;
+				
+				model.PlaceOfServiceTypeID 		= id_PlaceOfService.selectedItem.ServiceTypeID;
+				model.PlaceOfServiceTypeName 	= id_PlaceOfService.selectedItem.POSDescription;
+				
+				if(event)
+					event.stopImmediatePropagation();
+				
+			}
+			// Encounter Type Click handler
+			protected function EncounterType_clickHandler(event:MouseEvent):void
+			{
+				
+				if(event)
+					event.stopImmediatePropagation();
+				
+				event.stopImmediatePropagation();
+			}
+			// Place of service click handler
+			protected function id_PlaceOfService_clickHandler(event:MouseEvent):void
+			{
+				
+				if(event)
+					event.stopImmediatePropagation();
+				
+				event.stopImmediatePropagation();
+			}
+			// Set encounter type item
+			private function setEncounterTypeItem(encounterTypeId:int):void
+			{
+				if (id_EncounterType.dataProvider)
+				{
+					for (var i:int=0; i < id_EncounterType.dataProvider.length; i++)
+					{
+						var item:EncounterTypeDTO = EncounterTypeDTO(id_EncounterType.dataProvider[i]);
+						if (encounterTypeId == int(item.EncounterTypeID))
+						{
+							id_EncounterType.selectedIndex = i;
+							break;
+						}
+					}
+				}
+			}
+			// Set place of service item
+			private function setPlaceOfService(serviceTypeId:int):void
+			{
+				if (id_PlaceOfService.dataProvider)
+				{
+					for (var i:int=0; i < id_PlaceOfService.dataProvider.length; i++)
+					{
+						var item:PlaceOfServiceTypeDTO = id_PlaceOfService.dataProvider[i] as PlaceOfServiceTypeDTO;
+						if (serviceTypeId.toString() == item.ServiceTypeID)
+						{
+							id_PlaceOfService.selectedIndex 					= i;
+							model.placeOfServiceID 		  						= id_PlaceOfService.selectedItem.ServiceTypeID;
+							model.placeOfServiceName      						= id_PlaceOfService.selectedItem.POSDescription;
+							
+							model.PlaceOfServiceTypeID 		= int(item.ServiceTypeID);
+							model.PlaceOfServiceTypeName 	= item.POSDescription;
+							break;
+						}
+					}
+				}
+			}
+			// Encounter Type creation complete hadnler
+			protected function id_EncounterType_creationCompleteHandler(event:FlexEvent):void
+			{
+				selectEncounterType();
+				
+				if (!id_EncounterType.selectedItem)
+				{
+					id_EncounterType.selectedIndex = 0;
+				}
+				else if (id_EncounterType.selectedIndex < 0)
+				{
+					id_EncounterType.selectedIndex = 0;
+				}
+			}
+			// Place of service creation complete hadnler
+			protected function id_PlaceOfService_creationCompleteHandler(event:FlexEvent):void
+			{
+				selectPlaceOfService();
+				
+				if (!id_PlaceOfService.selectedItem)
+				{
+					id_PlaceOfService.selectedIndex = 0;
+				}
+				else if (id_PlaceOfService.selectedIndex < 0)
+				{
+					id_PlaceOfService.selectedIndex = 0;
+				}
+			}
+			// Select encounter type
+			private function selectEncounterType():void
+			{
+				if(model.encounterTypeDTOList && isNewVisit)
+				{
+					if(model.encounterTypeDTOList.length >0)
+					{
+						for(var i:uint=0; i<model.encounterTypeDTOList.length; i++)
+						{
+							var encounterTypeDTO:EncounterTypeDTO =  model.encounterTypeDTOList[i] as EncounterTypeDTO;
+							if(encounterTypeDTO.EncounterTypeName == 'Complete PE')
+							{
+								id_EncounterType.selectedIndex = i;
+								break;
+							}
+						}
+					}
+				}
+			}
+			// Select place of service
+			private function selectPlaceOfService():void
+			{
+				if(model.placeOfServiceList && isNewVisit)
+				{
+					if(model.placeOfServiceList.length >0)
+					{
+						for(var i:uint=0; i<model.placeOfServiceList.length; i++)
+						{
+							var placeOfServiceTypeDTO:PlaceOfServiceTypeDTO =  model.placeOfServiceList[i] as PlaceOfServiceTypeDTO;
+							if(placeOfServiceTypeDTO.POSCode == '11')
+							{
+								id_PlaceOfService.selectedIndex = i;
+								model.placeOfServiceID 		  = int(placeOfServiceTypeDTO.ServiceTypeID);
+								model.placeOfServiceName      = placeOfServiceTypeDTO.POSDescription;
+								
+								model.PlaceOfServiceTypeID 		= int(placeOfServiceTypeDTO.ServiceTypeID);
+								model.PlaceOfServiceTypeName 	= placeOfServiceTypeDTO.POSDescription;
+								break;
+							}
+						}
+					}
+				}
+			}
+			protected function id_encounterBG_mouseOverHandler(event:MouseEvent):void
+			{
+			}
+			protected function id_encounterBG_mouseOutHandler(event:MouseEvent):void
+			{
+			}
+			protected function id_encounterBG2_mouseOverHandler(event:MouseEvent):void
+			{
+			}
+			protected function id_encounterBG2_mouseOutHandler(event:MouseEvent):void
+			{
+			}
+			
+			// import button click handler
+			private function importBtnClickHandler(event:MouseEvent):void
+			{
+				if(importVisitPopUp && importVisitPopUp.isPopUp)
+				{
+					importVisitPopUp.removePopup();
+					id_ImportBtn.selected = false;
+					return;
+				}
+				
+				importVisitPopUp = new ImportVisitPopUp();
+				var pt:Point = id_ImportBtn.localToGlobal(new Point(id_ImportBtn.x - 114, id_ImportBtn.y + id_ImportBtn.height));
+				
+				importVisitPopUp.ShowPopup(this);
+				importVisitPopUp.move(pt.x, pt.y);
+				
+				importVisitPopUp.addEventListener("loadButtonClicked", function(event:Event):void
+				{
+					id_ImportBtn.selected = false;
+				}, false, 0, true);
+				
+				if (id_ImportBtn.selected)
+				{
+				}
+				else
+				{
+					if (importVisitPopUp)
+						importVisitPopUp.removePopup();
+				}
+				
+				event.stopImmediatePropagation();
+				id_ImportBtn.selected = true;
+				
+				importVisitPopUp.id_closeBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					id_ImportBtn.selected = false;
+				});
+			}
+			
+			
+			protected function id_encounterBG2_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+			}
+			protected function id_encounterBG_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+			}
+			protected function id_CloseBtn_clickHandler(event:MouseEvent):void
+			{
+				id_OptionPopUp.displayPopUp = false;
+				id_iconButtons.selected = false;
+			}
+			
+			protected function id_OtherDays_clickHandler(event:MouseEvent):void
+			{
+				
+				model.VisitDate = event.currentTarget.selectedItem.data;
+				//logger.debug( "Visit Date Changed to " + id_DateFormatter.format( event.currentTarget.selectedItem.data ) );
+				id_DaysOptionPopUp.displayPopUp = false; 
+				id_clockBtn.selected = false;
+				event.stopImmediatePropagation();
+				
+			}
+			
+			public function get IsModelUpdated():Boolean
+			{
+				return m_bIsModelUpdated;
+			}
+			
+			public function set IsModelUpdated(value:Boolean):void
+			{
+				m_bIsModelUpdated = value;
+				
+				if( value )
+				{				
+					selectEncounterType();
+					selectPlaceOfService();
+					
+					/* var module:ModuleDictationDTO = QSUtilityFunctions.getModuleDictationDTO(moduleConstantName);					
+					var noteDto:ModuleNoteDTO = QSUtilityFunctions.getModuleNoteDTO( moduleConstantName);
+					
+					if(module.DictationID && module.DictationID != Constants.GUID_FORMAT)
+					{
+					id_DictationBtn.setStyle("skinClass", VBdictationBtnSelected);
+					}
+					
+					if(noteDto.Note && noteDto.Note != "")
+					{
+					id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					}	 */							
+				}
+			}
+			
+			protected function id_iconButtons_focusOutHandler(event:FocusEvent):void
+			{
+				event.stopImmediatePropagation();
+			}
+			
+			protected function id_OptionPopUp_focusOutHandler(event:FocusEvent):void
+			{
+				id_OptionPopUp.displayPopUp = false ;
+				id_iconButtons.selected		= false ;
+			}
+			
+			public function setIcons(hasDictation:Boolean, hasNotes:Boolean):void
+			{
+				//if(id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0)
+				
+				if(hasNotes && hasDictation)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled2);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtnSelected);
+				}				
+				else if(hasNotes)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtn);
+				}
+				else if(hasDictation)
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtnSelected);	
+					id_NotesBtn.setStyle("skinClass", VBnotesBtn);
+				}				
+				else
+				{
+					id_iconButtons.setStyle("skinClass", VBIconsButton);
+					id_NotesBtn.setStyle("skinClass", VBnotesBtn);
+					id_DictationBtn.setStyle("skinClass", VBdictationBtn);					
+				}				
+			}
+			
+			private function set placeOfService(value:ArrayCollection):void
+			{
+				if( model.PlaceOfServiceTypeID )
+				{
+					setPlaceOfService( model.PlaceOfServiceTypeID );
+				}
+				
+			}
+			
+			private function set encounterType(value:ArrayCollection):void
+			{
+				
+				if (model.EncounterTypeId > 0)
+				{
+					setEncounterTypeItem(model.EncounterTypeId);
+				}
+				
+			}
+			
+			protected function id_iconButtons_clickHandler(event:MouseEvent):void
+			{
+				
+				id_OptionPopUp.displayPopUp = !id_OptionPopUp.displayPopUp; 
+				
+				event.stopImmediatePropagation();
+			}
+			
+			protected function id_clockBtn_clickHandler(event:MouseEvent):void
+			{
+				
+				id_DaysOptionPopUp.displayPopUp = !id_DaysOptionPopUp.displayPopUp; 
+				event.stopImmediatePropagation();
+				
+			}
+			
+			protected function id_OptionPopUp_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_OptionPopUp.visible = true;
+				id_OptionPopUp.displayPopUp = false;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="id_DateFormatter" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<fx:Binding source="model.encounterTypeDTOList" destination="encounterType"/>
+	<fx:Binding source="model.placeOfServiceList" destination="placeOfService"/>
+	<fx:Binding source="model.quickInputDataLoadedFlag" destination="IsModelUpdated" /> 
+	
+	<s:VGroup id="id_PanelBody" >
+	<s:SkinnableContainer id="id_headerSkin" width="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.quickInputHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" />
+		</s:layout>
+		<s:HGroup verticalAlign="middle" horizontalAlign="left" width="25%" paddingLeft="5">
+			<s:Label id="id_HeaderLabel" color="#ffffff" fontFamily="{Constants.APP_FONT_BOLD}" text="QUICK INPUT" fontSize="13"  />		
+			<mx:Spacer width="12" height="1" />
+			<s:SkinnableContainer width="84" height="18" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIcomponentBG">
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="5" paddingRight="5"  />
+				</s:layout>
+				<s:HGroup horizontalAlign="right" gap="-1" verticalAlign="middle"  paddingRight="5" paddingTop="1">
+					
+					<s:Label paddingRight="1" color="#ffffff" fontFamily="{Constants.APP_FONT_BOLD}" fontSize="12" text="{id_DateFormatter.format( model.VisitDate )}" alpha="1" />
+					
+					<s:VGroup width="20" gap="-1" verticalAlign="middle" horizontalAlign="right">
+						
+						<s:HGroup gap="0" paddingTop="1">					
+							<s:ToggleButton id="id_clockBtn" 
+											height="25" skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.createVisitArrowBtn"
+											buttonMode="true" useHandCursor="true"  toolTip="Select Visit Date"
+											click="id_clockBtn_clickHandler(event)"/>
+						</s:HGroup>
+						
+						<s:PopUpAnchor id="id_DaysOptionPopUp" width="160"
+									   popUpPosition="below" 
+									   displayPopUp="false" 
+									   styleName="popUpBox">
+							<s:List id="id_OtherDays" 
+									click="id_OtherDays_clickHandler(event)" 
+									focusOut="id_DaysOptionPopUp.displayPopUp = false"
+									skinClass="com.adobe.gazuntite.skins.chrome.listBoxSkins.VBHeaderPopupSkin" width="160"
+									itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.byDateListRenderer"
+									fontFamily="Calibri" color="#222222">
+								<s:dataProvider>
+									<s:ArrayList>
+										<fx:Object label="Today ({id_DateFormatter.format( AppUtils.GetDateFromToday( 0 ) )})" data="{new Date()}"/>
+										<fx:Object label="Yesterday ({id_DateFormatter.format( AppUtils.GetDateFromToday( -1 ) )})" data="{AppUtils.GetDateFromToday( -1 )}"/>
+										<fx:Object label="Day B. Yesterday ({id_DateFormatter.format( AppUtils.GetDateFromToday( -2 ) )})" data="{AppUtils.GetDateFromToday( -2 )}"/>
+									</s:ArrayList>
+								</s:dataProvider>
+							</s:List>
+						</s:PopUpAnchor>
+						
+					</s:VGroup>
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			
+			<s:SkinnableContainer id="id_encounterBG" 
+								  width="148" height="18"  skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIcomponentBG"			 
+								  mouseOver="id_encounterBG_mouseOverHandler(event)" 
+								  mouseOut="id_encounterBG_mouseOutHandler(event)"
+								  click="id_encounterBG_clickHandler(event)">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingTop="-1"/>
+				</s:layout>
+				
+				<components1:LabelComboBox id="id_EncounterType" 
+										  dataProvider="{model.encounterTypeDTOList}" fontFamily="Calibri"
+										  creationComplete="id_EncounterType_creationCompleteHandler(event)"
+										  labelField="EncounterTypeName" height="17" prompt="Encounter Type"  focusAlpha="0" focusRect="false" 
+										  click="EncounterType_clickHandler(event)" change="id_EncounterType_changeHandler(event)"
+										  skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.QIHeaderComboSkin" alpha="1" toolTip="Select encounter type"/>
+			</s:SkinnableContainer>
+			<s:SkinnableContainer width="147" height="18"  skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIcomponentBG" >				
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="5" paddingRight="5" paddingTop="-1" />
+				</s:layout>
+				<components1:LabelComboBox id="id_PlaceOfService" 
+										  dataProvider="{model.placeOfServiceList}" fontFamily="Calibri"
+										  creationComplete="id_PlaceOfService_creationCompleteHandler(event)" 
+										  labelField="POSDescription" focusAlpha="0" focusRect="false"  height="17"  prompt="Place Of Service" 
+										  click="id_PlaceOfService_clickHandler(event)" change="id_PlaceOfService_changeHandler(event)"
+										  skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.QIHeaderComboSkin" alpha="1" toolTip="Select place of service"/>
+			</s:SkinnableContainer>
+			
+		</s:HGroup>
+		<s:HGroup width="116" horizontalAlign="right" gap="0" >
+			<s:VGroup gap="-4" paddingTop="-2" horizontalAlign="right">
+				<s:HGroup gap="0">				
+					<buttonSkins:buttonSeparatorBlue visible="{id_ChangeIndicator.visible}"/>
+					<s:HGroup verticalAlign="middle" height="22" paddingTop="5" paddingLeft="3">					
+						<s:ToggleButton id="id_ChangeIndicator" width="21" height="21" top="3" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.changeIndicator"
+										includeInLayout="false" visible="false"/>
+					</s:HGroup>
+					<buttonSkins:buttonSeparatorBlue />
+					<s:Button id="id_SaveVisit" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIHeaderSaveBtn" width="21" height="21" 
+							  toolTip="Save Visit Data" buttonMode="true" useHandCursor="true" />
+					
+					<buttonSkins:buttonSeparator />
+					<s:ToggleButton id="id_iconButtons" height="26"  focusOut="id_iconButtons_focusOutHandler(event)" toolTip="Other Options"
+									skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.VBIconsBlackButton" buttonMode="true" useHandCursor="true" 
+									click="id_iconButtons_clickHandler(event)"/>
+				</s:HGroup>
+				<s:PopUpAnchor id="id_OptionPopUp" width="138"
+							   popUpPosition="below" 
+							   focusOut="id_OptionPopUp_focusOutHandler(event)"
+							   displayPopUp="true"								   
+							   styleName="popUpBox" creationComplete = "id_OptionPopUp_creationCompleteHandler(event)">
+					<s:SkinnableContainer alpha="1" id="id_popupBG" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.communicationIconsBG" width="100%">
+						<s:layout>
+							<s:VerticalLayout gap="2" verticalAlign="bottom" horizontalAlign="left" paddingBottom="6" paddingTop="5" paddingLeft="7" />
+						</s:layout>
+						
+						<s:HGroup width="100%" gap="30" verticalAlign="top" paddingRight="2">
+							<s:RichText color="#000000" fontSize="12" height="12" kerning="off" text="Other Options" whiteSpaceCollapse="preserve" fontFamily="Calibri Bold"/>
+							<s:Button buttonMode="true" id="id_CloseBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.popupCloseBtnSkin" 
+									  toolTip="Close" height="16" width="16"
+									  click="id_CloseBtn_clickHandler(event)"/>
+						</s:HGroup>
+						
+						<s:Button id="id_DictationBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBdictationBtn" 
+								  buttonMode="true" useHandCursor="true" toolTip="Record Dictation" />
+						<s:Button id="id_NotesBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBnotesBtn" 
+								  buttonMode="true" useHandCursor="true" toolTip="Record Dictation" />	
+						<s:ToggleButton id="id_ImportBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIImportPrevVisit"
+										buttonMode="true" useHandCursor="true" toolTip="Import Previous Visit" />	
+						<s:ToggleButton id="id_ProviderBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QISetProvider"
+										buttonMode="true" useHandCursor="true" toolTip="Set Provider for Visit" />	
+					</s:SkinnableContainer>
+				</s:PopUpAnchor>
+			</s:VGroup>
+			<buttonSkins:buttonSeparatorBlue />
+			<s:HGroup paddingBottom="1" paddingTop="-1" paddingRight="2">
+				<s:ToggleButton id="id_expandBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.expandButton_white" 
+								width="19" height="21"	buttonMode="true" useHandCursor="true" toolTip="{id_expandBtn.selected?'Collapse':'Expand'}"/>
+			</s:HGroup>
+			<buttonSkins:buttonSeparatorBlue />
+			<s:HGroup paddingBottom="1" paddingTop="-1" paddingRight="2">
+				<s:ToggleButton id="id_slideoutBtn" 
+								skinClass="com.adobe.gazuntite.skins.chrome.toggleButtonSkins.slideOutBtn_white"
+								buttonMode="true" useHandCursor="true" toolTip="{id_slideoutBtn.selected?'Slide-In':'Slide-Out'}" 
+								width="20" height="21" />
+			</s:HGroup>
+		</s:HGroup>
+	</s:SkinnableContainer>
+
+</s:VGroup>
+</commons:QICollapseableView>

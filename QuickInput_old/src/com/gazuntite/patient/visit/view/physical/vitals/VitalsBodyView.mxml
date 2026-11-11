@@ -1,0 +1,1440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:vitals="com.gazuntite.patient.visit.view.physical.vitals.*"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+		 creationComplete="cc(event)" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.converter.UnitConverter;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.dto.VitalsDTO;
+			import com.gazuntite.patient.visit.event.physical.vitals.LoadPatientPreviousVitalsEvent;
+			import com.gazuntite.patient.visit.event.physical.vitals.LoadPatientVitalByVisitEvent;
+			import com.gazuntite.patient.visit.event.physical.vitals.ManagePatientVitalEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.view.events.VitalsHeaderEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.binding.utils.ChangeWatcher;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.IFocusManagerComponent;
+			
+			import spark.components.NumericStepper;
+			import spark.events.TextOperationEvent;
+			
+			private var importVitalsPanel:ImportVitalsPanel;
+			private var _englishMode:Boolean;	
+			private var _bmi:Number = 0;
+			private var inputStepper:NumericStepper;
+			private var m_bIsModelUpdated:Boolean;
+			private var hasFocus:IFocusManagerComponent;
+			private var vital:vitalsNumericStipper;
+			
+			
+			public function get IsModelUpdated():Boolean
+			{
+				return m_bIsModelUpdated;
+			}
+			
+			public function set IsModelUpdated(value:Boolean):void
+			{
+				m_bIsModelUpdated = value;
+				
+				if( value )
+				{
+					
+					/* var module:ModuleDictationDTO = QSUtilityFunctions.getModuleDictationDTO(moduleConstantName);					
+					var noteDto:ModuleNoteDTO = QSUtilityFunctions.getModuleNoteDTO( moduleConstantName);
+					
+					if(module.DictationID && module.DictationID != Constants.GUID_FORMAT)
+					{
+					id_Header.id_Voice.setStyle("skinClass", VBdictationBtnSelected);
+					id_Header.id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					//id_dictationIndicator.visible = true;
+					}
+					
+					if(noteDto.Note && noteDto.Note != "")
+					{
+					id_Header.id_NotesBtn.setStyle("skinClass", VBnotesBtnSelected);
+					id_Header.id_iconButtons.setStyle("skinClass", VBIconsButtonFilled);
+					//id_noteIndicator.visible = true;
+					}
+					*/
+					//init();
+					
+					LoadDataMode();
+				}
+			}
+			
+			
+			[Bindable]
+			private var model :QIModelLocator = QIModelLocator.getInstance();
+			private var m_bHasChange:Boolean;
+			
+			[Bindable]
+			private var selectedUnit:uint = 0;
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+				
+				if( value )
+				{
+					/* id_Header.id_ChangeIndicator.visible		 = true;
+					id_Header.id_ChangeIndicator.includeInLayout = true; */
+				}
+				else
+				{
+					/* id_Header.id_ChangeIndicator.visible		 = false;
+					id_Header.id_ChangeIndicator.includeInLayout = false; */
+				}
+			}
+			
+			
+			[Bindable]
+			public function get bmi():Number
+			{
+				return _bmi;
+			}
+			
+			public function set bmi(value:Number):void
+			{
+				_bmi = value;
+			}
+			
+			
+			[Bindable]
+			private function get PhysicalPulse():Number
+			{
+				return Number( model.VitalDTO.Pulse );
+			}
+			
+			private function set PhysicalPulse(value:Number):void
+			{
+				model.VitalDTO.Pulse = value.toString();
+			}
+			
+			[Bindable]
+			private function get PhysicalTemperature():Number
+			{
+				return Number( model.VitalDTO.Temperature );
+			}
+			
+			private function set PhysicalTemperature(value:Number):void
+			{
+				model.VitalDTO.Temperature = value.toString();
+			}
+			
+			
+			[Bindable]
+			private function get PhysicalHeight():Array
+			{				
+				if(model.VitalDTO==null)
+					model.VitalDTO = new  VitalsDTO(); 
+				
+				return [Number(model.VitalDTO.Height),0];
+			}
+			
+			private function set PhysicalHeight(value:Array):void
+			{	
+				model.VitalDTO.Height = value[0].toString();
+				
+			}
+			
+			
+			[Bindable]
+			private function get PhysicalWeight():Number
+			{
+				return Number( model.VitalDTO.Weight );
+			}
+			
+			private function set PhysicalWeight(value:Number):void
+			{
+				model.VitalDTO.Weight = value.toString();
+			}
+			
+			
+			[Bindable]
+			private function get Oxygen():String
+			{
+				return (model.VitalDTO.Oxygen);
+			}
+			
+			///Author Tahir Alvi
+			///Date 27 08 2011		
+			///Set Oxygen
+			private function set Oxygen(value:String):void
+			{
+				model.VitalDTO.Oxygen = value.toString();
+			}
+			
+			[Bindable]
+			private function get PhysicalBPSys():Number
+			{
+				return Number( model.VitalDTO.Weight );
+			}
+			
+			private function set PhysicalBPSys(value:Number):void
+			{
+				model.VitalDTO.Weight = value.toString();
+			}
+			
+			[Bindable]
+			private function get PhysicalBPDys():Number
+			{
+				return Number( model.VitalDTO.Weight );
+			}
+			
+			private function set PhysicalBPDys(value:Number):void
+			{
+				model.VitalDTO.Weight = value.toString();
+			}
+			
+			[Bindable]
+			private function get PhysicalRespiration():Number
+			{
+				return Number(model.VitalDTO.Respiration);
+			}
+			
+			///Author Mansoor
+			///Date 15 Mar 2011
+			///set Respiration
+			private function set PhysicalRespiration(value:Number):void
+			{
+				model.VitalDTO.Respiration = value.toString();
+			}
+			
+			
+			[Bindable]
+			public function get englishMode():Boolean
+			{
+				return _englishMode;
+			}
+			
+			public function set englishMode(value:Boolean):void
+			{
+				if (value != _englishMode)
+				{
+					_englishMode = value;
+					
+					var hgtLbl:String = "Height ";
+					var wgtLbl:String = "Weight ";
+					var tempLbl:String = "Temp ";
+					
+					if (_englishMode)
+					{
+						
+						id_weight.maxValues = [999.9];
+						
+						hgtLbl += "(Inch)";
+						wgtLbl += "(lbs)";
+						tempLbl += "(F)";
+						
+						convertInEnglishUnits();
+					}
+					else
+					{
+						id_weight.maxValues = [9999.99];
+						
+						hgtLbl += "(Cm)";
+						wgtLbl += "(Kg)";
+						tempLbl += "(C)";
+						
+						convertInMetricUnits();
+						
+					}
+					
+					id_height.label = hgtLbl;
+					id_weight.label = wgtLbl;
+					id_Temperature.label = tempLbl;
+				}
+			}
+			
+			
+			public function LoadDataMode():void
+			{
+				if(model.VitalDTO!=null)
+				{
+					/* id_Header.id_english.selected 	= !model.VitalDTO.IsMetricDisplaySelected;
+					id_Header.id_metric.selected 	=  model.VitalDTO.IsMetricDisplaySelected; */
+					
+					var hgtLbl:String = "Height ";
+					var wgtLbl:String = "Weight ";
+					var tempLbl:String = "Temp ";
+					
+					if ( !model.VitalDTO.IsMetricDisplaySelected )
+					{
+						_englishMode = true;
+						
+						
+						if (_englishMode)
+						{
+							id_weight.maxValues = [999.9];
+							
+							hgtLbl += "(Inch)";
+							wgtLbl += "(lbs)";
+							tempLbl += "(F)";
+							
+							//						convertInEnglishUnits();
+						}
+					}
+					else
+					{
+						_englishMode = false;
+						
+						id_weight.maxValues = [9999.99];
+						
+						hgtLbl += "(Cm)";
+						wgtLbl += "(Kg)";
+						tempLbl += "(C)";
+						
+						//						convertInMetricUnits();
+						id_height.label = hgtLbl;
+						id_weight.label = wgtLbl;
+						id_Temperature.label = tempLbl;
+						
+					}
+					id_height.values 		= [Number(model.VitalDTO.Height), 0];
+					id_weight.values 		= [Number( model.VitalDTO.Weight ), 0];
+					id_Temperature.values 	= [Number( model.VitalDTO.Temperature ), 0];
+					id_resp.values 			= [Number(model.VitalDTO.Respiration), 0];
+					id_pulse.values 	  	= [Number( model.VitalDTO.Pulse ), 0];
+					//id_BloodPressure.values = [Number(model.VitalDTO.BPSys), Number(model.VitalDTO.BPDys)];
+					id_sys.values = [Number(model.VitalDTO.BPSys), Number(model.VitalDTO.BPDys)];
+					id_dys.values = [Number(model.VitalDTO.BPSys), Number(model.VitalDTO.BPDys)];
+					id_oxygen.text	 		= (model.VitalDTO.Oxygen);
+				}
+			}
+			
+			private function convertInMetricUnits():void
+			{
+				if(model.VitalDTO == null)
+					return;
+				
+				var w:Number = UnitConverter.poundsToKilograms(Number(model.VitalDTO.Weight));
+				var h:Number = UnitConverter.inchesToCentimeters(Number(model.VitalDTO.Height));
+				var t:Number = UnitConverter.fahrenheitToCelsius(Number(model.VitalDTO.Temperature));
+				
+				this.PhysicalWeight = w;
+				this.PhysicalHeight = [h];
+				this.PhysicalTemperature = t;
+				
+				id_weight.values = [w];
+				id_height.values = [h];
+				id_Temperature.values = [t];
+				convertInEnglishAgain();//Tahir Alvi - For display previous selected System values
+			}
+			
+			private function convertInMetricAgain():void
+			{
+				if(model.VitalDTO == null)
+					return;
+				
+				var t:Number;
+				var h:Number;
+				var w:Number;
+				
+				if(Number(id_Temperature.values[0]) == 0){
+					t = 0;
+				}else{
+					t = UnitConverter.fahrenheitToCelsius(Number(id_Temperature.values[0]));
+				}
+				if(Number(id_height.values[0])== 0){
+					h = 0;
+				}else{
+					h= UnitConverter.inchesToCentimeters(Number(id_height.values[0]));
+				}
+				if(Number(id_weight.values[0]) == 0){
+					w = 0;
+				}else{
+					w = UnitConverter.poundsToKilograms(Number(id_weight.values[0]));
+				}
+				
+				lbl_Height.text			= 'Ht. (Cm): '  +  numFormatter.format(h).toString() ; 
+				lbl_Weight.text 		= 'Wt. (Kg): '  + numFormatter.format(w).toString() ; 
+				lbl_Temperature.text 	= 'Temp(C): '   + numFormatter.format(t).toString() ; 
+			}
+			
+			private function convertInEnglishUnits():void
+			{
+				if(model.VitalDTO == null)
+					return;
+				
+				var w:Number = UnitConverter.kilogramsToPounds(Number(model.VitalDTO.Weight));
+				var h:Number = UnitConverter.centimetersToInches(Number(model.VitalDTO.Height));
+				var t:Number = UnitConverter.celsiusToFahrenheit(Number(model.VitalDTO.Temperature));
+				
+				this.PhysicalWeight = w;
+				this.PhysicalHeight = [h];
+				this.PhysicalTemperature = t;
+				
+				id_weight.values = [w];
+				id_height.values = [h];
+				id_Temperature.values = [t];
+				convertInMetricAgain();//Tahir Alvi - For display previous selected System values
+			}
+			
+			private function convertInPreviousSystem():void
+			{
+				if(this.englishMode == true)
+					convertInMetricAgain();
+				else
+					convertInEnglishAgain();
+			}
+			
+			
+			private function convertInEnglishAgain():void
+			{
+				if(model.VitalDTO == null)
+					return; 
+				
+				var t:Number;
+				var h:Number;
+				var w:Number
+				if(Number(id_Temperature.values[0]) == 0){
+					t = 0;
+				}else{
+					t = UnitConverter.celsiusToFahrenheit(Number(id_Temperature.values[0]));
+				}
+				if(Number(id_height.values[0]) == 0){
+					h = 0;
+				}else{
+					h = UnitConverter.centimetersToInches(Number(id_height.values[0]));
+				}
+				if(Number(id_weight.values[0]) == 0){
+					w = 0;
+				}else{
+					w = UnitConverter.kilogramsToPounds(Number(id_weight.values[0]));
+				}
+				
+				lbl_Height.text			= 'Ht. (Inch): ' 		+	numFormatter.format(h).toString() ; 
+				lbl_Weight.text 		= 'Wt. (lbs): ' 		+	numFormatter.format(w).toString() ; 
+				lbl_Temperature.text 	= 'Temp(F): ' 			+ 	numFormatter.format(t).toString() ; 
+			}
+			
+			protected function id_dictationIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_noteIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_oxygen_changeHandler(event:TextOperationEvent):void
+			{
+				if(model.VitalDTO == null)
+					model.VitalDTO = new VitalsDTO();
+				model.VitalDTO.Oxygen = id_oxygen.text;
+				hasChange = true;
+			}
+			
+			private function valueCommit_handler():void
+			{
+				calculateBMI();
+				convertInPreviousSystem();
+			}			
+			
+			public function VitalHeaderClickHandler(event:VitalsHeaderEvent):void
+			{
+				if (event.type == VitalsHeaderEvent.METRIC_UNIT_SELECTED)
+				{
+					englishMode = false;
+				}
+				else if (event.type == VitalsHeaderEvent.ENGLISH_UNIT_SELECTED)
+				{
+					englishMode = true;
+				}
+				else if (event.type == VitalsHeaderEvent.CLEAR_CLICKED)
+				{
+					(PhysicalHeight[0]   > 	 0 || PhysicalHeight[1] > 0) ||
+						PhysicalWeight 		 >	 0;
+					PhysicalTemperature  > 	 0;
+					PhysicalPulse 		 >   0;
+					PhysicalRespiration  >   0;
+					PhysicalBPSys 		 >   0.0;
+					PhysicalBPDys 		 >   0.0;
+					id_BMI.value 		 >   0.0;
+					id_oxygen.text 		 != "";
+					
+					
+					UtilityFunctions.AskMessage("Do You Want To Clear All Values?", function():void
+					{
+						id_height.values 			= [0.0, 0.0];
+						id_weight.values 			= [0.0, 0.0];
+						id_Temperature.values 		= [0.0, 0.0];
+						id_pulse.values 			= [0.0, 0.0];
+						id_resp.values 				= [0.0, 0.0];
+						id_sys.values 				= [0.0, 0.0];
+						id_dys.values     			= [0.0, 0.0];
+						
+						PhysicalHeight 			= [0.0, 0.0];
+						PhysicalWeight 			= 0.0;
+						PhysicalTemperature 	= 0.0;
+						PhysicalPulse 			= 0.0;
+						PhysicalRespiration 	= 0.0;
+						PhysicalBPSys 			= 0.0;
+						PhysicalBPDys 			= 0.0;
+						id_BMI.value 			= 0.0;
+						Oxygen 					= "";
+						id_oxygen.text 			= "";
+						
+						/* if (notesPanel && notesPanel.notesDTO)
+						{
+						notesPanel.notesDTO.Note = "";
+						notesPanel.notesDTO.NoteSubject = "";
+						notesPanel.id_body.id_subject.text = "";
+						notesPanel.id_body.id_message.text = "";
+						} */
+					});
+				}
+				else if (event.type == VitalsHeaderEvent.IMPORT_VITALS_CLICKED)
+				{
+					var lmrV:LoadPatientPreviousVitalsEvent = new LoadPatientPreviousVitalsEvent(onLoadPatientPreviousVitalsEvent);
+					CairngormEventDispatcher.getInstance().dispatchEvent(lmrV); 
+				}
+			}
+			// call back of LoadPatientPreviousVitalsEvent
+			private function onLoadPatientPreviousVitalsEvent():void
+			{
+				showImportVitalsPopup();
+			}
+			public function SaveData(event:Event):void
+			{
+				var vital:VitalsDTO = new VitalsDTO();
+				
+				vital.BPDys = id_dys.values[0].toString();	// this.PhysicalBPDys.toString();
+				vital.BPSys =  id_sys.values[0].toString();	//this.PhysicalBPSys.toString();
+				vital.Height =  id_height.values[0].toString();	//this.PhysicalHeight.toString();
+				vital.Weight =  id_weight.values[0].toString();	//this.PhysicalWeight.toString();
+				vital.Pulse = id_pulse.values[0].toString(); 	//this.PhysicalPulse.toString();
+				vital.Respiration =  id_resp.values[0].toString();	//this.PhysicalRespiration.toString();
+				vital.Temperature =  id_Temperature.values[0].toString();	//this.PhysicalTemperature.toString();
+				vital.Oxygen =  id_oxygen.text;					//this.Oxygen.toString(); 
+				vital.ID = 0;
+				
+				
+				
+				vital.CreatedAt = new Date();
+				vital.CreatedBy = model.LoggedInUserId;
+				
+				vital.IsDeleted = false;
+				vital.IsDirty  = true;
+				vital.IsMetricDisplaySelected = !englishMode;
+				vital.Editable = "true";
+				
+				vital.PatientID = model.patientID;
+				
+				vital.VisitDate = model.VisitDate;
+				vital.VisitID	=	model.VisitID;
+				
+				
+				if(model.VitalDTO == null)
+					model.VitalDTO = new VitalsDTO();
+					
+				else 
+					model.VitalDTO.IsDirty = true;
+				
+				model.VitalDTO = vital;
+				
+				
+				var mpve:ManagePatientVitalEvent = new ManagePatientVitalEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(mpve);
+				
+				resetData();
+			}
+			
+			private function showImportVitalsPopup():void
+			{
+				if( importVitalsPanel && id_NotesArea.contains( importVitalsPanel ) )
+				{
+					id_NotesArea.removeElement( importVitalsPanel );
+					//id_Header.id_import.selected = false;
+					return;
+				}
+				
+				importVitalsPanel 				= new ImportVitalsPanel();
+				importVitalsPanel.percentWidth		= 100;
+				importVitalsPanel.percentHeight		= 100;
+				
+				id_NotesArea.addElement( importVitalsPanel );
+				
+				importVitalsPanel.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {	
+					
+					importVitalsPanel.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						if( importVitalsPanel && id_NotesArea.contains( importVitalsPanel ) )
+						{
+							id_NotesArea.removeElement( importVitalsPanel );
+							//							/id_Header.id_import.selected = false;
+						}
+					});
+					importVitalsPanel.id_importVitalsGrid.addEventListener("importVitalRecordClick", OnRecentVitalGridClick);
+				});
+			}
+			
+			
+			protected function OnRecentVitalGridClick(event:Event):void
+			{
+				var selectedItem:VitalsDTO = model.patientPreviousVitalsList[ event.currentTarget.selectedIndex ] as VitalsDTO;
+				
+				this.englishMode = !selectedItem.IsMetricDisplaySelected;
+				/*
+				if (englishMode)
+				id_Header.id_english.selected = true;
+				else
+				id_Header.id_metric.selected = true; */
+				
+				if(selectedItem.Height != null && selectedItem.Height != '')
+					this.PhysicalHeight = [selectedItem.Height, 0];
+				
+				if(selectedItem.Weight != null && selectedItem.Weight != '')
+					this.PhysicalWeight = Number(selectedItem.Weight);
+				
+				if(selectedItem.Temperature != null && selectedItem.Temperature != '')
+					this.PhysicalTemperature = Number(selectedItem.Temperature);
+				
+				if(selectedItem.Pulse != null && selectedItem.Pulse != '')
+					this.PhysicalPulse = Number(selectedItem.Pulse);
+				
+				if(selectedItem.Respiration != null && selectedItem.Respiration != '')
+					this.PhysicalRespiration = Number(selectedItem.Respiration);
+				
+				if(selectedItem.BPSys != null && selectedItem.BPSys != '')
+					this.PhysicalBPSys = Number(selectedItem.BPSys);		
+				
+				if(selectedItem.BPDys != null && selectedItem.BPDys != '')
+					this.PhysicalBPDys = Number(selectedItem.BPDys);
+				
+				// zahid
+				if(selectedItem.Oxygen != null && selectedItem.Oxygen != '')
+					this.Oxygen = selectedItem.Oxygen;
+				// zahid
+				
+				//close the import panel
+				if( importVitalsPanel && id_NotesArea.contains( importVitalsPanel ) )
+				{
+					id_NotesArea.removeElement( importVitalsPanel );
+					/* id_Header.id_import.selected = false; */
+				}
+				
+				importVitalsPanel.removePopup();
+			}
+			
+			
+			
+			private function calculateBMI():void
+			{
+				
+				var hgt:Array = id_height.values;
+				var wgt:Array = id_weight.values;
+				
+				if (_englishMode)
+				{
+					if (hgt && hgt.length && wgt && wgt.length)
+					{
+						//var hgtInMeterSq1:Number = Math.pow(UnitConverter.centimetersToMeters(UnitConverter.feetToCentimeters(hgt[0]) + UnitConverter.inchesToCentimeters(hgt[1])), 2);
+						
+						var cm:Number 				= UnitConverter.inchesToCentimeters( hgt[0] );
+						var m:Number 				= UnitConverter.centimetersToMeters( cm );
+						var hgtInMeterSq1:Number 	= Math.pow( m, 2 );
+						var kg:Number				= UnitConverter.poundsToKilograms( wgt[0] );
+						
+						if (hgtInMeterSq1 > 0)
+						{
+							bmi =  int( ( kg / hgtInMeterSq1)* 100 ) / 100;
+						}
+						else
+							bmi = 0;
+					}
+					else
+						bmi = 0;
+				}
+				else
+				{
+					if (hgt && hgt.length && wgt && wgt.length)
+					{
+						var m:Number 				= UnitConverter.centimetersToMeters( hgt[0] );
+						
+						var hgtInMeterSq2:Number = Math.pow( m , 2);
+						
+						if (hgtInMeterSq2 > 0)
+							bmi = int(( wgt[0] / hgtInMeterSq2 ) * 100 ) / 100;
+							//							bmi = Math.round( wgt[0] / hgtInMeterSq2 );
+						else
+							bmi = 0;
+					}
+					else
+						bmi = 0;
+				}
+				
+				if (isNaN(bmi))
+					bmi = 0;
+			}
+			
+			
+			public function loadPatientVitals():void
+			{
+				if( model.VitalDTO == null)
+				{
+					var lmrv:LoadPatientVitalByVisitEvent = new LoadPatientVitalByVisitEvent(LoadDataMode);
+					CairngormEventDispatcher.getInstance().dispatchEvent(lmrv);	
+				}
+			}
+			protected function cc(event:FlexEvent):void
+			{
+				
+				
+				/* if( model.quickInputDataLoadedFlag )
+				UpdateChange();
+				
+				id_Header.id_OptionPopUp.displayPopUp = true;
+				id_Header.id_iconButtons.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if(id_notesDictation.id_Area.visible)
+				{
+				
+				if(id_Header.id_OptionPopUp.displayPopUp)
+				{
+				id_Header.id_iconButtons.setStyle("skinClass", VBIconsBlackButton);
+				}
+				else
+				{
+				id_Header.id_iconButtons.setStyle("skinClass", VBIconsButton);	
+				}
+				}
+				this.ExpandedView = true;
+				
+				event.stopImmediatePropagation();
+				});	
+				
+				id_Header.id_Voice.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_VITALS ) )
+				{
+				id_notesDictation.notesDTO = QSUtilityFunctions.getModuleNoteDTO(moduleConstantName);
+				id_notesDictation.DictationDTO = QSUtilityFunctions.getModuleDictationDTO(moduleConstantName);
+				
+				id_notesDictation.id_Area.visible 		= true;
+				id_notesDictation.id_Area.includeInLayout = true;		
+				id_notesDictation.id_VBViews.selectedIndex = 1;						
+				//id_header.id_iconButtons.setStyle("skinClass", VBIconsBlackButton);
+				id_Header.id_iconButtons.selected = false;
+				id_Header.id_OptionPopUp.displayPopUp = false;
+				
+				id_notesDictation.dictationPanel.rec_btn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{													
+				id_Header.setIcons(true, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+				hasChange = true;
+				});	
+				id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{						
+				id_Header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+				id_notesDictation.id_Area.visible 		= false;
+				id_notesDictation.id_Area.includeInLayout = false;
+				});
+				
+				ExpandedView = true;
+				
+				if(this.ExpandedView)
+				{
+				event.stopImmediatePropagation();
+				}
+				}
+				});			
+				
+				id_Header.id_NotesBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_VITALS ) )
+				{
+				id_notesDictation.notesDTO = QSUtilityFunctions.getModuleNoteDTO(moduleConstantName);
+				id_notesDictation.DictationDTO = QSUtilityFunctions.getModuleDictationDTO(moduleConstantName);
+				
+				id_notesDictation.id_Area.visible 		= true;
+				id_notesDictation.id_Area.includeInLayout = true;						
+				id_notesDictation.id_VBViews.selectedIndex = 0;
+				//id_header.id_iconButtons.setStyle("skinClass", VBIconsBlackButton);
+				id_Header.id_iconButtons.selected = false;
+				id_Header.id_OptionPopUp.displayPopUp = false;
+				
+				id_notesDictation.id_notesPanel.id_body.id_subject.setFocus();
+				
+				
+				id_notesDictation.dictationPanel.rec_btn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{													
+				id_Header.setIcons(true, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+				hasChange = true;
+				});	
+				id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{						
+				id_Header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+				id_notesDictation.id_Area.visible 		= false;
+				id_notesDictation.id_Area.includeInLayout = false;
+				});
+				
+				ExpandedView = true;
+				
+				if(this.ExpandedView)
+				{
+				event.stopImmediatePropagation();
+				}
+				}
+				});
+				
+				id_Header.id_slideoutBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				ToggleSlideOut();
+				event.stopImmediatePropagation();
+				});
+				id_Header.id_Pin.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_VITALS ) )
+				{
+				PinView = event.currentTarget.selected;
+				//event.stopImmediatePropagation();
+				}
+				});
+				
+				
+				registerChangeWatcherHandlers();
+				
+				id_Header.id_OptionPopUp.displayPopUp = false;
+				
+				init();
+				if( model.isNewVisitCreated )
+				{
+				/* old impl 
+				if(model.quickInputDTO.Physical!=null && model.quickInputDTO.Physical.Vitals!=null)
+				{
+				this.englishMode 				= !model.quickInputDTO.Physical.Vitals.IsMetricDisplaySelected;
+				id_Header.id_english.selected 	= !model.quickInputDTO.Physical.Vitals.IsMetricDisplaySelected;
+				id_Header.id_metric.selected 	=  model.quickInputDTO.Physical.Vitals.IsMetricDisplaySelected;
+				}
+				else
+				this.englishMode = true; 
+				
+				this.englishMode = true; // By defaulr englisg is select @ New visit
+				}
+				else */
+				
+				this.englishMode = true;
+				registerFocusOutHandlers();
+				convertInPreviousSystem();
+				LoadDataMode(); 
+				
+			}
+			
+			private function registerFocusOutHandlers():void
+			{
+				id_height.addEventListener(FocusEvent.FOCUS_OUT, validateHeight, false, 0, true);
+				id_weight.addEventListener(FocusEvent.FOCUS_OUT, validateWeight, false, 0, true);
+				id_Temperature.addEventListener(FocusEvent.FOCUS_OUT, validateTemperature, false, 0, true);
+				id_pulse.addEventListener(FocusEvent.FOCUS_OUT, validatePulse, false, 0, true);
+				id_resp.addEventListener(FocusEvent.FOCUS_OUT, validateRespiratory, false, 0, true);
+				id_sys.addEventListener(FocusEvent.FOCUS_OUT, validateBloodPressureSYS, false, 0, true);
+				id_dys.addEventListener(FocusEvent.FOCUS_OUT, validateBloodPressureDYS, false, 0, true);
+			}
+			
+			private function unRegisterFocusOutHandlers():void
+			{
+				id_height.removeEventListener(FocusEvent.FOCUS_OUT, validateHeight);
+				id_weight.removeEventListener(FocusEvent.FOCUS_OUT, validateWeight);
+				id_Temperature.removeEventListener(FocusEvent.FOCUS_OUT, validateTemperature);
+				id_pulse.removeEventListener(FocusEvent.FOCUS_OUT, validatePulse);
+				id_resp.removeEventListener(FocusEvent.FOCUS_OUT, validateRespiratory);
+				id_sys.removeEventListener(FocusEvent.FOCUS_OUT, validateBloodPressureSYS);
+				id_dys.removeEventListener(FocusEvent.FOCUS_OUT, validateBloodPressureDYS);
+			}
+			
+			private function registerChangeWatcherHandlers():void
+			{
+				ChangeWatcher.watch(id_height, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_weight, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_Temperature, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_pulse, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_resp, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_sys, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_dys, "hasViewChanged", vitalsViewChangedWatcherHandler);
+				ChangeWatcher.watch(id_oxygen, "text", vitalsViewChangedWatcherHandler);
+			}
+			
+			private function vitalsViewChangedWatcherHandler(event:Event):void
+			{
+				vitalsGetEdited();
+				//trace(event.kind, event.property, event.oldValue, event.newValue);
+			}
+			
+			
+			private function vitalsGetEdited():void
+			{
+				hasChange = id_height.hasViewChanged;
+				
+				hasChange = hasChange || id_weight.hasViewChanged;
+				
+				hasChange = hasChange || id_Temperature.hasViewChanged;
+				
+				hasChange = hasChange || id_resp.hasViewChanged;
+				
+				hasChange = hasChange || id_pulse.hasViewChanged;
+				
+				hasChange = hasChange || id_sys.hasViewChanged;
+				
+				hasChange = hasChange || id_dys.hasViewChanged;
+				
+				hasChange = hasChange || id_oxygen.text.length > 0;
+			}
+			
+			private function validateBloodPressureSYS(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_sys.values;
+				
+				if (value && value.length > 1)
+				{
+					var sys:Number = value[0];
+					//var dys:Number = value[1];
+					
+					var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+					
+					if (event.relatedObject == stepper.id_numericStipper)
+					{
+						inputStepper = stepper.id_numericStipper;
+						
+						if (sys != 0 && (sys < 70 || sys > 140))
+						{
+							isNotValid = true;
+						}
+					}
+					
+					/* else if (event.relatedObject == stepper.secondNumericStepper)
+					{
+					inputStepper = stepper.secondNumericStepper;
+					
+					if (dys != 0 && (dys < 50 || dys > 95))
+					{
+					isNotValid = true;
+					}
+					} */
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_sys;
+						
+						var errorMsg:String = "";
+						
+						if (inputStepper == stepper.id_numericStipper)
+							errorMsg = "Provided value for blood pressure(Sys) does not occur in feasible range";
+						/* else
+						errorMsg = "Provided value for blood pressure(Dys) does not occur in feasible range"; */
+						
+						errorMsg += ".\n Do you want to keep this value";
+						selectedUnit = 6;
+						
+						UtilityFunctions.AskMessage(errorMsg + "Blood pressure out of Range error",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						
+						/* Alert.show(errorMsg, "Blood pressure out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function validateBloodPressureDYS(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_dys.values;
+				
+				if (value && value.length > 1)
+				{
+					//var sys:Number = value[0];
+					var dys:Number = value[1];
+					
+					var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+					
+					if (event.relatedObject == stepper.id_numericStipper)
+					{
+						inputStepper = stepper.id_numericStipper;
+						
+						if (dys != 0 && (dys < 70 || dys > 140))
+						{
+							isNotValid = true;
+						}
+					}
+					
+					/* else if (event.relatedObject == stepper.secondNumericStepper)
+					{
+					inputStepper = stepper.secondNumericStepper;
+					
+					if (dys != 0 && (dys < 50 || dys > 95))
+					{
+					isNotValid = true;
+					}
+					} */
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_dys;
+						
+						var errorMsg:String = "";
+						
+						if (inputStepper == stepper.id_numericStipper)
+							errorMsg = "Provided value for blood pressure(Sys) does not occur in feasible range";
+						else
+							errorMsg = "Provided value for blood pressure(Dys) does not occur in feasible range";
+						
+						errorMsg += ".\n Do you want to keep this value";
+						selectedUnit = 6;
+						UtilityFunctions.AskMessage("Blood pressure out of Range error"+errorMsg ,alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						
+						/* 	Alert.show(errorMsg, "Blood pressure out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function validateWeight(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_weight.values;
+				
+				var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+				
+				if (value && value.length)
+				{
+					if (englishMode)
+					{
+						var lbs:Number = value[0];
+						
+						if (lbs != 0 && (lbs < 4 || lbs > 442 ))
+						{
+							isNotValid = true;
+							
+							inputStepper = stepper.id_numericStipper;
+						}
+					}
+					else
+					{
+						var kgs:Number = value[0];
+						
+						if (kgs != 0 && (kgs < 2 || kgs > 200))
+						{
+							isNotValid = true;
+							
+							inputStepper = stepper.id_numericStipper;
+						}
+					}
+					
+					calculateBMI();
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_weight;
+						selectedUnit = 2;
+						UtilityFunctions.AskMessage("Provided value for weight does not occur in feasible range.\n Do you want to keep these values",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						/* 	Alert.show("Provided value for weight does not occur in feasible range.\n Do you want to keep these values",
+						"Weight out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function validateTemperature(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_Temperature.values;
+				
+				var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+				
+				if (value && value.length)
+				{
+					if (englishMode == false)
+					{
+						var c:Number = value[0];
+						
+						if (c != 0 && (c < 35 || c > 40 ))
+						{
+							isNotValid = true;
+							
+							inputStepper = stepper.id_numericStipper;
+						}
+					}
+					else
+					{
+						var f:Number = value[0];
+						
+						if (f != 0 && (f < 95.5 || f > 104.5))
+						{
+							isNotValid = true;
+							
+							inputStepper = stepper.id_numericStipper;
+						}
+					}
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_Temperature;
+						selectedUnit = 3;
+						UtilityFunctions.AskMessage("Provided value for temperature does not occur in feasible range.\n Do you want to keep these values",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						/* Alert.show("Provided value for temperature does not occur in feasible range.\n Do you want to keep these values",
+						"Temperature out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function validatePulse(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_pulse.values;
+				
+				var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+				
+				if (value && value.length)
+				{
+					var p:Number = value[0];
+					
+					if (p != 0 && (p < 50 || p > 135 ))
+					{
+						isNotValid = true;
+						
+						inputStepper = stepper.id_numericStipper;
+					}
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_pulse;
+						selectedUnit = 4;
+						UtilityFunctions.AskMessage("Provided value for pulse does not occur in feasible range.\n Do you want to keep these values",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						/* Alert.show("Provided value for pulse does not occur in feasible range.\n Do you want to keep these values",
+						"Pulse out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function validateRespiratory(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_resp.values;
+				
+				var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+				
+				if (value && value.length)
+				{
+					var r:Number = value[0];
+					
+					if (r != 0 && (r < 10 || r > 65))
+					{
+						isNotValid = true;
+						
+						inputStepper = stepper.id_numericStipper;
+					}
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_resp;
+						selectedUnit = 5;
+						UtilityFunctions.AskMessage("Provided value for respiratory does not occur in feasible range.\n Do you want to keep these values",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						/* UtilityFunctions.AskMessage("Provided value for respiratory does not occur in feasible range.\n Do you want to keep these values",
+						, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			private function alertsCloseHandlerYes():void
+			{
+				vital.selected = false;
+				
+				if (hasFocus)
+					//hasFocus.setFocus();
+					focusManager.setFocus(hasFocus);
+				registerFocusOutHandlers();
+			}
+			
+			private function alertsCloseHandlerNo():void
+			{
+				vital.selected = true;
+				
+				if (inputStepper == vital.id_numericStipper){
+					vital.reset(true, false); 
+					resetData();
+				}
+				else{
+					vital.reset(false, true);
+				}
+				registerFocusOutHandlers();
+			}
+			
+			
+			private function resetData():void
+			{
+				if(null == model.VitalDTO)
+					return;
+				
+				switch(selectedUnit)
+				{
+					case 1:
+						model.VitalDTO.Height = '';
+						break;
+					case 2:
+						model.VitalDTO.Weight = '';
+						break;
+					case 3:
+						model.VitalDTO.Temperature = '';
+						break;
+					case 4:
+						model.VitalDTO.Pulse = '';
+						break;
+					case 5:
+						model.VitalDTO.Respiration = '';
+						break;
+					case 6:
+						model.VitalDTO.BPDys = '';
+						break;
+					default:
+						break;
+				}
+			}
+			
+			private function ValidateHeightInFeet(event:FocusEvent, stepper:vitalsNumericStipper):Boolean
+			{
+				var value:Array = id_height.values;
+				var ft:Number = value[0];
+				var inches:Number = value[1];
+				
+				
+				if (ft != 0 && (event.relatedObject == stepper.id_numericStipper) )
+				{
+					inputStepper = stepper.id_numericStipper;
+					
+					if (ft > 0 && ft < 1)
+					{
+						return true;
+					}
+					else if (ft > 8)
+					{
+						return true;
+					}
+				}
+				
+				/* else if (event.relatedObject == stepper.secondNumericStepper)
+				{
+				inputStepper = stepper.secondNumericStepper;
+				
+				if (ft == 1 && inches < 3)
+				{
+				return true;
+				}
+				} */
+				
+				return false
+			}
+			
+			private function ValidateHeightInInches(event:FocusEvent, stepper:vitalsNumericStipper):Boolean
+			{
+				var value:Array = id_height.values;
+				var inches:Number = value[0];
+				
+				if (event.relatedObject == stepper.id_numericStipper)
+				{
+					inputStepper = stepper.id_numericStipper;
+					
+					if ( inches != 0 && ( inches < 15 || inches > 96 ) )
+					{
+						return true;
+					}
+				}
+				
+				return false
+			}
+			
+			private function validateHeight(event:FocusEvent):void
+			{
+				var isNotValid:Boolean = false;
+				var value:Array = id_height.values;
+				
+				var stepper:vitalsNumericStipper = vitalsNumericStipper(event.target);
+				
+				if (value && value.length)
+				{
+					//if (id_Height.doubleModeOn && value.length > 1)
+					if (englishMode)
+					{
+						/* if( stepper.doubleModeOn )
+						isNotValid = ValidateHeightInFeet( event, stepper );
+						else */
+						isNotValid = ValidateHeightInInches( event, stepper );
+					}
+					else
+					{
+						var cm:Number = value[0];
+						
+						if (cm != 0 && (cm < 38 || cm > 245))
+						{
+							isNotValid = true;
+							inputStepper = stepper.id_numericStipper;
+						}
+					}
+					
+					calculateBMI();
+					
+					if (isNotValid)
+					{
+						unRegisterFocusOutHandlers();
+						hasFocus = focusManager.getFocus();
+						
+						vital = id_height;
+						selectedUnit = 1;
+						UtilityFunctions.AskMessage("Provided value for height does not occur in feasible range.\n Do you want to keep these values",alertsCloseHandlerYes,null,
+							alertsCloseHandlerNo,null);
+						/* Alert.show("Provided value for height does not occur in feasible range.\n Do you want to keep these values",
+						"Height out of Range error", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, alertsCloseHandler); */
+					}
+				}
+			}
+			
+			//Alvi -  reset Vitals Form on New Visit Create and on Edit Visit Laod
+			public function resetVitalForm():void
+			{
+				resetData();
+				id_height.id_numericStipper.textDisplay.text 		= '0';
+				id_weight.id_numericStipper.textDisplay.text 		= '0';
+				id_Temperature.id_numericStipper.textDisplay.text 	= '0';
+				id_pulse.id_numericStipper.textDisplay.text 		= '0';
+				id_resp.id_numericStipper.textDisplay.text 			= '0';
+				id_sys.id_numericStipper.textDisplay.text 			= '0';
+				id_dys.id_numericStipper.textDisplay.text 			= '0';
+				id_oxygen.text 										= '0';
+				id_BMI.id_Value.text								= '0';
+				lbl_Height.text										= 'Ht. (Cm)'; 
+				lbl_Weight.text 									= 'Wt. (Kg)'; 
+				lbl_Temperature.text 								= 'Temp(C)';
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:NumberFormatter id="numFormatter" rounding="up" precision="1"/>
+	</fx:Declarations>
+	<fx:Binding source="model.quickInputDataLoadedFlag" destination="IsModelUpdated" />
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		<s:SkinnableContainer id="sc_Diagnosis" width="100%" >
+			<s:layout>
+				<s:VerticalLayout  verticalAlign="top" gap="0"  /> 
+			</s:layout>
+			
+			<s:HGroup id="id_NotesArea" width="100%" paddingTop="0" />
+			
+			<s:VGroup  gap="4" horizontalAlign="left"  paddingLeft="3" paddingRight="3" paddingTop="5" paddingBottom="2" maxHeight="100" minHeight="82" height="100%" width="100%" >
+				<!--enabled="{model.securityProxyObject.PatientExam.QuickInput.Physicals.VitalSigns.IsEditAllowed}"-->
+				
+				
+				<s:HGroup width="100%" gap="3" >
+					<vitals:vitalsNumericStipper id="id_height"  label="Height(cm)" width="12%" minWidth="60" stepSizes="[0.1]" maxValues="[9999.9, 9999.9]" 
+												 values="{this.PhysicalHeight}" valueCommit="valueCommit_handler()" selected="true" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"/>
+					<vitals:vitalsNumericStipper id="id_weight" label="Weight(Kg)" width="12%" minWidth="60" stepSizes="[0.1]" maxValues="[9999.99]" 
+												 values="{[this.PhysicalWeight]}" valueCommit="valueCommit_handler()" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"/>
+					<vitals:vitalsNumericStipper id="id_Temperature" label="Temp(C)" width="12%" minWidth="60" stepSizes="[0.1]" maxValues="[999.99]" 
+												 values="{[this.PhysicalTemperature]}" valueCommit="convertInPreviousSystem()" 	skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"/>
+					<vitals:vitalsNumericStipper id="id_pulse" label="Pulse(Min)" width="12%" minWidth="60" maxValues="[999.99]" 
+												 values="{[this.PhysicalPulse]}" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"/>
+					<vitals:vitalsNumericStipper id="id_resp" label="Resp.(Min)" width="12%" minWidth="60" maxValues="[999.99]" 
+												 values="{[this.PhysicalRespiration]}" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"/>
+					
+					<s:VGroup width="22%" minWidth="120" horizontalAlign="center" >
+						<s:HGroup width="100%">
+							<vitals:vitalsNumericStipper  id="id_sys" label="BP (Sys)" width="50%" maxValues="[999, 99]" 
+														  values="{[this.PhysicalBPSys]}" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG" />
+							<vitals:vitalsNumericStipper  id="id_dys" label="BP (Dys)" width="50%" maxValues="[999, 99]" 
+														  values="{[this.PhysicalBPDys]}" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG" />							
+						</s:HGroup>
+						<!--<s:Label text="Blood Pressure" width="100%" fontFamily="Calibri" fontSize="11" textAlign="center" color="#9B9C9C" />-->
+						
+					</s:VGroup>
+					
+					<s:SkinnableContainer width="12%" minWidth="60" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG" >
+						<s:layout>
+							<s:VerticalLayout gap="2" horizontalAlign="center" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+						</s:layout>
+						
+						<s:Label id="labelField" text="O2" width="100%" fontFamily="Calibri" fontSize="11" textAlign="center" color="#9B9C9C" />
+						
+						<s:HGroup width="100%" gap="-15" horizontalAlign="center">							
+							<components:LabelTextInput   id="id_oxygen"	width="100%" minWidth="40" prompt="" 
+														 change="id_oxygen_changeHandler(event)" text="{[this.Oxygen]}"/>
+							<components:LabelTextInput  width="15" prompt="%" enabled="false" text="%" />
+						</s:HGroup>
+						
+					</s:SkinnableContainer>	
+					<s:VGroup width="40" horizontalAlign="center">
+						<vitals:LabelBMI id="id_BMI" fontFamily="Calibri" color="#000000"  label="BMI" value="{bmi}" width="100%" />
+					</s:VGroup>
+				</s:HGroup> 
+				<s:HGroup width="100%">
+					<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsToolTipBG" >
+						<s:layout>
+							<s:HorizontalLayout verticalAlign="middle"  paddingLeft="5"  />
+						</s:layout>
+						<s:Label id="lbl_Height" color="#333333"  fontFamily="Calibri" fontSize="12" width="80" maxDisplayedLines="1"/>
+						<buttonSkins:buttonSeparator/>
+						<s:Label id="lbl_Weight" color="#333333" fontFamily="Calibri" fontSize="12" width="80" maxDisplayedLines="1"/>
+						<buttonSkins:buttonSeparator/>
+						<s:Label id="lbl_Temperature" color="#333333" fontFamily="Calibri" fontSize="12"  width="80" maxDisplayedLines="1"/>
+					</s:SkinnableContainer>
+					<mx:Spacer width="100%"/>
+					<s:Button label="Next" click="dispatchEvent( new SelectSection('SelectSection', 'id_vital', true, true) )" 
+							  buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" toolTip="Next Section"/>
+					
+				</s:HGroup>			
+				<s:HGroup id="id_IndicatorGrp" width="100%" horizontalAlign="left" includeInLayout="{id_noteIndicator.visible}">
+					<s:Button id="id_noteIndicator" label="Notes" visible="false" includeInLayout="{id_noteIndicator.visible}"
+							  click="id_noteIndicator_clickHandler(event)" toolTip="View Notes" 
+							  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesIndicatorBtnSkin" />
+					<s:Button id="id_dictationIndicator" label="Dictation" visible="false" includeInLayout="{id_dictationIndicator.visible}"
+							  click="id_dictationIndicator_clickHandler(event)" toolTip="Play Dictation" 
+							  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.dictationIndicatorBtnSkin"/>
+				</s:HGroup>
+				
+				
+			</s:VGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</s:Group>

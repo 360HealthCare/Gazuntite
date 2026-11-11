@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc()" 
+		 preinitialize="preInitialize()" 
+		 xmlns:validators="com.gazuntite.common.util.validators.*"
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+		 xmlns:itemEditors1="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*" >
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YY" />
+		
+		<validators:ComboValidator id="comboValidator"/>
+	</fx:Declarations>
+	<fx:Binding source="model.inHouseLabList" destination="labInCollection"/>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.itemEditors.SparkComboBoxItemEditor;
+			import com.gazuntite.controls.extended.components.LabelComboBox;
+			import com.gazuntite.controls.extended.components.LabelDataGrid;
+			import com.gazuntite.patient.visit.dto.InHouseLabDTO;
+			import com.gazuntite.patient.visit.event.physical.labin.ManagePatientInHouseLabsEvents;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.view.events.LoadInHouseLabTestTypeByClinicIdEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.TextInput;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CollectionEvent;
+			import mx.events.DataGridEvent;
+			import mx.events.ValidationResultEvent;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			
+			[Bindable]
+			public var deleteColumnData:Object;
+			
+			private var _hasGridChanged:Boolean;
+			private var _hasViewChanged:Boolean;
+			private var _labInCollection:ArrayCollection;
+			
+			private function cc():void
+			{
+				id_LabsRecordGrid.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true);
+				id_LabsRecordGrid.addEventListener(DataGridActionsEvent.EDIT_RECORD_CLICK, editRecordClickHandler, false, 0, true);
+				id_LabsRecordGrid.addEventListener(DataGridActionsEvent.SAVE_RECORD_CLICK, saveRecordClickHandler, false, 0, true);
+				id_LabsRecordGrid.addEventListener(DataGridActionsEvent.ITEM_EDIT_KEY_UP, itemEditKeyUpHandler, false, 0, true);
+				
+				id_LabsRecordGrid.addEventListener(DataGridEvent.ITEM_EDIT_BEGIN, labInGridItemEditBeginHandler, false, 0, true);
+				id_LabsRecordGrid.addEventListener(DataGridEvent.ITEM_EDIT_END, labInGridItemEditEndHandler, false, 0, true);
+				
+				id_LabsRecordGrid.addEventListener(Event.CHANGE, dataGridProviderChangeHandler, false, 0, true);
+			}
+			
+			private function preInitialize():void
+			{
+				if (!deleteColumnData)
+					deleteColumnData = {};
+				
+				deleteColumnData["noteDataFields"] = {subject: "NoteSubject", note: "Note", header: "InHouseLabTestType.Name"};
+				deleteColumnData["dictationDataField"] = "DictationID";
+				deleteColumnData["recordIDField"] = "InHouseLabTestType.ID";
+				deleteColumnData["section"] = QIPopUpManager.IN_HOUSE_LAB;
+			}
+			
+			private function deleteRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var inHouseLabDTO:InHouseLabDTO;
+				
+				if (event.data is InHouseLabDTO)
+					inHouseLabDTO = event.data as InHouseLabDTO;
+				
+				if (!inHouseLabDTO)
+					return;
+				
+				//var inHouseLabID:int = inHouseLabDTO.PatientInHouseLabTestID;
+				UtilityFunctions.AskMessage(  "Do you want to delete selected record", function():void
+				{
+					/*if (inHouseLabID == 0)
+					{
+						model.inHouseLabList.removeItemAt(curTar.selectedIndex);
+						if (model.inHouseLabList.length <= 0)
+						{
+							_hasGridChanged = false;
+							hasViewChanged = isGetEdited();
+						}
+					}
+					else
+					{*/
+					inHouseLabDTO.IsDeleted = true;
+					hasViewChanged = _hasGridChanged = true;
+					//}
+					
+					var ev:ManagePatientInHouseLabsEvents = new ManagePatientInHouseLabsEvents();
+					CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				});
+			}
+			
+			private function editRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var inHouseLabDTO:InHouseLabDTO;
+				
+				if (event.data is InHouseLabDTO)
+					inHouseLabDTO = event.data as InHouseLabDTO;
+				
+				if (!inHouseLabDTO)
+					return;
+				
+				if (!inHouseLabDTO.IsRecordEditable)
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+				
+				var rowIndex:int = findRecordNumber(inHouseLabDTO);
+				
+				if (rowIndex < 0)
+					return;
+				
+				id_LabsRecordGrid.editable = true;
+				var itemToSetInEditableMode:IListItemRenderer = id_LabsRecordGrid.indexToItemRenderer(rowIndex);
+				var ev:DataGridEvent = new DataGridEvent(DataGridEvent.ITEM_EDIT_BEGINNING, true);
+				ev.columnIndex = 2;
+				ev.rowIndex = rowIndex;
+				ev.itemRenderer = itemToSetInEditableMode;
+				ev.dataField = "InHouseLabTestType.Code";
+				id_LabsRecordGrid.dispatchEvent(ev);
+			}
+			
+			private function saveRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var inHouseLabDTO:InHouseLabDTO;
+				
+				if (event.data is InHouseLabDTO)
+					inHouseLabDTO = event.data as InHouseLabDTO;
+				
+				if (!inHouseLabDTO)
+					return;
+				
+				if (!inHouseLabDTO.IsDirty)
+					return;
+				
+				if (model && model.inHouseLabList)
+				{
+					model.inHouseLabList.removeAll();
+					model.inHouseLabList.addAll(labInCollection);
+				}
+				
+				var managePIH : ManagePatientInHouseLabsEvents = new ManagePatientInHouseLabsEvents();
+				CairngormEventDispatcher.getInstance().dispatchEvent( managePIH );
+				
+				id_LabsRecordGrid.editable = false;
+			}
+			
+			private var searchStr:String;
+			private function itemEditKeyUpHandler(event:DataGridActionsEvent):void
+			{
+				
+				var lblFld:String = event.dataField;
+				var loadInhouseTestType:LoadInHouseLabTestTypeByClinicIdEvent;
+				
+				searchStr = event.searchString;
+				if (searchStr.length >= 3)
+				{
+					loadInhouseTestType = new LoadInHouseLabTestTypeByClinicIdEvent(searchStr, loadData);
+					/*if (lblFld == "InHouseLabTestType.Code")
+					{
+						loadInhouseTestType = new LoadInHouseLabTestTypeByClinicIdEvent(searchStr, loadData);
+					}
+					else if (lblFld == "InHouseLabTestType.Name")
+					{
+						loadInhouseTestType = new LoadInHouseLabTestTypeByClinicIdEvent(searchStr, loadData);
+					}*/
+					
+					if (loadInhouseTestType)
+						CairngormEventDispatcher.getInstance().dispatchEvent(loadInhouseTestType);
+				}
+				
+			}
+			
+			public  function loadData(val:* = null):void
+			{
+				/*if(model.LabInStaticDataList.length)
+				{
+					for(var i:uint=0; i < model.LabInStaticDataList.length; i++)
+					{
+						if(searchStr == model.LabInStaticDataList[i].Code)
+						{
+							id_TestCode.textInput.text 	= model.LabInStaticDataList[i].Code;
+							id_TestName.textInput.text  = model.LabInStaticDataList[i].Name;
+							selectedDTO					= model.LabInStaticDataList[i];
+							id_Add.enabled 				= isGetEdited();
+							return;
+						}							
+					}
+				}*/
+			}
+			private function findRecordNumber(inHouseLabDTO:InHouseLabDTO):int
+			{
+				var rowIndex:int = -1;
+				
+				if (!inHouseLabDTO)
+					return rowIndex;
+				
+				
+				if (!id_LabsRecordGrid.dataProvider)
+					return rowIndex;
+				
+				for (var i:uint=0; i < id_LabsRecordGrid.dataProvider.length; i++)
+				{
+					if (inHouseLabDTO == id_LabsRecordGrid.dataProvider[i])
+					{
+						rowIndex = i;
+						break;
+					}
+				}
+				
+				if (rowIndex >= id_LabsRecordGrid.dataProvider.length)
+					rowIndex = -1;
+				
+				return rowIndex;
+			}
+			
+			private function labInGridItemEditBeginHandler(event:DataGridEvent):void
+			{
+				if( event.itemRenderer.data && !event.itemRenderer.data.IsRecordEditable )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					id_LabsRecordGrid.destroyItemEditor();
+					return;
+				}
+				
+				id_LabsRecordGrid.createItemEditor(event.columnIndex, event.rowIndex);
+			}
+			
+			private function labInGridItemEditEndHandler(event:DataGridEvent):void
+			{
+				if (!id_LabsRecordGrid.itemEditorInstance || !id_LabsRecordGrid.selectedItem)
+					return;
+				
+				var validationRes:ValidationResultEvent;
+				var editable:Boolean = InHouseLabDTO(id_LabsRecordGrid.selectedItem).IsRecordEditable;
+				
+				if( editable == false )
+				{
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					id_LabsRecordGrid.destroyItemEditor();
+				}
+				
+				var editor:LabelComboBox;
+				
+				if (event.dataField == "InHouseLabTestType.Code" || event.dataField == "InHouseLabTestType.Name")
+				{
+					editor = SparkComboBoxItemEditor(id_LabsRecordGrid.itemEditorInstance).id_ComboEditor;
+					
+					comboValidator.error = "Invalid inHouse lab";
+					comboValidator.source = editor;
+					comboValidator.property = "selectedItem";
+					
+					validationRes = comboValidator.validate(editor.selectedItem);
+					
+					if (validationRes && !validationRes.results)
+					{
+						event.itemRenderer.data.InHouseLabTestType = editor.selectedItem;
+						event.itemRenderer.data.IsDirty = true;
+						hasViewChanged = _hasGridChanged = true;
+					}
+				}
+				
+				else if (event.dataField == "TestResult")
+				{
+					var edtr:TextInput;
+					if (id_LabsRecordGrid.itemEditorInstance is TextInput)
+						edtr = id_LabsRecordGrid.itemEditorInstance as TextInput;
+					
+					if (!edtr)
+						return;
+					
+					event.itemRenderer.data.TestResult = edtr.text;
+					event.itemRenderer.data.IsDirty = true;
+					hasViewChanged = _hasGridChanged = true;
+				}
+				
+				id_LabsRecordGrid.destroyItemEditor();
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function dataGridProviderChangeHandler(event:Event):void
+			{
+				if (!id_LabsRecordGrid.dataProvider)
+					return;
+				
+				if (!id_LabsRecordGrid.dataProvider.hasOwnProperty("length"))
+					return;
+				
+				
+				var recordsCount:int = id_LabsRecordGrid.dataProvider.length;
+				
+				if (recordsCount > 10)
+				{
+					id_LabsRecordGrid.rowCount = 10;
+					id_LabsRecordGrid.verticalScrollPolicy = "on";
+				}
+				else
+				{
+					id_LabsRecordGrid.rowCount = id_LabsRecordGrid.dataProvider.length;
+					id_LabsRecordGrid.verticalScrollPolicy = "off";
+				}
+			}
+			
+			public function displayRowNum(oItem:Object,iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_LabsRecordGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			public function displayVisitDate(oItem:Object, iCol:int):String
+			{
+				var visitDate:String = formatDateTime.format(oItem.VisitDate.toString());
+				
+				return String(visitDate);
+			}
+			
+			private function labInCollectionChangeHandler(event:CollectionEvent):void
+			{
+				if(labInCollection)
+				{
+					if(labInCollection.length > 1)
+						hasViewChanged = true;
+					else if(labInCollection.length < 1)
+						hasViewChanged = false;
+				}
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			[Bindable]
+			public function get labInCollection():ArrayCollection
+			{
+				return _labInCollection;
+			}
+			
+			public function set labInCollection(value:ArrayCollection):void
+			{
+				if (_labInCollection)
+					_labInCollection.removeAll();
+				
+				_labInCollection = null;
+				_labInCollection = new ArrayCollection();
+				
+				if (model.inHouseLabList)
+					_labInCollection.addAll(model.inHouseLabList);
+				
+				if (_labInCollection && _labInCollection.length > 0)
+				{
+					if(hasViewChanged)
+						hasViewChanged = false;
+					
+					hasViewChanged = true;
+				}
+			}
+		]]>
+	</fx:Script>
+	<components1:LabelDataGrid id="id_LabsRecordGrid"
+							  rowCount="{id_LabsRecordGrid.dataProvider.length ? id_LabsRecordGrid.dataProvider.length + 1 :  1}"
+							  width="100%" editable="false" visible="{id_LabsRecordGrid.dataProvider.length > 0? true: false}" includeInLayout="{id_LabsRecordGrid.dataProvider.length > 0? true: false}" 
+							  useRollOver="false" rowHeight="23"
+							  dataProvider="{labInCollection}"
+							  verticalScrollPolicy="off" horizontalScrollPolicy="off" maxHeight="150" columnWidths="{[25,'10%','15%','25%','20%','15%','15%',100]}" >
+		<components1:columns>
+			
+			
+			<mx:DataGridColumn headerText="Sr.#" editable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="displayRowNum"/>
+			<mx:DataGridColumn headerText="Visit Date" dataField="VisitDate" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="displayVisitDate" editable="false"/>
+			<mx:DataGridColumn headerText="Test Code" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="InHouseLabTestType.Code" editorDataField="editorText">
+				<mx:itemEditor>
+					<fx:Component>	
+						<itemEditors1:SparkComboBoxItemEditor  labelField="Code" width="85" dataProvider="{outerDocument.model.LabInStaticDataList}"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Test Name" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="InHouseLabTestType.Name" editorDataField="editorText">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors1:SparkComboBoxItemEditor  labelField="Name" width="85" dataProvider="{outerDocument.model.LabInStaticDataList}"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Result" dataField="TestResult" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" editable="true" editorDataField="text"/>
+			<mx:DataGridColumn headerText="Normal Range" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="InHouseLabTestType.NormalRange" editable="false"/>
+			<mx:DataGridColumn  headerText="Attachment" visible="false" dataField="ResultAttachment"  headerRenderer="mx.controls.Label" wordWrap="true" editable="false" itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.AttachmentViewRenderer"/>
+			<commons:DataGridColumnEx headerText="" editable="false" data="{deleteColumnData}" dataField="Note" property="ID" section="{QIPopUpManager.IN_HOUSE_LAB}" itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DeleteRecordRenderer" />
+		</components1:columns>
+	</components1:LabelDataGrid>
+</s:Group>

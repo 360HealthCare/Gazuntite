@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.components.*" 
+		 xmlns:dictation="com.gazuntite.components.dictation.*" 
+		 xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+		 xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.inHouseLab.InHouseLabDTO;
+			import com.gazuntite.common.dto.physical.inHouseLab.InHouseLabTestTypeDTO;
+			import com.gazuntite.common.view.components.CustomSaveAndMoveNextAlert;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.physical.inhouselab.PatientInputPhysicalInHouseLabEvent;
+			import com.gazuntite.input.view.inputsections.physical.inhouselab.PatientInputPhysicalInHouseLabViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			private var labelWidth:int = 70;
+			
+			[Bindable] public var IsViewDirty:Boolean;
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			
+			
+			//M:11Nov2013
+			[Bindable]
+			public var RecordLevelDictationID:String;
+			
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _dictationNoteViewModel:PatientDictationNoteViewModel;
+			
+			[Bindable]
+			public function get dictationNoteViewModel():PatientDictationNoteViewModel
+			{
+				return _dictationNoteViewModel;
+			}
+			
+			public function set dictationNoteViewModel(value:PatientDictationNoteViewModel):void
+			{
+				_dictationNoteViewModel = value;
+			}
+			
+			private function testKeyUpHandler(event:KeyboardEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var ev:PatientInputPhysicalInHouseLabEvent = new PatientInputPhysicalInHouseLabEvent(
+					PatientInputPhysicalInHouseLabEvent.PATIENT_INPUT_IN_HOUSE_LAB_ITEM_EDIT_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				
+				if (curTar.id == "id_TestName")
+				{
+					ev.searchType = PatientInputPhysicalInHouseLabViewModel.IN_HOUSE_LAB_TEST_NAME;
+				}
+				else
+				{
+					ev.searchType = PatientInputPhysicalInHouseLabViewModel.IN_HOUSE_LAB_TEST_CODE;
+				}
+				
+				dispatchEvent(ev);
+			}
+			
+			private function addClickHandler():void
+			{
+				if (isInValid())
+					return;
+				
+				var inHouseLabDTO:InHouseLabDTO = new InHouseLabDTO();
+				
+				inHouseLabDTO.InHouseLabTestType = id_TestName.selectedItem as InHouseLabTestTypeDTO;
+				inHouseLabDTO.Result = id_Result.text;
+				
+				inHouseLabDTO.CreatedBy = model.LoggedInUserId;
+				inHouseLabDTO.ModifiedBy = model.LoggedInUserId;
+				
+				inHouseLabDTO.CreatedAt = new Date();
+				inHouseLabDTO.ModifiedAt = new Date();
+				
+				inHouseLabDTO.VisitID = model.VisitID;
+				inHouseLabDTO.VisitDate = model.VisitDate;
+				
+				inHouseLabDTO.PatientID = model.patientDTO.ID;
+				
+				inHouseLabDTO.IsRecordEditable = true;
+				inHouseLabDTO.IsDirty = true;
+				
+				inHouseLabDTO.Note = RecordLevelNote; //dictationNoteView.note;
+				inHouseLabDTO.NoteSubject = "";
+				//inHouseLabDTO.DictationID = "00000000-0000-0000-0000-000000000000";
+				//M:11Nov2013				
+				inHouseLabDTO.DictationID 			= RecordLevelDictationID ;
+				trace(inHouseLabDTO.DictationID );
+				trace(RecordLevelDictationID);
+				
+				var ev:PatientInputPhysicalInHouseLabEvent = new PatientInputPhysicalInHouseLabEvent(
+					PatientInputPhysicalInHouseLabEvent.PATIENT_INPUT_IN_HOUSE_LAB_ADD_EVENT, true);
+				
+				ev.inHouseLabDTO = inHouseLabDTO;
+				dispatchEvent(ev);
+				
+				clearForm();
+			}
+			
+			private function isInValid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (id_TestName.selectedItem == null)
+				{
+					isNotValid = true
+					errorStr += "Please select Test Name\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_TestName;
+				}
+				
+				if (!id_CptCode.selectedItem == null)
+				{
+					isNotValid = true;
+					errorStr += "Please select CPT Code\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_CptCode;
+				}
+				
+				if (isNotValid && errorStr.length)
+					Alert.show(errorStr, "Required Field", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				
+				return isNotValid;
+			}
+			
+			public function clearForm():void
+			{
+				//id_TestName.selectedItem 		= null;
+				//id_CptCode.selectedItem 		= null;
+				
+				id_TestName.clear();
+				id_CptCode.clear();
+				img_TestName.source 			= QIConstants.IMG_RED;
+				img_IcdCode.source 				= QIConstants.IMG_RED;
+				//id_TestName.text 				= "";
+				//id_CptCode.text 				= "";
+				id_Result.text 					= "";
+				
+				dictationNoteView.note = "";
+				dictationNoteViewModel.inDictationMode = false;
+				dictationNoteViewModel.inNoteMode = false;
+				dictationNoteViewModel.visible = false;
+				
+				IsViewDirty = false;
+				
+				RecordLevelNote = '';
+			}
+			
+			protected function selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(event.target.selectedIndex != -1 && event.target.selectedItem)
+				{
+					img_TestName.source	= QIConstants.IMG_GREEN;
+					img_IcdCode.source	= QIConstants.IMG_GREEN;
+					ItemSelected(model.inHouseLabTestTypeDTOList.getItemAt(event.target.selectedIndex) as InHouseLabTestTypeDTO);
+					//id_CptCode.selectedItem = model.inHouseLabTestTypeDTOList.getItemAt(id_TestName.selectedIndex);
+				}
+				/* else
+				event.target.source = QIConstants.IMG_RED; */
+			}
+			
+			protected function id_TestName_textClearedHandler(event:Event):void
+			{
+				if(id_TestName.text.length <= 2)
+					img_TestName.source = QIConstants.IMG_RED;
+			}
+			
+			/* protected function id_CptCode_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+			if(id_CptCode.selectedIndex >= 0 || id_CptCode.selectedItem != null)
+			{
+			img_IcdCode.source			= QIConstants.IMG_GREEN;
+			id_TestName.selectedItem 	= model.inHouseLabTestTypeDTOList.getItemAt(id_CptCode.selectedIndex);
+			}
+			} */
+			
+			private function ItemSelected(dto:InHouseLabTestTypeDTO):void
+			{
+				id_CptCode.selectedItem = dto;
+				id_TestName.selectedItem = dto;
+			}
+			
+			protected function id_CptCode_textClearedHandler(event:Event):void
+			{
+				if(id_CptCode.text.length <= 2)
+				{
+					img_IcdCode.source = QIConstants.IMG_RED;
+				}
+			}
+			
+			protected function autoCompleteComponent_changeHandler(event:TextOperationEvent):void
+			{
+				
+				img_TestName.source = QIConstants.IMG_RED;
+				img_IcdCode.source = QIConstants.IMG_RED;
+				
+				if(id_CptCode.selectedItem)
+				{
+					id_CptCode.text = '';
+					id_TestName.text = '';
+					id_CptCode.close();
+					id_TestName.close();
+				}
+				id_CptCode.selectedItem = null;
+				id_TestName.selectedItem = null; 
+				
+				
+				
+				
+			}
+			
+			/* protected function next_clickHandler(event:MouseEvent):void
+			{
+			dispatchEvent(new SelectSection(SelectSection.SelectTabEvent,'id_InputAssessmentMain'));
+			} */
+			
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				
+				if(IsViewDirty)
+				{
+					//QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler );
+					var hideOption:String = CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE ;
+					QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler, null, hideOption );
+				}
+				else
+					MoveToNextPanel();
+			}
+			
+			private function MoveNextHandler(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						SaveAndMoveNext();
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						addClickHandler();
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						DiscardAndMoveNext();
+						break;
+				}
+			}
+			
+			private function DiscardAndMoveNext():void
+			{
+				clearForm();
+				MoveToNextPanel();
+			}
+			
+			private function SaveAndMoveNext():void
+			{
+				if (isInValid())
+					return;
+				
+				addClickHandler();
+				MoveToNextPanel();
+			}
+			
+			private function MoveToNextPanel():void
+			{
+				dispatchEvent(new SelectSection(SelectSection.SelectTabEvent,'id_InputAssessmentMain'));
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" gap="15">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_TestName" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_TestName" 
+									   width="100%" height="25" prompt="Select Test Name" toolTip="Test Name"
+									   dataProvider="{model.inHouseLabTestTypeDTOList}" labelField="Name"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   keyUp="testKeyUpHandler(event)" 
+									   selectedItemChange="selectedItemChangeHandler(event)"
+									   change="autoCompleteComponent_changeHandler(event)"
+									   textCleared="id_TestName_textClearedHandler(event)"
+									   
+									   />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_IcdCode" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_CptCode" 
+									   width="100%" height="25" prompt="Select CPT Code" toolTip="CPT Code"
+									   dataProvider="{model.inHouseLabTestTypeDTOList}" labelField="Code"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   keyUp="testKeyUpHandler(event)" 
+									   selectedItemChange="selectedItemChangeHandler(event)"
+									   textCleared="id_CptCode_textClearedHandler(event)"	
+									   change="autoCompleteComponent_changeHandler(event)"/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" verticalAlign="middle" >
+		<s:Spacer width="{img_TestName.width}"/>
+		<advancedTextInput:AdvancedTextInput id="id_Result" 
+											 width="50%" prompt="Enter Result" 
+											 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+											 toolTip="Result" maxChars="200"
+											 />
+		<s:Spacer width="18"/>
+		<s:HGroup width="50%" height="100%" verticalAlign="bottom" horizontalAlign="right">
+			<s:ToggleButton id="dictation" visible="false" includeInLayout="false"
+							toolTip="Dictation" skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+							selected="@{dictationNoteViewModel.inDictationMode}"/>
+			<s:ToggleButton id="note" visible="false" includeInLayout="false"
+							buttonMode="false" toolTip="Note"
+							skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+							selected="@{dictationNoteViewModel.inNoteMode}"/>
+			
+			<s:Button id="save"
+					  buttonMode="true" toolTip="Save" 
+					  skinClass="com.gazuntite.skins.controls.button.SavePlusButtonSkin"
+					  click="addClickHandler()"
+					  />
+			<s:Button id="next" click="next_clickHandler(event)"
+					  buttonMode="true" toolTip="Next" skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+					  label="Next" />
+		</s:HGroup>
+	</s:HGroup>
+	
+	
+	
+	<dictation2:PatientDictationNoteView id="dictationNoteView" width="100%" viewModel="{dictationNoteViewModel}" isSaveButtonVisible="false"/>
+</s:Group>

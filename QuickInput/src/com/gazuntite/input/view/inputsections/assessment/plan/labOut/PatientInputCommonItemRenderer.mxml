@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.states.OverrideBase;
+			
+			[Bindable]	
+			public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+			}
+			
+			protected function toggleEditView():void
+			{	
+				data.inEditMode = !data.inEditMode;
+			}
+			
+			protected function onDictationNoteButtonsClick(event:MouseEvent):void
+			{
+			}
+		]]>
+	</fx:Script>
+	<s:SkinnableContainer id="id_Header" width="100%" height="35" buttonMode="true" toolTip="Open/Close Details"
+						  click="toggleEditView()">
+		<s:Label id="id_SerialLabel" left="5" right="110" color="#333333" fontFamily="CalibriCFF" fontSize="14" maxDisplayedLines="1"
+				 text="{data.displayLabelOnRenderer}"
+				 toolTip="{data.TestName}" verticalCenter="0"/>
+		
+		<s:Group right="76" top="10">
+			<s:Image source="@Embed('assets/images/new.png')"/>
+			<s:Image source="@Embed('assets/images/clockblue.png')" visible="false" includeInLayout="false"/>
+		</s:Group>
+		
+		<s:ToggleButton id="uiDictation" right="53" top="8"
+						selected="@{viewModel.inDictationMode}" buttonMode="true" toolTip="Record level Dictation"
+						skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+						click="onDictationNoteButtonsClick(event)"/>
+		
+		<s:ToggleButton id="uiNote" right="28" top="8"
+						selected="@{viewModel.inNoteMode}" buttonMode="true" toolTip="Record level Notes"
+						skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+						click="onDictationNoteButtonsClick(event)"/>
+		
+		<s:Button right="4" top="8"
+				  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"
+				  buttonMode="true" useHandCursor="true" toolTip="Delete In-House Lab"/>
+	</s:SkinnableContainer>
+</s:ItemRenderer>

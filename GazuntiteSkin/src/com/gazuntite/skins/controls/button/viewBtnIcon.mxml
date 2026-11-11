@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+	</s:states>
+	<s:Rect height="16" id="rect2" radiusX="2" visible.disabled="false" visible.down="false" width="16" x="0" y="0" visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#FF7200" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FF7800" ratio="0.00784313725490196"/>
+				<s:GradientEntry alpha="1.0" color="#FF7800" ratio="0.19215686274509805"/>
+				<s:GradientEntry alpha="1.0" color="#FF4B13" ratio="0.47058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#FFBB5A" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.98" angle="270" blurX="0" blurY="0" color="#333333" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="16" id="rect1" radiusX="2" visible.disabled="false" visible.over="false" width="16" x="0" y="0" visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#FF7200" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FF7800" ratio="0.00784313725490196"/>
+				<s:GradientEntry alpha="1.0" color="#FF7800" ratio="0.19215686274509805"/>
+				<s:GradientEntry alpha="1.0" color="#FF4B13" ratio="0.47058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#FFBB5A" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="1" blurX.down="2" blurY="1" blurY.down="2" color="#333333" distance="1" distance.down="2" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="1" width="9" x="3" y="4">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="9" width="1" x="3" y="4">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="8" width="1" x="12" y="5">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="1" width="8" x="4" y="12">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="1" width="6" x="5" y="6">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="1" width="6" x="5" y="8">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="1" width="6" x="5" y="10">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect height="1" width="8" x="3" y="3">
+		<s:fill>
+			<s:SolidColor color="#000000" color.disabled="#999999"/>
+		</s:fill>
+	</s:Rect>
+	<s:transitions>
+		<s:Transition autoReverse="true" fromState="over" toState="up">
+			<s:Parallel>
+				<s:Parallel target="{rect2}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+</s:Skin>

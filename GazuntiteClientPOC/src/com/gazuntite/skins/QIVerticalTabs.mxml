@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect minHeight="21" maxHeight="30" height="100%" id="rect1" includeIn="disabled,over,up,upAndSelected" visible.upAndSelected="false" minWidth="110" width="100%" x="0.5" y="0.5" visible.over="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FDFDFD" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#E8E8E8" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1.0" color="#DBD9D6" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1.0" color="#F4F4F3" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+		</s:filters>
+	</s:Rect>
+	<s:Rect alpha="1" minHeight="21" maxHeight="30" height="100%" id="rect0" includeIn="disabled,down,over,up,upAndSelected" visible.upAndSelected="false" minWidth="110" width="100%" x="0.5" y="0.5" visible.up="false" visible.disabled="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#CBCED2" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B3B6BA" ratio="0.5137254901960784"/>
+				<s:GradientEntry alpha="1.0" color="#A3A7AB" ratio="0.5176470588235295"/>
+				<s:GradientEntry alpha="1.0" color="#B0B3B6" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="2" hideObject="false" includeIn="disabled,upAndSelected" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="2" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	
+	
+	<s:Rect minHeight="21" maxHeight="31" height="100%" id="rect3" includeIn="disabledAndSelected,downAndSelected,over,overAndSelected,up,upAndSelected" minWidth="113" width="{rect1.width+3}" x="0" y="0" visible.over="false" visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="0">
+				<s:GradientEntry alpha="1.0" color="#B1B8BD" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#85898F" ratio="0.5529411764705883"/>
+				<s:GradientEntry alpha="1.0" color="#81858A" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="2" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Path data="M 31.97 27.67 L 0.03 27.67 16.00 0.01 Z " maxHeight="8" height="8" includeIn="disabledAndSelected,downAndSelected,over,overAndSelected,up,upAndSelected" rotation="90" width="12" x="8" y="{labelDisplay.y - 2}" visible.over="false" visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="0">
+				<s:GradientEntry alpha="1.0" color="#FF4A4A" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B51515" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="0" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:RichText  id="labelDisplay" color="#FFFFFF" typographicCase.upAndSelected="uppercase" typographicCase.overAndSelected="uppercase" color.up="#000000" fontSize="12" text="" x="10" y="{rect1.height / 3}"  fontFamily="Calibri" fontFamily.upAndSelected="Calibri Bold" fontFamily.overAndSelected="Calibri Bold">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" alpha.up="0" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	<!--
+	<s:HGroup verticalAlign="middle" height="100%" paddingLeft="6">
+		<s:RichText color="#333333" color.disabledAndSelected="#ffffff" color.downAndSelected="#ffffff" color.upAndSelected="#ffffff" color.overAndSelected="#ffffff" fontSize="12" tabStops="S0" x="7" y="8" fontFamily="Calibri" fontFamily.upAndSelected="Calibri Bold" fontFamily.downAndSelected="Calibri Bold" fontFamily.overAndSelected="Calibri Bold"   />
+	</s:HGroup>-->
+</s:Skin>

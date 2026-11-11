@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="cc(event)" xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.closeCrossButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.addMoreButton;
+			import com.gazuntite.patient.visit.dto.visit.UserTypeDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			import com.gazuntite.provider.eprescription.services.patient.view.ePrescription;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable] public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _ePrescriptionView:ePrescription;
+			
+			private var _presCollection:ArrayCollection;
+			[Bindable]
+			public function get presCollection():ArrayCollection
+			{
+				return _presCollection;
+			}
+			
+			public function set presCollection(value:ArrayCollection):void
+			{
+				_presCollection = value;
+				if (_presCollection)
+				{
+					_presCollection.addEventListener(CollectionEvent.COLLECTION_CHANGE, presCollectionChangeHandler, false, 0, true);
+					
+				}
+			}
+			
+			private function presCollectionChangeHandler(event:CollectionEvent):void
+			{
+				/* if(presCollection)
+				{
+				if(presCollection.length > 1)
+				hasViewChanged = true;
+				else if(presCollection.length < 1)
+				hasViewChanged = false;
+				} */
+			}
+			
+			private function getRefillData(item:Object, iCol:int):String
+			{
+				var result:String='';
+				if(item.hasOwnProperty("Refill"))
+					result = item.Refill;
+				
+				if(item.hasOwnProperty("isPRN"))
+					result = item.isPRN;
+				
+				if(result.toLowerCase() == 'true')
+					result = 'AS NEEDED';
+				else if(item.hasOwnProperty("Refill"))
+					result = item.Refill;
+				return result;
+			}
+			
+			private function getVisitDate(item:Object, iCol:int):String
+			{
+				var result:String = '';
+				if(item.VisitDate)
+					result = item.VisitDate;
+				
+				if(result == '01/01/1901' || result == '02/01/1901')
+					result = 'N/A';
+				
+				return result;
+			}
+			public function GridRowNumber(oItem:Object, iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_PrescriptionGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			
+			public function loadGridData():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(presCollection))
+				{
+					dispatchEvent(new Event('LoadMedicationPrescriptionDataEvent', true));
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				/* if(model.LoggedInUserId)
+				{
+				
+				} */
+			}
+			
+			//-- Tahir Alvi - Add more button click handler
+			//-- New RX Integration in Quick Input
+			protected function id_AddMoreBtn_clickHandler(event:MouseEvent):void
+			{
+				if(id_AddMoreBtn.label == 'Add More') // when show New Rx Form
+				{
+					ShowStatusWindow( "Please wait while Loading NewRX." ); // show Waiting message.
+					id_content.visible			=	true;
+					id_content.includeInLayout 	= 	true;
+					id_AddMoreBtn.label 		= 	''; 
+					id_AddMoreBtn.label 		= 'Close';  
+					//--- add new RX
+					var usertype_dto:UserTypeDTO 						= new UserTypeDTO();
+					var userTypeDTO:XML 								= <OwnerUserType />
+					userTypeDTO.IsClinicUser 							= usertype_dto.IsClinicUser?"true":"false";
+					userTypeDTO.IsProvider 								= usertype_dto.IsProvider?"true":"false";
+					userTypeDTO.UserTypeId 								= usertype_dto.ID;
+					userTypeDTO.UserTypeName 							= usertype_dto.Name;
+					
+					_ePrescriptionView = new ePrescription();
+					
+					(_ePrescriptionView as ePrescription).userID 			= model.LoggedInUserId;
+					(_ePrescriptionView as ePrescription).clinicBranchID 	= model.LoggedInUserSelectedBranchId;
+					(_ePrescriptionView as ePrescription).templateId 		= "1";
+					(_ePrescriptionView as ePrescription).encounterTypeId 	= "1";
+					(_ePrescriptionView as ePrescription).userTypeDTO 		= userTypeDTO;
+					
+					_ePrescriptionView.percentWidth 						= 100;
+					//_ePrescription.percentHeight 						= 100;
+					id_content.addElement( _ePrescriptionView );
+					_ePrescriptionView.setNewRXView 						= true;
+					_ePrescriptionView.isPrescriptionMode 					= true;
+					_ePrescriptionView.id_newRX.loadSelectedPatientData(model.patientDTO , model.VisitID);
+					
+					_ePrescriptionView.addEventListener(FlexEvent.CREATION_COMPLETE ,RemoveStatusWindow);
+				}
+				else if(id_AddMoreBtn.label == 'Close') // when hide New Rx Form
+				{
+					id_content.visible			=	false;
+					id_content.includeInLayout 	= false;
+					id_AddMoreBtn.label 		= ''; 
+					id_AddMoreBtn.label 		= 'Add More';  
+					//-- remove new RX
+					id_content.removeElement( _ePrescriptionView );
+				}
+			}
+			
+			// Tahir Alvi - reset Prescription Panel to default state
+			public function resetPrescriptionForm():void
+			{
+				id_content.visible			= false;
+				id_content.includeInLayout 	= false;
+				id_AddMoreBtn.label 		= ''; 
+				id_AddMoreBtn.label 		= 'Add More';
+				
+				//-- remove new RX
+				if(null != _ePrescriptionView )
+				{
+					id_content.removeElement( _ePrescriptionView );
+					_ePrescriptionView = null;
+				}
+			}
+			
+			private var StatusWindow:PopupWindow ;
+			public function ShowStatusWindow(statusMessage :String ):void
+			{
+				StatusWindow = UtilityFunctions.ShowStatusMessage( statusMessage, this );
+			}
+			
+			public function RemoveStatusWindow(event:FlexEvent):void
+			{
+				if( StatusWindow )
+					StatusWindow.removePopup();
+				
+				StatusWindow = null;				
+			}
+			
+			public function AllowMoveToNextPanel( callBack:Function ):void
+			{
+							
+				 if( _ePrescriptionView != null )
+				{
+					UtilityFunctions.AskMessage( "Do you still want to leave form in current state?", function ():void
+					{
+						callBack(); 
+					}); 
+				}
+				else
+				{
+					callBack();
+				} 
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="model.prescriptionDToList" destination="presCollection" />
+	
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingTop="5" paddingLeft="3" paddingRight="3" paddingBottom="0"/>
+	</s:layout>
+	
+	<s:Group id="id_content" width="100%" height="100%"  visible="false" includeInLayout="false"/>
+	
+	<s:HGroup  width="100%" horizontalAlign="right">
+		<s:Button id="id_AddMoreBtn" 
+				  click="id_AddMoreBtn_clickHandler(event)" 
+				  label="Add More" 
+				  buttonMode="true" useHandCursor="true" width="80"
+				  skinClass="{id_AddMoreBtn.label=='Close' ? closeCrossButton : addMoreButton}"
+				  toolTip="{id_AddMoreBtn.label=='Close' ? 'Close Prescription Form' :'Add Prescription'}"  />
+		<s:Button id="id_nextBtn" 
+				  label="Next" 
+				  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" toolTip="Next Section" enabled="true"
+				  buttonMode="true" useHandCursor="true"/><!--click="dispatchEvent( new SelectSection('SelectSection', 'id_TreatmentPanel', true, true) )" -->
+	</s:HGroup> 
+	
+	<components1:LabelDataGrid id="id_PrescriptionGrid" width="100%" useRollOver="false" 
+							  dataProvider="{presCollection}" rowCount="{id_PrescriptionGrid.dataProvider.length + 1}" verticalScrollPolicy="on"
+							  sortableColumns="false" 
+							  maxHeight="150" 
+							  
+							  columnWidths="{['10%','15%','15%','20%','30%','10%']}"
+							  includeInLayout="{id_PrescriptionGrid.visible}" visible="{id_PrescriptionGrid.dataProvider.length > 0 ? true :false}"> 
+		<components1:columns>
+			<mx:DataGridColumn headerText="Sr.#" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" width="50" labelFunction="GridRowNumber"/>
+			<mx:DataGridColumn headerText="Visit Date" width="80" dataField="VisitDate" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="getVisitDate" /> <!--itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DateRenderer4DG"-->
+			<mx:DataGridColumn headerText="Dose" width="60" dataField="Dose" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"  />
+			<mx:DataGridColumn headerText="Medicine" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="drugName"  width="70"/>
+			<mx:DataGridColumn headerText="Sig" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="Sig" width="90" />
+			<mx:DataGridColumn headerText="No. of Refills" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" width="60" labelFunction="getRefillData"/>
+		</components1:columns>
+	</components1:LabelDataGrid>
+	
+	<s:Label text="No Prescriptions" fontFamily="Calibri Bold" color="#ffffff" fontSize="13" width="100%" textAlign="center" includeInLayout="{!id_PrescriptionGrid.visible}"  visible="{!id_PrescriptionGrid.visible}" 
+			 /><!--  -->
+</s:Group>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				  xmlns:s="library://ns.adobe.com/flex/spark" 
+				  xmlns:mx="library://ns.adobe.com/flex/mx"
+				  creationComplete="cc()" width="100%" xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.controls.dataGridClasses.DataGridListData;
+			
+			public static const ITEM_EDIT_KEY_UP:String = "dataGridItemEditKeyUp";
+			
+			
+			private var _dataProvider:IList;
+			private var _labelField:String = "label";
+			private var _data:Object;
+			
+			private var _editorText:String;
+			private var _selectedItem:*;
+			
+			private var _isFieldRequired:Boolean;
+			private var complexFieldNameComponents:Array = [];
+			
+			private function cc():void
+			{
+				BindingUtils.bindProperty(this, "editorText", id_ComboEditor.textInput, "text");
+				BindingUtils.bindProperty(this, "selectedItem", id_ComboEditor, "selectedItem");
+			}
+			
+			private function deriveComplexColumnData( value:Object ):Object 
+			{
+				var currentRef:Object = value;
+				
+				if (currentRef && complexFieldNameComponents)
+				{
+					for(var i:int=0; i < complexFieldNameComponents.length; i++)
+					{
+						if (currentRef)
+							currentRef = currentRef[complexFieldNameComponents[ i ]];
+					}
+				}
+				
+				return currentRef;
+			}
+			
+			[Bindable]
+			public function get dataProvider():IList
+			{
+				return _dataProvider;
+			}
+
+			public function set dataProvider(value:IList):void
+			{
+				_dataProvider = value;
+			}
+
+			[Bindable]
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(value:String):void
+			{
+				_labelField = value;
+			}
+
+			[Bindable]
+			public function get editorText():String
+			{
+				return _editorText;
+			}
+			
+			public function set editorText(value:String):void
+			{
+				_editorText = value;
+			}
+			
+			[Bindable]
+			public function get selectedItem():*
+			{
+				return _selectedItem;
+			}
+			
+			public function set selectedItem(value:*):void
+			{
+				_selectedItem = value;
+			}
+			
+			[Bindable]
+			public function get isFieldRequired():Boolean
+			{
+				return _isFieldRequired;
+			}
+			
+			public function set isFieldRequired(value:Boolean):void
+			{
+				if (value != _isFieldRequired)
+				{
+					_isFieldRequired = value;
+					id_ComboEditor.invalidateSkinState();
+				}
+			}
+			
+			private function comboEditorKeyUpHandler(event:KeyboardEvent):void
+			{
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.ITEM_EDIT_KEY_UP, true);
+				ev.searchString = id_ComboEditor.textInput.text;
+				ev.charCode = event.charCode;
+				ev.data = data;
+				
+				if (listData && listData is DataGridListData && listData.hasOwnProperty("dataField"))
+				{
+					ev.dataField = DataGridListData(listData).dataField;	
+				}
+				
+				dispatchEvent(ev);
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (listData && listData is DataGridListData)
+				{
+					var newSelectedItem:*;
+					var dateFieldVal:String = DataGridListData(listData).dataField;
+					var dataFld:String = "";
+					
+					if (!dateFieldVal)
+					{
+						return;
+					}
+					else if ( dateFieldVal.indexOf( "." ) != -1 ) 
+					{
+						complexFieldNameComponents = dateFieldVal.split( "." );
+						newSelectedItem = deriveComplexColumnData(data);
+						 
+						if (newSelectedItem && newSelectedItem !== undefined)
+						{
+							dataFld = complexFieldNameComponents[complexFieldNameComponents.length - 1];
+						}
+					}
+					else
+					{
+						newSelectedItem = data[dateFieldVal];
+						dataFld = dateFieldVal;
+					}
+					
+					var found:Boolean = false;
+					
+					if (dataProvider)
+					{
+						
+						for (var i:int = 0; i < dataProvider.length; i++)
+						{
+							if (dataProvider[i] == newSelectedItem)
+							{
+								id_ComboEditor.selectedItem = dataProvider[i];
+								found = true;
+								break;
+							}
+						}
+						
+					}
+					
+					if (!found)
+					{
+						id_ComboEditor.textInput.text = newSelectedItem;
+						
+						var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.ITEM_EDIT_KEY_UP, true);
+						ev.searchString = id_ComboEditor.textInput.text;
+						ev.data = data;
+						
+						if (listData && listData is DataGridListData && listData.hasOwnProperty("dataField"))
+						{
+							ev.dataField = DataGridListData(listData).dataField;	
+						}
+						
+						dispatchEvent(ev);
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<components1:LabelComboBox id="id_ComboEditor" verticalCenter="0" horizontalCenter="0" width="100%" dataProvider="{dataProvider}" labelField="{labelField}" required="{isFieldRequired}" 
+							  keyUp="comboEditorKeyUpHandler(event)"/>
+</s:MXItemRenderer>

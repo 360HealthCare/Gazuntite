@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.input.SoapnoteBgSkin" 
+					  xmlns:soap="com.gazuntite.input.view.inputsections.soap.*"
+					  backgroundAlpha="0"
+					  creationComplete="onCreated(event)" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.input.event.visit.visit.GenerateSoapNotePreviewEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			
+			import flash.net.drm.AuthenticationMethod;
+			
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			[Bindable]
+			public var viewModel:PatientInputViewModel = PatientInputViewModel.getInstance();
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			/* protected function onStageClick(event:MouseEvent):void
+			{
+				if (viewModel.showInputSoap && !this.hitTestPoint(event.stageX, event.stageY))
+				{
+					viewModel.showInputSoap = false;
+				}
+			} */
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+				/* var my_stage:Stage = (FlexGlobals.topLevelApplication as UIComponent).stage;
+				my_stage.addEventListener(MouseEvent.MOUSE_DOWN, onStageClick, false, 0, true); */
+				
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						viewModel.showInputSoap = false;
+					}
+				});
+				
+			}
+			
+			public function LoadSoapNotePreview():void
+			{
+				var evt:GenerateSoapNotePreviewEvent = new GenerateSoapNotePreviewEvent(true, model.patientDTO.Gender.toLowerCase().charAt(0) != 'f', LoadSoapNote_callBack );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			
+			private function LoadSoapNote_callBack( resp:String, isURL:Boolean = false ):void
+			{
+				if( isURL )
+				{
+					id_soapNoteView.SoapNoteURL = resp;
+				}
+				else
+				{
+					id_soapNoteView.SoapNoteText = resp;
+				}
+			}
+			
+			private function signVisitClickHandler():void
+			{
+				viewModel.visitSignCosign();
+			}
+			
+			private function saveVisitClickHandler():void
+			{
+				viewModel.saveVisit();
+			}
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" 
+			  paddingBottom="7" paddingLeft="7" paddingRight="10" paddingTop="7" >
+		<soap:SoapNoteView id="id_soapNoteView" width="100%" height="100%" />
+		
+		<s:HGroup width="100%" horizontalAlign="center" gap="8">
+			<s:Button toolTip="Visit History"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.EditSoapnoteButton"
+							buttonMode="true" useHandCursor="true"
+							/>
+			<s:Button toolTip="Sign Visit" enabled="{(model.diagnosisDTOList.length > 0)}"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SignSoapnoteButton"
+							buttonMode="true" useHandCursor="true"
+							click="signVisitClickHandler()"
+							/>
+			<s:Button label="Save" toolTip="Save Visit"
+					  click="saveVisitClickHandler()"
+					  buttonMode="true" useHandCursor="true"
+					  skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.VisitSaveButton"/>
+			
+			<s:Button toolTip="Search Soap Note"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SearchSoapnoteButton"
+							buttonMode="true" useHandCursor="true" visible="false" includeInLayout="false"
+							/>
+			<s:Button toolTip="Refer"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.CosignSoapnoteButton"
+							buttonMode="true" useHandCursor="true"
+							/>
+			<s:Button toolTip="Close Soap Note" click="viewModel.showInputSoap = false"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.CloseSoapnoteButton"
+							buttonMode="true" useHandCursor="true"
+							/>
+			<s:ToggleButton toolTip="Max/Restore" selected="@{viewModel.inputSoapMaximized}"
+							buttonMode="true" useHandCursor="true"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SoapnoteExpandTBSkin"
+							/>
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+</s:SkinnableContainer>

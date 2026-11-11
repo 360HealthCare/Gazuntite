@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+		width="100" height="26" >
+	
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Rect width="100%" height="100%"	visible.disabled="false" visible.down="false" visible.over="false" visible.up="false">
+		<s:filters>
+			<s:DropShadowFilter includeIn="down,downAndSelected,over,overAndSelected,up,upAndSelected"	
+								alpha="1" angle="90" blurX="2" blurY="2" color="0x000000"	
+								distance="1" hideObject="false" inner="true" knockout="false"  quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#D3D4D4" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect includeIn="down,over" width="100%" height="26" >
+		<s:fill>
+			<s:SolidColor color="0xFFD08F"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2" 
+								color="#000000" distance="1" hideObject="false" inner="true"	
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:Label id="label_display"
+			 color="#000000"
+			 fontFamily="CalibriCFF" 
+			 fontSize="13"
+			 fontWeight.down="bold"
+			 verticalCenter="0" 
+			 width="100%"
+			 maxDisplayedLines="1"
+			 showTruncationTip="true"
+			 left="6" right="6"
+			 text="{hostComponent.label}"
+			 />
+</s:Skin>

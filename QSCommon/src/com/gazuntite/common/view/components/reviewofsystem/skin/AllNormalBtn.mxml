@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="93.854" height="21.933">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Path x="19.435" y="-0.265" width="74.077" height="20.933" alpha="0.6"
+			data="M 0.25 0.25 L 56.58 0.25 C 58.426 0.25 59.936 1.76 59.936 3.605 L 59.936 12.58 C 59.936 14.426 58.426 15.937 56.58 15.937 L 0.25 15.937 L 0.25 0.25 Z">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4"
+								weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#707070" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#303030" ratio="0.45098039215686275"/>
+				<s:GradientEntry alpha="1.0" color="#0A0A0A" ratio="0.4627450980392157"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+	<s:Path x="0.652" y="-0.265" width="19.934" height="20.933"
+			data="M 3.605 0.25 L 16.027 0.25 L 16.027 15.937 L 3.605 15.937 C 1.76 15.937 0.25 14.426 0.25 12.58 L 0.25 3.605 C 0.25 1.76 1.76 0.25 3.605 0.25 Z">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#5E5959" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#5E5959" ratio="0.47058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4"
+								weight="1"/>
+		</s:stroke>
+	</s:Path>
+	<s:RichText x="8" y="6" color="#FFFFFF" fontFamily="Calibri" fontSize="12" fontWeight="bold"
+				tabStops="S0" text="N"/>
+	<s:RichText x="31" y="6" color="#FFFFFF" fontFamily="Calibri" fontSize="12" fontWeight="bold"
+				tabStops="S0 S50" text="All Normal"/>
+</s:Skin>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.common.view.components.ZipCityStateCombine"/>
+    <classEntry path="com.zigron.common.delegate.QSAllergyDelegate"/>
+    <classEntry path="com.zigron.common.event.LoadPatientbyPatientIDEvent"/>
+    <classEntry path="com.zigron.common.command.LoadPatientbyPatientIDCommand"/>
+    <classEntry path="com.zigron.common.command.visit.GenerateSoapNotePreviewCommonCommand"/>
+    <classEntry path="com.gazuntite.common.event.ManagePatientVitalEvent"/>
+    <classEntry path="com.gazuntite.common.command.ManagePatientVitalCommand"/>
+    <classEntry path="com.gazuntite.common.delegate.ManagePatientVitalDelegate"/>
+    <classEntry path="com.gazuntite.common.dto.VitalsDTO"/>
+    <classEntry path="com.gazuntite.common.dto.baseDTO.BaseDTO"/>
+    <classEntry path="com.gazuntite.common.event.CreateVisitEvent"/>
+    <classEntry path="com.gazuntite.common.command.CreateVisitCommand"/>
+    <classEntry path="com.gazuntite.common.delegate.CreateVisitDelegate"/>
+    <classEntry path="com.gazuntite.common.view.events.PatientVideoChatEndEvent"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

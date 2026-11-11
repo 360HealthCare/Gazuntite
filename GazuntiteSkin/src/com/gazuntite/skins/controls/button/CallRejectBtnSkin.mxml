@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="23" radiusX="3" width="98" x="0" y="0" visible.up="false" visible.over="false" visible.down="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color.disabled="#E8E8E8" color.down="#45F46B" color.over="#45F46B" color.up="#63E16C" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color.disabled="#C6C7C7" color.down="#24B22D" color.over="#24B22D" color.up="#41BF4A" ratio.disabled="0.5137254901960784" ratio.down="0.5058823529411764" ratio.over="0.5058823529411764" ratio.up="0.5137254901960784"/>
+				<s:GradientEntry alpha="1.0" color.disabled="#BABABA" color.down="#18A023" color.over="#18A023" color.up="#0EB81D" ratio="0.5176470588235295"/>
+				<s:GradientEntry alpha="1.0" color.disabled="#B7B8B8" color.down="#0C821D" color.over="#0C821D" color.up="#0D9C23" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurX.down="2" blurY="1" blurY.down="2" color="#C7FF41" color.disabled="#999999" color.down="#000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.75" alpha.disabled="0.5" alpha.down="0.25" alpha.up="1" angle="90" blurX="2" blurX.disabled="2" blurX.down="0" blurY="2" blurY.disabled="2" blurY.down="0" color="0x000000" color.down="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="23" id="rect1" includeIn="down,over,up" radiusX="3" d:userLabel="Bar" width="98" x="0" y="0">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurY="1" color="#FFD1D1" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1" color.down="#000000" blurX.down="2" blurY.down="2"/>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="#000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1" color.down="#FFFFFF" alpha.down="0.25" blurX.down="1" blurY.down="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry ratio="0" color.over="#B50000" alpha="1.0" color.up="#D30606" color.down="#B50000"/>
+				<s:GradientEntry ratio.over="0.48627450980392156" color.over="#C4000D" alpha="1.0" color.up="#E10111" color.down="#C4000D" ratio.up="0.49019607843137253" ratio.down="0.48627450980392156"/>
+				<s:GradientEntry ratio="0.49411764705882355" color.over="#D31E2A" alpha="1.0" color.up="#E73340" color.down="#D31E2A"/>
+				<s:GradientEntry ratio="1" color.over="#DD787F" alpha="1.0" color.up="#F0838B" color.down="#DD787F"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:RichText ai:aa="2" columnCount="1" d:id="20" tabStops="S0 S50" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" y="5" color="#FFFFFF" fontFamily="Calibri" fontSize="14" kerning="on" text="Reject Call" x="19" color.disabled="#333333">
+		<s:filters>
+			<s:DropShadowFilter angle="90" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1" blurX="1" blurY="1" alpha="0.25" color.disabled="#FFFFFF"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

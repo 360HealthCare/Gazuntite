@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init(event)" 
+		 useHandCursor="true"
+		 buttonMode="true" 
+		 height="13"
+		 width="100%"
+		 maxHeight="200">
+	
+	<fx:Metadata>
+		[Event(name="selectionChange", type="spark.events.IndexChangeEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		
+		<![CDATA[
+			import com.gazuntite.skins.CalloutButtonEditSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.FocusManager;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			import spark.skins.mobile.ButtonSkin;
+			
+			[Bindable]
+			protected var _dataProvider:ArrayCollection;
+			
+			[Bindable]
+			protected var _labelField:String;
+			
+			[Bindable]
+			protected var _selectedItemText:String = "";
+			
+			[Bindable]
+			protected var _buttonLabel:String;
+			
+			[Bindable]
+			protected var _required:Boolean = false;
+			
+			[Bindable]
+			protected var _isEditForm:Boolean = false;
+			
+			[Bindable]
+			protected var _newStyleName:String;
+			
+			[Bindable]
+			protected var _showButton:Boolean = true;
+			
+			[Bindable]
+			protected var showList:Boolean = false;
+			
+			[Bindable]
+			protected var _canSetOtherDataProviders:Boolean = false;
+			
+			public function get canSetOtherDataProviders():Boolean
+			{
+				return _canSetOtherDataProviders;
+			}
+
+			public function set canSetOtherDataProviders(value:Boolean):void
+			{
+				_canSetOtherDataProviders = value;
+			}
+
+			public function get showButton():Boolean
+			{
+				return _showButton;
+			}
+
+			public function set showButton(value:Boolean):void
+			{
+				_showButton = value;
+			}
+
+			public function get newStyleName():String
+			{
+				return _newStyleName;
+			}
+			
+			public function set newStyleName(value:String):void
+			{
+				_newStyleName = value;
+				label.styleName = value;
+				myCB.styleName = value;
+			}
+			
+			public function get isEditForm():Boolean
+			{
+				return _isEditForm;
+			}
+			
+			public function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+			}
+			
+			public function get selectedItemText():String
+			{
+				return _selectedItemText;
+			}
+			
+			public function set selectedItemText(value:String):void
+			{
+				_selectedItemText = value;
+				if(value == "")
+				{
+					textInput.text = "";
+					predictiveList.selectedIndex = -1;
+					
+					 if( _dataProvider )
+					{
+						_dataProvider.filterFunction = null;
+						_dataProvider.refresh();
+					} 
+				}
+			}
+			
+			public function get required():Boolean
+			{
+				return _required;
+			}
+			
+			public function set required(value:Boolean):void
+			{
+				_required = value;
+			}
+			
+			[Bindable]
+			public function get buttonLabel():String
+			{
+				return _buttonLabel;
+			}
+			
+			public function set buttonLabel(value:String):void
+			{
+				_buttonLabel = value;
+			}
+			
+			public function get labelField():String
+			{
+				return _labelField;
+			}
+			
+			public function set labelField(value:String):void
+			{
+				_labelField = value;
+			}
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				textInput.addEventListener(KeyboardEvent.KEY_DOWN, handleKeyDown);
+			}
+			
+			protected function handleKeyDown(event:KeyboardEvent):void
+			{
+				if(event.keyCode == 13)
+				{
+					myCB.closeDropDown();
+				} 
+				 
+				 if(event.keyCode == 40)
+				 {
+					 focusManager.setFocus(predictiveList);
+				 }
+				
+				//trace(event.keyCode);
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				selectedItemText = predictiveList.selectedItem[_labelField.toString()];
+				textInput.text = selectedItemText;
+				
+				predictiveList.selectedIndex = -1;
+				myCB.closeDropDown();
+				
+				
+				// DF: If true, tell the parent component the selected index
+				if(_canSetOtherDataProviders)
+				{
+					var disp:IndexChangeEvent = new IndexChangeEvent("selectionChange", true, true );
+					disp.newIndex = event.newIndex;
+					disp.oldIndex = event.oldIndex;
+					
+					dispatchEvent(disp);
+				}
+				
+			}
+			
+			// DF: Set the new index based on another component's selection
+			public function setNewIndex(idx:int):void
+			{
+				_selectedItemText = _dataProvider.source[idx][_labelField.toString()];
+				textInput.text = _selectedItemText;
+				
+				predictiveList.selectedIndex = -1;
+				myCB.closeDropDown();
+			}
+			
+			protected function textInput_focusInHandler(event:FocusEvent):void
+			{
+				if(_dataProvider != null)
+				{
+					showList = true;
+				}
+				
+			}
+			
+			protected function textInput_focusOutHandler(event:FocusEvent):void
+			{
+				//showList = false;
+			}
+			
+			protected function filter():void 
+			{
+				if(_dataProvider != null)
+				{
+					_dataProvider.filterFunction = filterMyArrayCollection;
+					_dataProvider.refresh();
+				}
+				
+			}
+			
+			protected function filterMyArrayCollection(item:Object):Boolean 
+			{	
+				return item[_labelField].toString().match(new RegExp(textInput.text, 'i'));
+			}
+			
+			protected function myCB_closeHandler(event:DropDownEvent=null):void
+			{
+				selectedItemText = textInput.text;
+			}
+			
+			protected function clearInput(event:MouseEvent):void
+			{
+				selectedItemText = ""; 
+				textInput.text = "";
+				myCB.closeDropDown()
+			}
+			
+			public function labelFunc(item:Object):String 
+			{
+				return item[_labelField];
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" 
+							horizontalAlign="left"
+							paddingBottom="1" 
+							paddingLeft="1" 
+							paddingRight="1" 
+							paddingTop="1"/>
+	</s:layout>
+	
+	<s:Rect height="5" 
+			   width="5" 
+			   id="requiredCircle"
+			   includeInLayout="{_required}" 
+			   visible="{_required}">
+		<s:fill>
+			<s:SolidColor color="#ff0600"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Label id="label" 
+			 text="{_buttonLabel}"
+			 styleName="{_newStyleName}"
+			 click="{myCB.openDropDown();}"/>
+	
+	<s:CalloutButton id="myCB"
+					 width="100%"
+					 horizontalPosition="start"
+					 verticalPosition="after"
+					 label="{_selectedItemText}"
+					 skinClass="com.gazuntite.skins.CalloutLabelSkin" 
+					 close="myCB_closeHandler(event)">
+		
+		<s:calloutLayout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:calloutLayout>
+		
+		<s:TextInput id="textInput" 
+					 width="130"
+					 height="28" 
+					 change="filter()" 
+					 focusIn="textInput_focusInHandler(event)"
+					 focusOut="textInput_focusOutHandler(event)"/>
+		
+		<s:List id="predictiveList" 
+				change="list_changeHandler(event)" 
+				labelFunction="labelFunc"
+				dataProvider="{_dataProvider}"
+				includeInLayout="{showList}"
+				height="100%" itemRenderer="com.gazuntite.components.itemrenderers.MultilineItemRenderer"/>
+		
+		<s:Button label="Clear" 
+				  styleName="button"
+				  click="clearInput(event)"
+				  visible="{_showButton}"/>
+	</s:CalloutButton>
+	
+</s:Group>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.whiteCloseButton;
+			
+			import mx.managers.PopUpManager;
+			
+			private var m_sHeadingLable:String;
+			private var m_sVisitDateLable:String;
+			private var m_sCenterLable:String = "NOTES";
+			private var m_sHideSaveButton:Boolean = false;
+			
+			[Bindable]
+			public function get VisitDateLable():String
+			{
+				return m_sVisitDateLable;
+			}
+
+			public function set VisitDateLable(value:String):void
+			{
+				m_sVisitDateLable = value;
+			}
+
+			[Bindable]
+			public function get HeadingLable():String
+			{
+				return m_sHeadingLable;
+			}
+
+			public function set HeadingLable(value:String):void
+			{
+				
+				m_sHeadingLable = value;
+			}
+
+			[Bindable]
+			public function get CenterLable():String
+			{
+				return m_sCenterLable;
+			}
+			
+			public function set CenterLable(value:String):void
+			{
+				if (value != m_sCenterLable)
+					m_sCenterLable = value;
+			}
+			
+			[Bindable]
+			public function get HideSaveButton():Boolean
+			{
+				return m_sHideSaveButton;
+			}
+			
+			public function set HideSaveButton(value:Boolean):void
+			{
+				if (value != m_sHideSaveButton)
+					m_sHideSaveButton = value;
+			}
+
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.button.input.ImportVitalsHeaderSkin">
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" />
+	</s:layout>
+	
+	<s:HGroup width="30" horizontalAlign="left" verticalAlign="middle" paddingLeft="5">
+		<s:Label id="id_HeadingLbl" text="{HeadingLable}"  color="#FFFFFF" fontFamily="Calibri" alpha="1" />
+	</s:HGroup>
+		
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="bottom" paddingTop="2" paddingBottom="-1">
+		</s:HGroup>
+							  
+	<s:HGroup width="30" horizontalAlign="right" verticalAlign="middle" paddingRight="5" >
+		<s:Label id="id_VisitDateLbl" text="{VisitDateLable}" fontSize="10" fontFamily="Calibri" color="#FFFFFF" />
+		<s:Button id="id_SaveBtn" width="23" height="23" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesSaveBtn" 
+				  buttonMode="true" useHandCursor="true" toolTip="Save" visible="{!HideSaveButton}"/>
+		<s:Button id="id_CloseBtn" width="23" height="23" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.whiteCloseButton_orange_mouseover"
+				  buttonMode="true" useHandCursor="true" toolTip="Close" />
+	</s:HGroup>
+	
+	
+	</s:SkinnableContainer>
+	
+	
+</s:Group>

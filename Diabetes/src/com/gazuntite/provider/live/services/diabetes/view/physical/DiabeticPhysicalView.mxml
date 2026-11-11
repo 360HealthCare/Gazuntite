@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   borderVisible="false"
+				   creationComplete="cc()"
+				   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabeticDetailEvent;
+			
+			import mx.events.FlexEvent;
+			
+			private var _selectedOrganIndex:int = 0; // 0 for feet , 1 for eye , 2 for lung
+			
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/physical/assets/eye_small.png")]
+			[Bindable]
+			public var eye_small:Class;
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/physical/assets/foot_small.png")]
+			[Bindable]
+			public var foot_small:Class;
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/physical/assets/lungs_small.png")]
+			[Bindable]
+			public var lungs_small:Class;
+			
+			[Bindable]	private var sectlabel:String = '';
+			[Bindable]	private var secImage:Class;
+			
+			[Bindable]
+			public function get selectedOrganIndex():int
+			{
+				return _selectedOrganIndex;
+			}
+			
+			public function set selectedOrganIndex(value:int):void
+			{
+				_selectedOrganIndex = value;
+			}
+			
+			protected function cc():void
+			{
+				
+			}
+			
+			public function PrepareView(index:int):void
+			{
+				selectedOrganIndex = index;
+				
+				switch(selectedOrganIndex)
+				{
+					case 0:
+					{
+						sectlabel = 'Foot';
+						secImage   = foot_small;
+						break;
+					}
+					case 1:
+					{
+						sectlabel = 'Eye';
+						secImage   = eye_small;
+						break;
+					}
+					case 2:
+					{
+						sectlabel = 'Lung';
+						secImage   = lungs_small;
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			protected function checkbox1_changeHandler(event:Event):void
+			{
+				if(id_checkBox.selected)
+				{
+					
+				}
+			}
+			
+			protected function id_backButton_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new Event('BackClicked',true));
+				
+			}
+			
+			protected function id_nextButton_clickHandler(event:MouseEvent):void
+			{
+				var eve:DiabeticDetailEvent = new DiabeticDetailEvent(DiabeticDetailEvent.DIABETIC_DETAIL_EVENT,true);
+				eve.selectedOrganIndex = selectedOrganIndex;
+				dispatchEvent(eve);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout >
+		<s:VerticalLayout gap="3" horizontalAlign="right" paddingRight="5" paddingTop="5" paddingBottom="5" paddingLeft="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="28" verticalAlign="top" > <!--visible="{selectedOrganIndex == 0}" 0 is for feet only, remove this statment when lungs & eye view is completed.-->
+		<s:Button id="id_backButton" 
+				  toolTip="Back" useHandCursor="true" buttonMode="true"
+				  click="id_backButton_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.button.BackSectionButtonSkin"/>
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.input.BlueViewSkin" height="100%" width="100">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" gap="6" />
+			</s:layout>
+			<s:Image id="id_secImage"  source="{secImage}" width="28" height="28"/>
+			<s:Label id="id_sectionlabel" fontFamily="CalibriCFFBold" fontSize="15" text="{sectlabel}"/>
+		</s:SkinnableContainer>
+		
+		<s:DropDownList id="id_examTypes"
+						width="100%" prompt="Exam Type"
+						skinClass="com.gazuntite.skins.controls.dropdownList.DDStepperSkin"
+						height="100%" buttonMode="true" useHandCursor="true"
+						click="id_examTypes.openDropDown()"
+						itemRenderer="com.gazuntite.provider.live.services.diabetes.view.physical.itemRenderer.DDItemrederer"
+						>
+			<s:ArrayCollection>
+				<fx:Object label="Initial" Field="Initial" />
+				<fx:Object label="Reassessment by Foot Care Provider" Field="Reassessment by Foot Care Provider" />
+				<fx:Object label="Reassessment Due to Change in Status" Field="Reassessment Due to Change in Status" />
+			</s:ArrayCollection>
+		</s:DropDownList>
+		
+		<s:Button id="id_nextButton" 
+				  toolTip="Next" useHandCursor="true" buttonMode="true" enabled="{id_checkBox.selected &amp;&amp; id_examTypes.selectedIndex != -1}"
+				  click="id_nextButton_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.button.NextSectionButtonSkin"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="center">
+		<s:Label text="Coming Soon" fontFamily="CalibriCFF" fontSize="14"/>
+		<!--<reviewofsystem:ReviewOfSystemInputView rosDataModel="{physicalDataModel}"  width="100%" height="100%" moduleName="{Constants.PHYSICAL_MODULE_NAME}"/>-->
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="30" horizontalAlign="right" visible="{selectedOrganIndex == 0}"><!--0 is for feet only, remove this statment when lungs & eye view is completed.-->
+		<s:CheckBox id="id_checkBox" 
+					skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+					label="Curative Foot Sense 5.07 Monofilament Response" 
+					toolTip="Curative Foot Sense 5.07 Monofilament Response"
+					change="checkbox1_changeHandler(event)" useHandCursor="true" buttonMode="true"/>
+	</s:HGroup>
+	
+</s:BorderContainer>

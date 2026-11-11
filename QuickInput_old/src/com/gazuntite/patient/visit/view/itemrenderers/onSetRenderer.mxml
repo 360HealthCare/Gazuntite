@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DateField xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			  xmlns:s="library://ns.adobe.com/flex/spark"  textInputStyleName="dateFieldTextBoxSkin"
+			  xmlns:mx="library://ns.adobe.com/flex/mx"  width="100"  height="21"
+			  implements="mx.controls.listClasses.IListItemRenderer" maxHeight="21"
+			  focusIn="open()"  yearNavigationEnabled="true" editable="true" maxYear="{new Date().getFullYear()}" minYear="1901"
+			  selectableRange="{{rangeEnd : new Date()}}"  verticalCenter="0" horizontalCenter="0" >
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.dataGridClasses.DataGridListData;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CalendarLayoutChangeEvent;
+			
+			override public function set data(value:Object):void
+			{
+				try
+				{
+					super.data=value;
+				}
+				catch(e:Error)
+				{
+					if (listData is DataGridListData && DataGridListData(listData).dataField in value)
+					{
+						var val:* = value[DataGridListData(listData).dataField];
+						if( val is String)
+						{
+							this.text = val;
+						}
+						else
+						{
+							selectedDate = new Date(Date.parse(val));
+						}
+					}
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</mx:DateField>

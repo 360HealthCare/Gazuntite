@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect height="23" radiusX="3" width="98" x="0" y="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry ratio="0" color.over="#45F46B" alpha="1.0" color.disabled="#E8E8E8" color.up="#63E16C" color.down="#45F46B"/>
+				<s:GradientEntry ratio.over="0.5058823529411764" color.over="#24B22D" alpha="1.0" color.disabled="#C6C7C7" color.up="#41BF4A" color.down="#24B22D" ratio.disabled="0.5137254901960784" ratio.up="0.5137254901960784" ratio.down="0.5058823529411764"/>
+				<s:GradientEntry ratio="0.5176470588235295" color.over="#18A023" alpha="1.0" color.disabled="#BABABA" color.up="#0EB81D" color.down="#18A023"/>
+				<s:GradientEntry ratio="1" color.over="#0C821D" alpha="1.0" color.disabled="#B7B8B8" color.up="#0D9C23" color.down="#0C821D"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="1" blurY="1" color="#C7FF41" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1" color.down="#000000" blurX.down="2" blurY.down="2" color.disabled="#999999"/>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1" blurX.down="0" blurY.down="0" alpha.down="0.25" blurX.disabled="2" blurY.disabled="2" alpha.disabled="0.5" color.down="#FFFFFF" alpha.up="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:RichText ai:aa="2" color="#FFFFFF" columnCount="1" fontFamily="Calibri" fontSize="14" d:id="20" kerning="on" tabStops="S0 S50" text="Accept Call" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="18" y="5" color.disabled="#333333">
+		<s:filters>
+			<s:DropShadowFilter angle="90" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1" blurX="1" blurY="1" alpha="0.25" color.disabled="#FFFFFF"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

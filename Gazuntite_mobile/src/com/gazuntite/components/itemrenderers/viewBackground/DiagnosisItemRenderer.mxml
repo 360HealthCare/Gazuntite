@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true">
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" gap="1" paddingBottom="2" />
+	</s:layout>
+	<fx:Script>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.VB_VisitDate_BG">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" />
+		</s:layout>		
+		<s:Label text="{data.IsNA?'N/A':formatDateTime.format(data.onSet)}" textAlign="center" fontFamily="Calibri" fontSize="10" color="#ffffff"/>
+	</s:SkinnableContainer>	
+	<s:HGroup width="100%">
+		<s:HGroup width="50">			
+			<s:Label text="{data.icdCode}" maxDisplayedLines="1" width="100%" maxWidth="50" fontFamily="Calibri" fontSize="11" color="#333333"/>
+		</s:HGroup>	
+		<s:Label text="{data.description}" maxDisplayedLines="1" maxWidth="120"  textAlign="left"  fontFamily="Calibri" fontSize="11" color="#333333" />
+	</s:HGroup>
+	
+	
+	<s:Line x="1" xTo="{this.width-20}">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#CCCCCC" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Line>
+</s:ItemRenderer>

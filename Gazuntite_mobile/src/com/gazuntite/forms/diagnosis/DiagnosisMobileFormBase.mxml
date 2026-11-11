@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.components.controls.*"
+					  width="100%" 
+					  height="100%"
+					  creationComplete="creationCompleteHandler(event)"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Metadata>
+		[ManagedEvents("saveFormData")]
+		[ManagedEvents("getICDCodeDescriptionEvent")]
+	</fx:Metadata>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.icd.GetICDCodeDescriptionEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.diagnosis.DiagnosisDTO;
+			import com.gazuntite.services.valueObjects.icd.ICDCodeDTO;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				if(sharedModel.ICDCodeDTOList.length > 0)
+				{
+					_selectedRecord = sharedModel.ICDCodeDTOList.getItemAt(0) as ICDCodeDTO;
+				}
+				
+				var e:GetICDCodeDescriptionEvent = new GetICDCodeDescriptionEvent();
+				dispatchEvent(e);
+				
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				if(id_AssociatedWith.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(id_ICDDescription.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(id_ICDCode.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				return true;
+				
+			}
+			
+			protected function clearForm():void
+			{
+				id_AssociatedWith.selectedItemText 	= "";
+				id_ICDDescription.selectedItemText 	= "";
+				id_ICDCode.selectedItemText 		= "";
+				id_OnSetDate.selectedItemText 		= "";
+				id_IsChronic.selected		 		= undefined;
+				
+			}
+			
+			private function saveFor(event:MouseEvent):void
+			{
+				if( validateEditForm() )
+				{
+					var diagnosis:DiagnosisDTO = new DiagnosisDTO();
+					diagnosis.AssociatedWith	= id_AssociatedWith.selectedItemText;
+					diagnosis.Description 		= id_ICDDescription.selectedItemText;
+					diagnosis.Code 				= id_ICDCode.selectedItemText;
+					diagnosis.OnSet 			= id_OnSetDate.selectedItemText;
+					diagnosis.Chronic			= id_IsChronic.selected? "Yes":"No";
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = diagnosis;
+					
+					if(_isEditForm)
+					{
+						e.isUpdate = true;
+					}
+					else
+					{
+						clearForm();
+					}
+					
+					dispatchEvent(e);
+				}
+			}
+			
+			protected function ICDCode_selectionChangeHandler(event:IndexChangeEvent):void
+			{
+				var icd:ICDCodeDTO = sharedModel.ICDCodeDTOList.getItemAt( event.newIndex ) as ICDCodeDTO;
+				id_ICDCode.selectedItemText = icd.Code;
+				id_ICDDescription.selectedItemText = icd.Description;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	
+	
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="10"
+						  paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</forms:layout>
+	
+	<s:Image source="assets/done.png" includeInLayout="{_isEditForm}"/>
+	<s:Image source="assets/edit.png" includeInLayout="{!_isEditForm}"/>
+	
+	
+	<controls:CalloutLabelText id="id_AssociatedWith" 
+							   styleName="title"
+							   labelField="associatedWith" 
+							   buttonLabel="Associated with:"
+							   required="true"
+							   width="50%"
+							   >
+		<controls:dataProvider>
+			<s:ArrayCollection>
+				<fx:Object associatedWith="This Visit" immunization="7-Valent" dose="1000000"/>
+				<fx:Object associatedWith="Last Visit" immunization="Immunization 2" dose="1000000"/>
+				<fx:Object associatedWith="Visit 3" immunization="Immunization 3" dose="1000000"/>
+				<fx:Object associatedWith="Visit 4" immunization="Immunization 3" dose="2000000"/>
+				<fx:Object associatedWith="Visit 5" immunization="Immunization 3" dose="3000000"/>
+				<fx:Object associatedWith="Visit 6" immunization="Immunization 3" dose="4000000"/>
+				<fx:Object associatedWith="Visit 7" immunization="Immunization 3" dose="5000000"/>
+			</s:ArrayCollection>
+		</controls:dataProvider>
+	</controls:CalloutLabelText>
+		
+	
+	<s:HGroup width="100%" >
+		
+		<controls:CalloutLabelText id="id_ICDCode" 
+								   styleName="subTitle"
+								   labelField="Code" 
+								   buttonLabel="ICD Code:"
+								   required="true" 
+								   isEditForm="false"
+								   dataProvider="{sharedModel.ICDCodeDTOList}"
+								   width="50%"
+								   selectionChange="ICDCode_selectionChangeHandler(event)"
+								   />
+
+		
+		<controls:CalloutLabelText id="id_ICDDescription" 
+								   styleName="subTitle"
+								   labelField="Description" 
+								   buttonLabel="ICD Description:"
+								   required="true" 
+								   isEditForm="false"
+								   dataProvider="{sharedModel.ICDCodeDTOList}"
+								   width="50%"
+								   selectionChange="ICDCode_selectionChangeHandler(event)"
+								   />
+
+		
+		
+	</s:HGroup>
+	
+	
+	<s:HGroup width="100%" >
+		
+		<controls:CalloutLabelDateSpinner id="id_OnSetDate"
+										  newStyleName="subTitle"
+										  labelField="OnSetDate" 
+										  buttonLabel="On Set:"
+										  required="true"
+										  isEditForm="false"
+										  
+										  width="50%"
+										  />
+		
+		<controls:ToggleSwitchLabel id="id_IsChronic" 
+									styleName="subTitle"
+									label="Chronic:" 									
+									width="120"/>
+		
+	</s:HGroup>
+	
+	<s:Button id="actionBtn"
+			  styleName="button"
+			  label="{_buttonLabel}"
+			  click="saveFor(event)"/>
+	
+	
+	
+</forms:MobileFormBase>

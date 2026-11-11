@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				creationComplete="init()">
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.listClasses.ListData;
+			protected function init():void
+			{
+				setStyle("rollOverColor", 0xf0f0f0);
+				setStyle("selectionColor", 0x6C8DF1);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="1" verticalAlign="middle" />
+	</s:layout>
+	
+	<s:Label id="id_lbl" text="{label}" 
+			 color.normal="#000000" 
+			 color.hovered="#000000"
+			 color.selected="#000000" 
+			 fontFamily="CalibriCFF" fontSize="14" verticalAlign="middle" 
+			 maxDisplayedLines="1"  width="100%" left="2" right="2"
+			 textAlign="center"
+			 buttonMode="true" showTruncationTip="true"
+			 />
+	
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xCCCCCC" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	
+</s:ItemRenderer>

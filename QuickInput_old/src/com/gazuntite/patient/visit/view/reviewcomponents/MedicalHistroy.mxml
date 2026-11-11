@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:CollapsiblePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 title="Medical Histroy" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.checkboxCollapsiblePanelSkin" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" 
+							 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<components1:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</components1:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			override public function set isSelected(value:Boolean):void
+			{
+				super.isSelected = value;
+				
+				model.reviewHistroy.IsMedicalReviewed = value;
+			}
+			
+			public function OnStatus(item:Object, iCol:int):String
+			{
+				if( item.IsNone.toString() == Constants.STRING_TRUE )
+					return Constants.STRING_NONE_UI;
+				else
+					return Constants.STRING_YES_UI;
+			}
+			public function OnIsActive(item:Object, iCol:int):String
+			{
+				if( item.isActive.toString() == 'true' )
+					return Constants.STRING_YES_UI;
+				
+				return ""; 
+			}
+		]]>
+	</fx:Script>
+	<components1:LabelDataGrid id="id_MedicalHistroy" horizontalScrollPolicy="off" verticalScrollPolicy="auto" width="100%"
+							  rowCount="{id_MedicalHistroy.dataProvider.length?id_MedicalHistroy.dataProvider.length:1}"
+							  columnWidths="{['20%','20%','15%','15%','15%','15%']}" verticalGridLines="false" dataProvider="{model.PreviousGeneralMedicalHistoryList}"
+							  >
+		<components1:columns>
+			<mx:DataGridColumn headerText="General History"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="medicalhistorytype.Name"  />
+			<mx:DataGridColumn headerText="Status"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="IsNone" labelFunction="OnStatus" />
+			<mx:DataGridColumn headerText="ICD Code" dataField="ICDDTO.IcdCodeName"  editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Description" dataField="ICDDTO.IcdCodeDescription" editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Onset" dataField="OnSet" editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="Active" dataField="isActive"  editable="false" labelFunction="OnIsActive" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+		</components1:columns>
+	</components1:LabelDataGrid>
+</components1:CollapsiblePanel>
+

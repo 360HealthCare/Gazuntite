@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:dictation="com.gazuntite.components.dictation.*" 
+		  xmlns:dictation1="com.gazuntite.dictation.view.dictation.*"
+		  creationComplete="vgroup1_creationCompleteHandler(event)"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel() ;
+			
+			[Bindable]
+			public var Note:String = "";
+			
+			[Bindable]
+			public var DictationID:String = DictationConstants.GUID_FORMAT;
+			
+			public function expandNoteView():void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				dictationNoteViewModel.visible = true;
+			}
+			public function collapseNoteView():void
+			{
+				dictationNoteViewModel.inNoteMode = false;
+				dictationNoteViewModel.visible = false;
+			}
+			
+			[Bindable]
+			public var showDictaionNoteButttons:Boolean = true;
+			
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (dictationNoteViewModel.inDictationMode)
+						dictationNoteViewModel.inDictationMode = false;
+					
+					if (dictationNoteViewModel.inNoteMode)
+						dictationNoteViewModel.inNoteMode = false;
+					dictationNoteViewModel.visible = false;
+				}
+			}
+			
+			protected function vgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				dictationNoteViewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:HGroup width="100%" horizontalAlign="right" verticalAlign="bottom"  height="100%" >
+		<s:ToggleButton id="id_btnDictation"
+						visible="{showDictaionNoteButttons}"
+						click="onDictationNoteButtonsClick()"
+						selected="@{dictationNoteViewModel.inDictationMode}"
+						toolTip="Record Level Dictation" tabIndex="0"
+						skinClass="{DictationID &amp;&amp; DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+						/>
+		
+		<s:ToggleButton id="id_btnNote" 
+						visible="{showDictaionNoteButttons}"
+						click="onDictationNoteButtonsClick()"
+						selected="@{dictationNoteViewModel.inNoteMode}"
+						toolTip="Record Level Notes" tabIndex="1"
+						skinClass="{Note.length ?NotesRedButtonSkin :WriteNoteButtonSkin}"
+						/>
+		<s:Group width="26">
+		<s:Button buttonMode="true" id="id_save"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin"
+				  right="0" verticalCenter="0"				  
+				  toolTip="Save"
+				  tabIndex="2"
+				  />
+		</s:Group>
+	</s:HGroup>
+	<dictation1:PatientDictationNoteView id="id_noteDictation" width="100%" minHeight="47" viewModel="{dictationNoteViewModel}"
+										 DictationID="@{DictationID}" IsDictaionEditMode="true"
+										 noteTooltip="{Note}" note="@{Note}" ShowSaveButton="false"/>
+	
+</s:VGroup>

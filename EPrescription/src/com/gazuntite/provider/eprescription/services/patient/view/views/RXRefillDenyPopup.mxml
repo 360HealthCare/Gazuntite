@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						creationComplete="creComp()"	
+						width="490"	height="165"
+						title="Deny Refill" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetDenialCodesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPendingRefillsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.PendingRefillResponseEvent;
+			
+			import mx.collections.ArrayCollection;
+			
+			private var _securityHeaderXML:XML;
+			private var _GaxenRefillRequestID:String;
+			public var Status:String;
+			
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+
+			[Bindable]
+			public function get GaxenRefillRequestID():String
+			{
+				return _GaxenRefillRequestID;
+			}
+
+			public function set GaxenRefillRequestID(value:String):void
+			{
+				_GaxenRefillRequestID = value;
+			}
+			//Creation Complete
+			protected function creComp():void
+			{
+				var rpEvent_ : GetDenialCodesEvent = new GetDenialCodesEvent(GetDenialCodes);	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+			
+			public function GetDenialCodes(response:XML):void
+			{
+				var pendingReqAC:ArrayCollection = new ArrayCollection();
+				for(var i:int=0; i<response.Codes.DenialCode.length(); i++)
+				{
+					var code:String 				= response.Codes.DenialCode[i].@DenialCode.toString();
+					var desc:String 				= response.Codes.DenialCode[i].@Description.toString();
+					
+					pendingReqAC.addItem({ code:code, desc:desc });
+				}
+				
+				id_denialCodes.dataProvider = pendingReqAC;
+				id_denialCodes.labelField 	= "desc";
+			}
+			protected function id_cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				closePopup();
+			}
+			
+			public function closePopup():void
+			{
+				this.removePopup();
+			}
+			
+			protected function id_OkBtn_clickHandler(event:MouseEvent):void
+			{	
+				if(id_denialCodes.selectedIndex == -1)
+				{
+					shakeEffect.play();
+					lbl_msg.text = 'Please select a reason.';
+					id_denialCodes.setFocus();
+					return;
+				}
+				
+				if(id_reasonOfDenial.text.length == 0 )
+				{
+					shakeEffect.play();
+					lbl_msg.text = 'Please write reason for denial.';
+					id_reasonOfDenial.setFocus();
+					return;
+				}
+				
+				var pendingRefill:XML 				= <PendingRefillRes />;
+				pendingRefill.@Status			 	= "2";
+				pendingRefill.@GaxenRefillRequestID	= GaxenRefillRequestID;
+				pendingRefill.@ChangedQuantity 		= "";
+				pendingRefill.@ReasonofDenial 		= id_reasonOfDenial.text;
+				pendingRefill.@DenialCodes 			= id_denialCodes.selectedItem ? id_denialCodes.selectedItem.code : "";
+				
+				pendingRefill.appendChild(securityHeaderXML);
+				
+				var rpEvent_ : PendingRefillResponseEvent = new PendingRefillResponseEvent(GetRefillResponse);	
+				rpEvent_.data = pendingRefill;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+			
+			public function GetRefillResponse(response:XML):void
+			{
+				lbl_msg.text = '';
+				closePopup();
+				// refresh pending request records by update call
+				var rpEvent_ : GetPendingRefillsEvent = new GetPendingRefillsEvent();	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Sequence id="shakeEffect" >
+			<s:Move duration="50" target="{this}" xFrom="{this.x}" xTo="{this.x - 50}" />
+			<s:Move duration="100" target="{this}" xFrom="{this.x-50}" xTo="{this.x + 100}" />
+			<s:Move duration="50" target="{this}" xFrom="{this.x + 100}" xTo="{this.x }" />
+		</s:Sequence >
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="6" paddingTop="4" paddingRight="6" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+		
+	<s:VGroup width="100%">
+		
+		<components:LabelComboBox id="id_denialCodes" prompt="Deny Reason" width="100" />
+		<s:TextArea id="id_reasonOfDenial" width="100%" height="50" maxChars="500" restrict="[a-z A-Z 0-9.,-_/]"/>
+		
+		<s:HGroup width="100%" horizontalAlign="right" paddingRight="5" gap="5">
+			<s:Label id="lbl_msg"  color="#F93D21" />
+			<s:Button id="id_OkBtn"  label="Ok" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Ok" click="id_OkBtn_clickHandler(event)" />
+			<s:Button id="id_cancelBtn" label="Cancel" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Cancel" click="id_cancelBtn_clickHandler(event)" />
+		</s:HGroup>
+		
+	</s:VGroup>
+	
+</components:PopupWindow>

@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx = "library://ns.adobe.com/flex/mx" 
+		 xmlns:local="*" 
+		 width="100%"
+		 height="100%"
+		 creationComplete="application1_applicationCompleteHandler(event)" xmlns:component="component.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import event.VideoChatControlEvent;
+			
+			import labs.otuome.p2p.VideoChat;
+			import labs.otuome.p2p.events.VideoChatEvent;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			private var _neighborhood:ArrayCollection;
+			private var debugLog:String = "Debug Log\n";
+			private var showneighborList:Boolean = true;
+			public var initCompleted:Boolean = true;
+			private var _videoChat:VideoChat;
+
+			public function get videoChat():VideoChat
+			{
+				return _videoChat;
+			}
+
+			public function set videoChat(value:VideoChat):void
+			{
+				if(null == value) throw("Fatal Error: videoChat must not be null at this point")
+				_videoChat = value;
+			}
+
+			private var sender:Object;
+			public	var selectedUser:Object;
+			
+			public var called:Boolean = false;
+			
+			[Bindable]
+			public function get neighborhood():ArrayCollection
+			{
+				return _neighborhood;
+			}
+			
+			public function set neighborhood(value:ArrayCollection):void
+			{
+				_neighborhood = value;
+			}
+			
+			[Bindable]
+			public function get ShowNeighborList():Boolean
+			{
+				return showneighborList;
+			}
+			
+			public function set ShowNeighborList(value:Boolean):void
+			{
+				showneighborList = value;
+			}
+			
+			private function onLogin( e:MouseEvent ):void
+			{
+				//Login( loginUI.username.text );
+			}
+			
+			/* public function Login(loginName:String):void
+			{
+				if(null != videoChat)
+				{
+					videoChat.login( loginName );
+				}
+				else
+				{
+					callLater( function():void
+					{
+						callLater( Login, [loginName]);
+					});
+				}
+			} */
+			
+			public function LogOff():void
+			{
+				videoChat.deactivateCamera();
+			}
+			
+			private function toggleLog( e:MouseEvent ):void
+			{
+				if (currentState != VideoChat.DEBUG)
+				{
+					debugUI.console.text = videoChat.debugLog;
+					videoChat.lastState = currentState;
+					currentState = VideoChat.DEBUG;
+					//headerUI.logToggle.label = "Back";
+				}
+				else
+				{
+					currentState = videoChat.lastState;
+					//headerUI.logToggle.label = "View Log";
+				}
+			}
+			
+			private function onUserPublished( e:VideoChatEvent ):void
+			{
+				videoChat.log( "User Published \n" );
+				currentState = VideoChat.LOBBY;
+			}
+			
+			private function onCameraActivated( e:VideoChatEvent ):void
+			{
+				videoChat.log( "Camera Activated\n" );
+				currentState = VideoChat.LOBBY;
+				
+				for(var count:int = 0; count < neighborList.selectedItems.length; count++)
+				{
+					if (neighborList.selectedItems[0].name == videoChat.username)
+					{
+						sender = neighborList.selectedItems[0];
+					}
+				}
+				
+			}
+			
+			private function onCameraDeactivated( e:VideoChatEvent ):void
+			{
+				currentState = VideoChat.LOGIN;
+				videoChat.log( "Camera Deactivated\n" );
+			}
+			
+			private function onNeighborSelected( e:IndexChangeEvent ):void
+			{
+				
+				for(var count:int = 0; count < neighborList.dataProvider.length; count++)
+				{
+					if (neighborList.dataProvider[count].name == videoChat.username)
+					{
+						sender = neighborList.selectedItems[count];
+						break;
+					}
+				}
+				
+				
+				if (neighborList.selectedItems.length == 1)
+				{
+					selectedUser = neighborList.dataProvider[e.newIndex];
+					
+					if (selectedUser.name != videoChat.username)
+					{
+						called = true;
+						videoChat.sendChatNotification( VideoChatEvent.INVITE,selectedUser );
+					}
+				}
+			}
+			
+			public function SendInvite(selectedUser:Object):void
+			{
+				called = true;
+				VideoChat.getInstance().sendChatNotification( VideoChatEvent.INVITE,selectedUser );
+			}
+			
+			private function onInvitationReceived( e:VideoChatEvent ):void
+			{
+				sender = e.sender;
+				invitationOverlayUI.invitationDetails.text = sender.name + " has invited you to chat";
+				invitationOverlayUI.visible = true;
+			}
+			
+			private function onInvitationDeclined( e:VideoChatEvent ):void
+			{
+				neighborList.selectedIndex = -1;
+				invitationOverlayUI.invitationDetails.text = e.sender.name + " declined your invitation";
+				invitationOverlayUI.controls.visible = false;
+				invitationOverlayUI.visible = true;
+				var timer:Timer = new Timer( 2000, 1 );
+				timer.addEventListener( TimerEvent.TIMER_COMPLETE,
+					onInvitationTimerComplete );
+				timer.start();
+				
+				videoChat.close();
+			}
+			
+			private function onInvitationTimerComplete( e:TimerEvent ):void
+			{
+				invitationOverlayUI.visible = false;
+				invitationOverlayUI.invitationDetails.text = "";
+				invitationOverlayUI.controls.visible = true;
+			}
+			
+			public function onAcceptInvitation( e:Event ):void
+			{
+				videoChat.sendChatNotification( VideoChatEvent.INVITATION_ACCEPTED, sender );
+				invitationOverlayUI.visible = false;
+				invitationOverlayUI.invitationDetails.text = "";
+				called = false;
+				videoChat.launch( sender );
+			}
+			
+			public function onDeclineInvitation( e:Event ):void
+			{
+				videoChat.sendChatNotification( VideoChatEvent.INVITATION_DECLINED,
+					sender );
+				invitationOverlayUI.visible = false;
+				invitationOverlayUI.invitationDetails.text = "";
+			}
+			
+			private function onUserUnavailable( e:VideoChatEvent ):void
+			{
+				neighborList.selectedIndex = -1;
+				invitationOverlayUI.invitationDetails.text = "That user is already in a chat.";
+				invitationOverlayUI.controls.visible = false;
+				invitationOverlayUI.visible = true;
+				var timer:Timer = new Timer( 2000, 1 );
+				timer.addEventListener( TimerEvent.TIMER_COMPLETE,
+					onInvitationTimerComplete );
+				timer.start();
+			}
+			
+			private function onChatStart( e:VideoChatEvent ):void
+			{
+				currentState = VideoChat.CHAT;
+				videoChat.log( "Chat Started\n" );
+			}
+			
+			private function onEndChat( e:VideoChatControlEvent ):void
+			{
+				
+				videoChat.sendChatNotification( VideoChatEvent.END_CHAT, sender );	
+				currentState = VideoChat.LOBBY;
+				videoChat.close();
+			}
+			
+			private function onChatEnded( e:VideoChatEvent ):void
+			{
+				neighborList.selectedIndex = -1;
+				currentState = VideoChat.LOBBY;
+				videoChat.close();
+			}
+			
+			protected function application1_applicationCompleteHandler(event:FlexEvent):void
+			{
+				//headerUI.appname.text = "Gazuntite VideoChat";
+				//headerUI.logToggle.label = "View Log";
+				
+				neighborhood = new ArrayCollection();
+				
+				//				addEventListener("Sendcall" , onNeighborSelected
+				
+				//videoChat.log( "Gazuntite VideoChat (AIR " + NativeApplication.nativeApplication.runtimeVersion + ")\n" );
+				
+				
+				
+				loginUI.loginButton.addEventListener( MouseEvent.CLICK, onLogin );
+				
+				//headerUI.logToggle.addEventListener( MouseEvent.CLICK, toggleLog );
+				neighborList.addEventListener( IndexChangeEvent.CHANGE, onNeighborSelected );
+				
+				
+				
+				invitationOverlayUI.acceptInvite.addEventListener( MouseEvent.CLICK,
+					onAcceptInvitation );
+				invitationOverlayUI.declineInvite.addEventListener( MouseEvent.CLICK,
+					onDeclineInvitation );
+				
+				uiVideoControlBar.addEventListener( VideoChatControlEvent.END_VIDEO_CHAT, onEndChat );
+				
+				
+				
+			}
+			
+			public function initVideoChat():void
+			{
+				videoChat = VideoChat.getInstance();   //((this.height*85)/100,(this.width*32)/100);
+				
+				videoChat.outgoingDisplay = outgoingPreview;
+				videoChat.incomingDisplay = incomingPreview;
+				
+				videoChat.preferredCamera = "1";
+				
+				/* dataProvider=”{neighborhood}” */
+				
+				videoChat.addEventListener( VideoChatEvent.CAMERA_ACTIVATED, onCameraActivated );
+				videoChat.addEventListener( VideoChatEvent.USER_PUBLISHED, onUserPublished );
+				videoChat.addEventListener( VideoChatEvent.CAMERA_DEACTIVATED, onCameraDeactivated );
+				videoChat.addEventListener( VideoChatEvent.INVITATION_RECEIVED,
+					onInvitationReceived );
+				videoChat.addEventListener( VideoChatEvent.INVITATION_DECLINED,onInvitationDeclined );
+				videoChat.addEventListener( VideoChatEvent.USER_UNAVAILABLE, onUserUnavailable );
+				videoChat.addEventListener( VideoChatEvent.START_CHAT, onChatStart );
+				videoChat.addEventListener( VideoChatEvent.END_CHAT, onChatEnded );
+				
+				
+				loginUI.groupname.text = videoChat.groupname;
+				videoChat.checkDeviceCapabilities();
+				
+				BindingUtils.bindProperty( this, "neighborhood", videoChat, "neighbors" );
+			}
+			
+			protected function outgoingPreviewCreated(event:FlexEvent):void
+			{
+				initVideoChat();
+				/* callLater( function():void
+				{
+					callLater(initVideoChat);
+				}); */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:states>
+		<s:State name="Login"/>
+		<s:State name="Lobby"/>
+		<s:State name="Chat"/>
+		<s:State name="Debug"/>
+	</s:states>
+	
+		<local:DebugUI
+			id="debugUI"
+			bottom="4"
+			left="4"
+			right="4"
+			top="32"
+			visible.Login="false" includeInLayout.Login="false"
+			visible.Lobby="false" includeInLayout.Lobby="false"
+			visible.Chat="false" includeInLayout.Chat="false"
+			/>
+		
+		<s:VGroup id="uiVideoMainContainer"
+			width="100%" height="100%" gap="0"
+			>
+			<s:HGroup width="100%" height="100%" >
+				<s:BorderContainer width="100%" borderVisible="false" borderAlpha="1"  borderWeight="2" borderColor="#00ff00" backgroundAlpha="0">
+<!--					<s:layout>
+						<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="0"
+										  />
+					</s:layout>
+-->						
+					<component:VideoChatInfoBar id="uiInfoBar" width="100%" top="0"/>
+					<s:BorderContainer id="uiVideoContainer" top="{uiInfoBar.height+8}" left="1" right="2" borderWeight="1"
+									   borderColor="#999999">
+						<s:backgroundFill>
+							<s:LinearGradient rotation="90">
+								<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#BDC0C9" ratio="1"/>
+							</s:LinearGradient>
+						</s:backgroundFill>
+						
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="0" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"
+							/>
+						</s:layout>
+												
+						<s:HGroup width="100%" height="100%" paddingLeft="2" paddingRight="2" paddingTop="2" paddingBottom="2">
+							<s:BorderContainer borderColor="#FFFFFF" backgroundAlpha="0" width="100%" minHeight="220" height="{incomingPreview.width*9/16}"
+											   id="incomingPreview"
+											   />
+						</s:HGroup>
+					
+					</s:BorderContainer>
+					<component:VideoChatControlBar id="uiVideoControlBar" left="1" right="2" top="{uiVideoContainer.y+uiVideoContainer.height}"/>
+				</s:BorderContainer>
+				<s:List
+					id="neighborList"
+					skinClass="skin.ListSkin"
+					width="100%" 
+					height="100%"
+					labelField="name"
+					itemRenderer="skin.NeighborhoodIR"
+					dataProvider="{neighborhood}"
+					visible.Chat="false" includeInLayout.Chat="false"
+					
+					visible = "{ShowNeighborList}"
+					includeInLayout="{ShowNeighborList}"
+					/>
+			</s:HGroup>
+		</s:VGroup>
+		
+	<s:BorderContainer right="11" y="{uiInfoBar.height+18}" borderColor="#999999" backgroundAlpha="0"
+					id="outgoingPreview"
+					width="160" height="90"
+					
+					creationComplete="outgoingPreviewCreated(event)"
+					/>
+		<local:LoginUI
+			id="loginUI"
+			width="100%"
+			height="100%"
+			verticalCenter="0"
+			horizontalCenter="0"
+			horizontalAlign="center"
+			
+			visible.Lobby="false" includeInLayout.Lobby="{loginUI.visible}"
+			visible.Chat="false" includeInLayout.Chat="{loginUI.visible}"
+			visible.Debug="false" includeInLayout.Login="{loginUI.visible}"
+			
+			/>
+		<local:InvitationOverlayUI
+			id="invitationOverlayUI"
+			width="100%" height="100%"
+			visible="false"
+			includeInLayout="{invitationOverlayUI.visible}"
+			/>
+		
+</s:Group>

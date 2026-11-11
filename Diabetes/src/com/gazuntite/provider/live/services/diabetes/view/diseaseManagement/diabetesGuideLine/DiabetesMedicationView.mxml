@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+		 creationComplete="cc(event)" xmlns:search="com.gazuntite.components.search.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.search.SearchDropDownEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/diseaseManagement/assets/search_text.png")]
+			[Bindable]	public var searchText:Class;
+			[Embed(source="com/gazuntite/provider/live/services/diabetes/view/diseaseManagement/assets/NDC.png")]
+			[Bindable]	public var searchNum:Class;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private var _ListDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+			
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+			}
+			
+			protected function id_list_creationCompleteHandler(event:FlexEvent):void
+			{
+				ListDataProvider = new ArrayCollection();
+				
+				ListDataProvider.source = [
+					
+					{serialNumber:1, DrugName:'Zenate', NDC:'012-23652-236'}, 
+					{serialNumber:2, DrugName:'Thermazene', NDC:'012-23652-236'}, 
+					{serialNumber:3, DrugName:'Saizen', NDC:'012-23652-236'}, 
+					{serialNumber:4, DrugName:'Zantac', NDC:'012-23652-236'}, 
+					{serialNumber:5, DrugName:'Bicozene', NDC:'012-23652-236'}, 
+					{serialNumber:6, DrugName:'Advance Formula', NDC:'012-23652-236'}, 
+				];
+			}
+			
+			protected function searchdropdown1_startSearchHandler(event:SearchDropDownEvent):void
+			{
+				trace(event.SearchQuery, event.searchTypePrompt, event.searchTypeIndex, event.SelectedItem);
+				//do service call here for searching and when search result is ready pass arraycollection to SearchDropDown
+				
+				resultCallBack();
+			}
+			
+			protected function resultCallBack():void
+			{
+				id_searchDD.ShowResult( new ArrayCollection([
+					{serialNumber:1, DrugName:'Zantac', NDC:'012-23652-236'}, 
+					{serialNumber:2, DrugName:'Cocain', NDC:'012-23652-236'}, 
+					{serialNumber:3, DrugName:'Zantac', NDC:'012-23652-236'}, 
+					{serialNumber:4, DrugName:'Zantac', NDC:'012-23652-236'}, 
+					{serialNumber:5, DrugName:'Zantac', NDC:'012-23652-236'}, 
+					{serialNumber:6, DrugName:'Zantac', NDC:'012-23652-236'}
+				]) );
+			}
+			
+			protected function id_searchDD_searchResultSelectionChangeHandler(event:SearchDropDownEvent):void
+			{
+				ListDataProvider.addItemAt(event.SelectedItem,0);
+			}
+			
+			/* protected function id_next_clickHandler(event:MouseEvent):void
+			{
+			dispatchEvent(new Event('MoreToNextTab', true));
+			} */
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="right" gap="2" paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+	</s:layout>
+	
+	<search:SearchDropDown id="id_searchDD"
+						   width="100%" height="30" PromptFieldName="label" startSearch="searchdropdown1_startSearchHandler(event)"
+						   searchResultSelectionChange="id_searchDD_searchResultSelectionChangeHandler(event)" ShowResultAsPopup="true"
+						   ResultRenderer="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.MedicationSearchIR">
+		<search:DataProvider>
+			<s:ArrayCollection>
+				<fx:Object label="Drug Name" icon="{searchText}" />
+				<fx:Object label="Generic Name" icon="{searchText}" />
+				<fx:Object label="NDC" icon="{searchNum}" />
+			</s:ArrayCollection>
+		</search:DataProvider>
+	</search:SearchDropDown>
+	
+	<s:VGroup width="100%" height="100%" gap="-2" >
+		<s:SkinnableContainer width="100%" height="30" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" />
+			</s:layout>
+			
+			<!--<s:HGroup width="100%" height="100%" verticalAlign="middle">-->
+				<s:Label width="11%" text="Sr.#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+				<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+				<s:Label width="26%" text="Drug Name" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+				<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+				<s:Label width="47%" text="NDC" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+				<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+				<s:Label width="17%" text="Actions" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+			<!--</s:HGroup>-->
+		</s:SkinnableContainer>
+		
+		<s:List id="id_list" width="100%" height="100%"
+				horizontalScrollPolicy="off" verticalScrollPolicy="auto"
+				creationComplete="id_list_creationCompleteHandler(event)"
+				dataProvider="{ListDataProvider}"
+				skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+				itemRenderer="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.MedicationListIR"
+				/>
+	</s:VGroup>
+	
+</s:Group>

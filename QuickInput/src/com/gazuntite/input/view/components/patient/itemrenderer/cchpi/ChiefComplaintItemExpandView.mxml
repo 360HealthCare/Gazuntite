@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc(event)"
+					  width="500"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.ccHpi.ChiefComplaintHpiDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	private var labelWidth:int = 100;
+			private var _chiefComplaintHpiDTO:ChiefComplaintHpiDTO;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+			[Bindable]
+			public function get chiefComplaintHpiDTO():ChiefComplaintHpiDTO
+			{
+				return _chiefComplaintHpiDTO;
+			}
+			
+			public function set chiefComplaintHpiDTO(value:ChiefComplaintHpiDTO):void
+			{
+				_chiefComplaintHpiDTO = value;
+			}
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="8" paddingBottom="5" gap="6"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="21" verticalAlign="middle">
+		<s:BitmapImage id="img_ChiefComplaint" source="{(chiefComplaintHpiDTO.ChiefComplaint.length > 0)? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+		<s:Label text="Chief Complaint:" styleName="patientFormLabel"/>
+		<s:Label id="id_ChiefComplaint" 
+				 text="{chiefComplaintHpiDTO.ChiefComplaint}" toolTip="{chiefComplaintHpiDTO.ChiefComplaint}"
+				 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue" width="100%"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="21" verticalAlign="middle" paddingLeft="15">
+		<s:Label text="History of Present Illness" fontFamily="CalibriCFF" color="#3194BE" fontSize="13" />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" >
+		<s:VGroup height="100%">
+			<s:BitmapImage id="img_Symptoms" source="{chiefComplaintHpiDTO.HPIFields.Symptom.length > 0 ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="120" gap="5">
+			<s:Label text="Symptoms:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Quality:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Modifying Factors:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Radiation:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="100%" gap="5">
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Symptom}" toolTip="{chiefComplaintHpiDTO.HPIFields.Symptom}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Quality}" toolTip="{chiefComplaintHpiDTO.HPIFields.Quality}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.ModifyingFactors}" toolTip="{chiefComplaintHpiDTO.HPIFields.ModifyingFactors}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Radiation}" toolTip="{chiefComplaintHpiDTO.HPIFields.Radiation}"	 maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="{labelWidth}" gap="5">
+			<s:Label text="Duration:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Severity:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Exacerbating:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="100%" gap="5">
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Duration}" toolTip="{chiefComplaintHpiDTO.HPIFields.Duration}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Severity}" toolTip="{chiefComplaintHpiDTO.HPIFields.Severity}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Exacerbating}" toolTip="{chiefComplaintHpiDTO.HPIFields.Exacerbating}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="{labelWidth}" gap="5">
+			<s:Label text="Location:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Context:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+			<s:Label text="Progression:" width="100%" styleName="patientFormLabel" maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup height="100%" width="100%" gap="5">
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Location}" toolTip="{chiefComplaintHpiDTO.HPIFields.Location}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Context}" toolTip="{chiefComplaintHpiDTO.HPIFields.Context}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+			<s:Label text="{chiefComplaintHpiDTO.HPIFields.Progression}" toolTip="{chiefComplaintHpiDTO.HPIFields.Progression}" maxDisplayedLines="1" showTruncationTip="true" styleName="patientFormValue"  width="100%"/>
+		</s:VGroup>
+		
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingRight="8" paddingLeft="17" verticalAlign="middle">
+		<s:Label text="Notes:"	 styleName="patientFormLabel" />
+		<s:Label text="{chiefComplaintHpiDTO.Note}" toolTip="{chiefComplaintHpiDTO.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (chiefComplaintHpiDTO.DictationID &amp;&amp; chiefComplaintHpiDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{chiefComplaintHpiDTO.Note}" note="@{chiefComplaintHpiDTO.Note}"	isSaveButtonVisible="false"
+										 DictationID="{chiefComplaintHpiDTO.DictationID}" IsDictaionEditMode="{false}"/>
+	
+	
+</s:SkinnableContainer>

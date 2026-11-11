@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:CalloutButton xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				 xmlns:s="library://ns.adobe.com/flex/spark" 
+				 xmlns:mx="library://ns.adobe.com/flex/mx"
+				 creationComplete="init(event)" 
+				 xmlns:ns="library://ns.tink.ws/flex/spark" 
+				 xmlns:controls="com.gazuntite.view.controls.*"
+				 close="calloutbutton1_closeHandler(event)">
+	
+	<fx:Metadata>
+		[Event(name="optionsButtonClicked", type="com.gazuntite.events.OptionsButtonClickedEvent")] 
+		[Event(name="addNoteEvent", type="com.gazuntite.events.AddNoteEvent")]
+		
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.AddNoteEvent;
+			import com.gazuntite.events.OptionsButtonClickedEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.Notes.NotesDTO;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.events.DropDownEvent;
+			
+			private var Notessaved : Boolean = false;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleClick(event:MouseEvent):void
+			{
+				
+				if(event.currentTarget.id == "dictationBtn")
+				{
+					this.currentState = "dictation";
+					
+					id_dictation.includeInLayout = true;
+					
+				}
+				else if(event.currentTarget.id == "notesBtn")
+				{
+					this.currentState = "notes";
+					id_notes.includeInLayout = true;
+				}
+				
+				/* 
+				var e:OptionsButtonClickedEvent = new OptionsButtonClickedEvent(OptionsButtonClickedEvent.OPTIONS_BUTTON_CLICKED, true);
+				
+				if(event.currentTarget.id == "dictationBtn")
+				{
+				e.notes = false;
+				}
+				
+				dispatchEvent(e);
+				this.closeDropDown(); 
+				*/
+			}
+			
+		/* 	protected function id_notes_AddNoteHandler(event:AddNoteEvent):void
+			{
+				
+				
+				
+				this.closeDropDown();
+			} */
+			
+			
+			
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(id_notes.id_subjectText.text!="" || id_notes.id_noteText.text!="")
+				{
+					var addNotes:AddNoteEvent = new AddNoteEvent(AddNoteEvent.Add_Note, true, true);
+					addNotes.note.message =id_notes.id_noteText.text;
+					addNotes.note.subject =id_notes.id_subjectText.text;
+					
+					dispatchEvent( addNotes );
+					
+					id_notes.id_subjectText.text = "";
+					id_notes.id_noteText.text = "";
+					Alert.show("Note Saved Scussessfull","Saved");
+					this.closeDropDown();
+				}
+				
+				else
+				{
+					Alert.show("Notes are empty , Please Enter the Notes");
+				}
+				
+			}
+			
+			
+			
+			
+			
+			protected function calloutbutton1_closeHandler(event:DropDownEvent):void
+			{
+				if((id_notes.id_subjectText.text!="" || id_notes.id_noteText.text!="") && !Notessaved )
+				{
+					Alert.show("Note is not empty, You want to save this Note ?","Clear Subject", Alert.YES|Alert.NO, 
+						this, function(event:CloseEvent):void
+						{
+							if( event.detail == Alert.YES)
+							{
+								button1_clickHandler(null);
+								
+								id_notes.id_subjectText.text = "";
+								id_notes.id_noteText.text = "";
+								//this.closeDropDown();
+							}
+							else if(event.detail == Alert.NO)
+							{
+								id_notes.id_subjectText.text = "";
+								id_notes.id_noteText.text = "";
+								//this.closeDropDown();
+							}
+						}
+						);
+					
+				}
+					//trace("callout closed without save");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="notes"/>
+		<s:State name="dictation"/>
+	</s:states>
+	
+	<s:calloutLayout>
+		<s:VerticalLayout horizontalAlign="center"
+						  paddingBottom="5"
+						  paddingLeft="5"
+						  paddingRight="5"
+						  paddingTop="5"/>
+	</s:calloutLayout>
+	
+	<s:VGroup id="id_notesDictationVgroup" minWidth="200" maxWidth="200" horizontalAlign="center">
+		
+		<s:HGroup horizontalAlign="center" >
+			<s:Button id="notesBtn" 
+					  skinClass="com.gazuntite.skins.NotesFormBtnSkin"
+					  useHandCursor="true"
+					  buttonMode="true"
+					  click="handleClick(event)"/>
+			<s:Button id="dictationBtn" 
+					  skinClass="com.gazuntite.skins.DictationFormBtnSkin"
+					  useHandCursor="true"
+					  buttonMode="true"
+					  click="handleClick(event)"/>
+		</s:HGroup>
+		
+		<controls:Notes  id="id_notes" includeIn="notes" width="100%" includeInLayout="false"/>
+		<controls:Dictation id="id_dictation" includeIn="dictation"  includeInLayout="false" width="100%"/>
+		
+		<s:HGroup excludeFrom="normal" horizontalAlign="center">
+			<s:Button id="id_save"
+				label="Save" 
+					  styleName="button"
+					  click="button1_clickHandler(event)"/>
+			
+			<s:Button label="Close" 
+					  styleName="button"
+					  click="{this.closeDropDown()}"/>
+		</s:HGroup>
+		
+		
+	</s:VGroup>
+	
+</s:CalloutButton>

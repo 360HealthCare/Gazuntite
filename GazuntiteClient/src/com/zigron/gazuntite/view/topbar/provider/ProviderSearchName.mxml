@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:sf="http://www.spicefactory.org/parsley"
+				   xmlns:controls="com.gazuntite.view.controls.*" 
+				   xmlns:components="com.gazuntite.controls.extended.components.*"
+				   height="100%"   backgroundColor="0xe4e5e7"
+				   creationComplete="group1_creationCompleteHandler(event)" 
+				   >
+	
+	<fx:Metadata>
+		
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			import spark.components.supportClasses.ItemRenderer;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			private var _providerNameList:ArrayCollection;
+
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]
+			public function get providerNameList():ArrayCollection
+			{
+				return _providerNameList;
+			}
+			
+			public function set providerNameList(value:ArrayCollection):void
+			{
+				_providerNameList = value;
+				
+				callLater(filterproividers);
+			}
+			
+			private function filterproividers():void
+			{
+				providerNameList.filterFunction = filter_proividerList; 
+				providerNameList.refresh(); 
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				providerNameList = new ArrayCollection();
+				providerNameList.addAll( model.AllProviders.ListAll );
+				
+				id_list.selectedItem = model.LoggedInProvider;
+				
+				//var e:ChangePatientEvent = new ChangePatientEvent(ChangePatientEvent.CHANGE_PATIENT);
+				//dispatchEvent(e);
+			}
+			
+			
+			public function filter_proividerList(item:Object):Boolean
+			{
+				var query:String = id_textbox.text;
+				var firstName:String = item.FirstName;
+				var midName:String = item.MiddleName;
+				var lastName:String = item.LastName;
+				
+				//filter logged in provider --- don't show
+				if(firstName.toLowerCase().indexOf(model.LoggedInProvider.FirstName.toLowerCase()) != -1)
+					return false;
+				
+				if(firstName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(midName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(lastName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				
+				
+				
+				return false;
+			} 
+			
+			protected function textinput1_changeHandler(event:TextOperationEvent=null):void
+			{
+				
+				filterproividers();
+				
+			} 
+			
+			protected function id_textbox_clearTextInputHandler(event:Event):void
+			{
+				id_textbox.text = '';
+				textinput1_changeHandler();
+			}
+			
+			protected function id_list_changeHandler(event:IndexChangeEvent):void
+			{
+				if(event.currentTarget.selectedItem)
+				{
+					model.selectedProvider = event.currentTarget.selectedItem as ProviderDTO;
+					
+					/* var e:ChangePatientEvent = new ChangePatientEvent(ChangePatientEvent.CHANGE_PATIENT);
+					dispatchEvent(e); */
+				}
+			}
+			
+			
+			public function updateNeighborHoodStatus(statusList:ArrayCollection):void
+			{
+				var i:int = 0;
+				var j:int = 0;
+				
+				var email:String;
+				var provider:ProviderDTO;
+				
+				for(i = 0; i < providerNameList.length; i++ )
+				{
+					provider = providerNameList.getItemAt( i ) as ProviderDTO;
+					provider.IsAvailableForChat = false;
+					for(j = 0; j < statusList.length; j++ )
+					{
+						email = statusList.getItemAt( j ).name;
+						
+						if(email == provider.UserEmail)
+						{
+							provider.IsAvailableForChat = true;
+							
+							logger.debug( "Provider < " + provider.UserEmail + " > is available for video chat");
+						}
+					}
+					
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" gap="0" horizontalAlign="right"/>
+	</s:layout>
+	<s:BorderContainer width="100%"
+					   height="35"
+					   borderWeight="0"
+					   borderColor="#8A969E"
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="1">
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#6E7C85" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#85919A" ratio="0.027450980392156862"/>
+				<s:GradientEntry alpha="1.0" color="#B1BCC3" ratio="0.043137254901960784"/>
+				<s:GradientEntry alpha="1.0" color="#8D9BA6" ratio="0.09019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#AEB6BD" ratio="0.9058823529411765"/>
+				<s:GradientEntry alpha="1.0" color="#8A969E" ratio="1"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+	
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="4"
+								paddingTop="7"
+								paddingLeft="5"
+								paddingRight="5"/>
+		</s:layout>
+		
+		<components:LabelTextInput id="id_textbox" 
+								   width="100%"
+								   prompt="Clinical User Search"
+								   change="textinput1_changeHandler(event)" 
+								   fontStyle="normal"
+								   color="0x333333"
+								   fontWeight="normal" fontSize="13"
+								   skinClass="com.gazuntite.skins.controls.textInput.SearchBoxTextInputSkin"
+								   />
+								   
+		<!--<controls:TextInputIcon id="id_textbox" 
+								width="100%"
+								showPromptWhenFocused="false"
+								fontWeight="bold" 
+								prompt="Clinical User Search"
+								change="textinput1_changeHandler(event)" 
+								clearTextInput="id_textbox_clearTextInputHandler(event)"
+								iconPath="assets/textInputSearchIcon.png"
+								skinClass="com.gazuntite.skins.TextInputIconSkin"/>-->
+		
+	</s:BorderContainer>
+	
+	<s:List id="id_list" 
+			width="100%" 
+			height="100%" 
+			change="id_list_changeHandler(event)"
+			dataProvider="{providerNameList}" 
+			horizontalScrollPolicy="off"
+		    borderVisible="false"
+			useVirtualLayout="false" 
+			skinClass="com.gazuntite.skins.controls.list.LeftScrollerListSkin"
+			itemRenderer="com.zigron.gazuntite.view.topbar.provider.renderer.ProviderItemRenderer"
+			>
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+	</s:List>
+	
+
+	
+</s:SkinnableContainer>

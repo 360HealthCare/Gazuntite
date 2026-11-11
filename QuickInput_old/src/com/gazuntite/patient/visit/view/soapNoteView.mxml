@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:custom="com.adobe.Quivus.view.controls.custom.*" 
+					  xmlns:buttonSeparators="com.adobe.gazuntite.view.controls.skins.buttonSeparators.*"
+					  skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.reviewAllWindowSkin"
+					  creationComplete="popupwindow1_creationCompleteHandler(event)" 
+					  xmlns:components1="com.gazuntite.controls.extended.components.*"
+					 
+					  
+					   >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.event.visit.MarkValidDataExistsEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			
+			public static const REVIEW_ALL:String = "reviewAll";
+			public static const SIGN_COSIGN:String = "signCoSign";
+			public static const SAVE_AND_REVIEW:String = "saveAndReview";
+			public static const REVIEW_AND_PRINT:String = "reviewAndPrint";
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var callback:Function;
+			private var statusCallback:Function;
+			private var authenticationPopUp:AuthenticationPopUp;
+			private var previewWindowType:String;
+			private var m_sSoapNoteText:String = "loading...";
+			private var m_sSoapNoteURL:String;
+			
+			[Bindable]
+			public function get SoapNoteText():String
+			{
+				return m_sSoapNoteText;
+			}
+
+			public function set SoapNoteText(value:String):void
+			{
+				m_sSoapNoteText = value;
+			}
+
+			[Bindable]
+			public function get SoapNoteURL():String
+			{
+				return m_sSoapNoteURL;
+			}
+			
+			public function set SoapNoteURL(value:String):void
+			{
+				m_sSoapNoteURL = value;
+				id_htmlArea.location = value;
+			}
+
+			
+			
+			public function show(value:String = "", arg_callback:Function = null, status_callback:Function = null):void
+			{
+				this.previewWindowType = value;
+				
+				ShowPopup( UtilityFunctions.getTopLevelParentContainer() );
+				
+				switch(value)
+				{
+					case REVIEW_ALL:
+						this.title = "Patient History for Review";
+						this.okBtn.label = "OK";
+						this.okBtn.visible = false;
+						this.cancelBtn.label = "Close";
+						break;
+					
+					case SIGN_COSIGN:
+						this.title = "Final Review";
+						this.okBtn.label = 'Sign'; 
+						model.signCoSignBtnLabel;
+						break;
+					
+					case SAVE_AND_REVIEW:
+						this.title = "Final Review";
+						this.okBtn.label = "Save";
+						break;
+					case REVIEW_AND_PRINT:
+						this.title = "Review and Print";
+						this.okBtn.label = "OK";
+						this.okBtn.visible = false;
+						this.cancelBtn.label = "Close";
+						break;
+				}
+				
+				
+				
+				callback = arg_callback;
+				statusCallback = status_callback
+				if(null != statusCallback)
+				statusCallback("Please Wait , While SOAP Note is Loading.");
+			}
+			
+			protected function id_htmlArea_completeHandler(event:Event):void
+			{
+				if(null != event.currentTarget.location )
+				{
+					CursorManager.removeBusyCursor();
+					id_htmlArea.htmlLoader.navigateInSystemBrowser = true;
+					callback("RemoveLoadingPoPup" , 0); // remove Soap Loading Note Pop UP
+				}
+				
+			}
+			
+			private function refreshModel():void
+			{/* 
+				if (model.quickInputDTO)
+				{
+					if (model.quickInputDTO.PMH)
+					{
+						if (model.quickInputDTO.PMH.Immunization)
+						{
+							model.quickInputDTO.PMH.Immunization.filterFunction = null;
+							model.quickInputDTO.PMH.Immunization.refresh();
+						}
+					}
+					
+					if (model.quickInputDTO.Physical)
+					{
+						if (model.quickInputDTO.Physical.HPI_CC)
+						{
+							model.quickInputDTO.Physical.HPI_CC.filterFunction = null;
+							model.quickInputDTO.Physical.HPI_CC.refresh();
+						}
+						
+						if (model.quickInputDTO.Physical.InHouseLabs)
+						{
+							model.quickInputDTO.Physical.InHouseLabs.filterFunction = null;
+							model.quickInputDTO.Physical.InHouseLabs.refresh();
+						}
+						
+						if (model.quickInputDTO.Physical.Labs)
+						{
+							model.quickInputDTO.Physical.Labs.filterFunction = null;
+							model.quickInputDTO.Physical.Labs.refresh();
+						}
+					}
+					
+					if (model.quickInputDTO.Assessment)
+					{
+						if (model.quickInputDTO.Assessment.Diagnosis)
+						{
+							model.quickInputDTO.Assessment.Diagnosis.filterFunction = null;
+							model.quickInputDTO.Assessment.Diagnosis.refresh();
+						}
+						
+						if (model.quickInputDTO.Assessment.Procedure)
+						{
+							model.quickInputDTO.Assessment.Procedure.filterFunction = null;
+							model.quickInputDTO.Assessment.Procedure.refresh();
+						}
+						
+						if (model.quickInputDTO.Assessment.Recommendation)
+						{
+							model.quickInputDTO.Assessment.Recommendation.filterFunction = null;
+							model.quickInputDTO.Assessment.Recommendation.refresh();
+						}
+						
+						if (model.quickInputDTO.Assessment.PatientFollowupInstruction)
+						{
+							model.quickInputDTO.Assessment.PatientFollowupInstruction.filterFunction = null;
+							model.quickInputDTO.Assessment.PatientFollowupInstruction.refresh();
+						}
+					}
+				} */
+			}
+			
+			private function okBtnClickHandler():void
+			{
+				//refreshModel();
+				var statusMessage:String = "Please wait while ";
+				switch(previewWindowType)
+				{
+					case SIGN_COSIGN:
+						if (!authenticationPopUp)
+							authenticationPopUp = new AuthenticationPopUp();
+						
+						if (model.VisitID)
+							authenticationPopUp.visitID = model.VisitID;
+						
+					//	authenticationPopUp.signBtnLabel = model.signCoSignBtnLabel;
+						authenticationPopUp.originName = Constants.QUICK_INPUT_MODULE_NAME;
+						authenticationPopUp.onVisitSignCosignCallback = onSucessfullVisitSave;
+						authenticationPopUp.ShowPopup(this);
+						
+						statusMessage = statusMessage + "sign / co-sign visit."
+						
+						break;
+					
+					case REVIEW_ALL:
+						
+						statusMessage = statusMessage + "saving visit data."
+						break;
+					
+					case SAVE_AND_REVIEW:
+						
+						var MVDEvent:MarkValidDataExistsEvent = new MarkValidDataExistsEvent(); 
+						MVDEvent.functionName = onSucessfullVisitSave;
+						CairngormEventDispatcher.getInstance().dispatchEvent( MVDEvent )
+						
+						// call the newly created MarkValidDataExists event 
+						
+						/* var MVDEvent:ManageQuickInputEvent = new ManageQuickInputEvent( true); 
+						MVDEvent.functionName = onSucessfullVisitSave;
+						CairngormEventDispatcher.getInstance().dispatchEvent( MVDEvent );
+						
+						var uvEvent:UpdateVisitEvent = new UpdateVisitEvent(  );
+						CairngormEventDispatcher.getInstance().dispatchEvent( uvEvent ); */
+						
+						statusMessage = statusMessage + "saving visit data."
+						
+						break;
+				}
+				if( statusCallback && previewWindowType != SIGN_COSIGN)
+					statusCallback( statusMessage );
+			}
+			
+			private function cancelBtnClickHandler():void
+			{
+				hide();
+			}
+			
+			public function hide(doClose:Boolean = false, actionName:String = "", visitID:int = 0):void
+			{
+				removePopup();
+				
+				if (null != callback && doClose)
+					callback(actionName, visitID);
+			}
+			
+			private function onSucessfullVisitSave(actionName:String = "", visitID:int = 0):void
+			{
+				dispatchEvent(new Event('onSaveVisit',true));
+				hide(true, actionName, visitID);
+			}
+			
+			public function printBtnClickHandler():void
+			{
+				
+			}
+
+			protected function popupwindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				m_sSoapNoteText = "<b>Loading...</b>";
+				
+			}
+			
+			
+		]]>
+		
+		
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:VGroup gap="2" height="{Capabilities.screenResolutionY - 130}" width="{(Capabilities.screenResolutionX / 2) - 30 }" verticalAlign="top" horizontalAlign="center" paddingLeft="5" >
+		
+			<mx:HTML id="id_htmlArea" htmlText="{SoapNoteText}" height="{Capabilities.screenResolutionY - 175}" width="{(Capabilities.screenResolutionX / 2) - 50}" complete="id_htmlArea_completeHandler(event)" x="2"/>
+			
+		
+		<s:VGroup verticalAlign="bottom" horizontalAlign="center" paddingBottom="0" width="100%">	
+			<s:HGroup horizontalAlign="center" width="100%">
+				<s:Button id="okBtn" click="okBtnClickHandler()" label="OK" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin" useHandCursor="true" buttonMode="true"/>
+				<s:Button id="cancelBtn" click="cancelBtnClickHandler()" label="Cancel" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin" useHandCursor="true" buttonMode="true"/>
+				
+			</s:HGroup>
+		</s:VGroup>
+	</s:VGroup>
+</components1:PopupWindow>
+		

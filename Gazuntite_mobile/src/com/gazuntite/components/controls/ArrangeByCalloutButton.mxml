@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:CalloutButton xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				 xmlns:s="library://ns.adobe.com/flex/spark" 
+				 xmlns:mx="library://ns.adobe.com/flex/mx"
+				 skinClass="com.gazuntite.skins.ArrangeByCalloutButtonSkin"
+				 styleName="button"
+				 horizontalPosition="middle"
+				 verticalPosition="after"
+				 maxHeight="21"
+				 creationComplete="init(event)">
+	
+	<fx:Metadata>
+		[Event(name="arrangeBy", type="com.gazuntite.events.ArrangeByEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ArrangeByEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.components.ArrowDirection;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			protected var _dataProvider:ArrayCollection = new ArrayCollection([]);
+			
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				var e:ArrangeByEvent = new ArrangeByEvent(ArrangeByEvent.ARRANGE_BY, true);
+				if( list.selectedItem is String )
+				{
+					e.field = list.selectedItem;
+				}
+				else
+				{
+					e.field = list.selectedItem.name;
+				}
+				
+				dispatchEvent(e);
+				
+				this.closeDropDown()
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:List id="list" 
+			change="list_changeHandler(event)"
+			labelField="name"
+			dataProvider="{_dataProvider}"
+			maxHeight="160"/>
+	
+</s:CalloutButton>

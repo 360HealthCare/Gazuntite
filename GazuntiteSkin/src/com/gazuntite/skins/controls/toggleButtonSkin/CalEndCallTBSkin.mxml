@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect height="36" radiusX="3" visible.down="false" visible.over="false" visible.overAndSelected="false" width="156" x="0" y="0" visible.upAndSelected="false" visible.disabledAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#D9D9DB" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B4B4B8" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="36" includeIn="disabledAndSelected,down,over,upAndSelected" radiusX="3" width="156" x="0" y="0" visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#A1C69B" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#41BF4A" ratio="0.5137254901960784"/>
+				<s:GradientEntry alpha="1.0" color="#0EB81D" ratio="0.5176470588235295"/>
+				<s:GradientEntry alpha="1.0" color="#0D9C23" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha.down="0.75" angle="90" blurX.down="2" blurY.down="2" color.down="#333333" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1" alpha.over="0.25" alpha.upAndSelected="0.75" blurX.over="1" blurX.upAndSelected="2" blurY.over="1" blurY.upAndSelected="2" color.over="#FFFFFF" color.upAndSelected="#333333" alpha.disabledAndSelected="0.75" blurX.disabledAndSelected="2" blurY.disabledAndSelected="2" color.disabledAndSelected="#333333"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect height="36" id="rect1" includeIn="downAndSelected,overAndSelected,upAndSelected" radiusX="3" d:userLabel="Bar" width="156" x="0" y="0">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1" color.downAndSelected="#000000" blurX.downAndSelected="2" blurY.downAndSelected="2" alpha.downAndSelected="0.75"/>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#333333" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry ratio="0" color.overAndSelected="#9B0000" alpha="1.0" color.upAndSelected="#ED1414" color.downAndSelected="#9B0000"/>
+				<s:GradientEntry color.overAndSelected="#B7000C" ratio.overAndSelected="0.48627450980392156" alpha="1.0" color.upAndSelected="#E10111" color.downAndSelected="#B7000C" ratio.upAndSelected="0.49019607843137253" ratio.downAndSelected="0.48627450980392156"/>
+				<s:GradientEntry ratio="0.49411764705882355" color.overAndSelected="#D11521" alpha="1.0" color.upAndSelected="#E73340" color.downAndSelected="#D11521"/>
+				<s:GradientEntry ratio="1" color.overAndSelected="#DD787F" alpha="1.0" color.upAndSelected="#F0838B" color.downAndSelected="#DD787F"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:RichText ai:aa="2" color="#000000" color.disabled="#999999" columnCount="1" fontSize="18" d:id="20" kerning="on" tabStops="S0" text="CALL" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="54" y="11" visible.overAndSelected="false" visible.upAndSelected="false" visible.downAndSelected="false" visible.disabledAndSelected="false" fontFamily="Arial" fontWeight="bold"/>
+	<s:RichText ai:aa="2" color="#FFFFFF" columnCount="1" fontSize="18" d:id="20" includeIn="disabled,disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" kerning="on" tabStops="S0 S50" text="END CALL" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="33" y="11" color.disabled="#999999" visible.disabled="false" fontFamily="Arial" fontWeight="bold">
+		<s:filters>
+			<s:DropShadowFilter distance="1" hideObject="false" color="0x000000" inner="false" strength="1" alpha="0.5" quality="3" knockout="false" blurX="1" blurY="1" angle="270" includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected"/>
+		</s:filters>
+	</s:RichText>
+</s:Skin>

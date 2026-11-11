@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:diagnosis="com.gazuntite.forms.diagnosis.*" 
+		 xmlns:treatment="com.gazuntite.forms.treatment.*" 
+		 xmlns:procedure="com.gazuntite.forms.treatment.procedure.*" 
+		 xmlns:lists="com.gazuntite.components.lists.*" 
+		 xmlns:prescription="com.gazuntite.forms.treatment.prescription.*" 
+		 >
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.forms.MobileFormBase;
+			import com.gazuntite.model.SharedModel;
+			
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			
+			private var _dataProvider:ArrayCollection;
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+				
+			}
+			
+			protected function addSaveRecord(event:SaveFormDataEvent):void
+			{
+				trace("bubbling saved record"); 
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" />
+	</s:layout>
+
+	
+	<prescription:PrescriptionMobileFormBase width="100%" saveFormData="addSaveRecord(event)" dataProvider="{dataProvider}" height="100%" />
+	
+	
+	
+	<!--here need to define List-->
+	
+	
+	
+</s:Group>

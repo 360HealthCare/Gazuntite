@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="group1_creationCompleteHandler()"
+		 xmlns:controls="com.gazuntite.provider.eprescription.services.patient.view.controls.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.event.DeleteOutBoxEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetOutboxEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.SendOutboxEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;							
+			
+			private var _SPI:String;
+			[Bindable]
+			public function get SPI():String
+			{
+				return _SPI;
+			}
+			
+			public function set SPI(value:String):void
+			{
+				_SPI = value;
+				
+				/* var getOutbox: GetOutboxEvent = new GetOutboxEvent(SPI, outboxLoaded);				
+				getOutbox.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getOutbox);   */
+			}
+			
+			public function setSPI(value:String):void
+			{
+				_SPI = value;
+				
+				var getOutbox: GetOutboxEvent = new GetOutboxEvent(SPI, outboxLoaded);				
+				getOutbox.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getOutbox);  
+			}
+			
+			private var securityHeaderXML:XML;
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();						
+			
+			protected function group1_creationCompleteHandler():void
+			{
+				securityHeaderXML	 			= <Header />;					
+				securityHeaderXML.@EUserName	= "TESTUSER";
+				securityHeaderXML.@EPassword	= "TESTPASS";
+				securityHeaderXML.@ClinicID		= "sad";
+				
+				//SPI = (parent as ePrescription).SPI;
+			}
+			
+			public function outboxLoaded(response:XML):void
+			{
+				//DOSAGE FORMS
+				var outboxAC:ArrayCollection = new ArrayCollection();
+				for(var i:uint=0; i<response.OutBoxMessages.OutBoxMessage.length(); i++)
+				{
+					
+					var Patient:String 			= response.OutBoxMessages.OutBoxMessage[i].@Name.toString();
+					var Drug:String 			= response.OutBoxMessages.OutBoxMessage[i].@DRUGNAME.toString();
+					var Dose:String 			= response.OutBoxMessages.OutBoxMessage[i].@Dose.toString();
+					var Quantity:String 		= response.OutBoxMessages.OutBoxMessage[i].@Quantity.toString();
+					var Refills:String 			= response.OutBoxMessages.OutBoxMessage[i].@Refill.toString();
+					var Sig:String 				= response.OutBoxMessages.OutBoxMessage[i].@SIG.toString();
+					var isPRN:String 			= response.OutBoxMessages.OutBoxMessage[i].@isPRN.toString();
+					
+					var ReferenceNumber:String 	= response.OutBoxMessages.OutBoxMessage[i].@ReferenceNumber.toString();
+					
+					outboxAC.addItem({ Patient:Patient, Drug:Drug, Dose:Dose, Sig:Sig, Quantity:Quantity, Refills:Refills, isPRN:isPRN, ReferenceNumber:ReferenceNumber});
+				}
+				id_outBoxList.dataProvider 		= outboxAC;
+				//id_outBoxGrid.rowCount 			= outboxAC.length; 
+				
+			}
+			
+			public function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				Alert.show("Do you want to remove ?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					if( event.detail == Alert.YES )
+					{
+						if(!item)
+						{
+							item = new Object();
+						}
+						
+						item = (id_outBoxList.dataProvider as ArrayCollection).getItemAt(id_outBoxList.selectedIndex);							
+						
+						//
+						var referenceNumber:String = (item.ReferenceNumber as String);				
+						var remOutboxEvent: DeleteOutBoxEvent = new DeleteOutBoxEvent(referenceNumber, function():void
+						{
+							trace("Outbox removed ");			
+						});
+						remOutboxEvent.data = securityHeaderXML;
+						CairngormEventDispatcher.getInstance().dispatchEvent(remOutboxEvent); 
+						
+						//REMOVE from grid
+						(id_outBoxList.dataProvider as ArrayCollection).removeItemAt(id_outBoxList.selectedIndex);
+						
+					}
+					else if( event.detail == Alert.NO )
+					{
+						
+					}
+				});
+			} 
+			
+			public function refillLabel(item:Object, iCol:int):String
+			{
+				var result:String = "";
+				var isPRN:String = "";
+				
+				if (item.hasOwnProperty("Refills"))
+				{
+					result = item.Refills ;
+				}
+				if (item.hasOwnProperty("isPRN"))
+				{
+					isPRN = item.isPRN ;
+					
+					if(isPRN == "true")
+					{
+						result = "As Needed";
+					}					
+				}
+				
+				
+				return result;
+				
+			}
+			
+			public var item:Object;
+			
+			public function linkbutton2_clickHandler(event:MouseEvent):void
+			{
+				Alert.show("Do you want to send ?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					
+					if( event.detail == Alert.YES )
+					{
+						if(!item)
+						{
+							item = new Object();
+						}
+						
+						item = (id_outBoxList.dataProvider as ArrayCollection).getItemAt(id_outBoxList.selectedIndex);							
+						//
+						var referenceNumber:String = (item.ReferenceNumber as String);				
+						var remOutboxEvent: SendOutboxEvent = new SendOutboxEvent(referenceNumber, function():void
+						{
+							trace("Outbox sent ");			
+						});
+						remOutboxEvent.data = securityHeaderXML;
+						CairngormEventDispatcher.getInstance().dispatchEvent(remOutboxEvent); 
+						
+						//REMOVE from grid
+						(id_outBoxList.dataProvider as ArrayCollection).removeItemAt(id_outBoxList.selectedIndex);
+						
+					}
+					else if( event.detail == Alert.NO )
+					{
+						
+					}
+				});
+				
+				/* 				var evt:FavPharmacySelectedEvent = new FavPharmacySelectedEvent( FavPharmacySelectedEvent.PHARMACY_SELECTED);
+				this.dispatchEvent( evt );
+			*/			}
+			
+			protected function uiInboxList_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_outBoxList.addEventListener("SendClicked",linkbutton2_clickHandler);
+				id_outBoxList.addEventListener("RemoveClicked",linkbutton1_clickHandler);
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout  gap="1"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+		<s:DropDownList id="uiSortDropdown"
+						skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+						selectedIndex="0"
+						toolTip="Arrange By">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Recently Added" />
+					<fx:Object label="Medicine Name" />
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Spacer width="100%" />
+	</s:SkinnableContainer>
+	
+	<s:List id="id_outBoxList"
+			width="100%" allowMultipleSelection="true"
+			height="100%"
+			skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+			borderVisible="false"
+			itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.OutBoxListItemRenderer"
+			creationComplete="uiInboxList_creationCompleteHandler(event)"/>
+</s:Group>

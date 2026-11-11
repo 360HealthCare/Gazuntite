@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.PatientProfileOptionsBlueCalloutSkin" 
+					  xmlns:callouts="com.gazuntite.view.controls.callouts.*"
+					  xmlns:sf="http://www.spicefactory.org/parsley"
+					  visible="{sharedModel.patientProfileOptionsVisible}"
+					  includeInLayout="{sharedModel.patientProfileOptionsVisible}" 
+					  creationComplete="init(event)"
+					  maxWidth="300">
+	
+	<fx:Metadata>
+		[ManagedEvents("changeView")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ChangeViewEvent;
+			import com.gazuntite.events.CommOpenEvent;
+			import com.gazuntite.events.IPESelectionEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init(event:FlexEvent):void
+			{
+				addEventListener(MouseEvent.CLICK, handleMouseClick);
+			}
+			
+			protected function handleMouseClick(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+			}
+			
+			protected function changeViewHandler(event:MouseEvent):void
+			{
+				var e:ChangeViewEvent = new ChangeViewEvent(ChangeViewEvent.CHANGE_VIEW);
+				e.selectedView = event.currentTarget.id;
+				dispatchEvent(e);
+				
+			}
+			
+			protected function tabBar_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				var e:ChangeViewEvent = new ChangeViewEvent(ChangeViewEvent.CHANGE_VIEW);
+				
+				switch(event.newIndex)
+				{
+					case 0:
+						e.selectedView = "profile";
+						sharedModel.profileSectionTitle = "PROFILE";
+						break;
+					case 1:
+						e.selectedView = "sms";
+						sharedModel.profileSectionTitle = "SMS";
+						break;
+					case 2:
+						e.selectedView = "email";
+						sharedModel.profileSectionTitle = "EMAIL";
+						break;
+					case 3:
+						e.selectedView = "chat";
+						sharedModel.profileSectionTitle = "CHAT";
+						break;
+					case 4:
+						e.selectedView = "video";
+						sharedModel.profileSectionTitle = "VIDEO";
+						break;
+				}
+				
+				dispatchEvent(e);
+			}
+			
+			
+			[MessageHandler]
+			public function handleCommClosing(event:CommOpenEvent):void
+			{
+				if(event.isOpen == false)
+				{
+					tabBar.selectedIndex = 0;
+					sharedModel.profileSectionTitle = "PROFILE";
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout paddingBottom="5" 
+							paddingLeft="15" 
+							paddingRight="30" 
+							paddingTop="15"/>
+	</s:layout>
+	
+	
+	<!-- will be skinned buttonBar -->
+	<s:ButtonBar skinClass="com.gazuntite.skins.ProfileOptionsButtonBarSkin"
+				 id="tabBar"
+				 change="tabBar_changeHandler(event)"
+				 selectedIndex="0">
+		<s:dataProvider>
+			<s:ArrayCollection>
+				<fx:Object icon="@Embed('assets/profileIcon.png')"
+						   iconSelected="@Embed('assets/profileIconSelected.png')"/>
+				<fx:Object icon="@Embed('assets/smsIcon.png')"
+						   iconSelected="@Embed('assets/smsIconSelected.png')"/>
+				<fx:Object icon="@Embed('assets/emailIcon.png')"
+						   iconSelected="@Embed('assets/emailIconSelected.png')"/>
+				<fx:Object icon="@Embed('assets/chatIcon.png')"
+						   iconSelected="@Embed('assets/chatIconSelected.png')"/>
+				<fx:Object icon="@Embed('assets/videoIcon.png')"
+						   iconSelected="@Embed('assets/videoIconSelected.png')"/>
+			</s:ArrayCollection>
+		</s:dataProvider>
+	</s:ButtonBar>
+
+</s:SkinnableContainer>

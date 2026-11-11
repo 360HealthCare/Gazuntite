@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:medicineSearch="com.gazuntite.provider.eprescription.services.patient.view.medicineSearch.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Metadata>
+		[Event(name="MedicineSelected", type="com.gazuntite.provider.eprescription.services.patient.view.events.MedicineSelectedEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.dto.MedicationRequestDTO;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetMedicationsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.MedicineSelectedEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]	private var MedicineSearchDTO:MedicationRequestDTO;
+			[Bindable] private var isSearchListShow:Boolean = false;
+			
+			private var querylength:int = 0;
+			
+			private function OnItemClick(event:Event):void
+			{
+				try
+				{
+					var ps:MedicineSelectedEvent = new MedicineSelectedEvent(MedicineSelectedEvent.MED_SELECTED);;
+					ps.selection = id_SearchListView.id_SearchList.selectedItem;
+					dispatchEvent( ps );
+					
+					clearSearchResults();
+					
+					event.stopImmediatePropagation();
+				}
+				catch(e:Error)
+				{
+					trace("ERROR --> PatientSelectedEvent :: OnItemClick", e );
+				}
+			}
+			
+			public function clearSearchResults(event:Event = null):void
+			{
+				if( id_SearchListView && id_SearchListView.visible )
+				{
+					id_pharmacy.text		= '';
+					id_SearchListView.visible 	= false;
+					isSearchListShow = false;
+					return
+				}
+			}
+			
+			private function resetFields():void
+			{
+				
+			}
+			
+			private function Search():void
+			{
+				var SearchString:String = id_pharmacy.text;
+				
+				resetFields();
+				
+				MedicineSearchDTO = new MedicationRequestDTO("TESTUSER","TESTPASS","sad");
+				
+				switch(id_searchType.selectedIndex)
+				{
+					
+					case  0:
+						MedicineSearchDTO.GENERICNAME = SearchString;
+						MedicineSearchDTO.SearchItemName =  "Drug";
+						id_image.source = selected_Mname;
+						break;
+					
+					case 1:
+						MedicineSearchDTO.productGenName = SearchString;
+						MedicineSearchDTO.SearchItemName = "Product";
+						id_image.source = selected_Gname;
+						break;
+					case 2:
+						MedicineSearchDTO.NDC = SearchString;
+						MedicineSearchDTO.SearchItemName = "NDC";
+						id_image.source = selected_ndc;
+						break;
+				}
+				
+				sendToServer();
+				
+			} 
+			// ----------------- Send to Server for Result---------------------------------------------------
+			private function sendToServer():void
+			{
+				querylength++;
+				
+				var medicineEvent: GetMedicationsEvent = new GetMedicationsEvent(MedicineSearchDTO ,getMedicines);
+				CairngormEventDispatcher.getInstance().dispatchEvent(medicineEvent); 
+			}
+			
+			
+			private function getMedicines():void
+			{
+				querylength--;
+				if( querylength == 0 )
+				{
+					id_SearchListView.visible = true;
+					id_SearchListView.id_SearchList.setFocus();
+					isSearchListShow = true;
+					resetFields();
+				}
+				return;	
+			}
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				id_SearchListView.visible = false;
+				id_pharmacy.text = '';
+				
+				switch(id_searchType.selectedIndex)
+				{
+					case 0:
+						id_pharmacy.prompt = 'Medicine Name';
+						id_image.source = selected_Mname;
+						break;
+					
+					case 1:
+						id_pharmacy.prompt = 'Generic Name';
+						id_image.source = selected_Gname;
+						break;
+					case 2:
+						id_pharmacy.prompt = 'NDC';
+						id_image.source = selected_ndc;
+						break;
+				} 
+				
+			}	
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					Search();
+				}
+			}
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				//event.stopImmediatePropagation();				
+			}
+			
+			/* protected function btnSearch_ClickHandler(event:MouseEvent):void
+			{
+			Search();
+			event.stopImmediatePropagation();	
+			} */
+			
+			
+			protected function id_pharmacy_changeHandler(event:TextOperationEvent):void
+			{
+				//return; // Only search on enter 
+				
+				if(id_pharmacy.text.length >= 2)
+					Search();
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_SearchListView.addEventListener('closeSearchBox',clearSearchResults);
+			}
+			
+			private var IsDropDownOpen:Boolean = false;
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				if(IsDropDownOpen)
+				{
+					id_searchType.closeDropDown(false);
+					IsDropDownOpen = false;
+				}
+					
+				else
+				{
+					id_searchType.openDropDown();
+					IsDropDownOpen = true;
+				}
+				
+				event.stopImmediatePropagation();
+			}
+			
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/name_selected.png")]
+			[Bindable]	public var selected_Gname:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/name_selected.png")]
+			[Bindable]	public var selected_Mname:Class;
+			[Embed(source="com/gazuntite/provider/eprescription/services/patient/view/assets/images/selected_ndc.png")]
+			[Bindable]	public var selected_ndc:Class;
+			
+			protected function id_searchType_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout verticalAlign="top" horizontalAlign="left" gap="-5" />
+	</s:layout>
+	
+	
+	<s:Group id="id_Main" width="100%" height="29"  >
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectionBg" width="35" height="100%" left="0" visible="{!isSearchListShow}" includeInLayout="{!isSearchListShow}"/>
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectedBg" width="35" height="100%" left="0" visible="{isSearchListShow}" includeInLayout="{isSearchListShow}"/>
+		
+		<s:Group left="3" verticalCenter="0">
+			<s:DropDownList id="id_searchType"
+							labelField="label" requireSelection="true"
+							skinClass="com.gazuntite.skins.controls.combobox.CustomDropDownListSkin"
+							itemRenderer="spark.skins.spark.DefaultComplexItemRenderer"	
+							change="searchType_changeHandler(event)" 
+							width="1" height="1" left="0"	click="id_searchType_clickHandler(event)">
+				<s:dataProvider>
+					<s:ArrayList>
+						<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/medname.png')" />
+						<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/genericname.png')" />
+						<s:BitmapImage source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/ndc.png')" />
+					</s:ArrayList>
+				</s:dataProvider>
+			</s:DropDownList>
+			
+			<s:Image id="id_image" 
+					 width="30" height="100%" source="{selected_Gname}" left="0" click="id_image_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="More Options"/>
+		</s:Group>	
+		
+		<components:LabelTextInput id="id_pharmacy" 
+								   borderAlpha="0" height="100%"
+								   focusAlpha="0" left="30" right="0" verticalCenter="0" fontSize="15" 
+								   prompt="Search Medicine" restrict="[A-Z a-z , . / \- 0-9]" 
+								   keyUp="textInput_keyUpHandler(event)"
+								   click="textInput_clickHandler(event)"  
+								   change="id_pharmacy_changeHandler(event)"
+								   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin"	
+								   toolTip="Medicine Search"/>
+	</s:Group>
+	
+	<medicineSearch:medicineSearchList id="id_SearchListView" width="100%" 
+									   MedicineSelected="OnItemClick(event)"
+									   visible="false" includeInLayout="{id_SearchListView.visible}" />
+</s:Group>

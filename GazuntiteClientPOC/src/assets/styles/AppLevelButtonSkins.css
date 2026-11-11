@@ -1,0 +1,901 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Buttons
+/*Black background buttons*/
+
+.checkButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.changeIndicator");
+}
+
+.blackButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackButton");
+}
+
+.blackAttachButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackAttachButton");
+}
+
+/*PreviousNext buttons*/
+
+.blackPreviousNextButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackPreviousNextButton");
+}
+
+/*FirstLast buttons*/
+
+.blackFirstLastButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackFirstLastButton");
+}
+
+/*All normal buttons*/
+
+.allNormalButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.allNormalButton");
+}
+
+.abnormalToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.abnormalButton");
+}
+
+/*Grey background buttons*/
+
+.greyButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.greyButton");
+}
+
+/*Pink background buttons*/
+
+.mistyRoseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.mistyRoseButton");
+}
+
+
+/*Blue background buttons*/
+
+.darkBlueButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.darkBlueButton");
+}
+
+.blueButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blueButton");
+}
+
+.purplishBlueButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.purplishBlueButton");
+}
+
+.darkSteelBlueButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.darkSteelBlueButton");
+}
+
+/*Update buttons*/
+
+.updateInfoButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.updateInfoButton");
+}
+
+/*Drag buttons*/
+
+.dragButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.dragButton");
+}
+
+/*Clear buttons*/
+
+.clearButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.clearButton");
+}
+
+.whiteClearButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.whiteClearButton");
+}
+/*Save buttons*/
+
+.saveButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.saveButton");
+}
+
+.blackSaveButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackSaveButton");
+}
+
+/*Delete Buttons*/
+
+.deleteButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.deleteButton");
+}
+
+/*Edit Buttons*/
+
+.editButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.editButton");
+}
+
+/*View Buttons*/
+
+.viewButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.viewButton");
+}
+
+.orangeViewButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.darkOrangeViewButton");
+}
+
+/*Resize buttons*/
+
+.resizeButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.resizeButton");
+}
+
+.expandedResizeButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.expandedResizeButton");
+}
+
+/*Scan buttons*/
+
+.scanButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.scanButton");
+}
+/*Folder buttons*/
+
+.folderButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.folderButton");
+}
+
+/*Next buttons*/
+
+.nextButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.nextButton");
+}
+
+/*Close buttons*/
+
+.closeButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.closeButton");
+}
+
+.blackCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackCloseButton");
+}
+
+.popupCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.popupCloseButton");
+}
+
+.blackPopUpCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackPopUpCloseButton");
+}
+
+.ovalPopUpCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.ovalPopUpCloseButton");
+}
+
+.whiteCloseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.whiteCloseButton");
+}
+
+/*Minimize buttons*/
+
+.minimizeButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.minimizeButton");
+}
+
+/*Close Patient buttons*/
+
+.closePatientButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.closePatientButton");
+}
+
+/*Signin buttons*/
+
+.signInButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.signInButton");
+}
+/*Email buttons*/
+
+.emailButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.emailButton");
+}
+
+.enlargedEmailButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.enlargedEmailButton");
+}
+
+.snailEmailButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.snailEmailButton");
+}
+
+.enlargedSnailEmailButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.enlargedSnailEmailButton");
+}
+
+/*Message buttons*/
+
+.messageButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.messageButton");
+}
+
+.enlargedMessageButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.enlargedMessageButton");
+}
+
+/*Chat buttons*/
+
+.chatButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.chatButton");
+}
+
+.enlargedChatButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.enlargedChatButton");
+}
+
+/*Phone buttons*/
+
+.phoneButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.phoneButton");
+}
+
+.enlargedPhoneButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.enlargedPhoneButton");
+}
+
+/*Maximize buttons*/
+
+.maximizeButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.maximizeButton");
+}
+
+
+/*SignOut buttons*/
+
+.signOutButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.signOutButton");
+}
+
+/*Default buttons*/
+
+.setAsDefaultButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.setAsDefaultButton");
+}
+
+/*Record buttons*/
+
+.recordButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.recordButton");
+}
+
+/*Stop buttons*/
+
+.stopButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.stopButton");
+}
+
+/*Pause buttons*/
+
+.pauseButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.pauseButton");
+}
+
+/*Play buttons*/
+
+.playButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.playButton");
+}
+
+/*Status buttons*/
+
+.availableStatusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.availableStatusButton");
+}
+
+.statusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.statusButton");
+}
+/*Search buttons*/
+
+.searchButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.searchButton");
+}
+.plainSearchButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blackSearchButton");
+}
+
+.yellowSearchButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.yellowSearchButton");
+}
+
+.orangeSearchButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.orangeSearchButton");
+}
+
+.blueSearchButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.blueSearchButton");
+}
+/*Alert buttons*/
+
+.alertButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.alertButton");
+}
+
+/*Add buttons*/
+
+.addButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.addButton");
+}
+
+.addMoreSaveButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.addMoreSaveButton");
+}
+/*Refresh buttons*/
+
+.refreshButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.refreshButton");
+}
+
+/*UserLabel buttons*/
+
+.userLabelButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.userLabelButton");
+}
+
+/*Register buttons*/
+
+.registerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.registerButton");
+}
+
+/*Cancel buttons*/
+
+.cancelButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.cancelButton");
+}
+
+/*Speaker buttons*/
+
+.greenSpeakerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.greenSpeakerButton");
+}
+
+.redSpeakerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.redSpeakerButton");
+}
+
+/*Dictation buttons*/
+
+.dictationButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.dictationButton");
+}
+
+.miniDictationButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.miniDictationButton");
+}
+
+.micButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.micButton");
+}
+
+.dictationSelectedButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.dictationSelectedButton");
+}
+
+.recordDictationButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.recordDictationButton");
+}
+
+.dictationIndicatorButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.dictationIndicatorButton");
+}
+
+/*********************************************************************************************/
+/*Combo Buttons
+Light grey background  buttons*/
+
+.lightGreyComboBoxButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.lightGreyComboBoxButton");
+}
+
+.optionalComboBoxButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.optionalComboBoxButton");
+}
+
+.requiredComboBoxButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.requiredComboBoxButton");
+}
+
+/*********************************************************************************************/
+/*Arrow Buttons
+White background arrow buttons*/
+
+.whiteArrButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.whiteButton");
+}
+
+.whiteExpandButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.whiteExpandButton");
+}
+
+.whiteSlideOutButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.whiteSlideOutButton");
+}
+
+/*Grey background arrow buttons*/
+
+.greyExpandButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.greyExpandButton");
+}
+
+.greySlideOutButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.greySlideOutButton");
+}
+
+/*Black background arrow buttons*/
+
+.blackScrollUpButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.blackScrollUpButton");
+}
+
+.blackLeftRightArrButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.blackLeftRightArrButton");
+}
+
+.blueLeftRightArrButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.blueLeftRightArrButton");
+}
+
+.blackScrollDownButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.blackScrollDownButton");
+}
+
+.blackOvalArrButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.arrowButtonSkins.blackOvalArrButton");
+}
+
+
+/*********************************************************************************************/
+/*Toggle Buttons
+Dark grey background buttons*/
+
+.darkGreyToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.darkGreyButton");
+}
+
+.gradientGreyPointerButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.gradientGreyPointerButton");
+}
+
+/*Silver background buttons*/
+
+.silverToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.silverButton");
+}
+
+
+/*Logo buttons*/
+
+.logoToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.logoButton");
+}
+
+
+/*Communication buttons*/
+
+.communicationToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.communicationButton");
+}
+
+/*Prescription buttons*/
+
+.prescriptionButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.prescriptionButton");
+}
+
+/*View Notes buttons*/
+
+.viewNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.viewNotesButton");
+}
+
+/*Recent Patient buttons*/
+
+.recentPatientButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.recentPatientButton");
+}
+
+/*Import Visit buttons*/
+
+.importVisitButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.importVisitButton");
+}
+/*Drop buttons*/
+
+.dropToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.dropButton");
+}
+
+.enlargedDropToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.enlargedDropButton");
+}
+
+/*Contact buttons*/
+
+.contactToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.contactButton");
+}
+
+
+/*Notification buttons*/
+
+.notificationToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.notificationButton");
+}
+
+/* Grey background Buttons */
+
+.lightGreyToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.lightGreyButton");
+}
+
+.darkGreySharpEndedToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.darkGreySharpEndedButton");
+}
+
+/*Search buttons*/
+
+.webSearchEngineToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.webSearchEngineButton");
+}
+
+/*Lab buttons*/
+
+.labToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.labButton");
+}
+
+
+/*AddMore buttons*/
+
+.addMoreToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.addMoreButton");
+}
+
+
+.ovalAddToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.ovalAddButton");
+}
+
+/* Notes buttons*/
+
+.notesToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.notesButton");
+}
+
+.writeNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.writeNotesButton");
+}
+
+.miniWriteNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.miniWriteNotesButton");
+}
+
+.whiteWriteNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.whiteWriteNotesButton");
+}
+
+.yellowWriteNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.yellowWriteNotesButton");
+}
+
+.blueWriteNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.blueWriteNotesButton");
+}
+
+.writeNotesSelectedButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.writeNotesSelectedButton");
+}
+
+.steelBlueWriteNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.steelBlueWriteNotesButton");
+}
+.lightButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.lightBlueButton");
+}
+
+.reviewAllCrossBtnSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.ReviewAllCrossBtnSkin");
+}
+.notesIndicatorButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.notesIndicatorButton");
+}
+
+.viewNotesButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.viewNotesButton");
+}
+
+/*Orange background buttons*/
+
+.orangeToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.orangeButton");
+}
+
+.orangeRedButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.orangeRedButton");
+}
+
+.peachDownloadButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.peachDownloadButton");
+}
+
+/*Blue background buttons*/
+
+.lightSteelBlueToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.lightSteelBlueButton");
+}
+
+/*Red background buttons*/
+
+.redToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.redButton");
+}
+
+.redSharpEndedToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.redSharpEndedButton");
+}
+
+/*Icons buttons*/
+
+.iconsFilledToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.iconsFilledButton");
+}
+
+.whiteIconsToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.whiteIconsButton");
+}
+
+.blackIconsToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.blackIconsButton");
+}
+
+/*Misc Buttons*/
+
+.subToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.subToggleButton");
+}
+
+.shareButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.shareButton");
+}
+
+.plusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.plusButton");
+}
+
+.actionButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.actionButton");
+}
+
+.squareBlackButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.squareBlackButton");
+}
+
+.pinToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.pinButton");
+}
+
+.importPreviousVisitButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.importPreviousVisitButton");
+}
+
+.saveVisitDataButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.saveVisitDataButton");
+}
+
+.changeIndicatorToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.changeIndicatorButton");
+}
+
+.previewVisitDataButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.previewVisitDataButton");
+}
+
+.checkOutPatientButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.checkOutPatientButton");
+}
+
+.loadPatientButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.loadPatientButton");
+}
+
+.communicationButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.communicationButton");
+}
+
+.goBackButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.goBackButton");
+}
+
+.importToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.importButton");
+}
+
+.graphToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.graphButton");
+}
+
+/* Status Buttons*/
+.greenStatusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.greenStatusButton");
+}
+
+.redStatusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.redStatusButton");
+}
+
+.orangeStatusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.orangeStatusButton");
+}
+
+.grayStatusButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonSkins.grayStatusButton");
+}
+
+.communicationHeaderToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.communicationHeaderButton");
+}
+
+.allergyPopUpToggleButtonSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.toggleButtonSkins.allergyPopUpButton");
+}

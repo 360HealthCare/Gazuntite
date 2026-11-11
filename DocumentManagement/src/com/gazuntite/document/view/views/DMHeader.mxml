@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 width="100%" height="100%"
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.document.dto.DocomentSearchedDTO;
+			import com.gazuntite.document.dto.PatientSearchedDTO;
+			import com.gazuntite.document.model.DMModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			public var DMmodel : DMModelLocator = DMModelLocator.getInstance();
+			
+			private var patientNames:ArrayCollection = new ArrayCollection(['John Harrison','Barbara Geater','Isobel Stevens','Meredith Grey','Alex Karev','Lexie Grey','Mark Slone','Owen Hunt','Cristina Yang','Miranda Bailey','Renda Kepner','Frodo Miller','Harry Lockhart','Damon Stewart','Kelley Clarkson','George Omelley','David Burke','Micheal Scolfield','Lincon Burrows','Sherry Blaire','Henery Lahm','Jenefer Anniston','Joey Tribbiani','Ross Gellar','Monica Gellar','Emma Watson','Denial Redcliff','Cedric Diggory','Tom Riddle','Klenn Hansard','Shafiq Ahmed','Tamjeed Hassan','Eric Huu','Moeen Mohsin','Azka zafar',' Saba Riaz','TA','Tahir Ramzan']);
+			
+			private var FileNames:ArrayCollection = new ArrayCollection(['AbdominalX-Ray.png','ECGReport.docx','ECGdetailed.pdf','Finaltest.docx','FinalizedMRI.png','FootX-Ray.png','Throatinfection.docx','Facialacnereport.png','BrokenribsX-ray.jpg','BackboneMRI.png','Intestinalreport.docx','Dislocatedshoulder.png','Brokenlimb.jpg','Infectedwound.png','CTscan.jpg','Brokenkneereport.png','Eyewhite.png','Neuroscans.png','Swollenwristjoint.jpg','Cardiovessels.pdf','Noseinfection.pdf','Skullfracture.png','Mouthcancer.docx','Earbleedingreport.pdf','Lungsreport.docx']);
+			
+			public var SearchString:String;
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				LoadPatients();
+			}
+			
+			public function LoadPatients():void
+			{
+				// load 30 patients in to the patient list
+				DMmodel.PatientDocomentsDTOList = getPatients(30); 
+			}
+			
+			private function getPatients(length:int = 10):ArrayCollection
+			{
+				var DataSET:ArrayCollection = new ArrayCollection();
+				var obj:PatientSearchedDTO;
+				
+				for(var i:int = 0 ; i < length ; i++)
+				{
+					var a:int = Math.floor(Math.random()*95 + 1);
+					
+					obj 		= new PatientSearchedDTO();
+					obj.age 	= a.toString()+'Yrs';
+					obj.DOB		= calculateDOB(a);
+					obj.id 		= i;
+					obj.docomentCount = Math.floor(Math.random()*15 + 1);
+					
+					obj.Name = getPatientName();
+					
+					if(i%2 == 0)
+					{
+						obj.Gender = 'M';
+					}
+						
+					else
+					{
+						obj.Gender = 'F';
+						
+					}
+					
+					DataSET.addItem(obj);
+				}
+				
+				return DataSET;
+			}
+			
+			public function getPatientName():String
+			{
+				return patientNames[Math.floor(Math.random()*patientNames.length + 0)];
+			}
+			
+			public function getFileName():String
+			{
+				return FileNames[Math.floor(Math.random()*FileNames.length + 0)];
+			}
+			
+			public function calculateDOB(age:int):String
+			{
+				
+				return (2013-age+'/'+Math.floor(Math.random()*12 + 1)+'/'+Math.floor(Math.random()*30 + 1));
+			}
+			
+			private function getDocoments(length:int = 10):ArrayCollection
+			{
+				var DataSET:ArrayCollection = new ArrayCollection();
+				var obj:DocomentSearchedDTO;
+				
+				for(var i:int = 0 ; i < length ; i++)
+				{
+					var a:int = Math.floor(Math.random()*95 + 1);
+					
+					obj 		= new DocomentSearchedDTO();
+					obj.age 	= a.toString()+'Yrs';
+					obj.DOB		= calculateDOB(a);
+					obj.id 		= i;
+					obj.Name = getFileName();
+					
+					if(i%2 == 0)
+					{
+						obj.patientName = getPatientName();
+						obj.Gender = 'M';
+						
+					}
+						
+						
+					else
+					{
+						obj.patientName = getPatientName();
+						obj.Gender = 'F';
+						
+					}
+					
+					DataSET.addItem(obj);
+				}
+				
+				return DataSET;
+			}
+			
+			protected function id_SearchInput_changeHandler(event:TextOperationEvent):void
+			{
+				
+			}
+			
+			protected function id_searchType_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(id_searchType.selectedIndex)
+				{
+					case 0:
+						id_searchbylabel.text = 'Patient';
+						id_SearchInput.prompt = 'Search Patient';
+						id_SearchInput.toolTip = 'Search By: Patient';
+						DMmodel.PatientDocomentsDTOList = getPatients(30);
+						DMmodel.isSearchByDocument = false;
+						break;
+					
+					case 1:
+						id_searchbylabel.text = 'Document';
+						id_SearchInput.prompt = 'Search Document';
+						id_SearchInput.toolTip = 'Search By: Document';
+						DMmodel.PatientDocomentsDTOList = getDocoments(13);
+						DMmodel.isSearchByDocument = true;
+						break;
+					
+				} 
+				
+				dispatchEvent(new Event("ResetListDesprictionView",true));
+			}	
+			
+			protected function textInput_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				/*  if(event.keyCode == Keyboard.ENTER)
+				{  */
+				SearchString = id_SearchInput.text;
+				dispatchEvent(new Event("FilterPatientList",true));
+				//Search();
+				/* } */
+			}
+			
+			private function Search():void
+			{
+				var SearchString:String = id_SearchInput.text;
+				
+				/* 
+				
+				resetFields();
+				MedicineSearchDTO = new MedicationRequestDTO("TESTUSER","TESTPASS","sad");
+				
+				switch(id_searchType.selectedIndex)
+				{
+				
+				case  0:
+				MedicineSearchDTO.GENERICNAME = SearchString;
+				MedicineSearchDTO.SearchItemName =  "Drug";
+				id_image.source = selected_Mname;
+				break;
+				
+				case 1:
+				MedicineSearchDTO.productGenName = SearchString;
+				MedicineSearchDTO.SearchItemName = "Product";
+				id_image.source = selected_Gname;
+				break;
+				case 2:
+				MedicineSearchDTO.NDC = SearchString;
+				MedicineSearchDTO.SearchItemName = "NDC";
+				id_image.source = selected_ndc;
+				break;
+				} */
+				
+				sendToServer();
+			} 
+			
+			private function sendToServer():void
+			{
+				/* var medicineEvent: GetMedicationsEvent = new GetMedicationsEvent(MedicineSearchDTO ,getMedicines);
+				CairngormEventDispatcher.getInstance().dispatchEvent(medicineEvent);  */
+			}
+			
+			[Embed(source="../assets/selected_name.png")]
+			[Bindable]	public var selected_name:Class;
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" gap="5"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.dmg.DMGSearchPatientBgSkin">
+		<s:HGroup id="id_Main" width="100%" height="100%" verticalAlign="middle" horizontalAlign="left" paddingLeft="5" paddingRight="5">
+			
+			<s:Group    width="30" height="100%">
+				<s:DropDownList id="id_searchType"
+								labelField="label" requireSelection="true"
+								skinClass="com.gazuntite.skins.controls.combobox.CustomDropDownListSkin"
+								itemRenderer="spark.skins.spark.DefaultComplexItemRenderer"	
+								change="searchType_changeHandler(event)" 
+								width="1" height="1" left="0"	
+								click="id_searchType_clickHandler(event)"
+								>
+					<s:dataProvider>
+						<s:ArrayList>
+							<s:BitmapImage source="@Embed('../assets/patientName.png')" />
+							<s:BitmapImage source="@Embed('../assets/documentName.png')" />
+						</s:ArrayList>
+					</s:dataProvider>
+				</s:DropDownList>
+				
+				<s:Image id="id_image"
+						 width="30" height="100%"  
+						 left="0" verticalCenter="0"
+						 click="id_image_clickHandler(event)" 
+						 source="{selected_name}" 
+						 buttonMode="true" useHandCursor="true" 
+						 />
+			</s:Group>	
+			
+			<s:Label id="id_searchbylabel" 
+					 text="Patient"  width="30%" color="#333333" fontSize="15" fontFamily="CalibriCFF"/>
+			<s:SkinnableContainer  width="100%" height="25" 
+								   skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin">
+				<s:TextInput id="id_SearchInput" 
+							 left="3" right="25"
+							 fontSize="15"  height="20"
+							 prompt="Search Patient"
+							 keyUp="textInput_keyUpHandler(event)"
+							 click="textInput_clickHandler(event)"  
+							 change="id_SearchInput_changeHandler(event)"
+							 toolTip="Search By: Patient"
+							 verticalCenter="0"
+							 contentBackgroundAlpha="0" borderVisible="false"
+							 fontFamily="CalibriCFF" fontStyle="normal" color="0x666666"
+							 /><!--restrict="[A-Z a-z , . / \- 0-9]" -->
+				
+				<s:Button id="id_searchBtn" right="4" 
+						  skinClass="com.gazuntite.skins.controls.container.dmg.DMGSearchPatientIconSkin"
+						  verticalCenter="2" rotation="90"
+						  />
+			</s:SkinnableContainer>
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:HGroup height="100%" width="145" horizontalAlign="center" verticalAlign="middle" gap="3">
+		<s:Button id="id_NewBtn" enabled="false"
+				  buttonMode="true" useHandCursor="true" toolTip="New"
+				  skinClass="com.gazuntite.skins.controls.button.dmg.NewDocumentBtnSkin"
+				  />
+		<s:Button id="id_EditBtn"
+				  toolTip="Edit" enabled="false"
+				  buttonMode="true" useHandCursor="true"
+				  skinClass="com.gazuntite.skins.controls.button.dmg.EditDocumentBtnSkin"
+				  />
+	</s:HGroup>
+</s:Group>

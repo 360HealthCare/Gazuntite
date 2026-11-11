@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:components="com.gazuntite.controls.extended.components.*" 
+				   xmlns:section="com.zigron.gazuntite.view.topbar.provider.profile.section.*"
+				   minHeight="0" backgroundColor="#F6D0C8"
+				   borderVisible="false"
+				   >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="-4" horizontalAlign="center" paddingTop="3" paddingBottom="3" paddingRight="3" paddingLeft="3"/>
+	</s:layout>
+	
+	<s:ButtonBar id="tabs" width="100%"  dataProvider="{vs}" skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar" >
+		<s:layout>
+			<s:HorizontalLayout gap="3" paddingLeft="8" paddingRight="4"/>
+		</s:layout>
+	</s:ButtonBar>
+	
+	<s:BorderContainer width="100%"  height="100%" borderWeight="1" borderColor="0x000000" cornerRadius="0" dropShadowVisible="false" borderAlpha="1">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		
+		<components:LabelViewStack id="vs" width="100%" height="100%" borderVisible="false" minHeight="0">
+			<s:ArrayList>
+				<s:SkinnableContainer id="General" 
+									  name="General" width="100%" height="100%" minHeight="0" 
+									  skinClass="com.gazuntite.skins.controls.container.ProfileContainerSkin"
+									  >
+					<section:GeneralView id="id_ProviderGeneralView" 
+										 width="100%" height="100%" minHeight="0"
+										 styleName="whiteNGreyRectangularBGContainerSkin" 
+										 />
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer id="Organization" 
+									  width="100%" height="100%"  >
+					<s:BorderContainer backgroundColor="0xFFFFFF" cornerRadius="4" borderColor="0xFFFFFF" borderVisible="true"
+									   left="10" right="10" top="15" bottom="10" height="200" width="100%">
+						<s:Label text="Coming Soon" fontFamily="CalibriCFF" fontSize="20" horizontalCenter="0" verticalCenter="0"/>
+						
+					</s:BorderContainer>
+					
+				</s:SkinnableContainer>
+				<s:SkinnableContainer id="Insurance" 
+									  width="100%" 
+									  height="100%">
+					<s:BorderContainer backgroundColor="0xFFFFFF" cornerRadius="4" borderColor="0xFFFFFF" borderVisible="true"
+									   left="10" right="10" top="15" bottom="10" height="200" width="100%">
+						<s:Label text="Coming Soon" fontFamily="CalibriCFF" fontSize="20" horizontalCenter="0" verticalCenter="0"/>
+						
+					</s:BorderContainer>
+				</s:SkinnableContainer>
+				<s:SkinnableContainer id="Other" 
+									  width="100%" 
+									  height="100%">
+					<s:BorderContainer backgroundColor="0xFFFFFF" cornerRadius="4" borderColor="0xFFFFFF" borderVisible="true"
+									   left="10" right="10" top="15" bottom="10" height="200" width="100%">
+						<s:Label text="Coming Soon" fontFamily="CalibriCFF" fontSize="20" horizontalCenter="0" verticalCenter="0"/>
+						
+					</s:BorderContainer>
+				</s:SkinnableContainer>
+			</s:ArrayList>
+		</components:LabelViewStack>
+		
+	</s:BorderContainer>
+	
+	
+</s:BorderContainer>

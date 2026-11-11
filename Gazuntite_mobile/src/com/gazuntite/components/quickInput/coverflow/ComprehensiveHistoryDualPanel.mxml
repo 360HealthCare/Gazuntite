@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dualpanel1:DualPanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:dualpanel="com.riavalue.components.dualpanel.*" 
+					 xmlns:components="com.gazuntite.components.*"
+					 width="100%"
+					 height="100%"
+					 transitionDuration="300"
+					 skinClass="com.riavalue.components.dualpanel.SpinSkin"
+					 creationComplete="init(event)" 
+					 xmlns:forms="com.gazuntite.forms.*" 
+					 xmlns:input="com.gazuntite.view.controls.custom.patientExamView.quickInput.immunization.input.*" 
+					 xmlns:controls="com.gazuntite.components.controls.*" 
+					 xmlns:ns="library://ns.tink.ws/flex/spark" 
+					 xmlns:dualpanel1="com.riavalue.components.dualpanel.*"
+					 xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+					 xmlns:compHistory="com.gazuntite.components.quickInput.compHistory.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.OptionsButtonClickedEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+				this.currentState = "normal";
+				
+				this.prefsButton.addEventListener(MouseEvent.CLICK, handlePrefsButtonClick);
+			}
+			
+			
+			protected function handlePrefsButtonClick(event:MouseEvent):void
+			{
+				
+				
+			}
+			
+			protected function frontPanel_optionsButtonClickedHandler(event:OptionsButtonClickedEvent):void
+			{
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<dualpanel:states>
+		<s:State name="normal"/>
+		<s:State name="normalFlipped"/>
+	</dualpanel:states> 
+	
+	
+	<!-- dual panel views -->
+	
+	<dualpanel:frontView>
+		<controls:CoverFlowPanelView id="frontPanel" 
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 
+									 title="Comprehensive History"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 optionsButtonClicked="frontPanel_optionsButtonClickedHandler(event)">
+			
+			<ns:Accordion width="100%" 
+						  height="100%" 
+						  skinClass="ws.tink.spark.skins.containers.AccordionSkin">
+				
+				<compHistory:GeneralHistory id="General"/>
+				
+				<compHistory:FamilyHistory id="Family" />
+				
+				<compHistory:SocialHistory id="Social" />
+				
+			</ns:Accordion>
+			
+		</controls:CoverFlowPanelView>
+		
+	</dualpanel:frontView>
+	
+	<!-- Back view dual panel -->
+	
+	<dualpanel:backView>
+		<s:Panel id="backPanel" 
+				 width="100%" 
+				 height="100%"
+				 backgroundColor="0xffffff"
+				 title="Comprehensive History"
+				 contentBackgroundAlpha="1"
+				 skinClass="com.gazuntite.skins.DualPanelViewSkin">
+			
+			<s:layout>
+				<s:VerticalLayout paddingBottom="0"
+								  paddingLeft="0"
+								  paddingRight="0"
+								  paddingTop="0"
+								  gap="3"/>
+			</s:layout>
+			
+			
+			
+		</s:Panel>
+	</dualpanel:backView>
+	
+</dualpanel1:DualPanel>

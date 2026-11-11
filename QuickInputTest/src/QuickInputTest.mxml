@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:view="com.gazuntite.patient.visit.view.*" 
+					   xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+					   creationComplete="windowedapplication1_creationCompleteHandler(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.appController.QSCommonController;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.LoadPatientbyPatientIDEvent;
+			import com.gazuntite.patient.visit.controller.QIController;
+			import com.gazuntite.patient.visit.dto.visit.VisitDTO;
+			import com.gazuntite.patient.visit.event.visit.CreateVisitEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			private var configurationFile:File;
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//Load Application Configuration File
+				LoadConfigurations();
+				QSCommonController.getInstance();
+			}
+			
+			private function LoadConfigurations():void
+			{
+				
+				this.configurationFile = new File("app:/config/Quivus_Configurations.xml");
+				
+				if( configurationFile && configurationFile.exists )
+				{
+					var stream:FileStream = new FileStream();
+					stream.open( configurationFile, FileMode.READ);
+					
+					var prefsXML:XML 						= XML(stream.readUTFBytes(stream.bytesAvailable));
+					
+					stream.close();
+					
+					var settings_config:XML 				= prefsXML.settings[0];
+					//model.SettingConfigXML 					= settings_config;
+					
+					//initLogging();
+					//Check Network
+					//NetworkUtil.Network.StartNetworkMonitor();
+					
+					var service_config:XML 					= prefsXML.service.(@type == prefsXML.@type)[0];
+					//model.ServiceConfigXML 					= service_config;
+					
+					QSCommonController.getInstance().ApplicationConfig ( service_config );
+					QIController.getInstance().ApplicationConfig ( service_config );
+					//LiveServicesController.getInstance().ApplicationConfig ( service_config );
+				}
+			}
+			
+			/*
+			
+			<VisitDTO IsDeleted="false" IsDirty="false" IsValidDataExists="true"VisitId="4300" PatientId="529" OwnerId="597" 
+			VisitDate="05/25/2011" UserId="597" VisitStatus="UnSigned" RecGuid="00000000-0000-0000-0000-000000000000"IsVirtualVisit="false" 
+			AppointmentId="0" EncounterTypeId="1" TemplateId="2" SignedByUserId="0" DictationID="00000000-0000-0000-0000-000000000000" 
+			CreatedBy="597"CreatedAt="05/25/2011" ModifiedBy="597" ModifiedAt="12/12/2011" TemplateVisitId="0" IsRecordEditable="false" 
+			CreatedStationID="1" PlaceOfServiceTypeID="0">
+			<OwnerUserType UserTypeId="3" IsProvider="false" IsClinicUser="false" ClinicBranchID="0"/>
+			<ClinicBranch IsDeleted="false" IsDirty="false" ClinicBranchIdSeq="7" License1="0" License2="0" AvgPatientPerDay="0" EntityTypeID="0" PracticeTypeID="0"/>
+			<UserType UserTypeId="3" IsProvider="false" IsClinicUser="false" ClinicBranchID="0"/>
+			</VisitDTO>
+			
+			*/
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				var model:QIModelLocator 	= QIModelLocator.getInstance();
+				var createdby:int 			= model.LoggedInUserProviderId;
+				var userID:int 				= model.LoggedInUserId;
+				var patientID:int 			= 48241;
+				var templateId:int 			= 1;
+				var userTypeId:int 			= 3;
+				var encounterTypeId:int 	= 1;
+				var createdStationID:int 	= 1;
+				var placeOfServiceTypeID:int = 1;
+				var createdAt:Date 			= new Date();
+				var modifiedAt:Date 		= new Date();
+				var barachID:int			= model.LoggedInUserSelectedBranchId;
+				
+				
+				
+				var loadPatientData:LoadPatientbyPatientIDEvent = new LoadPatientbyPatientIDEvent( patientID, function(patient:PatientDTO):void
+				{
+					model.patientDTO = patient;
+					model.gaxenID = patient.GAXENID;
+				});
+				CairngormEventDispatcher.getInstance().dispatchEvent( loadPatientData );
+				
+				var visit:VisitDTO = new VisitDTO(patientID, userID, userTypeId, encounterTypeId, templateId, createdStationID, placeOfServiceTypeID, createdby, createdAt, modifiedAt, barachID );
+				var cve:CreateVisitEvent = new CreateVisitEvent(visit);
+				CairngormEventDispatcher.getInstance().dispatchEvent( cve );
+				
+				
+				model.patientID = patientID;
+				model.VisitDate = createdAt;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:Group id="mainContainer" />
+	
+	<commons:QICollapseableView width="100%" HeadingLable="QuickInput"  >
+			<s:Button click="button1_clickHandler(event)" label="CreateVisit" />
+			<view:QuickInputView width="100%" height="100%" />
+			
+	</commons:QICollapseableView>
+	
+</s:WindowedApplication>

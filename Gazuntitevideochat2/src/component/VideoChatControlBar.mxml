@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="skin.video.VideoCharControlBarSkin"
+					  minHeight="0"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import event.VideoChatControlEvent;
+			protected function onEndChat(event:MouseEvent):void
+			{
+				this.dispatchEvent(new VideoChatControlEvent (VideoChatControlEvent.END_VIDEO_CHAT));
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout 
+			verticalAlign="middle"
+			paddingLeft="4" paddingRight="4"
+			paddingTop="6" paddingBottom="6"
+			/>
+	</s:layout>
+	<s:Button skinClass="skin.video.RecordBtnSkin"/>
+	<s:Button skinClass="skin.video.PlayBtnSkin"/>
+	<s:Button skinClass="skin.video.MicBtnSkin"/>
+	<s:Button skinClass="skin.video.FullScreenBtnSkin"/>
+	<s:Button skinClass="skin.video.EndChatBtnSkin" label="End Chat" click="onEndChat(event)"/>
+	<s:Rect width="100%"/>
+	<s:Button skinClass="skin.video.VolumeBtnSkin"/>
+	<s:HSlider  width="75" skinClass="skin.video.VolumeSliderSkin"
+				/>
+</s:SkinnableContainer>

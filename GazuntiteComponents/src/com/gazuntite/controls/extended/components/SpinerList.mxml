@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 
+		 
+		 >
+	<fx:Metadata>
+		[Event(name="change", type="spark.events.IndexChangeEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.IList;
+			
+			import spark.events.IndexChangeEvent;
+			
+
+			private var m_oDataProvider:IList
+			
+			[Bindable]
+			private var m_iCurrIndex:int = -1;
+
+			[Bindable]
+			public function get currIndex():int
+			{
+				return m_iCurrIndex;
+			}
+			
+			public function set currIndex(value:int):void
+			{
+				m_iCurrIndex = value;
+			}
+			
+			[Bindable]
+			public function get DataProvider():IList
+			{
+				return m_oDataProvider;
+			}
+
+			public function set DataProvider(value:IList):void
+			{
+				m_oDataProvider = value;
+				if( value )
+					currIndex = 0;
+			}
+
+			protected function id_MinBtn_clickHandler(event:MouseEvent):void
+			{
+				var oldIndex:int = currIndex;
+				
+				if( null == DataProvider )
+					return;
+				
+				if( currIndex > 0 )
+					--currIndex;
+				else
+					currIndex = DataProvider.length - 1;
+				
+				var e:IndexChangeEvent = new IndexChangeEvent( IndexChangeEvent.CHANGE, true, false, oldIndex, currIndex );
+				dispatchEvent( e );
+			}
+
+
+			protected function id_MaxBtn_clickHandler(event:MouseEvent):void
+			{
+				var oldIndex:int = currIndex;
+				
+				if( null == DataProvider )
+					return;
+				
+				if( currIndex < DataProvider.length - 1 )
+					++currIndex;
+				else
+					currIndex = 0;
+				
+				var e:IndexChangeEvent = new IndexChangeEvent( IndexChangeEvent.CHANGE, true, false, oldIndex, currIndex );
+				dispatchEvent( e );
+			}
+
+
+			protected function id_DDList_changeHandler(event:IndexChangeEvent):void
+			{
+				dispatchEvent( event );
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" gap="0" verticalAlign="middle" paddingRight="0" paddingTop="0"/>
+	</s:layout>
+	
+
+		
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.controls.skins.spinerSkin">
+		<s:layout>
+			<s:HorizontalLayout paddingTop="2" paddingLeft="2" paddingRight="2" />
+		</s:layout>
+	<s:Button id="id_minBtn" click="id_MinBtn_clickHandler(event)" skinClass="com.gazuntite.controls.skins.QIHistoryHeader_prevBtn"
+			   buttonMode="true" useHandCursor="true" toolTip="Previous"/>
+	
+	
+	<!--<s:Label id="id_Label" width="100%" text="{DataProvider.getItemAt( currIndex )}" textAlign="center" backgroundColor="#666666" color="#ffffff" fontFamily="Calibri Bold" />-->
+	<s:DropDownList id="id_DDList" width="100%" height="15" dataProvider="{DataProvider}" change="id_DDList_changeHandler(event)" selectedIndex="{currIndex}" textAlign="center" fontFamily="Calibri Bold" 
+					skinClass="com.gazuntite.controls.skins.SpinerList" />
+	
+	
+	<s:Button id="id_MaxBtn" click="id_MaxBtn_clickHandler(event)" skinClass="com.gazuntite.controls.skins.QIHistoryHeader_nextBtn" 
+			  buttonMode="true" useHandCursor="true" toolTip="Next"/>
+	
+	</s:SkinnableContainer>	
+
+	
+</s:Group>

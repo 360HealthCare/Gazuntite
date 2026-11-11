@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientDictationNoteViewSkin"
+					  visible="{viewModel.visible}"
+					  includeInLayout="{viewModel.visible}" height="50">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable] public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable] public var note:String = "";
+			
+			[Bindable] public var dictationTooltip:String = "Section Level Dictation";
+			
+			[Bindable] public var noteTooltip:String = "Section Level Notes";
+			
+			private var _isCloseButtonVisible:Boolean = true;	
+			private var _isSectionLevel:Boolean;
+			private var _isSaveButtonVisible:Boolean = true;
+			
+			[Bindable]
+			public function get isCloseButtonVisible():Boolean
+			{
+				return _isCloseButtonVisible;
+			}
+
+			public function set isCloseButtonVisible(value:Boolean):void
+			{
+				_isCloseButtonVisible = value;
+			}
+
+			[Bindable]
+			public function get isSectionLevel():Boolean
+			{
+				return _isSectionLevel;
+			}
+			
+			public function set isSectionLevel(value:Boolean):void
+			{
+				_isSectionLevel = value;
+			}
+
+			[Bindable]
+			public function get isSaveButtonVisible():Boolean
+			{
+				return _isSaveButtonVisible;
+			}
+			
+			public function set isSaveButtonVisible(value:Boolean):void
+			{
+				_isSaveButtonVisible = value;
+			}
+			
+			public function set updateState(param:*):void
+			{
+				if (viewModel.inDictationMode)
+				{
+					this.currentState = viewModel.inlineEditing?'dictationInline':'dictationNew';
+				}
+				else if (viewModel.inNoteMode)
+				{
+					this.currentState =  viewModel.inlineEditing?'noteInline':'noteNew';
+				}
+				else
+				{
+					this.currentState = 'default';
+				}
+				if (uiDictationContainer!=null)
+				{
+					uiDictationContainer.invalidateDisplayList();
+				}
+				if (uiNoteContainer!=null)
+				{
+					uiNoteContainer.invalidateDisplayList();
+				}
+			}
+			
+			private function saveDictationNoteClickHandler():void
+			{
+				var ev:PatientDictationNoteViewEvent = new PatientDictationNoteViewEvent(
+							PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, true);
+				
+				if (viewModel.inDictationMode)
+					ev.isNoteSave = false;
+				
+				else if (viewModel.inNoteMode)
+					ev.isNoteSave = true;
+				
+				ev.data = note;
+				
+				dispatchEvent(ev);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Binding source="{viewModel.inDictationMode}" destination="updateState"/>
+	<fx:Binding source="{viewModel.inNoteMode}" destination="updateState"/>
+	
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="dictationInline" stateGroups="dictation"/>
+		<s:State name="dictationNew" stateGroups="dictation"/>
+		<s:State name="noteInline" stateGroups="note"/>
+		<s:State name="noteNew" stateGroups="note"/>
+	</s:states>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" horizontalAlign="left" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:Rect width="100%" includeIn="default"/>
+	<s:ToggleButton id="uiDictationLeft" 
+					selected="@{viewModel.inDictationMode}" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationToggleButtonSkin"
+					includeIn="noteNew" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{dictationTooltip}"
+					/>
+	<s:SkinnableContainer
+		id="uiDictationContainer"
+		skinClass="com.gazuntite.skins.controls.container.DictationNoteHightSkin"
+		includeIn="dictation"
+		width="100%" height="100%"
+		>
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+		</s:layout>
+		<s:Button skinClass="com.gazuntite.skins.controls.button.patient.DictationPlayButtonSkin"
+				  buttonMode="true" toolTip="Play"
+				  />
+		<s:Button skinClass="com.gazuntite.skins.controls.button.patient.DictationRecordButtonSkin"
+				  buttonMode="true" toolTip="Record"
+				  
+				  />
+		<s:HScrollBar width="100%" skinClass="com.gazuntite.skins.controls.scrollbar.DictationHScrollBarSkin"/>
+		<s:Label text="2:38"/>
+		<s:ToggleButton id="uiDictationLive" selected="@{viewModel.inDictationMode}" 
+						visible="{!viewModel.inlineEditing}"
+						includeInLayout="{!viewModel.inlineEditing}"
+						skinClass="com.gazuntite.skins.controls.button.patient.DictationToggleButtonSkin"
+						buttonMode="true" toolTip="{dictationTooltip}"
+						/>
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer
+		id="uiNoteContainer"
+		skinClass="com.gazuntite.skins.controls.container.DictationNoteHightSkin"
+		includeIn="note"
+		width="100%" height="100%"
+		>
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+		</s:layout>
+		<s:TextArea width="100%" id="id_notesText" maxChars="1000"
+					text="@{note}" styleName="patientFormText" color="#333333"
+					minHeight="24" skinClass="com.gazuntite.skins.controls.textInput.TextInputSkin"/>
+		<s:ToggleButton id="uiNoteLive" selected="@{viewModel.inNoteMode}" 
+						visible="{!viewModel.inlineEditing}"
+						includeInLayout="{!viewModel.inlineEditing}"
+						skinClass="com.gazuntite.skins.controls.button.patient.WriteNoteToggleButtonSkin"
+						buttonMode="true" toolTip="{noteTooltip}"
+						/>
+	</s:SkinnableContainer>
+	
+	<s:ToggleButton id="uiDictation" selected="@{viewModel.inDictationMode}" 
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationToggleButtonSkin"
+					includeIn="default" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{dictationTooltip}"
+					/>
+	<s:ToggleButton id="uiNote" selected="@{viewModel.inNoteMode}" 
+					skinClass="com.gazuntite.skins.controls.button.patient.WriteNoteToggleButtonSkin"
+					includeIn="default, dictationNew" visible="{isSectionLevel}" includeInLayout="{isSectionLevel}"
+					buttonMode="true" toolTip="{noteTooltip}"
+					/>
+	
+	<s:VGroup height="100%" verticalAlign="bottom" paddingRight="2" gap="0">
+		<s:Button id="uiSaveButton" 
+				  visible="{uiNote.selected}" includeInLayout="{uiNote.selected}"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  enabled="{note.length >= 1 ? true : false}"
+				  toolTip="Save"
+				  click="saveDictationNoteClickHandler()"/>
+	</s:VGroup>
+	
+</s:SkinnableContainer>

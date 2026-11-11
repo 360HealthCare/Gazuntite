@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+		alpha.disabled="0.5"
+		>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	
+	<!--<s:Rect id="background"  width="100%" height="27" radiusX="6">
+		
+		<s:fill>
+		<s:LinearGradient x="169.06" y="26.16" scaleX="25.518" rotation="270">
+		<s:GradientEntry alpha="1.0" color="#D1816E" ratio="0"/>
+		<s:GradientEntry alpha="1.0" color="0x894535" ratio="0.49019607843137253"/>
+		<s:GradientEntry alpha="1.0" color="#A76D5F" ratio="0.49411764705882355"/>
+		<s:GradientEntry alpha="1.0" color="#DBA193" ratio="1"/>
+		
+		</s:LinearGradient>
+		</s:fill>
+	
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="5" blurY="5" color="0x000000" distance="0" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>-->
+	
+	
+	<s:Group width="100%" height="100%">
+		<s:Path x="0" y="0" width="100%" height="32" alpha="1"
+				data="M 5.76 0 L 261.84 0 C 264.744 0 267.12 2.375 267.12 5.28 L 267.12 20.16 L 0 20.16 L 0 5.759 C 0 2.591 2.592 0 5.76 0 Z">
+			<s:fill>
+				<s:LinearGradient x="169.06" y="26.16" scaleX="25.518" rotation="270">
+					<s:GradientEntry color="0xCA7C6B" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="0x985241" ratio="0.5254901960784314"/>
+					<s:GradientEntry alpha="1.0" color="#AD7365" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Path>
+		<!--<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="5" blurY="5" color="0x000000" distance="0" hideObject="false" inner="false" knockout="false" quality="3" strength="2"/>
+		</s:filters>-->
+	</s:Group>
+	
+	
+	<!--- @copy spark.components.SkinnableContainer#contentGroup -->
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+	
+</s:Skin>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*" xmlns:components="com.gazuntite.common.view.components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientWorkStatusDTO;
+			import com.gazuntite.input.model.QIModelLocator;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			public const TAB_STUDENT:String = "TAB_STUDENT";
+			public const TAB_EMPLOYED:String = "TAB_EMPLOYED";
+			public const TAB_UNEMPLOYED:String = "TAB_UNEMPLOYED";	
+			
+			private var _WorkStatusDTO:PatientWorkStatusDTO;
+			
+			[Bindable]	public var curTab:String = "";
+			
+			public function selectTab(selectedTab:String):void
+			{
+				curTab = selectedTab;
+				
+				switch(curTab)
+				{
+					case TAB_STUDENT:
+					{
+						WorkStatusDTO.EmployementStatusID = 1;
+						WorkStatusDTO.isWorkStatusEmployedFullTime = false;
+						WorkStatusDTO.WorkStatusEmployedEmployerInfo = "";
+						WorkStatusDTO.WorkStatusUnEmployedDate = "";
+						WorkStatusDTO.WorkStatusUnEmployedinfo = "";
+						break;
+					}
+					case TAB_EMPLOYED:
+					{
+						WorkStatusDTO.EmployementStatusID = 2;
+						WorkStatusDTO.Notes = "";
+						WorkStatusDTO.WorkStatusUnEmployedDate = "";
+						WorkStatusDTO.WorkStatusUnEmployedinfo = "";
+						break;
+					}
+					case TAB_UNEMPLOYED:
+					{
+						WorkStatusDTO.EmployementStatusID = 3;
+						WorkStatusDTO.isWorkStatusEmployedFullTime = false;
+						WorkStatusDTO.WorkStatusEmployedEmployerInfo = "";
+						break;
+					}
+				}
+			}
+
+			[Bindable]
+			public function get WorkStatusDTO():PatientWorkStatusDTO
+			{
+				return _WorkStatusDTO;
+			}
+
+			public function set WorkStatusDTO(value:PatientWorkStatusDTO):void
+			{
+				_WorkStatusDTO = value;
+				
+				curTab = "";
+				
+				switch(value.EmployementStatusID)
+				{
+					case 1:
+					{
+						curTab = TAB_STUDENT;
+						break;
+					}
+					case 2:
+					{
+						curTab = TAB_EMPLOYED;
+						break;
+					}
+					case 3:
+					{
+						curTab = TAB_UNEMPLOYED;
+						break;
+					}
+						
+					
+				}
+			}
+
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout	gap="-2" horizontalAlign="left"	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="2" />
+	</s:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:BorderContainer	width="122" height="80" cornerRadius="3" >
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="0" paddingLeft="2"  paddingRight="2"/>
+		</s:layout>
+		<s:VGroup id="uiListContainer" height="100%" clipAndEnableScrolling="true" gap="0" paddingTop="1" paddingBottom="1">
+		<social:SocialWSTabButton id="id_student"
+							 label="Student" width="100%"
+							 tabSelected="{curTab==TAB_STUDENT}"							
+							 click="selectTab(TAB_STUDENT)"
+							 />
+		<social:SocialWSTabButton id="id_employed"
+							 label="Employed" width="100%"
+							 tabSelected="{curTab==TAB_EMPLOYED}"
+							 click="selectTab(TAB_EMPLOYED)"
+							 />
+		<social:SocialWSTabButton id="id_unemployed"
+							 label="Unemployed" width="100%"
+							 tabSelected="{curTab==TAB_UNEMPLOYED}"
+							 click="selectTab(TAB_UNEMPLOYED)"
+							 />	
+		</s:VGroup>
+	</s:BorderContainer>
+	<s:BorderContainer	width="100%" height="160"	backgroundColor="0x83A3FE" borderVisible="false" left="4" top="0" right="0" bottom="0" cornerRadius="3" >
+		<!--<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="2" strength="1"/>
+		</s:filters>-->
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="2" paddingRight="6" paddingLeft="6" />
+		</s:layout>
+		<s:Group width="100%"  >	
+			<s:Group width="100%" includeInLayout="{curTab == ''}" visible="{curTab == ''}" >			
+				<components:PleaseSelectView label="Select an option" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+			</s:Group>
+			<social:SocialWSFormDetailView width="100%" id="id_studentDetail" visible="{curTab==TAB_STUDENT}" includeInLayout="{curTab==TAB_STUDENT}"
+											Note="@{WorkStatusDTO.Notes}" tabSelected="{TAB_STUDENT}" WorkStatusDTO="@{WorkStatusDTO}"
+											creationComplete="id_studentDetail.expandNoteView()" gap="2" />		
+			<social:SocialWSFormDetailView width="100%" id="id_employedDetail" visible="{curTab==TAB_EMPLOYED}" includeInLayout="{curTab==TAB_EMPLOYED}"
+											Note="@{WorkStatusDTO.WorkStatusEmployedEmployerInfo}" tabSelected="{TAB_EMPLOYED}"  WorkStatusDTO="@{WorkStatusDTO}"
+											creationComplete="id_employedDetail.expandNoteView()" gap="2" />		
+			<social:SocialWSFormDetailView width="100%" id="id_unemployedDetail" visible="{curTab==TAB_UNEMPLOYED}" includeInLayout="{curTab==TAB_UNEMPLOYED}"
+											Note="@{WorkStatusDTO.WorkStatusUnEmployedinfo}" tabSelected="{TAB_UNEMPLOYED}"  WorkStatusDTO="@{WorkStatusDTO}"
+											creationComplete="id_unemployedDetail.expandNoteView()" gap="2" />			
+			
+		</s:Group>
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button buttonMode="true" id="id_save"
+					  skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin"
+					  right="0" verticalCenter="0"				  
+					  toolTip="Save"
+					  tabIndex="2"
+					  includeInLayout="{curTab.length > 0}" visible="{curTab.length > 0}"
+					  />
+		</s:HGroup>
+				  
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

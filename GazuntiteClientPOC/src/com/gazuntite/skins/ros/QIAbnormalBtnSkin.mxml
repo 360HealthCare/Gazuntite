@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Group y="0" visible.over="false" x="0">
+		<s:Rect height="15" radiusX="3" width="16" x="0.5" y="0.5">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#A7A8A9" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#E5E5E5" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#D1D1D1" ratio="0.44313725490196076"/>
+					<s:GradientEntry alpha="1.0" color="#BDBDBD" ratio="0.4470588235294118"/>
+					<s:GradientEntry alpha="1.0" color="#CFCFCF" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		<s:RichText color="#333333" fontFamily="Calibri" fontSize="12" tabStops="S0" text="A" x="5" y="3"/>
+	</s:Group>
+	<s:Group  y="0" visible.up="false" visible.disabled="false" visible.disabledAndSelected="false" x="0">
+		<s:Rect height="15" width="16" y="0.5" x="0.5" radiusX="3">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" joints="miter" miterLimit="4" weight="1" color="#95C468"/>
+			</s:stroke>
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry ratio="0" color="#C1E88D" alpha="1.0"/>
+					<s:GradientEntry ratio="0.47058823529411764" color="#B2E47A" alpha="1.0"/>
+					<s:GradientEntry ratio="0.47058823529411764" color="#9BCE6C" alpha="1.0"/>
+					<s:GradientEntry ratio="1" color="#9FE479" alpha="1.0"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter distance="1" hideObject="false" color="0x000000" inner="false" strength="1" alpha="0.5" quality="3" knockout="false" angle="90" blurX="2" blurY="2"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText fontFamily="Calibri" fontSize="12" text="A" y="3" x="5" color="#333333" tabStops="S0"/>
+	</s:Group>
+</s:Skin>

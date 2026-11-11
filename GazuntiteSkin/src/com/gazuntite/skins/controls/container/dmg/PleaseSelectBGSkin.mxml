@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+		alpha.disabled="0.5"
+		width="100%" height="50"
+		>
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		/** 
+		* @copy spark.skins.spark.ApplicationSkin#hostComponent
+		*/
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata> 
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	<s:Group width="100%" height="100%" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="45" blurX="6" blurY="6" color="#333333"
+								distance="2" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+			<s:BevelFilter angle="90" blurX="1" blurY="1" distance="1.4"
+						   highlightAlpha="1.0" highlightColor="#777878" knockout="false"
+						   quality="3" shadowAlpha="1.0" shadowColor="#000000" strength="1"
+						   type="inner"/>
+		</s:filters>
+		
+		
+		<s:Path x="-5.379" y="-35.695" width="34.897" height="16.733"
+				data="M 83.71 72.47 L -0.01 72.47 41.85 -0.03 Z " rotation="-90"
+				transformX="41.85" transformY="35.97">
+			<s:fill>
+				<s:SolidColor color="#4F4F4F"/>
+			</s:fill>
+		</s:Path>
+		
+		<s:Rect x="13" y="0" width="100%" height="100%" radiusX="4">
+			<s:fill>
+				<s:LinearGradient rotation="0">
+					<s:GradientEntry alpha="1.0" color="#4F4F4F" ratio="0.25882352941176473"/>
+					<s:GradientEntry alpha="1.0" color="#333333" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+	</s:Group>	
+	
+	<s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+	</s:Group>
+</s:Skin>

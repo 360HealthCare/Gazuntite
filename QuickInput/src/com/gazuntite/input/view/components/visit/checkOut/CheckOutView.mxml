@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="500" height="500"
+		 >
+	
+	<fx:Metadata>
+		[Event(name="visitSummaryClickEvent", type="flash.events.Event")]
+		[Event(name="visitAmountClickEvent", type="flash.events.Event")]
+		[Event(name="visitAmountCloseEvent", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="20"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			protected function visitSummary_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("visitSummaryClickEvent", true, false ) );
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			protected function id_visitAmount_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("visitAmountClickEvent", true, false ) );
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			protected function id_visitSummaryClose_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("visitAmountCloseEvent", true, false ) );
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!--<s:RichText color="#FFFFFF"	fontFamily="CalibriCFF" fontSize="18" tabStops="S0 S50 S100" whiteSpaceCollapse="preserve" text="You have">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"	distance="1" hideObject="false" inner="false" knockout="false"	quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>-->
+	
+	<s:RichText color="#FFFFFF"	fontFamily="CalibriCFF" fontSize="18" tabStops="S0 S50 S100" whiteSpaceCollapse="preserve" text="You have completed the patient exam">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"	distance="1" hideObject="false" inner="false" knockout="false"	quality="3" strength="1"/>
+		</s:filters>
+	</s:RichText>
+	
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.input.CheckoutRedViewSkin" width="350" height="54">
+		<s:RichText left="15" color="#FFFFFF" fontFamily="CalibriCFF" fontSize="18"
+					tabStops="S0 S50 S100" text="Total Charge of the Visit"
+					typographicCase="uppercase" verticalCenter="0">
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+									distance="1" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:RichText>
+		<s:Button id="id_visitAmount"
+				  right="5" width="100" height="46" 
+				  label="$0,000" toolTip="$0,000"
+				  fontSize="18"
+				  buttonMode="true" click="id_visitAmount_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.button.input.BlueButtonSkin"
+				  useHandCursor="true" verticalCenter="0"/>
+		
+	</s:SkinnableContainer>
+	
+	<s:Spacer height="25" />
+	
+	<s:HGroup width="100%" horizontalAlign="center" gap="20">
+		<s:Button id="id_visitSummary" 
+				  width="150" height="50" 
+				  label="VISIT SUMMARY" buttonMode="true"
+				  click="visitSummary_clickHandler(event)"
+				  fontSize="18"
+				  skinClass="com.gazuntite.skins.controls.button.input.BlueButtonSkin"
+				  toolTip="Visit Summary" useHandCursor="true"
+				  />
+		<s:Button id="id_visitSummaryClose" 
+				  width="150" height="50" 
+				  label="Close" buttonMode="true"
+				  click="id_visitSummaryClose_clickHandler(event)"
+				  fontSize="18"
+				  skinClass="com.gazuntite.skins.controls.button.input.BlueButtonSkin"
+				  toolTip="Close View" useHandCursor="true"
+				  />
+	</s:HGroup>
+	
+			  
+</s:Group>

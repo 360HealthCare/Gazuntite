@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:appController="com.gazuntite.provider.services.sms.appController.*"
+				   xmlns:emailview="com.gazuntite.provider.services.sms.view.emailview.*"
+				   creationComplete="OnLoad();"  
+				   borderColor="#000000" borderWeight="1"
+				   >
+	
+	<fx:Script>
+		
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.services.common.model.CommunicationViewModel;
+			import com.gazuntite.provider.services.email.event.EmailOptionEvent;
+			import com.gazuntite.provider.services.email.model.EmailModelLocator;
+			import com.gazuntite.provider.services.sms.dto.SMSDTOResponse;
+			import com.gazuntite.provider.services.sms.event.DeleteSMSEvent;
+			import com.gazuntite.provider.services.sms.event.GetSentSMSEvent;
+			import com.gazuntite.provider.services.sms.view.emailview.SmsOptionPopup;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ListCollectionView;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			private var _userID:int;
+			private var _senderID:int;
+			private var _clinicBranchID:String;
+			
+			[Bindable]
+			private var model : EmailModelLocator = EmailModelLocator.getInstance();
+			
+			[Bindable]
+			private var viewModel:CommunicationViewModel = CommunicationViewModel.getInstance();
+			
+			[Bindable]
+			public function get senderID():int
+			{
+				return _senderID;
+			}
+			
+			public function set senderID(value:int):void
+			{
+				_senderID = value;
+			}
+			
+			
+			[Bindable]
+			public function get userID():int
+			{
+				return _userID;
+			}
+			
+			public function set userID(value:int):void
+			{
+				_userID = value;
+			}
+			
+			[Bindable]
+			public function get BranchID():String
+			{
+				return _clinicBranchID;
+			}
+			
+			public function set BranchID(value:String):void
+			{
+				_clinicBranchID = value;
+			}
+			
+			//[Bindable]
+			//private var model: SMSModelLocator = SMSModelLocator.getInstance();
+			private function OnLoad():void
+			{
+				viewstack1.selectedIndex	=0;
+				//				btnCompose.selected 		= true ;
+				
+				//EnableNavigationButtons(1,1);
+			}
+			
+			
+			
+			protected function btnDelete_clickHandler(event:Event):void
+			{
+				
+				if(id_SentSMS != null)
+				{
+					var SelectedItems:ArrayCollection = new ArrayCollection();
+					
+					for each (var item:SMSDTOResponse in  id_SentSMS.uiSmsList.dataProvider)
+					{
+						if(item.isSelected)
+							SelectedItems.addItem(item);
+					}
+					
+					//var selection:Vector.<Object> = new Vector.<Object>( id_SentSMS.uiSmsList.selectedItems );
+					
+					var smsID:String = "";
+					if(SelectedItems.length > 0)
+					{
+						for (var i:int = 0; i < SelectedItems.length; i++)
+						{
+							//if(ListCollectionView(id_SentSMS.dgSentSMS.dataProvider).getItemAt(i)["isSelected"]==true)
+							smsID	+=  SelectedItems.getItemAt(i)["smsID"]+"^";//ListCollectionView(id_SentSMS.dgSentSMS.dataProvider).getItemAt(i)["smsID"]+"^";
+						}
+						
+						
+						if(smsID.length > 0)
+						{
+							//var smsID:String = "28^31";	
+							smsID = smsID.substring(0,smsID.length);
+							var smsDeleteEvent : DeleteSMSEvent = new DeleteSMSEvent(smsID,id_SentSMS.model.loggedInUserId,DeleteFunctionCallBack);
+							CairngormEventDispatcher.getInstance().dispatchEvent(smsDeleteEvent);
+						}
+						else
+							//Alert.show("No SMS is selected for deletion.","SMS Sending Error" ,4,FlexGlobals.topLevelApplication.mainContainer);
+							
+							Alert.show("No SMS is selected for deletion.", "SMS Sending Error", Alert.OK, this, function( event:CloseEvent):void
+							{
+								viewstack1.selectedIndex=1;
+							});
+						
+							//UtilityFunctions.ShowMessage("No SMS is selected for deletion.","SMS Sending Error");
+						
+					}
+					else
+						//Alert.show("No row to delete.","SMS Sending Error" ,4,FlexGlobals.topLevelApplication.mainContainer);
+						Alert.show("No row to delete.", "SMS Sending Error", Alert.OK, this, function( event:CloseEvent):void
+						{
+							
+						});
+					
+						//UtilityFunctions.ShowMessage("No row to delete.","SMS Sending Error");
+				}
+			}
+			
+			private function DeleteFunctionCallBack():void
+			{
+				id_SentSMS.GetSMSValuesCallBack();
+				LoadSMS();
+			}
+			
+			protected function CloseHandler(event:MouseEvent):void
+			{
+				//chUtil.removeWindowsCount();
+				dispatchEvent( new CloseEvent(CloseEvent.CLOSE) );
+			}
+			
+			/*
+			protected function btnRefresh_clickHandler(event:MouseEvent):void
+			{
+			CallServer(model.currentPage=1);
+			}
+			
+			private function CallServer(currentPage:int):void
+			{
+			var smsSentEvent:GetSentSMSEvent =new GetSentSMSEvent(1,579,model.currentPage,GetSMSValuesCallBack);
+			CairngormEventDispatcher.getInstance().dispatchEvent(smsSentEvent);
+			}
+			
+			protected function btnGotoFirst_clickHandler(event:MouseEvent):void
+			{
+			CallServer(model.currentPage=1);
+			//var smsView:SentSMSView=new SentSMSView();
+			
+			}
+			
+			protected function btnGotoLast_clickHandler(event:MouseEvent):void
+			{
+			CallServer(model.currentPage=model.totalPage);
+			}
+			
+			public  function GetSMSValuesCallBack(val:* = null):void
+			{
+			EnableNavigationButtons(model.currentPage,model.totalPage);
+			}
+			
+			public function  EnableNavigationButtons(currentPage:int, totalPages:int ):void //currentPage:int, totalPages:int ):void
+			{
+			
+			//currentPage =model.currentPage;
+			//totalPages = model.totalPage;
+			
+			btnGotoFirst.enabled = currentPage != 1;
+			btnGotoLast.enabled 		= currentPage != totalPages;
+			btnNext.enabled 		=  currentPage != totalPages;
+			btnPrevious.enabled 	=  currentPage != 1;
+			}
+			
+			
+			
+			protected function btnPrevious_clickHandler(event:MouseEvent):void
+			{
+			CallServer(model.currentPage -=1);
+			}
+			
+			
+			protected function btnNext_clickHandler(event:MouseEvent):void
+			{
+			CallServer(model.currentPage +=1);
+			}
+			*/
+			public function resetButtons():void
+			{
+				//				btnCompose.selected			= false ;
+				//				btnSentSMS.selected			= false ;
+				//				btnDelete.enabled 			= false ;
+				
+			}
+			
+			
+			protected function id_Test_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function btnCompose_clickHandler(event:MouseEvent):void
+			{
+				viewstack1.selectedIndex=0;
+				resetButtons () ;
+				//				btnCompose.selected = true ;
+				
+				if(id_Compose != null)
+				{
+					id_Compose.senderID = senderID;
+					id_Compose.userID = userID;
+					id_Compose.BranchID = BranchID;
+				}
+				
+			}
+			
+			
+			protected function btnSentSMS_clickHandler(event:MouseEvent):void
+			{
+				viewstack1.selectedIndex=1;
+				resetButtons () ;
+				//				btnDelete.enabled = true;
+				//				btnSentSMS.selected = true ;
+				if(id_SentSMS != null)
+				{
+					
+					//id_SentSMS.clinicBranchID = BranchID;
+					//id_SentSMS.userID = userID;
+				}
+			}
+			private var smsOptionPopup:SmsOptionPopup;
+			protected function showComOptionpoup(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != smsOptionPopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				smsOptionPopup = new SmsOptionPopup();
+				smsOptionPopup.ShowPopup( this );
+				smsOptionPopup.dataProvider = viewstack1;
+				smsOptionPopup.addEventListener(EmailOptionEvent.EMAIL_OPTION_CHANGE, function(optionevent:EmailOptionEvent):void 
+				{ 
+					uiSmsOption.text=optionevent.content;
+					uiSmsOption.text=uiSmsOption.text.toUpperCase();
+					trace(optionevent);//comOptionpoup
+					//					logger.debug( "ComOptionpoup view changed " );
+				});
+				smsOptionPopup.addEventListener("smsClosePopup", 
+					function(closeevent:Event):void 
+					{ 
+						removeAllPopups();
+						viewModel.emailMenuShown = false;
+					} );
+				
+				var pt:Point = popButton.localToGlobal(new Point(event.localX, event.localY));
+				//				var pt:Point = new Point(event.localX, event.localY);
+				
+				smsOptionPopup.move( pt.x - smsOptionPopup.width + popButton.width + 66, pt.y + popButton.height-12);
+				//				comOptionpoup.move( pt.x - comOptionpoup.width , pt.y );
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			public function removeAllPopups():void
+			{
+				if( smsOptionPopup && smsOptionPopup.isPopUp )
+				{
+					smsOptionPopup.removePopup();
+					smsOptionPopup = null;
+				}
+			}
+			
+			
+			private var _showHeader:Boolean = true;
+			
+			[Bindable]
+			public function get showHeader():Boolean
+			{
+				return _showHeader;
+			}
+			
+			public function set showHeader(value:Boolean):void
+			{
+				_showHeader = value;
+			}
+			
+			
+			protected function id_composeBtn_clickHandler(event:MouseEvent):void
+			{
+				viewstack1.selectedIndex = 0;
+				uiSmsOption.text = 'COMPOSE';
+			}
+			
+			protected function id_SentBtn_clickHandler(event:MouseEvent):void
+			{
+				viewstack1.selectedIndex = 1;
+				uiSmsOption.text = 'SENT';
+			}
+			
+			public function LoadSMS():void
+			{
+				var smsSentEvent:GetSentSMSEvent =new GetSentSMSEvent(parseInt(BranchID),userID,0,callBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(smsSentEvent);
+			}
+			
+			private function callBack():void
+			{
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Metadata>
+		[Event(name="close", type="mx.events.CloseEvent")]
+	</fx:Metadata>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer styleName="gradientGreyExtendedHeaderBGContainerSkin"  width="100%" visible="{showHeader}" includeInLayout="{showHeader}">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle"  paddingLeft="5" paddingRight="5"/>
+		</s:layout>
+		<s:ToggleButton skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin2"
+						toolTip="More Options" id="popButton"
+						click="showComOptionpoup(event)"
+						useHandCursor="true" buttonMode="true"  
+						selected="@{viewModel.emailMenuShown}"
+						includeInLayout="false"
+						visible="false"
+						/>
+		<s:Label id="uiSmsOption" styleName="emailOption" text="COMPOSE"/>
+		<s:Spacer width="100%" />
+		
+		<s:ToggleButton id="id_composeBtn" 
+				  skinClass="com.gazuntite.skins.controls.toggleButtonSkin.communication.ComposeTBSkin"
+				  click="id_composeBtn_clickHandler(event)"
+				  buttonMode="true" useHandCursor="true"
+				  selected="{viewstack1.selectedIndex == 0}"
+				  toolTip="Compose"/>
+		<s:ToggleButton id="id_SentBtn" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.communication.OutboxTBSkin"
+						toolTip="Sent" click="id_SentBtn_clickHandler(event)"
+						selected="{viewstack1.selectedIndex == 1}"
+						buttonMode="true" useHandCursor="true"
+						/>
+	</s:SkinnableContainer>
+	
+	<mx:ViewStack id="viewstack1" width="100%" height="100%">
+		<s:NavigatorContent width="100%" height="100%" label="Compose">
+			<emailview:ComposeSMSView id="id_Compose" width="100%" height="100%" BranchID="{BranchID}" userID="{userID}" senderID="{senderID}" showNav="{showHeader}"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent width="100%" height="100%" label="Sent">
+			<emailview:SentSMSView id="id_SentSMS" userID="{senderID}" clinicBranchID="{BranchID}" width="100%" height="100%" DeleteSelectedSMS="btnDelete_clickHandler(event)"/>
+		</s:NavigatorContent>
+		
+	</mx:ViewStack>
+	
+	
+</s:BorderContainer>

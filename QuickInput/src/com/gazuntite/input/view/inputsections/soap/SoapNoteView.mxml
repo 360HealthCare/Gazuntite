@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   backgroundColor="#FFFFFF"
+				   cornerRadius="3"
+				   borderVisible="false"
+				   creationComplete="cc(event)"
+				   >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			
+			private var callback:Function;
+			private var statusCallback:Function;
+			private var previewWindowType:String;
+			private var m_sSoapNoteText:String = "loading...";
+			private var m_sSoapNoteURL:String;
+			
+			[Bindable]
+			public function get SoapNoteText():String
+			{
+				return m_sSoapNoteText;
+			}
+			
+			public function set SoapNoteText(value:String):void
+			{
+				m_sSoapNoteText = value;
+			}
+			
+			[Bindable]
+			public function get SoapNoteURL():String
+			{
+				return m_sSoapNoteURL;
+			}
+			
+			public function set SoapNoteURL(value:String):void
+			{
+				m_sSoapNoteURL = value;
+				id_htmlArea.location = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			protected function id_htmlArea_completeHandler(event:Event):void
+			{
+				if(null != event.currentTarget.location )
+				{
+					CursorManager.removeBusyCursor();
+					id_htmlArea.htmlLoader.navigateInSystemBrowser = true;
+					//callback("RemoveLoadingPoPup" , 0); // remove Soap Loading Note Pop UP
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="3" paddingLeft="3" paddingRight="2" paddingTop="3"/>
+	</s:layout>
+	
+	<mx:HTML id="id_htmlArea" 
+			 htmlText="{SoapNoteText}" 
+			 height="100%" width="100%" 
+			 complete="id_htmlArea_completeHandler(event)" 
+			 x="2"
+			 verticalScrollBarStyleName="htmlVScroll" horizontalScrollPolicy="off"
+			 />
+</s:BorderContainer>

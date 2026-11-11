@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:emailview="com.gazuntite.provider.services.email.view.emailview.*" 
+				   >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.controls.extended.skins.PatientBottomNavigationToggleButtonSkin;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.core.UIComponent;
+			
+			import spark.components.Button;
+			import spark.components.ToggleButton;
+			protected var curSelectedNavButton:ToggleButton = null;
+			private var viewUpdated:Boolean = false;
+			private var _inputViews:Array;
+
+			public function get inputViews():Array
+			{
+				return _inputViews;
+			}
+
+			public function set inputViews(value:Array):void
+			{
+				_inputViews = value;
+				viewUpdated = true;
+				invalidateProperties();
+			}
+
+			private var curView:FlipViewContainer;
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				if (viewUpdated)
+				{
+					viewUpdated = false;
+					if (inputViews!=null)
+					{
+						uiViewContainer.removeAllElements();
+						uiButtonBar.removeAllElements();
+						for each (var view:FlipViewContainer in inputViews)
+						{
+							uiViewContainer.addElement(view);
+							view.percentHeight = 100;
+							BindingUtils.bindProperty(view,"width", uiViewContainer, "width");
+							
+							/* var btn:ToggleButton = new ToggleButton();
+							btn.setStyle("skinClass", PatientBottomNavigationToggleButtonSkin);
+							btn.label = view.menuLabel;
+							btn.buttonMode = true;
+							btn.toolTip = btn.label;
+							uiButtonBar.addElement(btn); 
+							btn.addEventListener(MouseEvent.CLICK, onMenuItemClick);*/
+						}
+						curView = inputViews[0] as FlipViewContainer;
+						/* curSelectedNavButton = uiButtonBar.getElementAt(0) as ToggleButton;
+						curSelectedNavButton.selected = true; */
+						uiViewContainer.invalidateDisplayList();
+					}
+				}
+			}
+
+			
+			protected function onMenuItemClick(event:MouseEvent):void
+			{
+				var btn:ToggleButton = event.currentTarget as ToggleButton;
+				
+				// maintain toggle button state
+				if (btn == curSelectedNavButton)
+				{
+					btn.selected = true;
+					return;
+				}
+				else
+				{
+					curSelectedNavButton = btn;
+					for (var i:int=0; i< uiButtonBar.numElements; i++)
+					{
+						var b:ToggleButton = uiButtonBar.getElementAt(i) as ToggleButton;
+						if (b!=curSelectedNavButton)
+						{
+							b.selected = false;
+						}
+					}
+				}
+				
+				curView = null;
+				for each (var view:FlipViewContainer in inputViews)
+				{
+					if (view.menuLabel == curSelectedNavButton.label)
+					{
+						curView = view;
+						break;
+					}
+				}
+				if(curView!=null)
+				{
+					uiSlidePath.valueTo =curView.x;
+					uiSlide.play();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Power id="powerEasing"
+				 exponent="4"
+				 easeInFraction="0.8"
+				 />
+		<s:Animate id="uiSlide" target="{uiViewContainer}" duration="500" easer="{powerEasing}">
+			<s:SimpleMotionPath id="uiSlidePath" property="horizontalScrollPosition"/>
+		</s:Animate>
+		<s:Rotate3D id="uiFlip" angleYFrom="180" angleYTo="360" autoCenterTransform="true" focalLength="1000" duration="500"/>
+	</fx:Declarations>
+	<s:HGroup id="uiViewContainer" width="100%" top="0" bottom="0" paddingBottom="{uiButtonBar.height+1}" clipAndEnableScrolling="true"/>
+	<s:HGroup id="uiButtonBar" width="100%" horizontalAlign="center" bottom="0" gap="1"/>
+</s:Group>

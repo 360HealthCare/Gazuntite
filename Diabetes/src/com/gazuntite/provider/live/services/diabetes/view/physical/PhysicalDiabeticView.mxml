@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:physical="com.gazuntite.provider.live.services.diabetes.view.physical.*"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:detailView="com.gazuntite.provider.live.services.diabetes.view.physical.detailView.*"
+		 skinClass="com.gazuntite.skins.controls.container.UnderConstructionSkin"
+		 width="100%" height="100%"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabeticDetailEvent;
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabeticSelectionEvent;
+			
+			protected function cc():void
+			{
+				enabled = false;
+				addEventListener('BackClicked',function():void{
+				
+					if(uiViewStack.selectedIndex!=0)
+						uiViewStack.selectedIndex -- ;
+				
+				});
+				
+				id_selectionView.addEventListener(DiabeticSelectionEvent.FOOT_CLICKED , function():void{
+					
+					uiViewStack.selectedIndex = 1;
+					id_PhysicalView.PrepareView(0);
+					
+				});
+				
+				id_selectionView.addEventListener(DiabeticSelectionEvent.EYE_CLICKED , function():void{
+					
+					uiViewStack.selectedIndex = 1;
+					id_PhysicalView.PrepareView(1);
+				});
+				
+				id_selectionView.addEventListener(DiabeticSelectionEvent.LUNG_CLICKED , function():void{
+					
+					uiViewStack.selectedIndex = 1;
+					id_PhysicalView.PrepareView(2);
+					
+				});
+				
+				id_PhysicalView.addEventListener(DiabeticDetailEvent.DIABETIC_DETAIL_EVENT , function(ev:DiabeticDetailEvent):void{
+					
+					uiViewStack.selectedIndex = 2;
+					id_DetailView.PrepareView(ev.selectedOrganIndex);
+					
+				});
+				
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:Group width="100%" height="100%" enabled="false"><!-- skinClass="com.gazuntite.skins.controls.container.PinkBackgroundSkin"-->
+		<components:LabelViewStack id="uiViewStack"
+								   creationComplete="cc()"
+								   width="100%" height="100%" backgroundAlpha="0" borderVisible="false"
+								   creationPolicy="all">
+			<s:ArrayList>
+				<physical:DiabeticSelectionView id="id_selectionView" width="100%" height="100%" enabled="false"/>
+				<physical:DiabeticPhysicalView id="id_PhysicalView" width="100%" height="100%" enabled="false"/>
+				<detailView:DiabeticDetailView id="id_DetailView" width="100%" height="100%" enabled="false"/>
+			</s:ArrayList>
+		</components:LabelViewStack>
+	</s:Group>
+	
+</s:SkinnableContainer>

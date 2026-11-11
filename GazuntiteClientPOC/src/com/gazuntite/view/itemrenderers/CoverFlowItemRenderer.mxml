@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				width="460"
+				height="94%"
+				creationComplete="init(event)"
+				xmlns:dualpanel="com.rialvalue.components.dualpanel.*" 
+				xmlns:components="com.gazuntite.components.*"
+				mouseChildren="{data.en}">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.BlankViewForTesting;
+			import com.gazuntite.view.quickInput.coverflow.AllergiesDualPanel;
+			import com.gazuntite.view.quickInput.coverflow.BlankPanel;
+			import com.gazuntite.view.quickInput.coverflow.ChronicMedicationDualPanel;
+			import com.gazuntite.view.quickInput.coverflow.ComprehensiveHistoryDualPanel;
+			import com.gazuntite.view.quickInput.coverflow.ImmunizationDualPanel;
+			
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				//calculateSizeRequirements();
+				assignForms();
+			}
+			
+			protected function calculateSizeRequirements():void
+			{
+				//trace(Capabilities.screenResolutionX);
+				
+				if(Capabilities.screenResolutionX <= 1345)
+				{
+					this.width = 380;
+					this.height = 400;
+				}
+				
+				if(Capabilities.screenResolutionX <= 1280)
+				{
+					this.width = 370;
+					this.height = 370;
+				}
+			}
+			
+			protected function assignForms():void
+			{
+				switch(data.title)
+				{
+					case "Allergies":
+						addElement(new AllergiesDualPanel());
+						break;
+					case "Immunization":
+						addElement(new ImmunizationDualPanel());
+						break;
+					case "Chronic Medication":
+						addElement(new ChronicMedicationDualPanel());
+						break;
+					case "Comprehensive History":
+						addElement(new ComprehensiveHistoryDualPanel());
+						break;
+					default:
+						addElement(new BlankPanel());// temporary
+						break;
+				} 
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>  
+	
+</s:ItemRenderer>

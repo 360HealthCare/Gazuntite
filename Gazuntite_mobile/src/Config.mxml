@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object xmlns="*" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:model="com.gazuntite.model.*" 
+		xmlns:services="com.gazuntite.services.*" 
+		xmlns:parsley="http://www.spicefactory.org/parsley">
+	
+	<fx:Declarations>
+		<model:SharedModel id="sharedModel"/>
+		
+
+		<!-- Get Immunization services -->
+		<s:HTTPService id="getImmunizationTypesService" 			url="xml/ImmunizationTypesResponse.xml" 	resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationSitesService" 			url="xml/ImmunizationSiteResponse.xml" 		resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationSeriesService" 			url="xml/ImmunizationSeriesResponse.xml" 	resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationLotService" 				url="xml/ImmunizationLotNumberResponse.xml" resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationReasonForRefusalService" 	url="xml/IImmunizationRefusalResponse.xml" 	resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationBodySideRouteService" 	url="xml/ImmunizationRoutResponse.xml" 		resultFormat="e4x"/>
+		<s:HTTPService id="getImmunizationManufacturersService" 	url="xml/ImmunizationManufacturer.xml" 		resultFormat="e4x"/>
+
+		
+		
+		<!-- Get Immunization commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationManufacturersCommand" 	selector="getImmunizationManufacturersEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationBodySideRouteCommand" 	selector="getImmunizationBodySideRouteEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationLotCommand" 				selector="getImmunizationLotEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationReasonForRefusalCommand" 	selector="getImmunizationReasonForRefusalEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationSeriesCommand" 			selector="getImmunizationSeriesEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationSitesCommand" 			selector="getImmunizationSitesEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.immunization.GetImmunizationTypesCommand" 			selector="getImmunizationTypesEvent"/>
+
+		
+		
+		
+		<!-- Get Chronic Medication services -->
+		<s:HTTPService id="getMedicationFormDataService" 	url="xml/DoageForm_and_QuantityForm.xml" 		resultFormat="e4x"/>
+		<s:HTTPService id="getMedicineNameService" 			url="xml/MedicineName.xml" 						resultFormat="e4x"/>
+		<s:HTTPService id="getGenericnameService" 			url="xml/GENERICNAME.xml" 						resultFormat="e4x"/>
+		<s:HTTPService id="getStrengthService" 				url="xml/Strength.xml" 							resultFormat="e4x"/>
+		<s:HTTPService id="getNDCService" 					url="xml/NDC.xml" 								resultFormat="e4x"/>
+		
+		<!-- Get Chronic Medication commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.chronicMedication.getMedicationFormDataCommand" 		selector="getMedicationFormDataEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.chronicMedication.GetMedicineNameCommand" 			selector="getMedicineNameEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.chronicMedication.GetgetGenericnameCommand" 			selector="getGenericnameEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.chronicMedication.GetStrengthCommand" 				selector="getStrengthEvent"/>
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.chronicMedication.GetNDCCommand" 						selector="getNDCEvent"/>
+		
+		
+		
+		<!-- Get CPT Procedure Service -->
+		<s:HTTPService id="getCPTProcedureService" url="xml/CPTMedicalResponse.xml" resultFormat="e4x"/>
+		<!-- Get CPT Procedure  commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.cpt.GetCPTProcedureCommand" selector="getCPTProcedureEvent"/>
+
+		<!-- Get ICD Code Description services -->
+		<s:HTTPService id="getICDCodeDescriptionService" url="xml/ICDCodes.xml" resultFormat="e4x"/>
+		<!-- Get ICD Code Description  commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.icd.GetICDCodeDescriptionCommand" selector="getICDCodeDescriptionEvent"/>
+		
+		
+		<!-- Get Allergy services -->
+		<s:HTTPService id="getAllergyClassTypesService" url="xml/AllergyClassesResponse.xml" resultFormat="e4x"/>
+		<!-- Get Allergies commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.allergy.GetAllergiesClassesTypeCommand" selector="getAllergyClassTypesEvent"/>
+		
+		
+		<!-- Get LabIn services -->
+		<s:HTTPService id="getTestNameService" 			url="xml/labInTestName.xml" 						resultFormat="e4x"/>
+		<!-- Get LabIn commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.labIn.GetTestNameCommand" 			selector="getTestNameEvent"/>
+		
+		
+		<!-- Get CCHPI services -->
+		<s:HTTPService id="getSymptomsService" 			url="xml/CCHPI_Symptoms.xml" 						resultFormat="e4x"/>
+		<!-- Get CCHPI commands -->
+		<parsley:DynamicCommand type="com.gazuntite.services.commands.ccphi.GetSymptomsCommand" 			selector="getSymptomsEvent"/>
+		
+		
+		
+	</fx:Declarations>
+	
+	
+</Object>

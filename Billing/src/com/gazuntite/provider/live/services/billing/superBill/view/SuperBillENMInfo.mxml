@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 					 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="CC()"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.dto.ENMSuggestedCodeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillENMServiceInfoDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillProcedureInfoDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			import flashx.textLayout.events.FlowElementMouseEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			private var _SelectedENMCodes:ArrayCollection;
+			
+			private var SuggestedItemIndex:int;
+			
+			public var LastChildTabIndex:int = 0;
+			
+			public var isDataInitialized:Boolean = false;
+			
+			[Bindable]
+			public function get SelectedENMCodes():ArrayCollection
+			{
+				return _SelectedENMCodes;
+			}
+			
+			public function set SelectedENMCodes(value:ArrayCollection):void
+			{
+				_SelectedENMCodes = value;
+			}
+			
+			
+			public function CalculateENMCode():void
+			{
+				if( ! model.VisitSuperBill || ! model.VisitSuperBill.ENMServiceInfo || model.VisitSuperBill.ENMServiceInfo.length == 0) return;
+				
+				model.CurrentHistoryLevelScale = HL_Slider.value.toString();
+				model.CurrentExaminationLevelScale = EL_Slider.value.toString();
+				model.CurrentDecisionLevelScale = DL_Slider.value.toString();
+				
+				var enmCodesNewEncounter:Array = new Array("99201", "99202", "99203", "99204", "99205");
+				var enmCodesEstablishedEncounter:Array = new Array("99211", "99212", "99213", "99214", "99215");				
+				
+				var suggestedCode:String = "";
+				if(HL_Slider.value == 1)
+					return;
+				else
+				{
+					if((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).EncouterType == "1")
+					{
+						if(EL_Slider.value == 1 || DL_Slider.value == 1 )
+							return;
+						
+						var minVal:int = SelectMinimumValueOfThree(HL_Slider.value,EL_Slider.value,DL_Slider.value);
+						suggestedCode = enmCodesNewEncounter[minVal - 1] as String;
+					}
+					else
+					{
+						if(EL_Slider.value == 1 && DL_Slider.value == 1)
+							return;
+						
+						var matchVal:int = SelectAtleaseTwoMatchingElseMiddleOfThree(HL_Slider.value,EL_Slider.value,DL_Slider.value);
+						suggestedCode = enmCodesEstablishedEncounter[matchVal - 1] as String;
+					}
+				}
+				
+				if(SelectedENMCodes != null &&  SelectedENMCodes.length > 0 && suggestedCode != "")
+				{
+					for(var i:int = 0; i < SelectedENMCodes.length; i++)
+					{
+						var typeDTO:ENMSuggestedCodeDTO = SelectedENMCodes[i] as ENMSuggestedCodeDTO;
+						if(typeDTO.ENMProcCode == suggestedCode)
+						{
+							id_ENMCodes.selectedIndex = i;
+							id_Amount.text = numberFormatter.format(typeDTO.Price);
+							break;
+						}
+					} 
+				}
+			}
+			
+			protected function SelectMinimumValueOfThree(hl:int, el:int, dl:int):int
+			{
+				var result:int = 0;
+				
+				if(hl < el)
+					result = hl;
+				else
+					result = el;
+				
+				if(dl < result)
+					result = dl;
+				
+				return result;				
+			}
+			
+			protected function SelectMaxValueOfThree(hl:int, el:int, dl:int):int
+			{
+				var result:int = 0;
+				
+				if(hl > el)
+					result = hl;
+				else
+					result = el;
+				
+				if(dl > result)
+					result = dl;
+				
+				return result;				
+			}
+			
+			protected function SelectAtleaseTwoMatchingElseMiddleOfThree(hl:int, el:int, dl:int):int
+			{
+				var result:int = 0;
+				
+				if(hl == el || hl == dl)
+					result = hl;
+				else if(el == dl)
+					result = el;
+				else
+					result = SelectMinimumValueOfThree(hl,el,dl);
+				
+				
+				return result;				
+			}			
+			
+			protected function id_Default_clickHandler(event:MouseEvent):void
+			{				
+				HL_Slider.value = Number(model.VisitSuperBill.HistoryLevelScale);
+				EL_Slider.value = Number(model.VisitSuperBill.ExaminationLevelScale);
+				DL_Slider.value = Number(model.VisitSuperBill.DecisionLevelScale);
+				id_ENMCodes.selectedIndex = SuggestedItemIndex;
+				if(SuggestedItemIndex > -1)
+				{
+					id_Amount.text = numberFormatter.format((SelectedENMCodes[SuggestedItemIndex] as ENMSuggestedCodeDTO).Price);
+					id_ENMCodes.textInput.text = (SelectedENMCodes[SuggestedItemIndex] as ENMSuggestedCodeDTO).ENMProcCode;
+				}
+				else
+				{					
+					id_Amount.text = "0";
+					id_ENMCodes.textInput.text = "";
+				}
+			}
+			
+			protected function CC():void
+			{	
+				//initializeData();
+			}
+			
+			public function initializeData():void
+			{
+				model.CurrentENMServiceInfo = new ArrayCollection();
+				var enm:SuperBillENMServiceInfoDTO =  model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO
+				model.CurrentENMServiceInfo.addItem(enm);
+				SuggestedItemIndex = -1;
+				SelectedENMCodes = new ArrayCollection();
+				var encounterType:String = model.VisitSuperBill.ENMServiceInfo[0].EncouterType;
+				var enmSuggestedDTO:ENMSuggestedCodeDTO;
+				var enmDTO1:ENMSuggestedCodeDTO;
+				if(model.VisitSuperBill.ENMServiceInfo.length == 1 )
+				{					
+					if((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType == "1" && (model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID != "0")
+					{
+						for(var j:int = 0; j < model.ENMSuggestedCodeList.length; j++)
+						{					
+							enmDTO1 = model.ENMSuggestedCodeList[j];						
+							if(encounterType == enmDTO1.EncounterType )
+							{
+								SelectedENMCodes.addItem(enmDTO1);
+								if(enmDTO1.ENMCodeTypeID == (model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID)
+								{
+									enmSuggestedDTO = enmDTO1;
+									SuggestedItemIndex = SelectedENMCodes.getItemIndex(enmDTO1);
+								}
+							}						
+						}
+						
+						id_ENMCodes.selectedIndex = SelectedENMCodes.getItemIndex(enmSuggestedDTO);
+						id_Amount.text = numberFormatter.format((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).Fee);
+					}
+					else if((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType == "2" || (model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType == "3")
+					{
+						for(var l:int = 0; l < model.ENMSuggestedCodeList.length; l++)
+						{					
+							enmDTO1 = model.ENMSuggestedCodeList[l];						
+							if(encounterType == enmDTO1.EncounterType )
+							{
+								SelectedENMCodes.addItem(enmDTO1);
+								if(enmDTO1.ENMCodeTypeID == (model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID)
+								{
+									enmSuggestedDTO = enmDTO1;
+									SuggestedItemIndex = SelectedENMCodes.getItemIndex(enmDTO1);
+								}
+							}						
+						}
+						
+						id_ENMCodes.selectedIndex = SelectedENMCodes.getItemIndex(enmSuggestedDTO);
+						id_Amount.text = numberFormatter.format((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).Fee);
+						id_Use.setStyle("color","Green");
+						id_Use.enabled = false;
+						//model.TotalCharges += Number(id_Amount.text);
+						//model.CalculateSuperBill();
+						
+						HL_Slider.enabled = false;
+						EL_Slider.enabled = false;
+						DL_Slider.enabled = false;
+						//id_ENMCodes.enabled = false; 
+						id_Default.enabled = false;
+					}
+					else
+					{
+						for(var k:int = 0; k < model.ENMSuggestedCodeList.length; k++)
+						{					
+							var enmDTO2:ENMSuggestedCodeDTO = model.ENMSuggestedCodeList[k];						
+							if(enmDTO2.EncounterType == encounterType)
+								SelectedENMCodes.addItem(enmDTO2);						
+						}
+					}
+				}
+				else if(model.VisitSuperBill.ENMServiceInfo.length == 2 )
+				{					
+					if((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType == "2" )
+					{
+						for(var p:int = 0; p < model.ENMSuggestedCodeList.length; p++)
+						{					
+							enmDTO1 = model.ENMSuggestedCodeList[p];						
+							if(encounterType == enmDTO1.EncounterType )
+							{
+								SelectedENMCodes.addItem(enmDTO1);
+								if(enmDTO1.ENMCodeTypeID == (model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID)
+								{
+									enmSuggestedDTO = enmDTO1;
+									SuggestedItemIndex = SelectedENMCodes.getItemIndex(enmDTO1);
+								}
+							}						
+						}
+						
+						id_ENMCodes.selectedIndex = SelectedENMCodes.getItemIndex(enmSuggestedDTO);
+						id_Amount.text = numberFormatter.format((model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO).Fee);
+						id_Use.setStyle("color","Green");
+						id_Use.enabled = false;
+						//model.TotalCharges += Number(id_Amount.text);
+						//model.CalculateSuperBill();
+						
+						HL_Slider.enabled = false;
+						EL_Slider.enabled = false;
+						DL_Slider.enabled = false;
+						id_ENMCodes.enabled = false;
+						id_Default.enabled = false;
+					}
+					else if((model.VisitSuperBill.ENMServiceInfo[1] as SuperBillENMServiceInfoDTO).CodeType == "2" )
+					{
+						for(var n:int = 0; n < model.ENMSuggestedCodeList.length; n++)
+						{					
+							enmDTO1 = model.ENMSuggestedCodeList[n];						
+							if(encounterType == enmDTO1.EncounterType )
+							{
+								SelectedENMCodes.addItem(enmDTO1);
+								if(enmDTO1.ENMCodeTypeID == (model.VisitSuperBill.ENMServiceInfo[1] as SuperBillENMServiceInfoDTO).ENMCodeTypeID)
+								{
+									enmSuggestedDTO = enmDTO1;
+									SuggestedItemIndex = SelectedENMCodes.getItemIndex(enmDTO1);
+								}
+							}						
+						}
+						
+						id_ENMCodes.selectedIndex = SelectedENMCodes.getItemIndex(enmSuggestedDTO);
+						id_Amount.text = numberFormatter.format((model.VisitSuperBill.ENMServiceInfo[1] as SuperBillENMServiceInfoDTO).Fee);
+						id_Use.setStyle("color","Green");
+						id_Use.enabled = false;
+						//model.TotalCharges += Number(id_Amount.text);
+						//model.CalculateSuperBill();
+						
+						HL_Slider.enabled = false;
+						EL_Slider.enabled = false;
+						DL_Slider.enabled = false;
+						id_ENMCodes.enabled = false;
+						id_Default.enabled = false;
+					}
+				}
+				else
+				{
+					for(var m:int = 0; m < model.ENMSuggestedCodeList.length; m++)
+					{					
+						enmDTO1 = model.ENMSuggestedCodeList[m];						
+						if(enmDTO1.EncounterType == encounterType)
+							SelectedENMCodes.addItem(enmDTO1);						
+					}
+				} 
+				
+				CalculateENMCode();	
+				isDataInitialized = true;
+			}
+			
+			protected function id_ENMCodes_focusOutHandler(event:FocusEvent):void
+			{
+				var selectedENMCode:ENMSuggestedCodeDTO = id_ENMCodes.selectedItem as ENMSuggestedCodeDTO;
+				id_Amount.text = numberFormatter.format(selectedENMCode.Price);
+			}
+			
+			
+			protected function id_ENMCodes_changeHandler(event:IndexChangeEvent):void
+			{
+				var selectedENMCode:ENMSuggestedCodeDTO = id_ENMCodes.selectedItem as ENMSuggestedCodeDTO;
+				id_Amount.text = numberFormatter.format(selectedENMCode.Price);
+			}
+			
+			private function handleClickEvent(e:FlowElementMouseEvent):void {
+				var url:String = "https://www.cms.gov/MLNEdWebGuide/25_EMDOC.asp";
+				navigateToURL(new URLRequest(url), '_blank');
+			}
+			
+			protected function id_Use_clickHandler(event:MouseEvent):void
+			{
+				if(id_ENMCodes.selectedIndex == -1)
+				{
+					Alert.show("Please select code","Info",4,this);
+					id_ENMCodes.setFocus();
+					return;
+				}
+				Alert.show("Are you sure to use given data?", "Confirmation", Alert.YES | Alert.NO, this, alertListener, null, Alert.NO);
+				
+				function alertListener(eventObj:CloseEvent):void 
+				{					
+					if (eventObj.detail==Alert.YES) 
+					{
+						addProcedure();
+						
+						HL_Slider.enabled = false;
+						EL_Slider.enabled = false;
+						DL_Slider.enabled = false;
+						id_ENMCodes.enabled = false;
+						id_Default.enabled = false;
+						
+						var selectedDTO:ENMSuggestedCodeDTO = id_ENMCodes.selectedItem as ENMSuggestedCodeDTO;
+						
+						
+						if( (model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID == "0" )
+						{
+							(model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID = selectedDTO.ENMCodeTypeID;
+							(model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).Fee = numberFormatter.format(selectedDTO.Price);
+							(model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType = "2";						
+						}
+						else if( (model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID != "0" && (model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).ENMCodeTypeID == selectedDTO.ENMCodeTypeID)				
+							(model.CurrentENMServiceInfo[0] as SuperBillENMServiceInfoDTO).CodeType = "3";				
+						else
+						{
+							var newDTO:SuperBillENMServiceInfoDTO = model.VisitSuperBill.ENMServiceInfo[0] as SuperBillENMServiceInfoDTO;
+							newDTO.ENMCodeTypeID = selectedDTO.ENMCodeTypeID;
+							newDTO.Fee = numberFormatter.format(selectedDTO.Price);
+							newDTO.CodeType = "2";
+							model.CurrentENMServiceInfo.addItem(newDTO);
+						}
+						
+						id_Use.setStyle("color","Green");
+						id_Use.enabled = false;
+						
+						model.canSaveSupderBill = true;
+						model.isSupderBillUpdated = true;
+						//model.isENMCodeUsed = true;
+					}
+				}			
+			}
+			
+			private function addProcedure():void
+			{
+				//save new procedureDTO
+				var procedureDTO:SuperBillProcedureInfoDTO = new SuperBillProcedureInfoDTO();
+				
+				procedureDTO.ProcedureCode = id_ENMCodes.selectedItem.ENMProcCode;
+				procedureDTO.CPTMedicalTypeID = id_ENMCodes.selectedItem.ENMCodeTypeID;
+				procedureDTO.ProcedureDescription = id_ENMCodes.selectedItem.ENMProcDescription;
+				procedureDTO.Fee = id_Amount.text;
+				procedureDTO.Unit = "1";
+				procedureDTO.IncludeInBilling = "true";
+				procedureDTO.IsCreatedFromSuperBill = "true";
+				procedureDTO.IsDeleted = "false";
+				procedureDTO.CreatedBy = String(model.LoggedInUserId);
+				procedureDTO.ModifiedBy = "0";
+				
+				model.procedureDTOList.addItem(procedureDTO);
+				
+				model.TotalProcedureCharges += Number(id_Amount.text);
+				model.TotalCharges += Number(id_Amount.text);
+				model.CalculateSuperBill();
+				model.ENMUsedCharges = Number(id_Amount.text);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:NumberFormatter id="numberFormatter" precision="2" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" verticalAlign="top" gap="15">
+		<s:VGroup width="50%"  gap="5" height="100%" >
+			<s:HGroup verticalAlign="middle" height="21" width="100%">
+				<s:Label  fontFamily="CalibriCFFBold" text="History Level" fontSize="12" maxDisplayedLines="1" showTruncationTip="true"/>
+				<mx:HRule width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup verticalAlign="top" height="30" width="100%">	
+				<s:Label text="Computed" width="50" fontFamily="CalibriCFFBold" fontSize="11"  maxDisplayedLines="1" showTruncationTip="true" />
+				<mx:Slider id="HL_Slider"
+						   minimum="1"   maximum="5"  width="100%" height="30" labelOffset="30"
+						   value="{Number(model.VisitSuperBill.HistoryLevelScale)}" change="CalculateENMCode()"
+						   snapInterval="1" labels="[N/A,Focussed,Expand,Detail,Comp]" 
+						   />	
+			</s:HGroup>
+			<s:Spacer height="10" />
+			<s:HGroup verticalAlign="middle" height="21" width="100%">
+				<s:Label  fontFamily="CalibriCFFBold" text="Decision Complexity Level" fontSize="12"  maxDisplayedLines="1" showTruncationTip="true" />
+				<mx:HRule width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup verticalAlign="top" height="30" width="100%">	
+				<s:Label text="Computed" width="50" fontFamily="CalibriCFFBold" fontSize="11"  maxDisplayedLines="1" showTruncationTip="true" />
+				<mx:Slider id="DL_Slider" 
+						   width="100%" minimum="1"  snapInterval="1" height="30" labelOffset="30"
+						   maximum="5" value="{Number(model.VisitSuperBill.DecisionLevelScale)}"  
+						   change="CalculateENMCode()" 
+						   labels="[N/A,SF,Low,High,Moder]"
+						   />
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:VGroup width="50%" gap="5" height="100%">
+			<s:HGroup verticalAlign="middle" height="21" width="100%">
+				<s:Label  fontFamily="CalibriCFFBold" text="Examination Level" fontSize="12" maxDisplayedLines="1" showTruncationTip="true"/>
+				<mx:HRule width="100%"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="top" height="30">	
+				<s:Label text="Computed" width="50" fontFamily="CalibriCFFBold" fontSize="11" />
+				<mx:Slider id="EL_Slider" minimum="1"  snapInterval="1"  height="30" labelOffset="30"
+						   maximum="5" value="{Number(model.VisitSuperBill.ExaminationLevelScale)}" 
+						   change="CalculateENMCode()" width="100%" 
+						   labels="[N/A,Focuss,Expand,Detail,Comp]"
+						   />				
+			</s:HGroup>
+			<s:Spacer height="10" />
+			<s:HGroup width="100%" verticalAlign="middle" height="21" >
+				<s:Label text="Suggested Code:" width="33%" fontFamily="CalibriCFFBold" fontSize="11" />
+				<s:Label text="{id_ENMCodes.selectedItem.ENMProcCode}" width="33%" fontFamily="Calibri" fontSize="11"
+						 includeInLayout="{!id_Use.enabled}" visible="{!id_Use.enabled}"
+						 toolTip="{'Suggested Code: ' + id_ENMCodes.selectedItem.ENMProcCode}" />
+				<s:ComboBox id="id_ENMCodes"  labelField="ENMProcCode" 
+							width="33%" toolTip="{id_ENMCodes.selectedItem ? 'Suggested Code: ' + id_ENMCodes.selectedItem.ENMProcCode : 'Suggested Code'}"
+							dataProvider="{SelectedENMCodes}" includeInLayout="{id_Use.enabled}" visible="{id_Use.enabled}"										
+							change="id_ENMCodes_changeHandler(event)"
+							prompt="Suggested Code" 
+							skinClass="com.gazuntite.skins.IPEControls.IPEComboboxSkin"
+							/>
+				<s:TextInput id="id_Amount" toolTip="{'Amount: ' + id_Amount.text}" text="0.00"
+							 prompt="Amount" restrict="[0-9]\."  width="33%" height="100%" editable="false"
+							 skinClass="com.gazuntite.skins.controls.textInput.DisableTISkin"/>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle" >
+				<s:RichEditableText id="richTxt" width="100%" editable="false" focusEnabled="false" toolTip="E/M Code is calculated on CMS 1997 Guidelines">
+					<s:textFlow>
+						<s:TextFlow>
+							<s:p fontSize="11" fontFamily="Calibri" >
+								<s:a click="handleClickEvent(event)"><s:span color="#0065FF" textDecoration="none" fontFamily="Calibri" fontSize="11" >
+																		 E/M Code is calculated on CMS 1997 Guidelines</s:span></s:a>
+							</s:p>
+						</s:TextFlow>
+					</s:textFlow> 
+				</s:RichEditableText>
+			</s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button id="id_Default" 
+				  label="Default" toolTip="Default" 
+				  useHandCursor="true" buttonMode="true"  
+				  click="id_Default_clickHandler(event)" 
+				  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"
+				  />
+		<s:Button id="id_Use"
+				  label="Use"  toolTip="Use" useHandCursor="true" 
+				  buttonMode="true" click="id_Use_clickHandler(event)" 
+				  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"/>
+	</s:HGroup>
+	
+</s:Group>

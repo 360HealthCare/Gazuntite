@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:spicefactory="http://www.spicefactory.org/parsley"  
+				   backgroundColor="0x161616" 
+				   cornerRadius="5" 
+				   xmlns:components="com.gazuntite.controls.extended.components.*" 
+				   creationComplete="cc(event)"
+				   >
+	
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="forgetPassword"/>
+		<s:State name="resetPassword"/>
+	</s:states>
+	
+	<fx:Metadata>
+		[Event(name="login", type="com.zigron.gazuntite.view.event.LoginViewEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.util.LoggingUtil;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.zigron.gazuntite.event.login.LoginEvent;
+			import com.zigron.gazuntite.event.login.ResetPasswordEvent;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.login.LoginRequestDTO;
+			import com.zigron.gazuntite.utils.ChromeUtil;
+			import com.zigron.gazuntite.utils.GazuntiteAssetsUtility;
+			import com.zigron.gazuntite.view.common.AlertHelper;
+			import com.zigron.gazuntite.view.event.LoginViewEvent;
+			
+			import dg.display.SnowDisplay;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.logging.ILogger;
+			import mx.managers.CursorManager;
+			
+			import spark.components.WindowedApplication;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]	public var model:ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]	public var forgotPasswordString:String="<font color='#ffffff'><a href='#'>Forgot Password</a></font>";
+			
+			private function isInValid():Boolean
+			{
+				var InValid : Boolean = vUsername.validate().type == ValidationResultEvent.INVALID;
+				InValid  = vPassword.validate().type == ValidationResultEvent.INVALID;
+				return InValid;	
+			}
+			
+			private function login() : void 
+			{
+				if(userNameTxt.text == "")
+				{
+					id_errors.visible 			= true;
+					id_errors.includeInLayout 	= true;
+					id_errorMsg.label 			= "Please enter username";
+					return;
+				}
+				if(passwordTxt.text == "")
+				{
+					id_errors.visible 			= true;
+					id_errors.includeInLayout 	= true;
+					id_errorMsg.label 			= "Please enter password";
+					return;
+				}
+				
+				
+				
+				id_errors.visible 			= false;
+				id_errors.includeInLayout 	= false;
+				
+				// validate the fields
+				if ( isInValid()) 
+				{
+					return;
+				}
+				else 
+				{
+					// if everything validates, broadcast an event containing the username & password
+					/* var cgEvent : LoginEvent = new LoginEvent( id_username.text, id_password.text , logInResponse);
+					CairngormEventDispatcher.getInstance().dispatchEvent( cgEvent );
+					return; */
+					
+					ValidationUtils.Trim(userNameTxt);
+					ValidationUtils.Trim(passwordTxt);
+					
+					var request:LoginRequestDTO = new LoginRequestDTO( UtilityFunctions.TrimString( userNameTxt.text ), UtilityFunctions.TrimString( passwordTxt.text ) );
+					
+					var le:LoginEvent = new LoginEvent( request , logInResponse);
+					
+					CairngormEventDispatcher.getInstance().dispatchEvent( le );
+					
+					/* var cgEvent : LogInCombinedEvent = new LogInCombinedEvent( userNameTxt.text, passwordTxt.text , logInResponse);
+					CairngormEventDispatcher.getInstance().dispatchEvent( cgEvent ); */
+					
+					//model.connectedUserName = userNameTxt.text;
+				}
+			}
+			
+			protected function logInResponse(loginApprove:Boolean):void
+			{
+				var e:LoginViewEvent = new LoginViewEvent(LoginViewEvent.LOGIN);
+				
+				if(loginApprove)
+				{
+					// login successful
+					e.success = true;
+					model.IsProviderLoggedIn = true;
+					model.updateModel(model.LoggedInUserDTO);
+					
+				}
+				else
+				{
+					// login failed, fire event
+					e.success = false;
+					id_errors.visible 			     = true;
+					id_errors.includeInLayout 	     = true;
+					id_errorMsg.label 			     = "Invalid User Name / Password";
+				}
+				
+				dispatchEvent(e);
+			}
+			
+			/* protected function loginClickHandler(event:MouseEvent):void
+			{
+			var e:LoginViewEvent = new LoginViewEvent(LoginViewEvent.LOGIN);
+			
+			if( CheckLogin( UtilityFunctions.TrimString( userNameTxt.text ),  UtilityFunctions.TrimString( passwordTxt.text ) ) )
+			{
+			// login successful
+			e.success = true;
+			model.IsProviderLoggedIn = true;
+			}
+			else
+			{
+			// login failed, fire event
+			e.success = false;
+			}
+			
+			dispatchEvent(e);
+			} */
+			
+			/* private function CheckLogin(userName:String, password:String):Boolean
+			{
+			sendToServer( userName, password );
+			for each(var provider:ProviderDTO in model.AllProviders.ListAll)
+			{
+			var UserEmail:String 	= provider.UserEmail;
+			var UserPassword:String = provider.Password;
+			if( UserEmail == userName )
+			{
+			if(UserPassword == password)
+			{
+			model.updateModel( provider );
+			
+			invalidGroup.visible = false;
+			logger.debug(model.LoggedInProvider.FullName + " logged-in.");
+			//VideoChat.getInstance().login( model.LoggedInProvider.UserEmail );
+			VideoChatManager.getInstance().login( model.LoggedInProvider.UserEmail );
+			return true;
+			}
+			}
+			}
+			
+			return false;
+			} */
+			
+			
+			/* private function sendToServer(userName:String, password:String):void
+			{
+			var request:LoginRequestDTO = new LoginRequestDTO( userName, password );
+			
+			var le:LoginEvent = new LoginEvent( request );
+			
+			CairngormEventDispatcher.getInstance().dispatchEvent( le );
+			} */
+			
+			
+			public function changeToopTip():void
+			{
+				if(id_restore.toolTip=='Restore')
+				{
+					id_restore.toolTip='Maximize';
+				}
+				else if(id_restore.toolTip=='Maximize')
+				{
+					id_restore.toolTip='Restore';
+				}
+			}
+			
+			protected function id_close_clickHandler():void
+			{
+				//????????????????????????????????????????????????????????????????????????????
+				//
+				// user is not even logged-in why somebody wants to check unsaved data here
+				//
+				//????????????????????????????????????????????????????????????????????????????
+				
+				/* var modified_views:ArrayCollection = PatientInputViewModel.getInstance().getDirtyViewList();
+				if (modified_views.length>0)
+				{
+					var msg:String = "The following views contain unsaved data:";
+					for each (var view_name:String in modified_views)
+					{
+						msg += "\n  "+view_name;
+					}
+					msg += "\nThe unsaved data will be lost. Do you want to continue?";
+					AlertHelper.showContinueQuestion(confirmedClose, msg);
+				}
+				else
+				{ */
+					UtilityFunctions.AskMessage(  "Do you really want to exit 'Gazuntite Online Clinic'", function():void
+					{
+						confirmedClose();
+					});
+				//}
+			}
+			protected function confirmedClose():void
+			{
+				//	dispatchEvent(new LogoutViewEvent(true));
+				(FlexGlobals.topLevelApplication as WindowedApplication).exit();
+				
+				
+				/* var logoutevent:LogoutEvent = new LogoutEvent(function ():void{ ChromeUtil.closeWindow(); });
+				CairngormEventDispatcher.getInstance().dispatchEvent(logoutevent); */
+			}
+			
+			protected function txt_enterHandler(event:FlexEvent):void
+			{
+				login();
+			}
+			
+			protected function resetPassword():void
+			{
+				ValidationUtils.Trim(id_resetEmail);
+				if(id_resetEmail.text == "")
+				{
+					id_errors.visible 			= true;
+					id_errors.includeInLayout 	= true;
+					id_errorMsg.label 			= "Please enter email";
+					return;
+				}
+				
+				if( ! isValidEmailToResetPassord)
+				{
+					id_errors.visible 			= true;
+					id_errors.includeInLayout 	= true;
+					id_errorMsg.label 			= "Email Does Not Exist";
+					return;
+				}
+				
+				id_errors.visible 			= false;
+				id_errors.includeInLayout 	= false;
+				
+				var cgEvent : ResetPasswordEvent = new  ResetPasswordEvent( id_resetEmail.text, resetPasswordResponse);
+				CairngormEventDispatcher.getInstance().dispatchEvent( cgEvent );
+				cursorManager.setBusyCursor();
+				model.connectedUserName = id_resetEmail.text;
+				
+			}
+			
+			protected function resetPasswordResponse(val:*=null):void
+			{
+				CursorManager.removeBusyCursor();
+				if(model.resetPasswordResult == "true")
+				{
+					//id_resetEmail.enabled = false
+					//submitBtn.enabled = false;
+					id_resetEmail.visible = false;
+					id_resetEmail.includeInLayout = false;
+					submitBtn.visible = false;
+					submitBtn.includeInLayout = false;					
+					currentState = 'resetPassword' ;
+					goBackBtn.label = "Go to Login";
+				}
+				else 
+					invalidEmail();
+			}
+			
+			private function invalidEmail():void
+			{
+				id_errors.visible 			     = true;
+				id_errors.includeInLayout 	     = true;
+				
+				if(model.resetPasswordErrorMessageResult.length>0)
+				{
+					id_errorMsg.label = model.resetPasswordErrorMessageResult.replace("Login does't exsist","Email Does Not Exist");
+					return;
+				}
+				
+				if(model.resetPasswordIsActiveResult=='false' && model.resetPasswordIsValidResult=='true')
+				{
+					id_errorMsg.label 			     = "Inactive User";
+				}
+				else if (model.resetPasswordIsLockedResult=='true' && model.resetPasswordIsValidResult=='true')
+				{
+					id_errorMsg.label 			     = "Locked User";
+				}
+				else
+				{
+					id_errorMsg.label 			     = "Invalid Email ID";
+				}
+				
+			}
+			
+			protected function id_forgotPass_clickHandler(event:MouseEvent):void	
+			{
+				id_errors.visible 			     = false;
+				id_errors.includeInLayout 	     = false; 
+				if(id_resetEmail)
+				{
+					//id_resetEmail.enabled 			 = true;
+					id_resetEmail.visible = true;
+					id_resetEmail.includeInLayout = true;
+					submitBtn.visible = true;
+					submitBtn.includeInLayout = true;					
+				}
+				//if(submitBtn)
+				//submitBtn.enabled 				 = true;
+				currentState                     ='forgetPassword';
+				goBackBtn.label = "Go Back";
+				
+			}
+			
+			protected function group2_keyDownHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+					resetPassword(); 
+			}
+			
+			protected function goBackBtn_clickHandler(event:MouseEvent):void
+			{
+				currentState                     ='default';
+				id_errors.visible 			     = false;
+				id_errors.includeInLayout 	     = false;
+				
+			}
+			
+			private var isValidEmailToResetPassord:Boolean = false;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				//var snow:SnowDisplay = new SnowDisplay(this.width, this.height);
+				//spv.addChild(snow);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:StringValidator id="vUsername" property="text" required="true"
+							requiredFieldError="Provider ID is required" source="{ userNameTxt }"/>
+		<mx:StringValidator id="vPassword" property="text" required="true" 
+							requiredFieldError="Password is required" source="{ passwordTxt }"/>
+		
+		<mx:EmailValidator  source="{id_resetEmail}" property="text"
+							missingAtSignError="The @ sign is missing in your email address"
+							valid="isValidEmailToResetPassord = true"
+							invalid="isValidEmailToResetPassord = false"
+							required="false" />
+		
+		<s:GlowFilter id="glowFilter" blurX="8" blurY="8" color="#ff6600"/>
+		<fx:Vector id="motionPathVector" type="spark.effects.animation.MotionPath">
+			<s:SimpleMotionPath id="blurXPath" property="blurX" valueFrom="0" valueTo="11"/>
+			<s:SimpleMotionPath id="blurYPath" property="blurY" valueFrom="0" valueTo="11"/>
+		</fx:Vector>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="top"/>
+	</s:layout>
+	
+	<s:SpriteVisualElement id="spv" />
+	
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" />
+		</s:layout>
+		
+		<s:HGroup id="id_windowControlButtons" gap="2" width="100%" horizontalAlign="right" paddingTop="3" paddingRight="5">
+			<s:Button id="id_min" 
+					  height="15" width="16" useHandCursor="true" buttonMode="true" 
+					  skinClass="com.gazuntite.skins.controls.button.MiniButtonSkin" 
+					  click="ChromeUtil.minimizeWindow()" toolTip="Minimize"/>
+			<s:Button id="id_restore"
+					  height="15" width="16" skinClass="com.gazuntite.skins.controls.button.restoreButton" visible="false" includeInLayout="false"
+					  click="ChromeUtil.toggleMaximizeWindow(); changeToopTip()" toolTip="Maximize" useHandCursor="true" buttonMode="true"/>					
+			<s:Button id="id_close" 
+					  height="15" width="16" skinClass="com.gazuntite.skins.controls.button.CloseButtonSkin"
+					  click="id_close_clickHandler()" toolTip="Close" useHandCursor="true" buttonMode="true"/>
+		</s:HGroup>
+		
+		<s:Spacer height="40%"/>
+		<s:Image source="{UtilityFunctions.getByteArray(GazuntiteAssetsUtility.LOGIN_LOGO_B4STR)}" />
+		<s:Spacer height="20%"/>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.LoginBlueBGSkin" 
+							  verticalCenter="0" horizontalCenter="0" width="344" height="265">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center"  verticalAlign="middle" gap="25"/>
+			</s:layout>
+			
+			<s:SkinnableContainer id="invalidGroup" 
+								  visible="false" includeInLayout="false" width="70%" height="40"
+								  skinClass="com.gazuntite.skins.InvalidProviderIDSkin">
+				<s:layout>
+					<s:HorizontalLayout paddingLeft="10" paddingRight="10" horizontalAlign="left" verticalAlign="middle"/>
+				</s:layout>
+				<s:Image source="assets/redX.png" />
+				<s:Label text="Invalid ProviderID" styleName="loginFormInvalidProviderID" width="100%"/>
+				<s:RichEditableText id="richTxt" editable="false" focusEnabled="false">
+					<s:textFlow>
+						<s:TextFlow>
+							<s:p>
+								<s:a href="#">
+									<s:span color="0xffffff" fontSize="12">Forgot Password</s:span>
+								</s:a>
+							</s:p>
+						</s:TextFlow>
+					</s:textFlow>
+				</s:RichEditableText>
+			</s:SkinnableContainer>
+			
+			<!--//////////////////////////////////////////////////////////-->
+			<s:SkinnableContainer id="id_errors" 
+								  visible="false" width="100%" includeInLayout="{id_errors.visible}" excludeFrom="resetPassword"  >
+				<s:layout>
+					<s:HorizontalLayout paddingLeft="10" paddingRight="10" verticalAlign="middle"/>
+				</s:layout>
+				<s:Button id="id_errorMsg" width="100%" skinClass="com.gazuntite.skins.controls.container.InvalidMesageButtonSkin" />
+			</s:SkinnableContainer>
+			<!--//////////////////////////////////////////////////////////-->
+			
+			
+			<s:VGroup horizontalAlign="left" verticalAlign="top" gap="10" width="296">
+				<s:RichText id="id_forgotPwdLabel" fontFamily="CalibriCFF" fontSize="15" includeIn="forgetPassword,resetPassword"	text="Forgot Password?"
+							text.resetPassword="Check Your Email" width="100%"/>
+				<s:RichText fontFamily="CalibriCFF" fontSize="12" includeIn="forgetPassword,resetPassword" width="100%"
+							text.forgetPassword="To get the new password, please enter your email" maxDisplayedLines="1"
+							text.resetPassword="We sent you an email with a new password." />
+				
+				<s:TextInput id="id_resetEmail" 
+							 width="100%"  height="28" 
+							 includeIn="forgetPassword,resetPassword" 	
+							 prompt="Please type your email here" toolTip="Email"
+							 skinClass="com.gazuntite.skins.controls.textInput.AllTextInputSkin" 
+							 />
+				
+				<s:RichText color="#333333" fontFamily="CalibriCFF" fontSize="17" tabStops="S0 S50" text="User Name" includeIn="default"/>
+				<s:TextInput id="userNameTxt"
+							 width="100%"
+							 height="28" includeIn="default"
+							 text="" 
+							 textAlign="left"
+							 prompt="User Name" toolTip="User Name"
+							 enter="txt_enterHandler(event)"
+							 skinClass="com.gazuntite.skins.controls.textInput.loginTI" 
+							 />
+			</s:VGroup>
+			
+			<s:VGroup id="id_view2" gap="10" horizontalAlign="left" verticalAlign="top">
+				<s:Group width="100%">
+					<s:RichText color="#333333" fontFamily="CalibriCFF" fontSize="17" tabStops="S0 S50" text="Password" left="0" includeIn="default"/>
+					<s:Label id="id_forgotPass" 
+							 click="id_forgotPass_clickHandler(event)" 
+							 right="0" bottom="0" useHandCursor="true" buttonMode="true"
+							 color="blue" fontSize="13" text="Problems Signing in?" includeIn="default" toolTip="Problems Signing in?" fontFamily="CalibriCFF"/>
+				</s:Group>
+				
+				<s:TextInput id="passwordTxt"
+							 width="100%" 
+							 height="28" includeIn="default"
+							 text=""
+							 displayAsPassword="true" textAlign="left"
+							 prompt="Password" toolTip="Password"
+							 skinClass="com.gazuntite.skins.controls.textInput.loginTI"
+							 enter="txt_enterHandler(event)"
+							 />	
+			</s:VGroup>
+			
+			<s:Group width="296">
+				<s:HGroup width="100%" horizontalAlign="center">
+					<s:Button id="goBackBtn" includeIn="forgetPassword,resetPassword" 
+							  label="Go Back" buttonMode="true"
+							  click="goBackBtn_clickHandler(event)"
+							  skinClass="com.gazuntite.skins.controls.button.SignInButtonSkin"
+							  toolTip="Go back to Log In page"
+							  width="90"/>
+					<s:Button id="submitBtn"
+							  buttonMode="true" click="resetPassword()"
+							  label="Submit" toolTip="Submit Provider ID" includeIn="forgetPassword,resetPassword"
+							  skinClass="com.gazuntite.skins.controls.button.SignInButtonSkin"
+							  useHandCursor="true"  width="90" />					
+				</s:HGroup>
+				<s:Button label="Sign In"
+						  width="100" left="0"
+						  useHandCursor="true" buttonMode="true" toolTip="Sign In"
+						  click="login()" includeIn="default"
+						  skinClass="com.gazuntite.skins.controls.button.SignInButtonSkin"
+						  /><!--click="loginClickHandler(event)"-->		
+				<s:RichText color="#000000" fontFamily="CalibriCFF" fontSize="15" tabStops="S0"
+							text="Or" whiteSpaceCollapse="preserve" includeIn="default"
+							x="170" verticalCenter="0"/>
+				<s:Button id="id_registerProvider" right="0" label="Register yourself"
+						  buttonMode="true" includeIn="default"
+						  skinClass="com.gazuntite.skins.controls.button.LinkButtonSkin"
+						  toolTip="Register yourself" useHandCursor="true"
+						  verticalCenter="0"/>
+			</s:Group>
+			
+		</s:SkinnableContainer>
+		
+		<s:Spacer height="100%"/>
+		
+		<s:RichText color="#5D5D5D" fontFamily="CalibriCFF" fontSize="14" tabStops="S0 S50" text="Gazuntite {model.AppVersion}" />
+		<s:RichText color="#5D5D5D" fontFamily="CalibriCFF" fontSize="13" tabStops="S0 S50 S100 S150 S200 S250 S300 S350" text="Copyrights 2011-2013 Gazuntite Online Clinic LLC. All Rights Reserved." whiteSpaceCollapse="preserve" paddingBottom="10"/>
+		
+	</s:Group>
+	
+</s:BorderContainer>

@@ -1,0 +1,752 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:SelectablePanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx" 
+							creationComplete="panel1_creationCompleteHandler()"
+							xmlns:renderer="com.gazuntite.patient.visit.view.pmh.compHistory.renderer.*" 
+							xmlns:social="com.gazuntite.patient.visit.view.pmh.compHistory.social.*"
+							xmlns:itemrenderers="com.gazuntite.patient.visit.view.itemrenderers.*"
+							xmlns:components1="com.gazuntite.controls.extended.components.*" 
+							>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.radioButtonSkins.YNotesRadioButton;
+			import com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.writeNotesButtonSelected;
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryAddictionDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.view.itemrenderers.OptionButton;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.logging.ILogger;
+			import mx.logging.Log;
+			
+			
+			//private var logger:ILogger = Log.getLogger("com.adobe.Quivus.view.controls.custom.patientExamView.quickInput.comprehensiveHistory.social.SocialSection");
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var m_aAllowContents:Boolean = false;
+			private var m_oMedicalHistoryDto:MedicalHistoryDTO;
+			
+			public var OnNotesClose:Function;
+			
+			[Bindable]
+			public function get medicalHistoryDto():MedicalHistoryDTO
+			{
+				return m_oMedicalHistoryDto;
+			}
+			
+			public function set medicalHistoryDto(value:MedicalHistoryDTO):void
+			{
+				m_oMedicalHistoryDto = value;
+			}
+			
+			protected function id_Views_changeHandler(event:IndexChangedEvent):void
+			{
+				
+				BindTabData( id_Views.selectedChild.label );
+				
+				QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.COMPREHENSIVE_HISTORY);
+			}
+			
+			
+			protected function tabbar1_clickHandler(event:MouseEvent):void
+			{
+				trace(event.target.id);
+			}
+			
+			private function OnDrugYesNoClick(value:String, secLabel:String, target:OptionButton):void
+			{
+				setSelectedTab( secLabel );
+				
+				var sec:socialYesNo 	= ( id_Views.selectedChild as NavigatorContent ).getElementAt( 0 ) as socialYesNo;
+				sec.Label 				= "You have selected";
+				sec.Label2				= value;
+				sec.IsSelected 			= (value.toLowerCase() == "yes") ? true:false;
+				
+				if( null == sec.SocialHistoryAddictionDto )
+					BindTabData( secLabel );
+				
+				if( sec.SocialHistoryAddictionDto )
+				{
+					 switch( value )
+					{
+						case QIConstants.STRING_YES_UI:
+							sec.SocialHistoryAddictionDto.IsYesSelected 	= QIConstants.STRING_TRUE;
+							sec.SocialHistoryAddictionDto.IsNoSelected 		= QIConstants.STRING_FALSE;
+							sec.SocialHistoryAddictionDto.IsUnknown 		= false;
+							break;
+						case QIConstants.STRING_NO_UI:
+							sec.SocialHistoryAddictionDto.IsYesSelected 	= QIConstants.STRING_FALSE;
+							sec.SocialHistoryAddictionDto.IsNoSelected 		= QIConstants.STRING_TRUE;
+							sec.SocialHistoryAddictionDto.IsUnknown 		= false;
+							break;
+						case QIConstants.UNKNOWN:
+							sec.SocialHistoryAddictionDto.IsYesSelected 	= QIConstants.STRING_FALSE;
+							sec.SocialHistoryAddictionDto.IsNoSelected 		= QIConstants.STRING_FALSE;
+							sec.SocialHistoryAddictionDto.IsUnknown 		= true;
+							break;
+					} 
+				}
+				
+				callLater( function():void 
+				{
+					UpdateModel( value );
+					dispatchEvent( new Event("data_added", true, true) );
+				});
+			}
+			// check for previous records
+			private function isPreviousYesValue():Boolean
+			{
+				var hasYes:Boolean = false;
+				 var i:int;
+				for( i = 0; i < model.socialHistoryDTOListByPatient.length; i++ )
+				{
+					/* var dto:SocialhistoryVBDTO = model.medicalHistoryDTOListByPatient.getItemAt( i ) as SocialhistoryVBDTO;
+					hasYes = dto.IsNA != true;
+					if( hasYes )
+						break; */
+				} 
+				return hasYes;
+			}
+			// Tahir Alvi -- response of delete records from general history
+			// Reload CH data
+			private function loadData(val:*=null):void
+			{
+				dispatchEvent(new Event('reLoad_CH',true, true));
+			}
+			/* private function isPreviousYesValue():Boolean
+			{
+			var hasYes:Boolean = false;
+			var i:int;
+			for( i = 0; i < model.socialHistoryDTOListByPatient.length; i++ )
+			{
+			var dto:MedicalHistoryDTO = model.socialHistoryDTOListByPatient.getItemAt( i ) as MedicalHistoryDTO;
+			hasYes = dto.IsNone != Constants.STRING_TRUE;
+			if( hasYes )
+			break;
+			}
+			return hasYes;
+			} */
+			
+			private function OnSocialYesNoClick(value:String, secLabel:String, target:OptionButton):void
+			{
+				setSelectedTab( secLabel );
+				
+				 var selSec:socialYesNo = ( id_Views.selectedChild as NavigatorContent ).getElementAt( 0 ) as socialYesNo;
+				selSec.Label = "You have selected";
+				selSec.Label2 = value;
+				selSec.IsSelected = (value.toLowerCase() == QIConstants.STRING_YES_UI) ? true:false;
+				
+				if(value == QIConstants.STRING_YES_UI)
+				{
+					selSec.id_Views.selectedIndex = 2;
+				}
+				else if( value == QIConstants.STRING_NO_UI )
+				{
+					selSec.id_Views.selectedIndex = 0;
+				}
+				
+				callLater( function():void 
+				{
+					UpdateModel( value );
+					if( selSec.SocialHistoryAddictionDto )
+						selSec.SocialHistoryAddictionDto.IsDirty = true;
+					hasChange = true;
+					dispatchEvent( new Event("data_added", true, true) );
+				}); 
+			}
+			
+			private function OnNotesCloseClick(event:MouseEvent):void
+			{
+				OnNotesClose();
+				event.stopImmediatePropagation();
+				DeselectAllButtons();
+			}
+			
+			protected function OnTabCreationComplete(event:FlexEvent):void
+			{
+				 event.currentTarget.id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+				id_Other.id_header.id_SpinerList.visible = false;
+				id_WorkStatus.id_header.id_SpinerList.visible = false; 
+			}
+			
+			private function OnTabClick(event:MouseEvent, secLabel:String):void
+			{
+				setSelectedTab( secLabel );
+			}
+			
+			private function UpdateChange():void
+			{
+				 try
+				{
+					hasChange = model.SocialHistoryAddictionTypeDTOList.length>0;
+				}
+				catch( e:Error )
+				{
+					trace( "QICH::Social Section", e.message );
+				} 
+			}
+			
+			public function LoadData():void
+			{
+				try
+				{
+					UpdateChange();//check if there is data for social history, then show check mark
+					var Dto:SocialHistoryAddictionDTO = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(  Constants.SOCIAL_TOBACCO_MODULE_NAME );
+					if( Dto && Dto.IsYesSelected )
+					{
+						if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_TRUE.toLowerCase() )
+						{
+							id_TobaccoTab.id_Y.selected = true;
+							id_TobaccoTab.id_N.selected = false;
+							id_TobaccoTab.id_U.selected = false;
+							id_Tobaco.IsSelected 		= true;
+							id_Tobaco.Label 			= "You have selected";
+							id_Tobaco.Label2 			= '"'+Constants.STRING_YES_UI+'"';
+							if(Dto.AddictionNotes && Dto.AddictionNotes.length > 0)
+								id_TobaccoTab.id_Y.setStyle("skinClass", YNotesRadioButton);
+						}
+						else if( Dto.IsUnknown )
+						{
+							id_TobaccoTab.id_U.selected = true;
+							id_TobaccoTab.id_Y.selected = false;
+							id_TobaccoTab.id_N.selected = false;
+							id_Tobaco.IsSelected 		= false;
+							id_Tobaco.Label 			= "You have selected";
+							id_Tobaco.Label2 			= '"'+Constants.UNKNOWN+'"';
+						}
+						else if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_FALSE.toLowerCase() )
+						{
+							id_TobaccoTab.id_N.selected = true;
+							id_TobaccoTab.id_Y.selected = false;
+							id_TobaccoTab.id_U.selected = false
+							id_Tobaco.IsSelected 		= false;
+							id_Tobaco.Label 			= "You have selected";
+							id_Tobaco.Label2 			= Constants.STRING_NO_UI;
+						}
+						Dto = null;
+					}
+					
+					Dto = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(  Constants.SOCIAL_ALCOHOL_MODULE_NAME );
+					if( Dto && Dto.IsYesSelected )
+					{
+						if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_TRUE.toLowerCase() )
+						{
+							id_AlcoholTab.id_N.selected = false;
+							id_AlcoholTab.id_Y.selected = true;
+							id_Alcohol.IsSelected 		= true;
+							id_Alcohol.Label 			= "You have selected";
+							id_Alcohol.Label2 			= Constants.STRING_YES_UI;
+							if(Dto.AddictionNotes && Dto.AddictionNotes.length > 0)
+								id_AlcoholTab.id_Y.setStyle("skinClass", YNotesRadioButton);
+						}
+						else if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_FALSE.toLowerCase() )
+						{
+							id_AlcoholTab.id_N.selected = true;
+							id_AlcoholTab.id_Y.selected = false;
+							id_Alcohol.IsSelected 		= false;
+							id_Alcohol.Label 			= "You have selected";
+							id_Alcohol.Label2 			= Constants.STRING_NO_UI;
+						}
+						Dto = null;
+					}
+					
+					Dto = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(  Constants.SOCIAL_DRUGS_MODULE_NAME );
+					if( Dto && Dto.IsYesSelected )
+					{
+						if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_TRUE.toLowerCase() )
+						{
+							id_DrugsTab.id_N.selected 	= false;
+							id_DrugsTab.id_Y.selected 	= true;
+							id_Drugs.IsSelected 		= true;
+							id_Drugs.Label 				= "You have selected";
+							id_Drugs.Label2				= Constants.STRING_YES_UI;
+							if(Dto.AddictionNotes && Dto.AddictionNotes.length > 0)
+								id_DrugsTab.id_Y.setStyle("skinClass", YNotesRadioButton);
+						}
+						else if( Dto.IsYesSelected.toLowerCase() == Constants.STRING_FALSE.toLowerCase() )
+						{
+							id_DrugsTab.id_N.selected 	= true;
+							id_DrugsTab.id_Y.selected 	= false;
+							id_Drugs.IsSelected 		= false;
+							id_Drugs.Label 				= "You have selected";
+							id_Drugs.Label2 				= Constants.STRING_NO_UI;
+						}
+						Dto = null;
+					}
+					
+					if( model.socialHistoryDTO )
+					{
+						if( model.socialHistoryDTO.IsWorkStatusYesSelected.toLowerCase() == Constants.STRING_TRUE )
+						{
+							id_WorkTab.id_N.selected = false;
+							id_WorkTab.id_Y.selected = true;
+							id_WorkStatus.IsSelected = true;
+							id_WorkStatus.Label		 = "You have selected";
+							id_WorkStatus.Label2	 = Constants.STRING_YES_UI;
+							id_WorkStatus.id_Views.selectedIndex = 2;
+							if(model.socialHistoryDTO.WorkStatusNotes && model.socialHistoryDTO.WorkStatusNotes.length > 0)
+								id_WorkTab.id_Y.setStyle("skinClass", YNotesRadioButton);
+						}
+						else
+						{
+							id_WorkTab.id_N.selected = true;
+							id_WorkTab.id_Y.selected = false;
+							id_WorkStatus.IsSelected = false;
+							id_WorkStatus.Label		= "You have selected";
+							id_WorkStatus.Label2	= Constants.STRING_NO_UI;
+						}
+					}
+					
+					if( model.socialHistoryDTO && model.socialHistoryDTO.MaritalStatusID )
+					{
+						setMeritalStatusId( model.socialHistoryDTO.MaritalStatusID );
+						id_Marital.Label = "You have selected"; 
+						id_Marital.Label2 = getMeritalStatus( model.socialHistoryDTO.MaritalStatusID );
+					}
+					
+					if( model.socialHistoryDTO && model.socialHistoryDTO.IsOtherYesSelected.toLowerCase() == Constants.STRING_TRUE )
+					{
+						id_OtherTab.id_N.selected 	= false;
+						id_OtherTab.id_Y.selected 	= true;
+						id_Other.IsSelected 		= true;
+						id_Other.Label		 		= "You have selected";
+						id_Other.Label2		 		= Constants.STRING_YES_UI;
+						id_Other.id_Views.selectedIndex = 2;
+						if( model.socialHistoryDTO.OtherNotes .length > 0)
+							id_OtherTab.id_Y.setStyle("skinClass", YNotesRadioButton);
+					}
+					else
+					{
+						id_OtherTab.id_N.selected	= true;
+						id_OtherTab.id_Y.selected 	= false;
+						id_Other.IsSelected 		= false;
+						id_Other.Label				= "You have selected";
+						id_Other.Label2				= Constants.STRING_NO_UI;
+					}
+				}
+				catch( e:Error )
+				{
+					trace( "SocialSection::LoadData() errorID:" + e.errorID + ", errorName:" + e.name + ", errorMessage:" + e.message );
+				} 
+			}
+			
+			private function UpdateModel(value:String):void
+			{
+				hasChange = true;
+				 switch( id_Views.selectedChild.label )
+				{
+					case Constants.SOCIAL_TOBACCO_MODULE_NAME:
+					case Constants.SOCIAL_ALCOHOL_MODULE_NAME:
+					case Constants.SOCIAL_DRUGS_MODULE_NAME:
+						var dto:SocialHistoryAddictionDTO = (( id_Views.selectedChild as NavigatorContent).getElementAt( 0 ) as socialYesNo ).SocialHistoryAddictionDto;
+						switch( value.toLowerCase() )
+						{
+							case Constants.STRING_YES_UI:
+								dto.IsYesSelected 	= Constants.STRING_TRUE;
+								dto.IsNoSelected 	= Constants.STRING_FALSE;
+								dto.IsUnknown 		= false;
+								break;
+							case Constants.STRING_NO_UI:
+								dto.IsYesSelected 	= Constants.STRING_FALSE;
+								dto.IsNoSelected 	= Constants.STRING_TRUE;
+								dto.IsUnknown 		= false;
+								break;
+							case Constants.UNKNOWN:
+								dto.IsYesSelected 	= Constants.STRING_FALSE;
+								dto.IsNoSelected 	= Constants.STRING_FALSE;
+								dto.IsUnknown 		= true;
+								break;
+						}
+						
+						break;
+					case Constants.SOCIAL_MERITAL_STATUS_MODULE_NAME:
+						model.socialHistoryDTO.MaritalStatusID = getMeritalStatusId( value );
+						break;
+					case Constants.SOCIAL_WORK_STATUS_MODULE_NAME:
+						switch( value )
+						{
+							case Constants.STRING_YES_UI:
+								model.socialHistoryDTO.IsWorkStatusYesSelected = Constants.STRING_TRUE; 
+								model.socialHistoryDTO.WorkStatusDictationID   = Constants.GUID_FORMAT; // setting it to null guid
+								model.socialHistoryDTO.IsDirty = true; 
+								break;
+							case Constants.STRING_NO_UI:
+								model.socialHistoryDTO.IsWorkStatusYesSelected 	= Constants.STRING_FALSE;
+								model.socialHistoryDTO.OtherDictationID 		= Constants.GUID_FORMAT; // setting it to null guid
+								model.socialHistoryDTO.IsDirty = true; 
+								break;
+						}
+						break;
+					
+					case Constants.SOCIAL_OTHER_MODULE_NAME:
+						switch( value )
+						{
+							case Constants.STRING_YES_UI:
+								model.socialHistoryDTO.IsOtherYesSelected = Constants.STRING_TRUE; 
+								model.socialHistoryDTO.IsDirty = true; 
+								break;
+							case Constants.STRING_NO_UI:
+								model.socialHistoryDTO.IsOtherYesSelected = Constants.STRING_FALSE;
+								model.socialHistoryDTO.IsDirty = true; 
+								break;
+						}
+						break;
+					
+				} 
+			}
+			
+			private function getMeritalStatusId( value:String ):int
+			{
+				switch( value )
+				{
+					case "Married":
+						id_MeritalTab.id_M.selected = true;
+						return QIConstants.MARRIED_MERITAL_STATUS_ID;
+					case "Single":
+						id_MeritalTab.id_S.selected = true;
+						return QIConstants.SINGLE_MERITAL_STATUS_ID;
+					case "Divorced":
+						id_MeritalTab.id_D.selected = true;
+						return QIConstants.DIVORCED_MERITAL_STATUS_ID;
+					case "Widow":
+						id_MeritalTab.id_W.selected = true;
+						return QIConstants.WIDOWED_MERITAL_STATUS_ID;
+				}
+				return -1;
+			}
+			
+			private function setMeritalStatusId( value:int ):void
+			{
+				switch( value )
+				{
+					case QIConstants.MARRIED_MERITAL_STATUS_ID:
+						id_MeritalTab.id_M.selected = true;
+						break;
+					case QIConstants.SINGLE_MERITAL_STATUS_ID:
+						id_MeritalTab.id_S.selected = true;
+						break;
+					case QIConstants.DIVORCED_MERITAL_STATUS_ID:
+						id_MeritalTab.id_D.selected = true;
+						break;
+					case QIConstants.WIDOWED_MERITAL_STATUS_ID:
+						id_MeritalTab.id_W.selected = true;
+						break;
+				}
+			}
+			
+			private function getMeritalStatus( value:int ):String
+			{
+				var status:String;
+				switch( value )
+				{
+					case QIConstants.MARRIED_MERITAL_STATUS_ID:
+						status = "Married";
+						break;
+					case QIConstants.SINGLE_MERITAL_STATUS_ID:
+						status = "Single";
+						break;
+					case QIConstants.DIVORCED_MERITAL_STATUS_ID:
+						status = "Divorced";
+						break;
+					case QIConstants.WIDOWED_MERITAL_STATUS_ID:
+						status = "Widow";
+						break;
+				}
+				return status;
+			}
+			
+			protected function panel1_creationCompleteHandler():void
+			{
+				QIUtilityFunctions.EnableSelection( id_TabButtons, id_TobaccoTab );
+				
+				 id_WorkStatus.id_header.id_SpinerList.visible 	= false;
+				id_Other.id_header.id_SpinerList.visible 		= false;
+				
+				id_Tobaco.id_NotesView.id_TextArea.addEventListener("textChanged",  function(event:Event):void
+				{
+					if( id_Tobaco.SocialHistoryAddictionDto.AddictionNotes && id_Tobaco.SocialHistoryAddictionDto.AddictionNotes.length > 0)
+					{
+						id_TobaccoTab.id_Y.setStyle("skinClass", YNotesRadioButton);					 
+						id_Tobaco.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+						id_Tobaco.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+					}
+					else
+					{
+						id_TobaccoTab.id_Y.setStyle("skinClass", YRadioButton);					 
+					}
+				});
+				
+				id_Alcohol.id_NotesView.id_TextArea.addEventListener("textChanged",  function(event:Event):void
+				{
+					if( id_Alcohol.SocialHistoryAddictionDto.AddictionNotes && id_Alcohol.SocialHistoryAddictionDto.AddictionNotes.length > 0)
+					{
+						id_AlcoholTab.id_Y.setStyle("skinClass", YNotesRadioButton);					 
+						id_Alcohol.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+						id_Alcohol.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+					}
+					else
+					{
+						id_AlcoholTab.id_Y.setStyle("skinClass", YRadioButton);					 
+					}
+				});
+				
+				id_Drugs.id_NotesView.id_TextArea.addEventListener("textChanged",  function(event:Event):void
+				{
+					if( id_Drugs.SocialHistoryAddictionDto.AddictionNotes && id_Drugs.SocialHistoryAddictionDto.AddictionNotes.length > 0)
+					{
+						id_DrugsTab.id_Y.setStyle("skinClass", YNotesRadioButton);					 
+						id_Drugs.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+						id_Drugs.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+					}
+					else
+					{
+						id_DrugsTab.id_Y.setStyle("skinClass", YRadioButton);					 
+					}
+				});
+				
+				id_WorkStatus.id_NotesView.id_TextArea.addEventListener("textChanged",  function(event:Event):void
+				{
+					model.socialHistoryDTO.WorkStatusNotes = id_WorkStatus.id_NotesView.id_TextArea.text;
+					if( id_WorkStatus.id_NotesView.id_TextArea.text.length > 0)
+					{
+						id_WorkTab.id_Y.setStyle("skinClass", YNotesRadioButton);					 
+						id_WorkStatus.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+						id_WorkStatus.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+					}
+					else
+					{
+						id_WorkTab.id_Y.setStyle("skinClass", YRadioButton);					 
+					}
+				});
+				
+				id_Other.id_NotesView.id_TextArea.addEventListener("textChanged",  function(event:Event):void
+				{
+					model.socialHistoryDTO.OtherNotes =  id_Other.id_NotesView.id_TextArea.text;
+					if( id_Other.id_NotesView.id_TextArea.text.length > 0)
+					{
+						id_OtherTab.id_Y.setStyle("skinClass", YNotesRadioButton);					 
+						id_Other.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+						id_Other.id_header.id_NotesBtn.setStyle("skinClass", writeNotesButtonSelected);
+					}
+					else
+					{
+						id_OtherTab.id_Y.setStyle("skinClass", YRadioButton);					 
+					}
+				}); 
+				
+			}
+			
+			private function setSelectedTab(tabName:String):void
+			{
+				var name:String = UtilityFunctions.TitleCase( tabName );
+				 switch( name )
+				{
+					case QIConstants.SOCIAL_TOBACCO_MODULE_NAME:
+						id_Views.selectedIndex = 0;
+						id_Tobaco.id_DetailsView.MediumList = model.historyMediumTypesDTOList;
+						id_Tobaco.id_DetailsView.UsageList  = model.usageAmountTypeDTOList;
+						break;
+					case QIConstants.SOCIAL_ALCOHOL_MODULE_NAME:
+						id_Views.selectedIndex = 1;
+						id_Alcohol.id_DetailsView.MediumList = model.historyMediumTypesDTOList;
+						id_Alcohol.id_DetailsView.UsageList  = model.usageAmountTypeDTOList;
+						break;
+					case QIConstants.SOCIAL_DRUGS_MODULE_NAME:
+						id_Views.selectedIndex = 2;
+						id_Drugs.id_DetailsView.MediumList = model.historyMediumTypesDTOList;
+						id_Drugs.id_DetailsView.UsageList  = model.usageAmountTypeDTOList;
+						break;
+					case QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME:
+						id_Views.selectedIndex = 3;
+						break;
+					case QIConstants.SOCIAL_MERITAL_STATUS_MODULE_NAME:
+						id_Views.selectedIndex = 4;
+						break;
+					case QIConstants.FAMILY_OTHER_MODULE_NAME:
+						id_Views.selectedIndex = 5;
+						break;
+					
+				} 
+				
+				callLater( QIUtilityFunctions.EnableSelection, [ id_TabButtons, QIUtilityFunctions.getButtonByLabel( id_TabButtons, tabName ) ] );
+			}
+			
+			
+			public override function set AllowContents(value:Boolean):void
+			{
+				super.AllowContents 		= value;
+				
+				if( !value )
+					DeselectAllButtons();
+				
+				if( id_Views )
+				{
+					id_Views.visible 			= value;
+					id_Views.includeInLayout	= value;
+					
+					
+					if( value )
+					{
+						setSelectedTab( id_Views.selectedChild.label );
+						BindTabData( id_Views.selectedChild.label );
+					}
+				}
+				
+				/* if( ! model.isNewVisitCreated && value ) //load data if not new visit
+				{
+				LoadData();
+				if( id_Views && id_Views.selectedChild )
+				BindTabData( id_Views.selectedChild.label );
+				} */
+			}
+			
+			private function DeselectAllButtons():void
+			{
+				if( id_TobaccoTab != null )
+				{
+					id_TobaccoTab.id_MainButton.selected 	= false;
+					id_AlcoholTab.id_MainButton.selected 	= false;
+					id_DrugsTab.id_MainButton.selected 		= false;
+					id_WorkTab.id_MainButton.selected 		= false;
+					id_MeritalTab.id_MainButton.selected 	= false;
+					id_OtherTab.id_MainButton.selected 		= false;
+				}
+			}
+			
+			
+			private function BindTabData(tabName:String):void
+			{
+				switch( tabName )
+				{
+					case Constants.SOCIAL_TOBACCO_MODULE_NAME:
+						id_Tobaco.SocialHistoryAddictionDto = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(Constants.SOCIAL_TOBACCO_MODULE_NAME);
+						break;
+					case Constants.SOCIAL_ALCOHOL_MODULE_NAME:
+						id_Alcohol.SocialHistoryAddictionDto = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(Constants.SOCIAL_ALCOHOL_MODULE_NAME);
+						break;
+					case Constants.SOCIAL_DRUGS_MODULE_NAME:
+						id_Drugs.SocialHistoryAddictionDto = QIUtilityFunctions.getSocialHistoryAddictionDTOByName(Constants.SOCIAL_DRUGS_MODULE_NAME);
+						break;
+					case Constants.SOCIAL_MERITAL_STATUS_MODULE_NAME:
+						setMeritalStatusId( model.socialHistoryDTO.MaritalStatusID );
+						break;
+					case Constants.SOCIAL_WORK_STATUS_MODULE_NAME:
+						id_WorkStatus.id_NotesView.id_TextArea.text 	= model.socialHistoryDTO.WorkStatusNotes;
+						model.socialHistoryDTO.WorkStatusDictationID 	= Constants.GUID_FORMAT; // setting it to null guid
+						break;
+					case Constants.SOCIAL_OTHER_MODULE_NAME:
+						id_Other.id_NotesView.id_TextArea.text 	=  model.socialHistoryDTO.OtherNotes;
+						model.socialHistoryDTO.OtherDictationID = Constants.GUID_FORMAT; // setting it to null guid
+						break;
+				} 
+			}
+			
+			public function set selectFirstTab( value:Boolean ):void
+			{
+				 if( value )
+				{
+					BindTabData( Constants.SOCIAL_TOBACCO_MODULE_NAME );
+					setSelectedTab( Constants.SOCIAL_TOBACCO_MODULE_NAME );
+				} 
+			}
+			
+			
+			
+			protected function id_OtherTab_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_OtherTab.id_MainButton.height = 21;
+				id_AlcoholTab.id_MainButton.height = 21;
+				id_DrugsTab.id_MainButton.height = 21;
+				id_MeritalTab.id_MainButton.height = 21;
+				id_TobaccoTab.id_MainButton.height = 21;
+				id_WorkTab.id_MainButton.height = 21;
+			}
+			
+			public function clearData(executeBinding:Boolean = false):void
+			{
+				id_Tobaco.SocialHistoryAddictionDto = null;
+				id_Alcohol.SocialHistoryAddictionDto = null;
+				id_Drugs.SocialHistoryAddictionDto = null;
+				id_WorkStatus.SocialHistoryAddictionDto = null;
+				id_Marital.SocialHistoryAddictionDto = null;
+				id_Other.SocialHistoryAddictionDto = null;
+				
+				if( executeBinding )
+				{
+					setSelectedTab( id_Views.selectedChild.label );
+					BindTabData( id_Views.selectedChild.label );
+				}
+				
+			}
+			
+			public function resetSocialSection():void
+			{
+				clearData(false);
+				//Ayesha 15/02/2013: reset all sections--pending
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!--<fx:Binding source="model.chdataLoaded" destination="selectFirstTab"  /> -->
+	
+	<components1:layout>
+		<s:HorizontalLayout paddingTop="2" paddingLeft="1" paddingRight="1" paddingBottom="1" gap="-1" />
+	</components1:layout>
+	
+	
+	
+	<!--<s:TabBar width="100" skinClass="com.adobe.Quivus.view.controls.skins.VerticalTabSkin" 
+	dataProvider="{id_Views}" click="tabbar1_clickHandler(event)" />-->
+	
+	<s:VGroup id="id_TabButtons" width="100%" maxWidth="132" gap="0" paddingBottom="2" paddingTop="0">
+		<itemrenderers:OptionButton id="id_TobaccoTab" height="20" showOptionButtons="YUN" width="100%" Label="{QIConstants.SOCIAL_TOBACCO_MODULE_NAME}" YesNoClickHandler="OnDrugYesNoClick" ButtonClickHandler="OnTabClick" />
+		<itemrenderers:OptionButton id="id_AlcoholTab" height="20" width="100%" showOptionButtons="YUN" Label="{QIConstants.SOCIAL_ALCOHOL_MODULE_NAME}" YesNoClickHandler="OnDrugYesNoClick" ButtonClickHandler="OnTabClick" />
+		<itemrenderers:OptionButton id="id_DrugsTab" height="20" width="100%" showOptionButtons="YUN" Label="{QIConstants.SOCIAL_DRUGS_MODULE_NAME}" YesNoClickHandler="OnDrugYesNoClick" ButtonClickHandler="OnTabClick" />
+		<itemrenderers:OptionButton id="id_WorkTab" height="20"  width="100%" showOptionButtons="YN" Label="{QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME}" YesNoClickHandler="OnSocialYesNoClick" ButtonClickHandler="OnTabClick" />
+		<itemrenderers:OptionButton id="id_MeritalTab" height="20" width="100%" showOptionButtons="MSDW" Label="{QIConstants.SOCIAL_MERITAL_STATUS_MODULE_NAME}" YesNoClickHandler="OnDrugYesNoClick" ButtonClickHandler="OnTabClick" />
+		<itemrenderers:OptionButton id="id_OtherTab" height="20" width="100%" showOptionButtons="YN" Label="{QIConstants.SOCIAL_OTHER_MODULE_NAME}" YesNoClickHandler="OnSocialYesNoClick" ButtonClickHandler="OnTabClick"
+							   creationComplete="id_OtherTab_creationCompleteHandler(event)" />
+	</s:VGroup>
+	
+	<mx:ViewStack id="id_Views" width="100%" height="123" resizeToContent="true" includeInLayout="{AllowContents}" visible="{AllowContents}"
+				  change="id_Views_changeHandler(event)" creationPolicy="all">
+		<s:NavigatorContent label="{QIConstants.SOCIAL_TOBACCO_MODULE_NAME}">
+			<social:socialYesNo id="id_Tobaco" width="100%" height="100%" Label="Press Yes/No/Unknown" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+		<s:NavigatorContent label="{QIConstants.SOCIAL_ALCOHOL_MODULE_NAME}">
+			<social:socialYesNo id="id_Alcohol" width="100%" height="100%" Label="Press Yes/No/Unknown" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+		<s:NavigatorContent label="{QIConstants.SOCIAL_DRUGS_MODULE_NAME}">
+			<social:socialYesNo id="id_Drugs" width="100%" height="100%" Label="Press Yes/No/Unknown" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+		<s:NavigatorContent label="{QIConstants.SOCIAL_WORK_STATUS_MODULE_NAME}">
+			<social:socialYesNo id="id_WorkStatus" width="100%" height="100%" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+		<s:NavigatorContent label="{QIConstants.SOCIAL_MERITAL_STATUS_MODULE_NAME}">
+			<social:socialYesNo id="id_Marital" width="100%" height="100%" Label="Press Marital Status" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+		<s:NavigatorContent label="{QIConstants.FAMILY_OTHER_MODULE_NAME}">
+			<social:socialYesNo id="id_Other" width="100%" height="100%" creationComplete="OnTabCreationComplete(event)" />
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	
+</components1:SelectablePanel>

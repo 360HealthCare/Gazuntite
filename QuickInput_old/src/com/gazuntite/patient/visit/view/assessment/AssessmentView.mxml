@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="init(event)"
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*"
+		 xmlns:treatment="com.gazuntite.patient.visit.view.assessment.treatment.*" 
+		 xmlns:plan="com.gazuntite.patient.visit.view.assessment.plan.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.PMHButtonSkin;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QICloseRedButtonSkin;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.view.assessment.treatment.TreatmentPanel;
+			import com.gazuntite.patient.visit.view.commons.QICollapseableView;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			public var currentIndex:int = 1;
+			public var currentSelectedView:QICollapseableView;
+			
+			private var m_bHasChange:Boolean;
+			
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			[Bindable]
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+				
+				if( value || id_DiagnosisPanel.hasChange || id_TreatmentPanel.hasChange || id_PlanPanel.hasChange )
+				{
+					m_bHasChange = true;
+				}
+				else
+				{
+					m_bHasChange = false;
+				}
+			}
+			
+			public function setFirstTab():void
+			{
+				collupseAllPanel();
+				setSelectedById( "id_DiagnosisBtn" );
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				addEventListener("SelectSection" , SwitchToNextPanel);
+				addEventListener(CloseEvent.CLOSE , onClosePanel);
+				//SelectNextByIndex();
+			}
+			
+			protected function SwitchToNextPanel(event:SelectSection):void
+			{
+				SelectNextByID(event.SectionID);
+			}
+			
+			public function removeAllPopups():void
+			{
+				/* id_AlergiesPanel.AllowOtherPopup		= false;
+				id_HistoryPanel.AllowOtherPopup		= false;
+				id_ImmunizationPanel.AllowOtherPopup	= false;
+				id_ChronicmedicationPanel.AllowOtherPopup	= false; */
+			}
+			
+			private function SelectNextByID( sectionID:String ):void
+			{
+				removeAllPopups();
+				collupseAllPanel();
+				switch( sectionID )
+				{
+					case "id_DiagnosisPanel":
+						setSelectedById( "id_TreatmentBtn" );
+						break;
+					case "id_TreatmentPanel":
+						setSelectedById( "id_PlanBtn" );
+						break;
+					case "id_PlanPanel":
+						setSelectedById( "id_DiagnosisBtn" );
+						break;
+					
+					default:
+						setSelectedById( "id_TreatmentBtn" );
+						break;
+				}
+			}
+			private function onClosePanel(event:CloseEvent):void
+			{
+				switch( event.target.id )
+				{
+					case "id_DiagnosisBtn":
+					case "id_DiagnosisPanel":
+						
+						id_DiagnosisBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+						break;
+					
+					case "id_TreatmentBtn":
+					case "id_TreatmentPanel":
+						
+						id_TreatmentBtn.setStyle("skinClass", QICloseRedButtonSkin);
+							
+						break;
+					
+					case "id_PlanBtn":
+					case "id_PlanPanel":
+						
+						id_PlanBtn.setStyle("skinClass", QICloseRedButtonSkin);
+						
+						break;
+
+				}
+			}
+			
+			private function ShowPanel(event:MouseEvent):void
+			{
+				
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				
+				
+				//getCurrentSelectedPanel().ExpandedView = true; 
+				
+				getCurrentSelectedPanel() .AllowMoveToNextPanel( function():void
+				{
+					event.currentTarget.selected = true;
+					
+					setSelectedById( event.currentTarget.id )
+				}); 
+			}
+			
+			public function ScrollUp():void
+			{
+				id_Scroller.viewport.verticalScrollPosition = id_Scroller.viewport.verticalScrollPosition + 15;
+			}
+			
+			public function ScrollDown():void
+			{
+				id_Scroller.viewport.verticalScrollPosition = id_Scroller.viewport.verticalScrollPosition - 15;
+			}
+			
+			public function collupseAllPanel():void
+			{
+				
+				id_DiagnosisPanel.ExpandedView			= false;
+				id_TreatmentPanel.ExpandedView 		= false;
+				id_PlanPanel.ExpandedView 		= false; 
+				
+				
+			}
+			
+			public function DeSelectAllNavButton():void
+			{
+				id_DiagnosisBtn.selected		=	false;
+				id_TreatmentBtn.selected		=	false;
+				id_PlanBtn.selected				=	false;
+
+				
+			}
+			
+			
+			public function DeSelectAllPageBtn():void
+			{
+				id_diagnosisPage.selected = false;
+				id_TreatmentPage.selected = false;
+				id_PlanPage.selected = false;
+				
+			}
+			
+			private function getCurrentSelectedPanel():QICollapseableView
+			{
+				if( id_DiagnosisPanel.ExpandedView )
+				{
+					return id_DiagnosisPanel;
+				}
+				else if( id_TreatmentPanel.ExpandedView )
+				{
+					return id_TreatmentPanel;
+				}
+				else if( id_PlanPanel.ExpandedView )
+				{
+					return id_PlanPanel;
+				}
+				
+				return id_DiagnosisPanel;
+			}
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				DeSelectAllPageBtn();
+				
+				currentIndex += 1 ;
+				SelectNextByIndex()
+				
+			}
+			
+			protected function previous_clickHandler(event:MouseEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				DeSelectAllPageBtn()
+				
+				currentIndex -= 1 ;
+				SelectNextByIndex()
+				
+			}
+			
+			
+			protected function pagination_itemClickHandler(event:ItemClickEvent):void
+			{
+				
+				collupseAllPanel();
+				
+				DeSelectAllNavButton();
+				
+				DeSelectAllPageBtn()
+				
+				getCurrentSelectedPanel() .AllowMoveToNextPanel ( function():void
+				{
+					setSelectedById( event.item as String );
+				});
+			}
+			
+			
+			public function SelectNextByIndex():void
+			{
+				if( currentIndex == 0 )
+					currentIndex = 3;
+				
+				switch( currentIndex )
+				{
+					case 1:
+						setSelectedById( "id_DiagnosisBtn" );
+						break;
+					case 2:
+						setSelectedById( "id_TreatmentBtn" );
+						break;
+					case 3:
+						setSelectedById( "id_PlanBtn" );
+						break;
+					default:
+						setSelectedById( "id_DiagnosisBtn" );
+						break;
+					
+				}
+			}
+			
+			public function PinAll( value:Boolean ):void
+			{
+				id_DiagnosisPanel.PinView 							= value;
+				id_DiagnosisPanel.id_Header.id_Pin.selected 		= value;
+				
+				id_TreatmentPanel.PinView 						= value;
+				id_TreatmentPanel.id_Header.id_Pin.selected 	= value;
+				
+				id_PlanPanel.PinView 							= value;
+				id_PlanPanel.id_Header.id_Pin.selected 			= value;
+				
+				 if( !value )
+					currentSelectedView.ExpandedView = true; 
+				
+			}
+			
+			public function checkPinAll():Boolean
+			{
+				return id_DiagnosisPanel.PinView 	&&
+					id_TreatmentPanel.PinView 		&&
+					id_PlanPanel.PinView 	;
+				
+			}
+			
+			
+			private function inActivateBorders():void 
+			{				
+				
+				id_DiagnosisPanel.ShowFocusBorder 		= false;
+				id_TreatmentPanel.ShowFocusBorder 			= false;
+				id_PlanPanel.ShowFocusBorder 		= false;
+				
+			}
+			
+			private function setSelectedById(tabId:String):void
+			{
+				DeSelectAllNavButton();
+				DeSelectAllPageBtn();
+				
+				switch( tabId )
+				{
+					case "id_DiagnosisBtn":
+					case "id_DiagnosisPanel":
+						inActivateBorders(); 
+						currentSelectedView				= id_DiagnosisPanel;
+						id_DiagnosisBtn.selected			= true;
+						id_DiagnosisPanel.ExpandedView 		    = true;
+						id_DiagnosisPanel.visible		 		= true;
+						id_diagnosisPage.selected			= true;
+						
+						
+						callLater( function():void
+						{
+							id_DiagnosisPanel.id_diagnosis.id_DiagnosisView.id_AssociateVisitzCombo.setFocus();							
+						});
+						
+						currentIndex						= 1;
+						id_DiagnosisBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						id_Scroller.viewport.verticalScrollPosition = 5;
+						break;
+					
+					case "id_TreatmentBtn":
+					case "id_TreatmentPanel":
+						inActivateBorders();
+						currentSelectedView					= id_TreatmentPanel;
+						id_TreatmentBtn.selected					= true;
+						id_TreatmentPanel.ExpandedView 				= true;
+						id_TreatmentPanel.visible		 			= true;
+						id_TreatmentPage.selected					= true;
+
+						currentIndex						= 2;
+						id_TreatmentBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						 if( checkPinAll() )
+							id_Scroller.viewport.verticalScrollPosition = id_DiagnosisPanel.height;
+						else
+							id_Scroller.viewport.verticalScrollPosition = id_DiagnosisPanel.height + 25; 
+						
+						break;
+					
+					case "id_PlanBtn":
+					case "id_PlanPanel":
+						inActivateBorders();
+						currentSelectedView					= id_PlanPanel;
+						id_PlanBtn.selected					= true;
+						id_PlanPanel.ExpandedView 			= true;
+						id_PlanPanel.visible		 			= true;
+						id_PlanPage.selected					= true;
+						
+						callLater( function():void
+						{
+							id_PlanPanel.id_LabOutView.id_TestType.setFocus();
+						});
+						
+						currentIndex						= 3;
+						id_PlanBtn.setStyle("skinClass", PMHButtonSkin);
+						
+						if( checkPinAll() )
+							id_Scroller.viewport.verticalScrollPosition = id_DiagnosisPanel.height + 45;
+						else
+							id_Scroller.viewport.verticalScrollPosition = id_DiagnosisPanel.height + id_DiagnosisPanel.height;
+						
+						break;
+									
+				}
+				
+				
+			}
+			
+			
+			public function collupseAllPanelexcept(current:String):void
+			{
+				if(current != id_DiagnosisPanel.id)
+					id_DiagnosisPanel.ExpandedView 		= false;
+				
+				if(current != id_TreatmentPanel.id)
+					id_TreatmentPanel.ExpandedView 		= false;
+				
+				if(current != id_PlanPanel.id)
+					id_PlanPanel.ExpandedView 			= false;
+				
+			}
+			
+			protected function QSViewStateChangeHandler(event:QSViewStateEvent):void
+			{
+				
+				
+				if(event.viewState == QSViewStateEvent.EXPANDED_VIEW && event.currentTarget != currentSelectedView)
+				{
+					collupseAllPanelexcept(event.currentTarget.id);
+					//collupseAllPanel();
+					DeSelectAllNavButton();
+					DeSelectAllPageBtn();
+					setSelectedById( event.currentTarget.id );
+				}
+					
+				else if(event.viewState ==  QSViewStateEvent.COLLAPSED_VIEW)
+				{
+					DeSelectAllNavButton();
+					DeSelectAllPageBtn()
+					currentSelectedView = null;
+				} 			
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="pagination" itemClick="pagination_itemClickHandler(event)"/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	<s:HGroup width="100%" horizontalAlign="center" height="40" verticalAlign="middle">
+		<s:Button skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBPMHPrevBtn"  click="previous_clickHandler(event)"
+				  toolTip="Previous Section" buttonMode="true"/>
+		
+		<s:HGroup width="100%" horizontalAlign="left">		
+			<s:ToggleButton id="id_DiagnosisBtn" width="115" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHButtonSkin" label="DIAGNOSIS"
+							click="ShowPanel(event)" buttonMode="true" useHandCursor="true"  /> <!--selected="true"-->
+			
+			<s:ToggleButton id="id_TreatmentBtn" width="115" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHButtonSkin" label="TREATMENT"
+							click="ShowPanel(event)" buttonMode="true" useHandCursor="true" />
+			
+			<s:ToggleButton id="id_PlanBtn" width="65" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHButtonSkin" label="PLAN"
+							click="ShowPanel(event)" buttonMode="true" useHandCursor="true" />
+			
+			
+		</s:HGroup>
+		<s:Button skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VBPMHNextBtn" click="next_clickHandler(event)"
+				  toolTip="Next Section" buttonMode="true"/>
+	</s:HGroup>
+	
+	<s:BorderContainer width="100%" height="100%" cornerRadius="3" backgroundColor="#999AAA" 
+					   borderAlpha="0" borderColor="#999AAA" backgroundAlpha="0">
+		<s:layout>
+			<s:VerticalLayout paddingTop="0" horizontalAlign="left" gap="1"  />
+		</s:layout>
+		<s:Scroller id="id_Scroller" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >
+			<s:Group width="100%" height="100%" >
+				<s:layout>
+					<s:VerticalLayout paddingTop="2" horizontalAlign="center" verticalAlign="top" gap="-5" clipAndEnableScrolling="true" />
+				</s:layout>
+				
+				
+				<diagnosis:DiagnosisPanel id="id_DiagnosisPanel" ExpandedView="false" width="100%"  HeadingLable="Diagnosis" QSViewStateChange="QSViewStateChangeHandler(event)" includeInLayout="{id_DiagnosisPanel.visible}" />
+													  
+				<treatment:TreatmentPanel id="id_TreatmentPanel" ExpandedView="false" width="100%" HeadingLable="Treatment" QSViewStateChange="QSViewStateChangeHandler(event)" includeInLayout="{id_TreatmentPanel.visible}" />
+										  
+				<plan:PlanPanel id="id_PlanPanel" ExpandedView="false" width="100%"  HeadingLable="Plan" QSViewStateChange="QSViewStateChangeHandler(event)" includeInLayout="{id_PlanPanel.visible}" />
+
+			</s:Group>
+		</s:Scroller>
+		
+		<s:HGroup width="100%" horizontalAlign="center" paddingTop="5">
+			
+			<s:RadioButton id="id_diagnosisPage"  	selected="true"	groupName="pagination" value="id_DiagnosisBtn" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Diagnosis"	/>
+			<s:RadioButton id="id_TreatmentPage" 	groupName="pagination" value="id_TreatmentBtn" 	skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn"	buttonMode="true" useHandCursor="true" toolTip="Treatment"/>
+			<s:RadioButton id="id_PlanPage" 		groupName="pagination" value="id_PlanBtn" 		skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.QIPaginationRadioBtn" buttonMode="true" useHandCursor="true" toolTip="Plan"/>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+</s:Group>

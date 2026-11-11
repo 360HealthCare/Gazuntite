@@ -1,0 +1,48 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Buttonbars
+Black buttonbars */
+
+.blackButtonBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonBarSkins.blackButtonBar");
+}
+
+/*Grey buttonbars */
+.greyButtonBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.buttonBarSkins.greyButtonBar");
+}
+
+/*********************************************************************************************/
+/*Tabbars
+Blue tabbars */
+
+.blueTabBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.tabBarSkins.blueTabBar");
+}
+
+/*Black tabbars */
+
+.blackTabBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.tabBarSkins.blackTabBar");
+}
+
+/*Grey tabbars */
+
+.lightGreyTabBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.tabBarSkins.lightGreyTabBar");
+}
+
+/*Silver tabbars */
+
+.silverTabBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.tabBarSkins.silverTabBar");
+}

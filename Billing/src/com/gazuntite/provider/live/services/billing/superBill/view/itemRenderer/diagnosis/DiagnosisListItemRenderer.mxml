@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*" 				
+				autoDrawBackground="false"
+				width="100%" 
+				initialize="init()" 
+				xmlns:diagnosis="com.gazuntite.provider.live.services.billing.superBill.view.diagnosis.*" 
+				>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.ICDCodeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillDiagnosisInfoDTO;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			
+			[Bindable]
+			private var diagnosisDTO:SuperBillDiagnosisInfoDTO;
+			
+			[Bindable]
+			private var selectedDiagnosis:ICDCodeDTO;
+			
+			[Bindable]	public var inEditMode:Boolean = false;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				diagnosisDTO = data as SuperBillDiagnosisInfoDTO;
+				
+				selectedDiagnosis =new ICDCodeDTO();
+				
+				selectedDiagnosis.ID =  int(diagnosisDTO.ICDCodeID);
+				selectedDiagnosis.IcdCodeName = diagnosisDTO.ICDCodeName;
+				selectedDiagnosis.IcdCodeDescription = diagnosisDTO.ICDCodeDescription;
+				
+				invalidateDisplayList();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function init():void
+			{
+				removeGlow();
+			}
+			
+			private function toggleEditView():void
+			{
+			//	inEditMode = !inEditMode;
+				
+				if(inEditMode)
+				{
+					//applyGlow();			
+				}
+				else
+				{
+					//removeGlow();
+				}
+				
+			}
+			
+			private function applyGlow():void
+			{
+				glow1.alpha = 1;
+				glowAnimation.play();
+			}
+			public function removeGlow():void
+			{
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+			}
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!diagnosisDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{					
+					/* diagnosisDTO.IsDeleted = true;
+					
+					var ev:SuperBilldiagnosisEvent = new SuperBilldiagnosisEvent(
+					SuperBilldiagnosisEvent.SUPER_BILL_diagnosis_DELETE_EVENT, true);
+					
+					ev.diagnosisDTO = diagnosisDTO;
+					
+					dispatchEvent(ev); */
+				});
+				
+				event.stopPropagation();
+			}
+			
+			private function showGlow():void
+			{
+				if (Boolean(diagnosisDTO.IsCreatedFromSuperBill))
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>	
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:SkinnableContainer id="id_Header"
+						  width="100%" height="30" buttonMode="true" toolTip="Open/Close Details"  click="toggleEditView()" >	
+		<s:HGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="left"  paddingLeft="8"  >
+			
+			<s:Label id="codeNmae" text="{diagnosisDTO.ICDCodeName}"  width="25%" color="#333333" fontFamily="CalibriCFF"  toolTip="{'Code: ' + diagnosisDTO.ICDCodeName}"	
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1"/>
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label id="codeDesc" text="{diagnosisDTO.ICDCodeDescription}" width="50%"  color="#333333" fontFamily="CalibriCFF" toolTip="{'Description: ' + diagnosisDTO.ICDCodeDescription}"	 
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1" />
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label id="ordr" text="1"   width="25%" color="#333333" fontFamily="CalibriCFF"	toolTip="Order: 1"
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1"/>
+			<s:Line height="100%" visible="false" includeInLayout="false">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>	
+			
+			<s:HGroup width="70"  height="100%" verticalAlign="middle" horizontalAlign="center" visible="false" includeInLayout="false">
+				<s:Button id="id_btnEdit"						
+						  buttonMode="true" toolTip="Edit"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton"
+						  includeInLayout="{id_btnEdit.visible}"
+						  />			
+				<s:Button skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+						  buttonMode="true" useHandCursor="true" toolTip="Delete Diagnosis"
+						  click="deleteClickHandler(event)"/>
+			</s:HGroup>	
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 10}" top="30"  visible="{inEditMode}" includeInLayout="{inEditMode}" >
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<diagnosis:SuperBillDiagnosisInputView width="100%" isInItemRenderer="true" visible="{inEditMode}" includeInLayout="{inEditMode}" 
+											   selectedDiagnosis="{selectedDiagnosis}" diagnosisDTO="{diagnosisDTO}" showInputView="true" />
+	</s:Group>
+	
+</s:ItemRenderer>

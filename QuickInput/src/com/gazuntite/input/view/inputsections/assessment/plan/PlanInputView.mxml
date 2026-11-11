@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components1="com.gazuntite.controls.extended.components.*"
+					  xmlns:labOut="com.gazuntite.input.view.inputsections.assessment.plan.labOut.*"
+					  xmlns:recommendation="com.gazuntite.input.view.inputsections.assessment.plan.recommendation.*"
+					  xmlns:followUp="com.gazuntite.input.view.inputsections.assessment.plan.followUp.*"
+					  xmlns:quickInput="com.gazuntite.provider.live.services.diabetes.view.quickInput.*" 
+					  xmlns:advanceCare="com.gazuntite.provider.live.services.diabetes.view.quickInput.advanceCare.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  creationComplete="cc()" 
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.assessment.plan.advanceCare.PatientInputAssessmentAdvanceCareViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	private var viewModel:PatientInputAssessmentPlanViewModel = PatientInputAssessmentPlanViewModel.getInstance();
+			[Bindable]  private var ACviewModel:PatientInputAssessmentAdvanceCareViewModel= PatientInputAssessmentAdvanceCareViewModel.getInstance();
+			
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{	
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				if(event.isNoteSave)			
+				{	
+					if (!viewModel.notesDTO)
+					{
+						var note:String = id_DictationNote.SectionLevelNote;
+						
+						viewModel.notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.PLAN_MODULE_NAME);
+						viewModel.notesDTO.Note = note;
+					}
+					else
+					{
+						viewModel.notesDTO.Note = id_DictationNote.SectionLevelNote;
+					}
+					
+					var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( viewModel.notesDTO, QIConstants.PLAN_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				}
+				else
+				{
+					if (!viewModel.dictationDTO)
+					{
+						var dictaionId:String = id_DictationNote.SectionLevelDictationID;
+						
+						viewModel.dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.PLAN_MODULE_NAME);
+						viewModel.dictationDTO.DictationID = dictaionId;
+					}
+					
+					var dicEvent:ManageModuleDictationEvent = new ManageModuleDictationEvent( viewModel.dictationDTO, QIConstants.PLAN_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, model.LoggedInUserSelectedBranchId, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( dicEvent );
+				}
+				
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed")
+				if(isNoteSaved)
+					viewModel.dictationNoteViewModel.visible = false;
+			}
+			
+			public function ClearPlanFormView():void
+			{
+				if(id_labOutView)
+					id_labOutView.ClearLabOutView();
+				if(id_recommendationView)
+					id_recommendationView.ClearRecommendationView();
+				if(id_FollowupView)
+					id_FollowupView.ClearFollowUpView();
+				if(id_advanceCareView)
+					id_advanceCareView.ClearAdvanceCareView();
+				
+				
+				viewModel.notesDTO = null;
+				viewModel.dictationDTO = null;
+				if( null != id_DictationNote )
+				{
+					id_DictationNote.SectionLevelNote = "";
+					id_DictationNote.resetToDefault();
+				}
+			}
+			
+			protected function id_labOutView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_labOutView.addEventListener(SelectSection.SelectInnerTabEvent,function():void{
+					
+					uiViewStack.selectedIndex = 1;
+				});
+				
+			}
+			
+			protected function id_recommendationView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_recommendationView.addEventListener(SelectSection.SelectInnerTabEvent,function():void{
+					
+					uiViewStack.selectedIndex = 2;
+				});
+			}
+			
+			protected function id_FollowupView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_FollowupView.addEventListener(SelectSection.SelectInnerTabEvent,function():void{
+					
+					uiViewStack.selectedIndex = 3;
+				});
+				
+			}
+			
+			protected function id_advanceCareView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_advanceCareView.addEventListener(SelectSection.SelectInnerTabEvent,function():void{
+					
+					dispatchEvent(new SelectSection(SelectSection.SelectTabEvent,'id_InputHistoryMain'));
+				});
+				
+			}
+			
+			
+			private function SwitchNotes(event:IndexChangeEvent):void
+			{
+				//Dont touch this fucntion , your system will blow up. Author : Moeen Mohsin
+				if(event.oldIndex != -1 && event.newIndex!= -1)
+				{
+					switch(event.oldIndex)
+					{
+						case 0:
+						{
+							id_labOutView.TempRecordLevelNote = RecordLevelNote;
+							break;
+						}
+						case 1:
+						{
+							id_recommendationView.TempRecordLevelNote = RecordLevelNote;
+							break;
+						}
+						case 2:
+						{
+							id_FollowupView.TempRecordLevelNote = RecordLevelNote;
+							break;
+						}
+						case 3:
+						{
+							id_advanceCareView.TempRecordLevelNote = RecordLevelNote;
+							break;
+						}
+							
+						default:
+						{
+							//its not gona come here ever.
+							break;
+						}
+					}
+					
+					switch(event.newIndex)
+					{
+						case 0:
+						{
+							RecordLevelNote = id_labOutView.TempRecordLevelNote
+							break;
+						}
+						case 1:
+						{
+							RecordLevelNote = id_recommendationView.TempRecordLevelNote;
+							break;
+						}
+						case 2:
+						{
+							RecordLevelNote = id_FollowupView.TempRecordLevelNote;
+							break;
+						}
+						case 3:
+						{
+							RecordLevelNote = id_advanceCareView.TempRecordLevelNote;
+							break;
+						}
+							
+						default:
+						{
+							//its not gona come here ever.
+							break;
+						}
+					}
+				}
+			}
+			
+			protected function uiViewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				SwitchNotes(event);
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="5"/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" label="PLAN" maxSectionCounter="3" sectionNumber="3" showInputPart="true"
+								  PrevSectionLabel="Treatment"
+								  NextSectionLabel=""
+								  NavItems="{NavItems}"
+								  MainSectionLabel="Assessment"
+								  dictationNoteViewModel="{viewModel.dictationNoteViewModel}"
+								  SectionLevelNote="@{viewModel.notesDTO.Note}"
+								  SectionLevelDictationID="{viewModel.dictationDTO.DictationID}"
+								  />
+	
+	<!--<dictation:PatientDictationNoteView id="id_DictationNote" 
+	width="100%" minHeight="47" viewModel="{viewModel.dictationNoteViewModel}"
+	isSectionLevel="true" note="@{viewModel.notesDTO.Note}"/>-->
+	
+	<dictation2:NewPatientDictationNoteView  id="id_DictationNote" 
+											width="100%" minHeight="47" isSectionLevel="true"
+											viewModel="{viewModel.dictationNoteViewModel}" 
+											SectionLevelNote="@{viewModel.notesDTO.Note}"
+											RecordLevelNote="@{RecordLevelNote}"											
+											SectionLevelDictationID="@{viewModel.dictationDTO.DictationID}"
+											/>
+	
+	<s:VGroup width="100%" height="100%" gap="-5" paddingTop="10" paddingLeft="2" paddingRight="2" horizontalAlign="center">
+		<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="3">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="center" verticalAlign="top" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="2"/>
+			</s:layout>
+			<components1:LabelViewStack id="uiViewStack" 
+										width="100%" height="100%" backgroundAlpha="0" borderVisible="false"
+										selectedIndex="@{viewModel.planInputTabSelectedIdx}" change="uiViewStack_changeHandler(event)">
+				<s:ArrayList> 
+					<labOut:LabOutInputView id="id_labOutView" name="Lab Out" width="100%" height="100%" creationComplete="id_labOutView_creationCompleteHandler(event)" RecordLevelNote="@{RecordLevelNote}" RecordLevelDictationID="@{id_DictationNote.RecordLevelDictationID}"/>
+					<recommendation:RecommendationInputView id="id_recommendationView" name="Recommendation" width="100%" height="100%" creationComplete="id_recommendationView_creationCompleteHandler(event)" RecordLevelNote="@{RecordLevelNote}" RecordLevelDictationID="@{id_DictationNote.RecordLevelDictationID}"/>
+					<followUp:FollowUpInputView id="id_FollowupView" name="Follow Up" width="100%" height="100%" creationComplete="id_FollowupView_creationCompleteHandler(event)" RecordLevelNote="@{RecordLevelNote}" RecordLevelDictationID="@{id_DictationNote.RecordLevelDictationID}"/>
+					<advanceCare:AdvanceCareView id="id_advanceCareView" name="Advance Care" width="100%" height="100%" dictationNoteViewModel = "{ACviewModel.inlineDictationNoteViewModel}" creationComplete="id_advanceCareView_creationCompleteHandler(event)" RecordLevelNote="@{RecordLevelNote}" />
+				</s:ArrayList>
+			</components1:LabelViewStack>
+		</s:BorderContainer>
+	</s:VGroup>	
+	
+</s:SkinnableContainer>

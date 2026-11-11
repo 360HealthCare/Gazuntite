@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.zigron.controls.extended.components.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ICDCodeDTO;
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.controls.extended.skins.comboBoxRegisterationSkin;
+			import com.gazuntite.patient.visit.event.assessment.diagnosis.LoadDiagnosisICDCodeEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			
+			import mx.controls.Alert;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var selectedIcdCodeDTO:ICDCodeDTO;
+			
+			
+			private var serachTerm:String;//Search term for the records
+			
+			/* [Bindable]
+			public var selectedIcdCodeDTO:ICDCodeDTO; */
+			
+			private var m_oMedicalHistoryDto:MedicalHistoryDTO;
+			private var isActive:String='';
+			
+			[Bindable]
+			public function get medicalHistoryDto():MedicalHistoryDTO
+			{
+				return m_oMedicalHistoryDto;
+			}
+			
+			public function set medicalHistoryDto(value:MedicalHistoryDTO):void
+			{
+				m_oMedicalHistoryDto = value;
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				var edited:Boolean = false;
+				//Only able to enter record when all mandatory records are enterd
+				if((id_ICDCode.selectedItem) || (id_Description.textInput.text.length > 3))
+				{
+					edited = true; 
+//					id_add.enabled	= true;
+					
+					/* selectedIcdCodeDTO = new ICDCodeDTO();
+					if( id_ICDCode.selectedItem )
+					{
+						selectedIcdCodeDTO = id_ICDCode.selectedItem;
+					}
+					else
+					{
+						selectedIcdCodeDTO.IcdCodeDescription = id_Description.textInput.text;
+					}
+					
+					/* if(isActive == Constants.STRING_FALSE || isActive == Constants.STRING_TRUE)
+						selectedIcdCodeDTO.IsActive = isActive == Constants.STRING_TRUE; *  /
+					if(isActive == Constants.STRING_YES_UI)// || isActive == Constants.STRING_TRUE)
+						selectedIcdCodeDTO.IsActive = Constants.STRING_TRUE;//isActive == Constants.STRING_TRUE;
+					if(isActive == Constants.STRING_NO_UI)// || isActive == Constants.STRING_TRUE)
+						selectedIcdCodeDTO.IsActive = Constants.STRING_FALSE;//isActive == Constants.STRING_TRUE;
+					
+					selectedIcdCodeDTO.Onset = id_Onset.text.substr( 0, 200 ); // maximum allowes length is 200;
+					
+					selectedIcdCodeDTO.DictationID = Constants.GUID_FORMAT; */
+				}
+				
+				//hasViewChanged = (_hasGridChanged)? _hasGridChanged : edited;
+				
+				return edited;
+			}
+			
+			public function resetFields():void
+			{
+				//selectedIcdCodeDTO 			= null;
+				id_ActiveYes.selected		= false;
+				id_ActiveNo.selected		= false;
+				serachTerm						= '';
+				id_ICDCode.textInput.text 		= '';
+				id_Description.textInput.text 	= '';
+				id_Description.selectedIndex	= -1;
+				id_ICDCode.selectedIndex		= -1;
+				id_Onset.text 					= '';
+				id_Onset.prompt					= 'OnSet';
+				isActive						='';
+				id_Description.invalidateDisplayList();
+				id_Description.invalidateDisplayList();
+				id_ICDCode.invalidateDisplayList();
+			}
+			
+			private function icdCodeChangeHandler():void
+			{
+				serachTerm = id_ICDCode.textInput.text;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				 if(serachTerm.length >=3)
+				{
+					selectedIcdCodeDTO = null;
+					var icdEvent : LoadDiagnosisICDCodeEvent = new LoadDiagnosisICDCodeEvent(serachTerm, null);
+					CairngormEventDispatcher.getInstance().dispatchEvent( icdEvent );
+				}
+				else
+				{
+					id_Description.textInput.text = '';
+					id_Description.selectedIndex = -1;
+					selectedIcdCodeDTO = null;
+				} 
+//				id_add.enabled 		= isGetEdited();
+			}
+			
+			private function icdDescriptionChangeHandler():void
+			{
+				serachTerm = id_Description.textInput.text;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				if(serachTerm.length >=3)
+				{
+					selectedIcdCodeDTO = null;
+					var icdEvent : LoadDiagnosisICDCodeEvent = new LoadDiagnosisICDCodeEvent(serachTerm, null);
+					CairngormEventDispatcher.getInstance().dispatchEvent( icdEvent );
+				}
+				else
+				{
+					id_ICDCode.textInput.text = '';
+					id_ICDCode.selectedIndex = -1;
+					selectedIcdCodeDTO = null;
+				}
+//				id_add.enabled 		= isGetEdited();
+			}
+
+			protected function id_ICDCode_changeHandler(event:IndexChangeEvent):void
+			{
+				  if( id_ICDCode.selectedItem )
+				{
+					var item:ICDCodeDTO 		= id_ICDCode.selectedItem;
+					id_Description.selectedItem = item;
+					selectedIcdCodeDTO 			= item;
+					 id_ActiveYes.selected = item.IsActive ? true:false;
+					id_ActiveNo.selected = item.IsActive ? false:true; 
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				}
+				else
+				{
+					Alert.show("please select ICD from list. for custom ICD add custom discription","invalid input");
+				} 
+			}
+
+			protected function id_Description_changeHandler(event:IndexChangeEvent):void
+			{
+				 if( id_Description.textInput.text.length > 3 )
+				{
+					var item:ICDCodeDTO;
+					if( id_Description.selectedIndex >= 0 )
+					{
+						item = id_Description.selectedItem;
+						id_ICDCode.selectedItem 	= item;
+					}
+					else 
+					{
+						item = new ICDCodeDTO();
+						item.IcdCodeDescription = id_Description.textInput.text;
+					}
+					
+					selectedIcdCodeDTO 			= item;
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				} 
+			}
+
+
+			protected function id_ICDCode_keyDownHandler(event:KeyboardEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+
+			protected function id_Description_keyDownHandler(event:KeyboardEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+
+			protected function id_add_clickHandler(event:MouseEvent):void
+			{
+				//this.medicalHistoryDto.ICDCodeList.addItem( selectedIcdCodeDTO );
+				resetFields();
+			}
+
+
+			protected function rbGroup_changeHandler(event:Event):void
+			{
+				var value:String = event.currentTarget.selectedValue.toString();
+				isActive = value; //== Constants.STRING_YES_UI;
+				
+				dispatchEvent( new Event("ICD_Change", true, true ) );
+			}
+			
+			private function validateOnset():void
+			{
+				dispatchEvent( new Event("ICD_Change", true, true ) );
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" change="rbGroup_changeHandler(event)" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="-2" />
+	</s:layout>
+	
+	<family:DetailViewHeader id="id_header" width="100%" height="23" />
+	
+	<s:SkinnableContainer height="100%" width="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIInnerFormBGSkin" >
+		
+		<s:layout>
+			<s:VerticalLayout paddingLeft="5" paddingBottom="10" paddingTop="9" gap="2" />
+		</s:layout>
+		
+		
+		
+		
+		<components1:LabelComboBox id="id_ICDCode" prompt="ICD Code" width="100" dataProvider="{model.icdCodeDTOList}"
+								  keyUp="icdCodeChangeHandler()" keyDown="id_ICDCode_keyDownHandler(event)" labelField="IcdCodeName"
+								  change="id_ICDCode_changeHandler(event)" useHandCursor="true" buttonMode="true"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationSkin" 
+								  tabIndex="3" />
+		<components1:LabelComboBox id="id_Description" prompt="ICD Description" width="100%" dataProvider="{model.icdCodeDTOList}"
+								  keyUp="icdDescriptionChangeHandler()" keyDown="id_Description_keyDownHandler(event)"
+								  change="id_Description_changeHandler(event)" useHandCursor="true" buttonMode="true" labelField="IcdCodeDescription"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationSkin"  
+								  tabIndex="4"/>
+		
+		<s:HGroup gap="-1" verticalAlign="middle">
+			<s:Label id="id_ActiveLbl" text="Active" fontFamily="Calibri" color="#ffffff"/>
+			<s:Spacer width="6" />
+			<s:RadioButton id="id_ActiveYes" value="{QIConstants.STRING_YES_UI}" groupName="rbGroup" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton" tabIndex="4" buttonMode="true" toolTip="Yes"/>
+			<s:RadioButton id="id_ActiveNo" value="{QIConstants.STRING_NO_UI}" groupName="rbGroup" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.NRadioButton" buttonMode="true" toolTip="No"/>
+			<s:Spacer width="6" />
+			<components1:LabelDateField id="id_Onset" prompt="OnSet" width="100" change="validateOnset()"
+									   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+									   selectableRange="{{rangeEnd : new Date()}}" tabIndex="6" IsEditAllow="false" editable="false"/>
+			<!--<s:Group name="spacer" width="100%" />-->
+			<!--<s:Button id="id_add" label="+" enabled="false" tabIndex="5" click="id_add_clickHandler(event)"/>-->
+		</s:HGroup>
+		
+		
+	</s:SkinnableContainer>
+	
+	
+</s:Group>

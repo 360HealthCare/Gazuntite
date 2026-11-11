@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtnSkin;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIWriteNotesBtnSkin;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			
+			import mx.events.FlexEvent;
+			
+			
+			/* import spark.skins.spark.windowChrome.CloseButtonSkin; */
+			
+			/* import valueObjects.ModuleDictationDTO;  */
+			
+			private var _horizontalAlign:String;
+			private var m_scolor:uint = 0xF9D234;
+			
+			private var _data:Object;
+			
+			[Bindable]
+			public function get color():uint
+			{
+				return m_scolor;
+			}
+
+			public function set color(value:uint):void
+			{
+				m_scolor = value;
+			}
+
+			[Bindable]
+			public function get horizontalAlign():String
+			{
+				return _horizontalAlign;
+			}
+
+			public function set horizontalAlign(value:String):void
+			{
+				_horizontalAlign = value;
+			}
+
+			public function get data():Object
+			{
+				return _data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				_data = value;
+			}
+
+			private function onEmailClick(event:MouseEvent):void
+			{
+				dispatchEvent(new Event("emailRecordClick", true));
+				dispatchEvent(new DataGridActionsEvent(DataGridActionsEvent.EMAIL_RECORD_CLICK, true));
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			private function onWriteNotesClick(event:MouseEvent):void
+			{
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.WRITE_NOTES_CLICK, true);
+				ev.data = data;
+				
+				dispatchEvent(ev);
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			private function onWriteDictationClick(event:MouseEvent):void
+			{
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.WRITE_DICTATION_CLICK, true);
+				ev.data = data;
+				
+				dispatchEvent(ev);
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			private function onEditClick(event:MouseEvent):void
+			{
+				id_SaveBtn.visible 	= true;
+				id_Edit.visible 	= false;
+				
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.EDIT_RECORD_CLICK, true);
+				ev.data = data;
+				
+				dispatchEvent(ev);
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			private function onDeleteClick(event:MouseEvent):void	
+			{
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.DELETE_RECORD_CLICK, true);
+				ev.data = data;
+				
+				dispatchEvent(ev);
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			private function onSaveClick(event:MouseEvent):void
+			{
+				id_SaveBtn.visible 	= false;
+				id_Edit.visible 	= true;
+				
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.SAVE_RECORD_CLICK, true);
+				ev.data = data;
+				
+				dispatchEvent(ev);
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:HGroup width="100%" horizontalAlign="{horizontalAlign}" paddingRight="5">
+		<s:Button id="id_Email" width="12" height="12" click="onEmailClick(event)" skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.emailBtn"
+				  buttonMode="true" toolTip="Email" enabled="false"/>
+		<s:Button id="id_WriteDictation" width="12" height="12" click="onWriteDictationClick(event)" skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.dictationBtn" 
+				  buttonMode="true" toolTip="Record Dictation"/>
+		<s:Button id="id_WriteNotes" width="12" height="12" click="onWriteNotesClick(event)" skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.notesBtn"
+				  buttonMode="true" toolTip="Write Notes"/>
+		<s:Button id="id_Edit" width="12" height="12" click="onEditClick(event)" skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.editButton"
+				  buttonMode="true" toolTip="Edit" includeInLayout="{id_Edit.visible}"/>
+		<s:Button id="id_SaveBtn" width="12" height="12" click="onSaveClick(event)" 
+				  skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.saveButton"  
+				  buttonMode="true" useHandCursor="true" toolTip="Save" visible="false" includeInLayout="{id_SaveBtn.visible}"/>
+		<s:Button id="id_Delete" width="12" height="12" click="onDeleteClick(event)"
+				  skinClass="com.adobe.gazuntite.skins.chrome.gridButtonSkins.removeBtn"
+				  buttonMode="true" toolTip="Delete"/>
+	</s:HGroup>
+</s:Group>

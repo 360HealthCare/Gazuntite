@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   skinClass="com.gazuntite.skins.controls.container.practiceMangerSkin" 
+				   xmlns:practicemanager="com.zigron.gazuntite.view.practicemanager.*"
+				   xmlns:components="com.gazuntite.controls.extended.components.*" 
+				   xmlns:view="com.gazuntite.provider.eprescription.services.patient.view.*"
+				   xmlns:view1="com.gazuntite.provider.live.services.elab.view.*"
+				   xmlns:documgmt="com.gazuntite.document.view.*"
+				   width="100%" height="100%" xmlns:view2="com.gazuntite.provider.live.services.scheduler.view.*" xmlns:diseaseManagement="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.*" 
+				   >
+	<s:layout>
+		<s:VerticalLayout paddingLeft="1" paddingTop="1" paddingRight="1"/>
+	</s:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.model.ApplicationModel;
+			
+			[Bindable]	private var model:ApplicationModel = ApplicationModel.getInstance();
+		]]>
+	</fx:Script>
+	<practicemanager:PracticeManagerViewExpandedHeader id="id_header" width="100%" height="40" />
+	
+	<components:LabelViewStack id="id_Views" width="100%" height="100%" backgroundAlpha="0">
+		<s:ArrayList>
+			<s:BorderContainer width="100%" height="100%" backgroundColor="#3194BE">
+				<view2:Scheduler id="id_Scheduler" width="100%" height="100%" bgColor="0x3194BE" />
+			</s:BorderContainer>
+			
+			<view:ePrescription width="100%" height="100%" bgColor="0x3194BE"/>
+			
+			<view1:eLabsView width="100%" height="100%" bgColor="0x3194BE" 
+							 loggedInClinincBranchId="{model.LoggedInUserSessionDTO.ClinicBranchID}"
+							 loggedInUserProviderId="{model.LoggedInProvider.UserId}"
+							 loggedInUserProviderTypeId="{model.LoggedInUserSessionDTO.UserTypeID}"
+							 />
+			<s:BorderContainer width="100%" height="100%"  backgroundColor="#3194BE">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="8" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				<documgmt:DocumentManagementPanel id="id_DocumentManagement" width="100%" height="100%" bgColor="0x3194BE" />
+			</s:BorderContainer>
+			
+			
+			<s:BorderContainer width="100%" height="100%" backgroundColor="#3194BE">
+				<s:Label text="Coming Soon" verticalCenter="0" horizontalCenter="0"  color="#FFFFFF" />
+			</s:BorderContainer>
+			
+			<s:BorderContainer width="100%" height="100%"  backgroundColor="#3194BE">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="8" paddingLeft="5" paddingRight="5" paddingTop="5" />
+				</s:layout>
+				<diseaseManagement:DiseaseManagmentView id="id_DiseaseManagement" width="100%" height="100%" /><!-- bgColor="0x3194BE" -->
+			</s:BorderContainer>
+			
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+</s:BorderContainer>

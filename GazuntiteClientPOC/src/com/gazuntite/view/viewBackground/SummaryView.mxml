@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.components.*"
+		 width="100%" 
+		 height="100%"
+		 creationComplete="init(event)"
+		 xmlns:st="library://ns.tink.ws/flex/spark"
+		 xmlns:containers="spark.tink.containers.*"
+		 xmlns:local="*"
+		 xmlns:itemRenderers="spark.tink.itemRenderers.*" 
+		 xmlns:layouts="spark.tink.layouts.*"
+		 xmlns:itemrenderers="com.gazuntite.view.itemrenderers.*"
+		 xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+		 xmlns:viewBackground="com.gazuntite.view.viewBackground.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			import com.riavalue.layouts.*;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.List;
+			
+			import ws.tink.*;
+			
+			public var title:String = "Summary";
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function init(event:FlexEvent):void
+			{
+				this.currentState = "normal";
+			}
+			
+			protected function handleDetalViewClick(event:MouseEvent):void
+			{
+				// switch based on label text
+				switch(event.currentTarget.text)
+				{
+					case "Allergies":
+						this.currentState = "allergiesDetails";
+						break;
+					case "Prescriptions":
+						this.currentState = "prescriptionDetails";
+						break;
+					case "Chronic Diagnosis":
+						this.currentState = "diagnosisDetails";
+						break;
+					default:
+						this.currentState = "normal";
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="allergiesDetails"/>
+		<s:State name="prescriptionDetails"/>
+		<s:State name="diagnosisDetails"/>
+	</s:states>
+	
+	<s:SkinnableContainer width="100%" 
+						  backgroundColor="0xffffff"
+						  height="100%">
+		
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		
+		<s:HGroup width="100%" 
+				  height="100%"
+				  horizontalAlign="center"
+				  verticalAlign="top"
+				  includeIn="normal">
+			
+			<s:VGroup horizontalAlign="center"
+					  width="33%">
+				
+				<s:BorderContainer width="100%"
+								   height="24"
+								   borderWeight="1" 
+								   borderColor="0x898989"
+								   cornerRadius="0" 
+								   dropShadowVisible="false"
+								   borderAlpha="1">
+					
+					<s:backgroundFill>
+						<s:LinearGradient rotation="90">
+							<s:GradientEntry color="0x898989" ratio=".1"/>
+							<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+						</s:LinearGradient>
+					</s:backgroundFill>
+					
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="bottom" 
+											paddingLeft="10"
+											paddingBottom="2"/>
+					</s:layout>
+					
+					<s:Label text="Chronic Diagnosis" 
+							 styleName="listLabel"
+							 click="handleDetalViewClick(event)"/>
+				</s:BorderContainer>
+				
+				<s:List height="100%" 
+						width="100%"
+						contentBackgroundColor="0xffffff"
+						dataProvider="{sharedModel.diagnosisHistoryAC}"
+						itemRenderer="com.gazuntite.view.itemrenderers.viewBackground.DiagnosisItemRenderer"
+						horizontalScrollPolicy="off"/>
+				
+			</s:VGroup>
+			
+			
+			<s:VGroup horizontalAlign="center"
+					  width="33%">
+				
+				<s:BorderContainer width="100%"
+								   height="24"
+								   borderWeight="1" 
+								   borderColor="0x898989"
+								   cornerRadius="0" 
+								   dropShadowVisible="false"
+								   borderAlpha="1">
+					
+					<s:backgroundFill>
+						<s:LinearGradient rotation="90">
+							<s:GradientEntry color="0x898989" ratio=".1"/>
+							<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+						</s:LinearGradient>
+					</s:backgroundFill>
+					
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="bottom" 
+											paddingLeft="10"
+											paddingBottom="2"/>
+					</s:layout>
+					
+					<s:Label text="Prescriptions" 
+							 styleName="listLabel"
+							 click="handleDetalViewClick(event)"/>
+					
+				</s:BorderContainer>
+				
+				<s:List height="100%"
+						width="100%"
+						contentBackgroundColor="0xffffff"
+						dataProvider="{sharedModel.prescriptionsHistoryAC}"
+						itemRenderer="com.gazuntite.view.itemrenderers.viewBackground.PrescriptionItemRenderer"
+						horizontalScrollPolicy="off"/>
+			</s:VGroup>
+			
+			
+			<s:VGroup horizontalAlign="center"
+					  width="33%">
+				
+				<s:BorderContainer width="100%"
+								   height="24"
+								   borderWeight="1" 
+								   borderColor="0x898989"
+								   cornerRadius="0" 
+								   dropShadowVisible="false"
+								   borderAlpha="1">
+					
+					<s:backgroundFill>
+						<s:LinearGradient rotation="90">
+							<s:GradientEntry color="0x898989" ratio=".1"/>
+							<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+						</s:LinearGradient>
+					</s:backgroundFill>
+					
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="bottom" 
+											paddingLeft="10"
+											paddingBottom="2"/>
+					</s:layout>
+					
+					<s:Label text="Allergies" 
+							 styleName="listLabel"
+							 click="handleDetalViewClick(event)"/>
+					
+				</s:BorderContainer>
+				
+				<s:List height="100%"
+						width="100%"
+						contentBackgroundColor="0xffffff"
+						dataProvider="{sharedModel.allergyHistoryAC}"
+						itemRenderer="com.gazuntite.view.itemrenderers.viewBackground.AllergiesItemRenderer"
+						horizontalScrollPolicy="off"/>
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<viewBackground:VBAllergiesView width="100%" 
+										close="{this.currentState = 'normal'}"
+										height="100%" 
+										includeIn="allergiesDetails"/>
+		
+		<viewBackground:VBPrescriptionView width="100%" 
+										   close="{this.currentState = 'normal'}"
+										   height="100%" 
+										   includeIn="prescriptionDetails"/>
+		
+		<viewBackground:VBChronicDiagnosisView width="100%" 
+											   close="{this.currentState = 'normal'}"
+											   height="100%" 
+											   includeIn="diagnosisDetails"/>
+		
+		
+		
+	</s:SkinnableContainer>
+	
+</s:Group>

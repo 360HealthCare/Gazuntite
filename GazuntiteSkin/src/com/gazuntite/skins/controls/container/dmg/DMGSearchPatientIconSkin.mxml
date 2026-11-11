@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+             xmlns:s="library://ns.adobe.com/flex/spark" 
+             xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+             minWidth="21" minHeight="21" 
+             alpha.disabled="0.5">
+     
+    <fx:Metadata>
+        <![CDATA[ 
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.Button")]
+        ]]>
+    </fx:Metadata>
+    
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" />
+        <s:State name="down" />
+        <s:State name="disabled" />
+    </s:states>
+    
+	<s:Path x="0" y="0"
+			data="M 18.531 14.506 C 18.056 15.194 17.11 15.367 16.422 14.89 L 10.191 10.578 C 9.75 10.274 9.522 9.777 9.539 9.279 C 8.737 10.14 7.683 10.718 6.501 10.932 C 5.051 11.197 3.586 10.88 2.377 10.044 C 1.167 9.207 0.355 7.949 0.091 6.499 C -0.173 5.048 0.143 3.583 0.98 2.373 C 2.71 -0.126 6.151 -0.753 8.65 0.977 C 10.92 2.547 11.644 5.529 10.465 7.935 C 10.926 7.741 11.473 7.779 11.916 8.085 L 18.148 12.397 C 18.836 12.874 19.008 13.817 18.531 14.506 Z M 9.294 4.822 C 9.11 3.811 8.545 2.934 7.701 2.35 C 5.959 1.144 3.559 1.58 2.352 3.322 C 1.145 5.067 1.582 7.466 3.325 8.671 C 5.068 9.878 7.467 9.442 8.675 7.699 C 9.258 6.855 9.478 5.834 9.294 4.822 Z">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Path>
+    
+</s:SparkButtonSkin>

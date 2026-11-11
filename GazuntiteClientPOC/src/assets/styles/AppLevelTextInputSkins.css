@@ -1,0 +1,95 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*TextInput
+Search TextInput */
+
+
+.labelTextInputRequiredSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.LabelTextInputRequiredSkin");
+}
+
+.labelTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.LabelTextInputSkin");
+}
+
+
+.searchTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.searchTextInput");
+}
+
+.lightGreySearchTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.lightGreySearchTextInput");
+}
+ 
+.webSearchTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.webSearchTextInput");
+}
+/*Transparent TextInput */
+
+.transparentTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.transparentTextInput");
+}
+
+/*Optional TextInput */
+
+.optionalTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.optionalTextInput");
+}
+
+.optionalTextAreaSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.optionalTextArea");
+}
+
+/*Required TextInput */
+
+.requiredTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.requiredTextInput");
+}
+
+.requiredTextAreaSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.requiredTextArea");
+}
+
+/*LogIn TextInput */
+
+.logInTextInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.logInTextInput");
+}
+
+/*Numeric Steppers */
+
+.numericStepperSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.numericStepper");
+}
+
+.textInputSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.textInput");
+}
+
+.dateFieldTextBoxSkin 
+{
+	border-visible : false ;
+	content-background-alpha :0 ;
+/*    //border-skin    : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.dateTextBox");*/
+}
+
+.hudTextBoxSkin
+{
+	skin-class :ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.hudTextInput");
+}

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="group1_creationCompleteHandler(event)" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetDenialCodesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPendingRefillsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.PendingRefillResponseEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			private var _securityHeaderXML:XML;
+			private var _GaxenRefillRequestID:String;
+			public var Status:String;
+			
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			
+			[Bindable]
+			public function get GaxenRefillRequestID():String
+			{
+				return _GaxenRefillRequestID;
+			}
+			
+			public function set GaxenRefillRequestID(value:String):void
+			{
+				_GaxenRefillRequestID = value;
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+					}
+				});
+				
+				var rpEvent_ : GetDenialCodesEvent = new GetDenialCodesEvent(GetDenialCodes);	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+				
+				id_denialCodes.setFocus();
+			}
+			public function GetDenialCodes(response:XML):void
+			{
+				var pendingReqAC:ArrayCollection = new ArrayCollection();
+				for(var i:int=0; i<response.Codes.DenialCode.length(); i++)
+				{
+					var code:String 				= response.Codes.DenialCode[i].@DenialCode.toString();
+					var desc:String 				= response.Codes.DenialCode[i].@Description.toString();
+					
+					pendingReqAC.addItem({ code:code, desc:desc });
+				}
+				
+				id_denialCodes.dataProvider = pendingReqAC;
+				id_denialCodes.labelField 	= "desc";
+			}
+			protected function id_cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				closePopup();
+			}
+			
+			public function closePopup():void
+			{
+				this.removePopup();
+			}
+			
+			protected function id_OkBtn_clickHandler(event:MouseEvent):void
+			{	
+				if(id_denialCodes.selectedIndex == -1)
+				{
+					//shakeEffect.play();
+					lbl_msg.text = 'Please select a reason.';
+					id_denialCodes.setFocus();
+					return;
+					
+					shakeEffect.targets();
+				}
+				
+				if(id_reasonOfDenial.text.length == 0 )
+				{
+					//shakeEffect.play();
+					lbl_msg.text = 'Please write reason for denial.';
+					id_reasonOfDenial.setFocus();
+					return;
+				}
+				
+				var pendingRefill:XML 				= <PendingRefillRes />;
+				pendingRefill.@Status			 	= "2";
+				pendingRefill.@GaxenRefillRequestID	= GaxenRefillRequestID;
+				pendingRefill.@ChangedQuantity 		= "";
+				pendingRefill.@ReasonofDenial 		= id_reasonOfDenial.text;
+				pendingRefill.@DenialCodes 			= id_denialCodes.selectedItem ? id_denialCodes.selectedItem.code : "";
+				
+				pendingRefill.appendChild(securityHeaderXML);
+				
+				var rpEvent_ : PendingRefillResponseEvent = new PendingRefillResponseEvent(GetRefillResponse);	
+				rpEvent_.data = pendingRefill;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+			
+			public function GetRefillResponse(response:XML):void
+			{
+				lbl_msg.text = '';
+				closePopup();
+				// refresh pending request records by update call
+				var rpEvent_ : GetPendingRefillsEvent = new GetPendingRefillsEvent();	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Sequence id="shakeEffect" >
+			<s:Move duration="50" target="{this}" xFrom="{this.x}" xTo="{this.x - 50}" />
+			<s:Move duration="100" target="{this}" xFrom="{this.x-50}" xTo="{this.x + 100}" />
+			<s:Move duration="50" target="{this}" xFrom="{this.x + 100}" xTo="{this.x }" />
+		</s:Sequence >
+	</fx:Declarations>
+	
+	<s:BorderContainer width="100%" height="100%" borderVisible="false" backgroundColor="#FFFFFF">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="5"/>
+		</s:layout>
+		
+		<components:LabelComboBox id="id_denialCodes" 
+								  prompt="Select Reason" width="100%" height="28" fontFamily="CalibriCFF" fontSize="15"
+								  skinClass="com.gazuntite.controls.extended.skins.StepStyleComboSkin" />
+		
+		<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin">
+			<components:LabelTextArea id="id_reasonOfDenial"
+									  prompt="Enter Reason..."
+									  width="100%" height="100%" maxChars="500" restrict="[a-z A-Z 0-9.,-_/]"
+									  skinClass="com.gazuntite.controls.extended.skins.transparentTextAreaSkin"
+									  fontFamily="CalibriCFF" fontSize="14" right="5" left="5" top="5" bottom="5"/>
+		</s:SkinnableContainer>
+		
+		<s:HGroup width="100%" horizontalAlign="right"  height="28">
+			<s:Label id="lbl_msg"  
+					 width="100%" fontFamily="CalibriCFF" fontSize="15"/>
+			<s:Button id="id_OkBtn"  
+					  label="Ok"  width="60" height="100%" buttonMode="true" toolTip="Ok" click="id_OkBtn_clickHandler(event)" 
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.BlackButton"/>
+			<s:Button id="id_cancelBtn" 
+					  label="Cancel" width="60" height="100%" buttonMode="true" toolTip="Cancel" click="id_cancelBtn_clickHandler(event)" 
+					  skinClass="com.gazuntite.skins.controls.button.ePrescription.BlackButton"/>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+</components:PopupGroup>

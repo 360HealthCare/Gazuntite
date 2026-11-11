@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="119"	
+		 creationComplete="CC(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var _optionLabel:String = "none";
+			private var optionLabelChanged:Boolean;
+			
+			[Bindable]
+			public var label:String;
+			
+			[Bindable]
+			public var tabSelected:Boolean = false;
+			
+			[Bindable]
+			public var dataSelected:Boolean = false;
+			
+			public function onTabSelectionChange(event:Event):void
+			{
+				if (!uiToggleButton.selected)
+				{
+					uiToggleButton.selected = true;
+					//					event.stopImmediatePropagation();
+				}
+				
+				if (id_single.selected)
+					optionLabel = "Single";
+				else if(id_married.selected)
+					optionLabel = "Married";
+				else if(id_divorced.selected)
+					optionLabel = "Divorced";	
+				else if(id_widow.selected)
+					optionLabel = "Widow";
+				else
+					optionLabel = "none";
+			}
+			
+			protected function togglebutton_changeHandler(event:Event):void
+			{
+				var rb:ToggleButton = event.currentTarget as ToggleButton;
+				
+				switch (rb.label)
+				{
+					case "M":
+					{
+						id_single.selected = false;
+						id_divorced.selected = false;
+						id_widow.selected = false;
+						
+						if (!id_married.selected)
+							optionLabel = "none";
+							
+						else
+							optionLabel = "Married";
+						
+						break;
+					}
+					case "S":
+					{
+						id_married.selected = false;
+						id_divorced.selected = false;
+						id_widow.selected = false;
+						
+						if (!id_single.selected)
+							optionLabel = "none";
+						else
+							optionLabel = "Single";
+						
+						break;
+					}	
+					case "D":
+					{
+						id_married.selected = false;
+						id_single.selected = false;
+						id_widow.selected = false;
+						
+						if (!id_divorced.selected)
+							optionLabel = "none";
+							
+						else
+							optionLabel = "Divorced";
+						
+						break;
+					}	
+					case "W":
+					{
+						id_married.selected = false;
+						id_single.selected = false;
+						id_divorced.selected = false;
+						
+						if (!id_widow.selected)
+							optionLabel = "none";
+						else
+							optionLabel = "Widow";
+						
+						break;
+					}	
+				}
+				
+				uiToggleButton.selected = true;
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				//id_single.selected = true;
+			}
+			
+			[Bindable]
+			public function get optionLabel():String
+			{
+				return _optionLabel;
+			}
+			
+			public function set optionLabel(value:String):void
+			{
+				_optionLabel = value;
+				
+				optionLabelChanged = true;
+				invalidateProperties();
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (optionLabelChanged)
+				{
+					optionLabelChanged = false;
+					
+					switch (optionLabel)
+					{
+						case "none":
+						{
+							id_married.selected = false;
+							id_single.selected = false;
+							id_divorced.selected = false;
+							id_widow.selected = false;
+							
+							break;
+						}
+						case "Married":
+						{
+							id_married.selected = true;
+							
+							break;	
+						}
+						case "Single":
+						{
+							id_single.selected = true;
+							
+							break;
+						}
+						case "Divorced":
+						{
+							id_divorced.selected = true;
+							
+							break;
+						}
+						case "Widow":
+						{
+							id_widow.selected = true;
+							break;
+						}	
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:ToggleButton id="uiToggleButton" 
+					label="{uiToggleButton.selected?label.toUpperCase():label}" 
+					selected="{tabSelected}" change="onTabSelectionChange(event)"
+					left="0" right="0" top="0" bottom="0" skinClass="com.gazuntite.input.view.skins.SideTabButtonSkin"/>
+	<s:SkinnableContainer height="22" right="7" verticalCenter="0"
+						  skinClass="com.gazuntite.input.view.skins.SquareRadioButtonContainerSkin"
+						  >
+		<s:layout>
+			<s:HorizontalLayout
+				paddingLeft="1" paddingRight="1" paddingTop="1" paddingBottom="1"
+				gap="2"
+				/>
+		</s:layout>
+		<s:ToggleButton 
+			skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+			label="M" id="id_married" change="togglebutton_changeHandler(event)"
+			/>
+		<s:ToggleButton 
+			skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+			label="S" id="id_single" change="togglebutton_changeHandler(event)" 
+			/>
+		<s:ToggleButton 
+			skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+			label="D" id="id_divorced" change="togglebutton_changeHandler(event)"
+			/>
+		<s:ToggleButton 
+			skinClass="com.gazuntite.input.view.skins.SquareRadioButtonSkin"
+			label="W" id="id_widow" change="togglebutton_changeHandler(event)"
+			/>
+	</s:SkinnableContainer>
+</s:Group>

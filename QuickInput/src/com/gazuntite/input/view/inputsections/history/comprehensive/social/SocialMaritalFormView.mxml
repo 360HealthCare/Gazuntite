@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*" 
+					  xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="CC(event)" xmlns:components="com.gazuntite.common.view.components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientMartialStatusDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel() ;
+					
+			public const TAB_ANNULLED:String = "TAB_ANNULLED";
+			public const TAB_DIVORCED:String = "TAB_DIVORCED";
+			public const TAB_DOMESTIC_PARTNER:String = "TAB_DOMESTIC_PARTNER";	
+			public const TAB_INTERLOCUTORY:String = "TAB_INTERLOCUTORY";	
+			public const TAB_LEGALLY_SEPARATED:String = "TAB_LEGALLY_SEPARATED";	
+			public const TAB_MARRIED:String = "TAB_MARRIED";	
+			public const TAB_NEVER_MARRIED_SINGLE :String = "TAB_NEVER_MARRIED_SINGLE";	
+			public const TAB_POLYGAMOUS:String = "TAB_POLYGAMOUS";	
+			public const TAB_WIDOWED:String = "TAB_WIDOWED";	
+
+			protected var selectedPage:int = 0;
+			
+			private var _MaritalStatusDTO:PatientMartialStatusDTO;
+			
+			[Bindable]
+			public function get MaritalStatusDTO():PatientMartialStatusDTO
+			{
+				return _MaritalStatusDTO;
+			}
+			
+			public function set MaritalStatusDTO(value:PatientMartialStatusDTO):void
+			{
+				_MaritalStatusDTO = value;
+				curTab = "";
+				var pg1:int = 0;
+				var pg2:int = 1;
+				var pg3:int = 2;
+				
+				var viewPage:int  = pg1;
+				switch(value.MartialStatusID)
+				{
+					case 1:
+					{
+						curTab = TAB_ANNULLED;
+						viewPage = pg1;
+						break;
+					}
+					case 2:
+					{
+						curTab = TAB_DIVORCED;
+						viewPage = pg1;
+						break;
+					}
+					case 3:
+					{
+						curTab = TAB_DOMESTIC_PARTNER;
+						viewPage = pg1;
+						break;
+					}
+					case 4:
+					{
+						curTab = TAB_INTERLOCUTORY;
+						viewPage = pg1;
+						break;
+					}
+					case 5:
+					{
+						curTab = TAB_LEGALLY_SEPARATED;
+						viewPage = pg2;
+						break;
+					}
+					case 6:
+					{
+						curTab = TAB_MARRIED;
+						viewPage = pg2;
+						break;
+					}
+					case 7:
+					{
+						curTab = TAB_NEVER_MARRIED_SINGLE;
+						viewPage = pg2;
+						break;
+					}
+					case 8:
+					{
+						curTab = TAB_POLYGAMOUS;
+						viewPage = pg2;
+						break;
+					}
+					case 9:
+					{
+						curTab = TAB_WIDOWED;
+						viewPage = pg3;
+						break;
+					}
+				}
+				
+				//scrollToPage(viewPage);
+			}
+			
+			
+			[Bindable]	public var curTab:String = "";
+			
+			public function selectTab(selectedTab:String):void
+			{
+				curTab = selectedTab;
+				
+				switch(curTab)
+				{
+					case TAB_ANNULLED:
+					{
+						MaritalStatusDTO.MartialStatusID = 1;
+						break;
+					}
+						
+					case TAB_DIVORCED:
+					{
+						MaritalStatusDTO.MartialStatusID = 2;
+						break;
+					}
+						
+					case TAB_DOMESTIC_PARTNER:
+					{
+						MaritalStatusDTO.MartialStatusID = 3;
+						break;
+					}
+						
+					case TAB_INTERLOCUTORY:
+					{
+						MaritalStatusDTO.MartialStatusID = 4;
+						break;
+					}
+						
+					case TAB_LEGALLY_SEPARATED:
+					{
+						MaritalStatusDTO.MartialStatusID = 5;
+						break;
+					}
+						
+					case TAB_MARRIED:
+					{
+						MaritalStatusDTO.MartialStatusID = 6;
+						break;
+					}
+						
+					case TAB_NEVER_MARRIED_SINGLE:
+					{
+						MaritalStatusDTO.MartialStatusID = 7;
+						break;
+					}
+						
+					case TAB_POLYGAMOUS:
+					{
+						MaritalStatusDTO.MartialStatusID = 8;
+						break;
+					}
+						
+					case TAB_WIDOWED:
+					{
+						MaritalStatusDTO.MartialStatusID = 9;
+						break;
+					}
+						
+				}
+			}
+			protected function onDictationNoteButtonsClick2():void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				return;
+			}
+			protected function onDictationNoteButtonsClick():void
+			{
+				dictationNoteViewModel.inDictationMode = true;
+				return;
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (dictationNoteViewModel.inDictationMode)
+						dictationNoteViewModel.inDictationMode = false;
+					
+					if (dictationNoteViewModel.inNoteMode)
+						dictationNoteViewModel.inNoteMode = false;
+					dictationNoteViewModel.visible = false;
+				}
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				dictationNoteViewModel.visible = true;
+				dictationNoteViewModel.inlineEditing = true;
+			}
+			
+			/* protected function scrollToPage(newPage:Number):void
+			{				
+				//var item_per_page:int = Math.ceil(uiListContainer.height/id_annulled.height)-1;
+				var total_pages:int = Math.ceil(9/4);
+				
+				if (newPage<0 || newPage>=total_pages)
+				{
+					return;
+				}
+				
+				selectedPage = newPage;
+				var scroll_to_item:int = newPage*4;
+				var scroll_pos:int = scroll_to_item*id_annulled.height;
+				uiScrollAnimatePath.valueTo = scroll_pos;
+				uiScrollAnimate.play();
+				//uiPageLabel.text = (newPage+1).toString()+' of '+total_pages.toString();
+				
+				//enableScrollButtons( total_pages > 1 );
+			} */
+			
+			/* private function enableScrollButtons(value:Boolean):void
+			{
+				id_ScrollDown.enabled = value;
+				id_ScrollUp.enabled = value;
+			} */
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<!--<s:Animate id="uiScrollAnimate" target="{uiListContainer}" duration="300">
+			<s:motionPaths>
+				<s:SimpleMotionPath id="uiScrollAnimatePath" property="verticalScrollPosition" />
+			</s:motionPaths>
+			
+		</s:Animate>-->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout	gap="-2" horizontalAlign="left"	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="2" verticalAlign="middle"/>
+	</s:layout>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:BorderContainer	width="122" height="228" cornerRadius="3"  >
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="0" paddingLeft="2" paddingRight="2" />
+		</s:layout>
+		<s:VGroup id="uiListContainer" height="100%" clipAndEnableScrolling="true" gap="0" paddingTop="1" paddingBottom="1">
+			<social:SocialWSTabButton id="id_annulled"
+									  label="Annulled" width="100%"
+									  tabSelected="{curTab==TAB_ANNULLED}"							
+									  click="selectTab(TAB_ANNULLED)"
+									  />
+			<social:SocialWSTabButton id="id_divorced"
+									  label="Divorced" width="100%"
+									  tabSelected="{curTab==TAB_DIVORCED}"
+									  click="selectTab(TAB_DIVORCED)"
+									  />
+			<social:SocialWSTabButton id="id_domesticPartner"
+									  label="Domestic Partner" width="100%"
+									  tabSelected="{curTab==TAB_DOMESTIC_PARTNER}"
+									  click="selectTab(TAB_DOMESTIC_PARTNER)"
+									  />		
+			<social:SocialWSTabButton id="id_interlocutory"
+									  label="Interlocutory" width="100%"
+									  tabSelected="{curTab==TAB_INTERLOCUTORY}"
+									  click="selectTab(TAB_INTERLOCUTORY)"
+									  />		
+			<social:SocialWSTabButton id="id_legallySeparated"
+									  label="Legally Separated" width="100%"
+									  tabSelected="{curTab==TAB_LEGALLY_SEPARATED}"
+									  click="selectTab(TAB_LEGALLY_SEPARATED)"
+									  />		
+			<social:SocialWSTabButton id="id_married"
+									  label="Married" width="100%"
+									  tabSelected="{curTab==TAB_MARRIED}"
+									  click="selectTab(TAB_MARRIED)"
+									  />		
+			<social:SocialWSTabButton id="id_single"
+									  label="Single" width="100%"
+									  tabSelected="{curTab==TAB_NEVER_MARRIED_SINGLE}"
+									  click="selectTab(TAB_NEVER_MARRIED_SINGLE)"
+									  />		
+			<social:SocialWSTabButton id="id_polygamous"
+									  label="Polygamous" width="100%"
+									  tabSelected="{curTab==TAB_POLYGAMOUS}"
+									  click="selectTab(TAB_POLYGAMOUS)"
+									  />		
+			<social:SocialWSTabButton id="id_widowed"
+									  label="Widowed" width="100%"
+									  tabSelected="{curTab==TAB_WIDOWED}"
+									  click="selectTab(TAB_WIDOWED)"
+									  />
+		</s:VGroup>
+		<!--<s:Group width="100%"  >
+			<s:Button id="id_ScrollDown" 
+					  toolTip="Scroll Down" useHandCursor="true" buttonMode="true"
+					  click="scrollToPage(selectedPage-1)" 
+					  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.DownBtnSkin"
+					  left="2"
+					  verticalCenter="0"
+					  />
+			<s:Label id="uiPageLabel" width="100%" textAlign="center" fontFamily="CalibriCFFBold"/>
+			<s:Button id="id_ScrollUp"
+					  toolTip="Scroll Up" useHandCursor="true" buttonMode="true"
+					  click="scrollToPage(selectedPage+1)" 
+					  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.UpBtnSkin"
+					  right="2" verticalCenter="0"
+					  />
+		</s:Group>-->
+		
+	</s:BorderContainer>
+	<s:Group width="100%" includeInLayout="{curTab == ''}" visible="{curTab == ''}" >			
+		<components:PleaseSelectView label="Select an option" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+	</s:Group>
+	<s:BorderContainer	width="100%" height="233"	backgroundColor="0x83A3FE" borderVisible="false" 
+						left="4" top="0" right="0" bottom="0" cornerRadius="3" includeInLayout="{curTab.length > 0}" visible="{curTab.length > 0}" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="45.0" blurX="1" blurY="1" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="2" strength="1"/>
+		</s:filters>
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="2" paddingRight="6" paddingLeft="6" paddingBottom="4" />
+		</s:layout>
+		<s:HGroup width="100%" horizontalAlign="right"  verticalAlign="bottom"  height="100%"  paddingRight="8">
+			<s:ToggleButton id="id_btnDictation"							
+							click="onDictationNoteButtonsClick()"
+							selected="@{dictationNoteViewModel.inDictationMode}"
+							toolTip="Record Level Dictation" tabIndex="0"
+							skinClass="{MaritalStatusDTO.DictationID &amp;&amp; MaritalStatusDTO.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+							/>
+			
+			<s:ToggleButton id="id_btnNote" 
+							click="onDictationNoteButtonsClick2()"
+							selected="@{dictationNoteViewModel.inNoteMode}"
+							toolTip="Record Level Notes" tabIndex="1"
+							skinClass="{MaritalStatusDTO.MartialStatusNotes.length ?NotesRedButtonSkin :WriteNoteButtonSkin}"
+							/>
+			
+		</s:HGroup>
+		<social:SocialMaritalDictationNoteView id="id_noteDictation" width="100%" minHeight="47" viewModel="{dictationNoteViewModel}" IsDictaionEditMode="true"
+											noteTooltip="{MaritalStatusDTO.MartialStatusNotes}" note="@{MaritalStatusDTO.MartialStatusNotes}" 
+											ShowSaveButton="false" DictationID="@{MaritalStatusDTO.DictationID}" isSectionLevel="false"
+											/>
+		<s:HGroup width="100%" horizontalAlign="right">
+			<s:Button buttonMode="true" id="id_save"
+					  skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin"
+					  right="0" verticalCenter="0"				  
+					  toolTip="Save"
+					  tabIndex="2"
+					  includeInLayout="{curTab.length > 0}" visible="{curTab.length > 0}"
+					  />
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

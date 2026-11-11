@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="init()" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:views1="com.gazuntite.controls.calendar.views.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.controls.calendar.cal.event.ChangeViewEvent;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			public var calendarDescriptor:CalendarDescriptor = new NullCalendarDescriptor();
+			[Bindable]
+			public var calendars:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public var events:ArrayCollection = new ArrayCollection();
+			
+			private var todayDate:Date; 
+			private var currentDate:Date = new Date();
+			private var currentMonth:Number;
+			private var currentYear:Number;
+			
+			protected function init():void
+			{
+				todayDate = new Date();
+				dayView.date = todayDate; 
+				wWView.date = todayDate; 
+				wView.date = todayDate; 
+				mView.date = todayDate;
+				
+				currentMonth = todayDate.month;
+				currentYear = currentDate.fullYear;
+				lbldate.text = todayDate.toDateString();
+
+				dayView.addEventListener('changeViewEvent',tab_changeHandler);
+				wWView.addEventListener('changeViewEvent',tab_changeHandler);
+				wView.addEventListener('changeViewEvent',tab_changeHandler);
+				mView.addEventListener('changeViewEvent',tab_changeHandler);
+			}
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				switch(tab.selectedIndex){
+					case 0:
+						currentDate["date"]+=1;
+						dayView.date = currentDate;
+						lbldate.text = currentDate.toDateString();
+						break;
+					case 1:
+						currentDate = CalendarUtils.getNextDate(currentDate, 5);
+						wWView.date = currentDate;
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						break;
+					case 2:
+						currentDate = CalendarUtils.getNextDate(currentDate, 7);
+						wView.date = currentDate;
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						break;
+					case 3:
+						if(currentMonth == 11)
+						{
+							currentMonth = -1;
+							currentYear = currentYear + 1;
+						}
+						currentMonth = currentMonth + 1;				
+						currentDate = new Date(currentYear, currentMonth, 1);
+						mView.date = currentDate;
+						lbldate.text = CalendarUtils.getMonthdate(currentDate.month, currentDate.fullYear);
+						break;
+					default:
+						break;
+				}
+			}
+			
+			protected function currentDate_clickHandler(event:MouseEvent):void
+			{
+				switch(tab.selectedIndex){
+					case 0:
+						lbldate.text = todayDate.toDateString();
+						dayView.date = todayDate;
+						break;
+					case 1:
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						wWView.date = todayDate;
+						break;
+					case 2:
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						wView.date = todayDate;
+						break;
+					case 3:
+						lbldate.text = CalendarUtils.getMonthdate(todayDate.month, todayDate.fullYear);
+						mView.date = todayDate;
+						break;
+					default:
+						break;
+				}
+				currentDate = todayDate;
+			}
+			
+			protected function back_clickHandler(event:MouseEvent):void
+			{
+				switch(tab.selectedIndex){
+					case 0:
+						currentDate["date"]-=1;
+						dayView.date = currentDate;
+						lbldate.text = currentDate.toDateString();
+						break;
+					case 1:
+						currentDate = CalendarUtils.getNextDate(currentDate, -5);
+						wWView.date = currentDate;
+						lbldate.text = wWView.stratDate +' - '+ wWView.endDate;
+						break;
+					case 2:
+						currentDate = CalendarUtils.getNextDate(currentDate, -7);
+						wView.date = currentDate;
+						lbldate.text = wView.stratDate +' - '+ wView.endDate;
+						break;
+					case 3:
+						if(currentMonth == 0)
+						{
+							currentMonth = 12;
+							currentYear = currentYear -1;
+						}
+						currentMonth = currentMonth - 1;				
+						currentDate = new Date(currentYear, currentMonth, 1);
+						mView.date = currentDate;
+						lbldate.text = CalendarUtils.getMonthdate(currentDate.month, currentDate.fullYear);
+						break;
+					default:
+						break;
+				}
+			}
+			protected function tab_changeHandler(event:com.gazuntite.controls.calendar.cal.event.ChangeViewEvent):void
+			{
+				tab.selectedIndex = event.viewIndex;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%" height="100%" gap="0">
+		
+		<s:BorderContainer width="100%" height="30" borderVisible="false">
+			<components:LabelComboBox  id="cmbLocation" right="5" verticalCenter="0"  prompt="Select Location" width="150"/>
+			<components:LabelComboBox  id="cmbProviders" right="170" verticalCenter="0" prompt="Mr.Abc " width="150"/>	
+			
+		</s:BorderContainer>
+		<s:BorderContainer width="100%" height="30" >
+			<s:layout>
+				<s:BasicLayout />
+			</s:layout>
+			<s:HGroup  paddingRight="0" gap="2" left="5" verticalCenter="0" horizontalAlign="center" >
+				
+				<s:Button click="back_clickHandler(event)" label="&lt;" width="28"/>
+				<s:Button click="currentDate_clickHandler(event)" label="Today"/>
+				<s:Button click="next_clickHandler(event)" label="&gt;" width="28"/>
+				<s:Label id="lbldate"  horizontalCenter="0"/>
+			</s:HGroup>
+			<s:ButtonBar dataProvider="{tab}"  right="10" verticalCenter="0" >
+				<s:layout>
+					<s:ButtonBarHorizontalLayout gap="5" />
+				</s:layout>
+			</s:ButtonBar>
+		</s:BorderContainer>
+		
+		
+		<mx:ViewStack id="tab" width="100%" height="100%">
+			<views1:DayView id="dayView" width="100%" height="100%" label="Day" 	    calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" />
+			<views1:WeekView id="wWView" width="100%" height="100%" label="Work Week"   calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" IsWorkWeek="true"/>
+			<views1:WeekView id="wView"  width="100%" height="100%" label="Week" 		calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}"  />
+			<views1:MonthView id="mView" width="100%" height="100%" label="Month"		calendarDescriptor="{calendarDescriptor}" calendars="{calendars}" events="{events}" />
+		</mx:ViewStack>
+		
+	</s:VGroup>
+	
+	<fx:Style source="calendar.css" />
+</s:Group>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:notes="com.adobe.gazuntite.view.controls.custom.patientExamView.notes.*"
+					   creationComplete="popupgroup1_creationCompleteHandler(event)" 
+					   xmlns:notes1="com.gazuntite.patient.visit.view.notes.*"
+					   xmlns:components1="com.gazuntite.controls.extended.components.*"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			//public var selectedItem:RecentVitalDTO;
+			private var vitalId:int;
+			///get Weight			
+			public function get VitalId():int
+			{
+				return vitalId;
+			}
+			
+			public function set VitalId(value:int):void
+			{
+				vitalId = value;
+			} 
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				removePopup();
+				event.stopImmediatePropagation();
+				}); */
+				
+				id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					event.stopImmediatePropagation();
+				});
+				
+				id_importVitalsGrid.dataProvider = model.patientPreviousVitalsList;
+				//id_importVitalsGrid.dataProvider = model.vitalDTOListByPatient;
+				
+				//				/id_importVitalsGrid.addEventListener("importVitalRecordClick", importVitalRecordClickHandler, false, 0, true);
+				
+				if(model.patientPreviousVitalsList != null && model.patientPreviousVitalsList.length == 0)
+				{
+					id_importVitalsGrid.visible = true;
+					id_importVitalsGrid.visible = false;
+				}
+			}
+			
+			/*private function importVitalRecordClickHandler(event:Event):void
+			{
+			var grid:DataGrid = DataGrid(event.currentTarget);
+			
+			selectedItem = RecentVitalDTO(grid.selectedItem);
+			}*/
+			
+			public function displayRowNum(oItem:Object,iCol:int):String
+			{
+				var rowNumber:int = id_importVitalsGrid.dataProvider.getItemIndex(oItem) + 1;
+				return String(rowNumber);
+			}
+			
+			protected function id_header_creationCompleteHandler(event:FlexEvent):void
+			{
+				/* id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				this.removePopup();
+				
+				}); */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components1:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" verticalAlign="middle" />
+	</components1:layout>
+	
+	<notes1:ImportVitalsHeader id="id_header" 
+							   width="100%" height="25" HeadingLable="Import Previous Vitals"  
+							   CenterLable="IMPORT" HideSaveButton="true"  creationComplete="id_header_creationCompleteHandler(event)"/>
+	
+	<s:Group width="100%">
+		<s:layout>
+			<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="0" paddingRight="0" paddingTop="-4" />
+		</s:layout>
+		
+		<s:SkinnableContainer height="100%" width="100%" skinClass="com.adobe.gazuntite.skins.notesBodyOrangeLargeSkin">
+			
+			<s:layout>
+				<s:VerticalLayout gap="-1" paddingBottom="3" paddingLeft="0" paddingRight="0" paddingTop="0" />
+			</s:layout>	
+				<components1:LabelDataGrid id="id_importVitalsGrid"  
+							 dataProvider="{model.patientPreviousVitalsList}"
+							 visible="{(id_importVitalsGrid.dataProvider.length > 0)}"  includeInLayout="{id_importVitalsGrid.visible}"
+							 rowHeight="22"	width="100%" maxHeight="100" 
+							 rowCount="{id_importVitalsGrid.dataProvider.length? id_importVitalsGrid.dataProvider.length : 1}" 
+							 horizontalScrollPolicy="off" verticalScrollPolicy="auto"
+							 columnWidths="{[25,'70%','20%']}" >
+					
+					<components1:columns>
+						<mx:DataGridColumn headerText="Sr.#" labelFunction="displayRowNum"/>
+						<mx:DataGridColumn headerText="Visit Date" dataField="VisitDate" itemRenderer="com.gazuntite.common.view.renderers.DateRenderer4DG"/>
+						<mx:DataGridColumn headerText="Visit Type" dataField="VisitEncounterTypeName"/>
+						<mx:DataGridColumn>
+							<mx:itemRenderer>
+								<fx:Component>
+									<s:MXItemRenderer>
+										<s:Button label="Load" click="{dispatchEvent(new Event('importVitalRecordClick', true));}" buttonMode="true" useHandCursor="true"
+												  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.ImportVisitLoadBtn" verticalCenter="0" horizontalCenter="0"/>
+									</s:MXItemRenderer>							
+								</fx:Component>
+							</mx:itemRenderer>
+						</mx:DataGridColumn>
+					</components1:columns>
+				</components1:LabelDataGrid>
+			
+			<s:HGroup width="100%" paddingTop="12" horizontalAlign="center" verticalAlign="bottom" >		
+				<s:Label id="id_lbl" text="No Records Found" color="#FFFFFF" visible="{(!id_importVitalsGrid.dataProvider.length)}"  includeInLayout="{id_lbl.visible}" fontFamily="Calibri" fontSize="14" width="100%" textAlign="center"/>
+			</s:HGroup>
+			
+		</s:SkinnableContainer>
+		
+	</s:Group>
+	
+</components1:PopupGroup>

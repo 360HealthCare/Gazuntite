@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:comprehensive="com.gazuntite.input.view.inputsections.history.comprehensive.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:general="com.gazuntite.input.view.inputsections.history.comprehensive.general.*" 
+					  xmlns:family="com.gazuntite.input.view.inputsections.history.comprehensive.family.*" 
+					  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*" 
+					  xmlns:components1="com.gazuntite.components.*"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  creationComplete="cc()" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var viewModel:PatientInputHistoryComprehensiveViewModel = PatientInputHistoryComprehensiveViewModel.getInstance();
+			[Bindable]	private var notesDTO:ModuleNoteDTO;
+			[Bindable]	public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{
+				notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.COMPREHENSIVE_HISTORY_MODULE_NAME);
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{	
+				if(event.isNoteSave)
+				{
+					if( null == notesDTO )
+						notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.COMPREHENSIVE_HISTORY_MODULE_NAME);
+					
+					notesDTO.Note = id_DictationNote.note;
+					
+					var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( notesDTO, QIConstants.COMPREHENSIVE_HISTORY_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				}
+				else					
+				{					
+					if (!viewModel.dictationDTO)
+					{
+						var dictaionId:String = id_DictationNote.DictationID;
+						
+						viewModel.dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.COMPREHENSIVE_HISTORY_MODULE_NAME);
+						viewModel.dictationDTO.DictationID = dictaionId;
+					}
+					
+					var dicEvent:ManageModuleDictationEvent = new ManageModuleDictationEvent( viewModel.dictationDTO, QIConstants.COMPREHENSIVE_HISTORY_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, model.LoggedInUserSelectedBranchId, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( dicEvent );
+				}
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed")
+				if(isNoteSaved)
+					viewModel.newComprehensiveInputDictationNoteViewModel.visible = false;
+			}
+			
+			protected function uiViewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				if(uiViewStack.selectedIndex == 0)
+					viewModel.currentTabState = "general";
+				else if(uiViewStack.selectedIndex == 1)
+					viewModel.currentTabState = "family";
+				else if(uiViewStack.selectedIndex == 2)
+					viewModel.currentTabState = "social";
+			}
+			//-- Clear the section before any patient load.
+			public function ClearCompInputView():void
+			{
+				if(uiViewStack)
+					uiViewStack.selectedIndex = 0;
+				viewModel.currentTabState = "general";
+				
+				if(id_generalView)
+					id_generalView.clearGeneralView();
+				if(id_familyView)
+					id_familyView.clearFamilyView();
+				if(id_socialView)
+					id_socialView.clearSocialView();
+				
+				/* dispatchEvent( new Event("ClearHXGeneral", true, false ) );	
+				dispatchEvent( new Event("ClearHXFamily", true, false ) );	
+				dispatchEvent(new Event("clearSocialHistoryForm", true)); */
+				notesDTO = null;
+				if( null != id_DictationNote )
+				{
+					id_DictationNote.resetToDefault();
+					id_DictationNote.note = "";
+					viewModel.dictationDTO = null;
+					id_DictationNote.DictationID = DictationConstants.GUID_FORMAT;
+					viewModel.newComprehensiveInputDictationNoteViewModel.visible = false;
+				}
+			}
+			
+			protected function id_generalView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_generalView.addEventListener(SelectSection.SelectInnerTabEvent, function(e:SelectSection):void {
+				
+					uiViewStack.selectedIndex = 1;
+					
+				});
+				
+			}
+			
+			protected function id_familyView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_familyView.addEventListener(SelectSection.SelectInnerTabEvent, function(e:SelectSection):void {
+					
+					uiViewStack.selectedIndex = 2;
+				});
+			}
+			
+			protected function id_socialView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_socialView.addEventListener(SelectSection.SelectInnerTabEvent, function(e:SelectSection):void {
+					
+					dispatchEvent( new SelectSection( SelectSection.SelectSelectionEvent,'Chronic Medication'));
+					
+				});
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"  horizontalAlign="center" />
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" PrevSectionLabel="Allergies" label="COMPREHENSIVE HX" 
+								  NextSectionLabel="Chronic Medication" 
+								  NavItems="{NavItems}" SectionLevelNote="@{notesDTO.Note}"
+								  maxSectionCounter="4" sectionNumber="2" showInputPart="true"
+								  MainSectionLabel="History"  
+								  dictationNoteViewModel="{viewModel.newComprehensiveInputDictationNoteViewModel}"  
+								  SectionLevelDictationID="{viewModel.dictationDTO.DictationID}"
+								  />
+	<dictation2:PatientDictationNoteView id="id_DictationNote" width="100%" minHeight="47" viewModel="{viewModel.newComprehensiveInputDictationNoteViewModel}" 
+										isSectionLevel="true" note="@{notesDTO.Note}" IsDictaionEditMode="true" />
+	
+	<s:VGroup width="100%" height="100%"  gap="-5" paddingTop="1"  horizontalAlign="center"	  >
+		<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="2">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="right" gap="0" />
+			</s:layout>
+		<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+			<s:Group width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout gap="0" />
+				</s:layout>
+				
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.WhiteViewSkin" width="100%" height="100%" >
+					<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false" change="uiViewStack_changeHandler(event)" >
+						<s:ArrayList>
+							<general:GeneralView id="id_generalView" name="General" width="100%" height="100%" creationComplete="id_generalView_creationCompleteHandler(event)"/>
+							<family:FamilyView id="id_familyView" name="Family" width="100%" height="100%" creationComplete="id_familyView_creationCompleteHandler(event)"/>
+							<social:SocialView id="id_socialView" name="Social" width="100%" height="100%" creationComplete="id_socialView_creationCompleteHandler(event)"/>
+						</s:ArrayList>
+					</components:LabelViewStack>
+				</s:SkinnableContainer>
+				
+			</s:Group>
+		</s:Scroller>
+		</s:BorderContainer>
+	</s:VGroup>
+	
+</s:SkinnableContainer>

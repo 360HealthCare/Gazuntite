@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabled="0.5" blendMode="normal">
+	<fx:Metadata>[HostComponent("com.gazuntite.controls.extended.components.LabelTextInput")]</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			/** 
+			 * @private 
+			 */     
+			private static const focusExclusions:Array = ["textDisplay"];
+			
+			/**
+			 *  @private
+			 */
+			override public function get focusSkinExclusions():Array { return focusExclusions;};
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="normalWithPrompt"/>
+		<s:State name="disabled"/>
+		<s:State name="disabledWithPrompt"/>
+	</s:states>
+	
+	<!-- border --> 
+	<!--- @private -->
+	<s:Rect left="0" right="0" top="0" bottom="0" id="border" alpha="0" >
+		<s:stroke>     
+			<!--- @private -->
+			<s:SolidColorStroke id="borderStroke" weight="0" />
+		</s:stroke>
+	</s:Rect>
+	
+	<!-- fill -->
+	<!--- Defines the appearance of the TextInput component's background. -->
+	<s:Rect id="background" left="1" right="1" top="1" bottom="1" alpha="0">
+		<s:fill>
+			<!--- @private Defines the background fill color. -->
+			<s:SolidColor id="bgFill" color="0xeeeeee" />
+		</s:fill>
+	</s:Rect>
+	
+	<!-- shadow -->
+	<!--- @private -->
+	
+	
+	<!-- text -->
+	<!--- @copy spark.components.supportClasses.SkinnableTextBase#textDisplay -->
+	
+	<!-- text -->
+	<s:RichEditableText 
+		id="textDisplay"
+		bottom="1"
+		paddingBottom="3"
+		paddingLeft="8"
+		paddingRight="3"
+		right="1"
+		left="1"
+		top="1"
+		fontFamily="CalibriCFF"
+		focusRect="false"
+		focusThickness="0"
+		color="#000000"
+		paddingTop="5"
+		verticalAlign="middle"
+		verticalCenter="0"
+		focusIn="{textDisplay.selectRange(0,textDisplay.text.length) }"
+		/>
+	
+	<!-- prompt -->
+	
+	<s:Label 
+		id="promptDisplay"
+		includeIn="disabledWithPrompt,normalWithPrompt"
+		color="#666666"
+		bottom="1"
+		left="1"
+		paddingLeft="8"
+		paddingBottom="3"
+		paddingRight="3"
+		paddingTop="5"
+		right="1"
+		fontStyle="normal"
+		verticalCenter="0"
+		verticalAlign="middle"
+		fontFamily="CalibriCFF"
+		maxDisplayedLines="1" />
+	
+	
+</s:SparkSkin>

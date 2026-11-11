@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<commons:SectionHeader xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+					   xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" 
+					   xmlns:buttonBarSkins="com.adobe.gazuntite.skins.chrome.buttonBarSkins.*"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.view.ComingSoon;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				var popup:ComingSoon = new ComingSoon();
+				popup.ShowPopup( this );
+				PopUpManager.centerPopUp(popup);
+				popup.height = 200;
+				popup.width = 200;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:HGroup id="id_vitalHeader" width="100%" horizontalAlign="left" ><!--visible="{ShowVitalHeader}" includeInLayout="{id_vitalHeader.visible}"-->
+		<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.vitalsIconsBGSkin">
+			<s:layout>
+				<s:HorizontalLayout gap="1" />
+			</s:layout>
+		<s:ToggleButton id="id_import" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VitalsImportBtn" buttonMode="true" useHandCursor="true" toolTip="Import Previous Vitals"
+						click="id_import_clickHandler(event)" />
+			<buttonBarSkins:buttonSeparator_small  />
+		<s:Button skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VitalsGraphBtnSkin" buttonMode="true" useHandCursor="true" toolTip="View Vital's Graph"
+				  click="button1_clickHandler(event)"/>
+			<buttonBarSkins:buttonSeparator_small  />
+		<s:Button id="id_clear" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.VitalsClearBtn" buttonMode="true" useHandCursor="true" toolTip="Clear"
+				  click="id_clear_clickHandler(event)"/>
+		</s:SkinnableContainer>
+		
+		
+		
+		<s:HGroup gap="-1" paddingTop="0" verticalAlign="middle" >
+			<s:RadioButton id="id_metric"  skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.metricBtnSkin" buttonMode="true" useHandCursor="true" toolTip="Conversion Types"
+						   click="id_metric_clickHandler(event)"/>	
+			<s:RadioButton id="id_english" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.englishBtnSkin" buttonMode="true" useHandCursor="true" toolTip="Conversion Types" 
+						   click="id_english_clickHandler(event)" selected="true"/>
+		</s:HGroup> 
+	</s:HGroup>
+	
+</commons:SectionHeader>

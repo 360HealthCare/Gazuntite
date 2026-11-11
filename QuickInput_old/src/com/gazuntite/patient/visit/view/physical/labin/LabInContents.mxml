@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*"
+		 xmlns:validators="com.gazuntite.common.util.validators.*"
+		 xmlns:labin="com.gazuntite.patient.visit.view.physical.labin.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotesSelected;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.patient.visit.dto.InHouseLabDTO;
+			import com.gazuntite.patient.visit.dto.InHouseLabTestTypeDTO;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.event.physical.labin.LoadPateintInHouseLabsByVisitIdEvent;
+			import com.gazuntite.patient.visit.event.physical.labin.ManagePatientInHouseLabsEvents;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.managers.dictation.QIDictationManager;
+			import com.gazuntite.patient.visit.view.commons.dictation.DictationPopup;
+			import com.gazuntite.patient.visit.view.commons.notes.NotesPanel;
+			import com.gazuntite.patient.visit.view.events.LoadInHouseLabTestTypeByClinicIdEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Label;
+			import mx.events.FlexEvent;
+			
+			import spark.components.RichEditableText;
+			import spark.events.IndexChangeEvent;
+			
+			private var _hasGridChanged:Boolean;
+			private var _hasViewChanged:Boolean;
+			
+			private var searchTerm:String;//Search term for the records
+			
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var recordNotesDTO: ModuleNoteDTO;
+			public var recordNotesPanel: NotesPanel;
+			
+			[Bindable]
+			public var selectedDTO:InHouseLabTestTypeDTO;
+			
+			private var _includeGridInLayout:Boolean;
+			private var _includeGridInLayoutChanged:Boolean = true;
+			
+			private var attachmentContent:ByteArray;
+			
+			private var _labInCollection:ArrayCollection;
+			
+			[Bindable]
+			public function get hasGridChanged():Boolean
+			{
+				return _hasGridChanged;
+			}
+			
+			public function set hasGridChanged(value:Boolean):void
+			{
+				_hasGridChanged = value;
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			public  function loadData(val:* = null):void
+			{
+				if(model.LabInStaticDataList.length)
+				{
+					selectedDTO	= null;
+					for(var i:uint=0; i < model.LabInStaticDataList.length; i++)
+					{
+						var nameComp:Boolean = UtilityFunctions.compareStringsIgnoringCase(searchTerm, model.LabInStaticDataList[i].Name);
+						var codeComp:Boolean = UtilityFunctions.compareStringsIgnoringCase(searchTerm, model.LabInStaticDataList[i].Code);
+						
+						if (codeComp || nameComp)
+						{
+							id_TestCode.textInput.text 	= model.LabInStaticDataList[i].Code;
+							id_TestName.textInput.text  = model.LabInStaticDataList[i].Name;
+							selectedDTO					= model.LabInStaticDataList[i];
+							
+							break;
+						}							
+					}
+					
+					id_Add.enabled = isGetEdited();
+				}
+			}
+			
+			private function testCodeKeyUpHandler():void
+			{
+				searchTerm = '';
+				searchTerm = id_TestCode.textInput.text;
+				
+				id_TestName.textInput.text 		= '';
+				id_TestName.selectedIndex 		= -1;
+				selectedDTO 					= null;
+				id_Add.enabled 					= isGetEdited();
+				
+				//if value exceeds 2 characters then search Icd Code and map the Icd Code.
+				if(searchTerm.length >= 3)
+				{		
+					var labEvent : LoadInHouseLabTestTypeByClinicIdEvent = new LoadInHouseLabTestTypeByClinicIdEvent(searchTerm , loadData);
+					CairngormEventDispatcher.getInstance().dispatchEvent( labEvent );	
+				}
+			}
+			
+			private function labIn_ClickHandler(event:MouseEvent, index:uint):void
+			{
+				if(event.target as RichEditableText || event.target as Label)
+				{
+					return;
+				}
+				else 
+				{
+					if(searchTerm == null)
+						return
+					
+					if(searchTerm.length > 2)
+					{
+						openLabInPopup(index);
+					}
+				}
+			}
+			
+			private function openLabInPopup(index:int):void
+			{
+				var addlabInPopup:LabInPopup = new LabInPopup();
+				addlabInPopup.ShowPopup( this );
+				//QIPopUpManager.addPopUp( addlabInPopup, QIPopUpManager.IN_HOUSE_LAB );
+				/* addlabInPopup.addEventListener(CloseEvent.CLOSE, function (event:CloseEvent):void
+				{
+				if( model.quickInputDTO.Physical.InHouseLabs.length > 0 )
+				{
+				hasViewChanged = true;
+				}
+				}); */
+				addlabInPopup.title  = "Add LabIn";
+				addlabInPopup.height = 410;
+				addlabInPopup.width  = 600;
+				
+				//addlabInPopup.move((Capabilities.screenResolutionX/8) , addlabInPopup.y - 20);
+				addlabInPopup.move(addlabInPopup.x - 25 , addlabInPopup.y - 125);
+				addlabInPopup.searchAndLoadLabIn(searchTerm, index);
+				
+				addlabInPopup.removeEventListener( "labInAdded", onLabInAdded );
+				addlabInPopup.addEventListener( "labInAdded", onLabInAdded );
+				
+				resetFields();
+			}
+			
+			
+			private function onLabInAdded(event:Event):void
+			{
+				if(hasViewChanged)
+					hasViewChanged = false;
+				
+				hasViewChanged = true;
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				var edited:Boolean = false;
+				
+				if (selectedDTO)//if((id_TestCode.textInput.text.length > 4 ) && (id_TestName.textInput.text.length > 2)){
+				{
+					edited = true;
+				}
+				
+				return edited;
+			}
+			
+			private var recordGridNotesPopUp:NotesPanel;
+			private var section:String;
+			
+			private function onWriteNotesClick(event:Event):void
+			{
+				if (!recordGridNotesPopUp)
+					recordGridNotesPopUp = new NotesPanel();
+				
+				if (!recordGridNotesPopUp.isPanelShown)
+				{
+					var headingLabel:String = "";
+					
+					
+					
+					var addRecord:AddRecord = AddRecord(event.target);
+					
+					recordGridNotesPopUp 				= new NotesPanel();
+					recordGridNotesPopUp.width			= 250;
+					recordGridNotesPopUp.height			= 110;
+					recordGridNotesPopUp.HeadingLable 	= id_TestName.textInput.text;
+					recordGridNotesPopUp.VisitDateLable = UtilityFunctions.FormatDate(model.VisitDate, "MM-DD-YYYY");//new Date().toDateString();
+					recordGridNotesPopUp.ShowPopup(this);
+					
+					
+					
+					recordGridNotesPopUp.notesDTO		=  addRecord.notesDTO; //gridNotesDTO;
+					
+					QIPopUpManager.addPopUp(recordGridNotesPopUp, section);
+					
+					
+					var pt:Point = id_Add.localToGlobal(new Point(id_Add.id_WriteNotes.x ,id_Add.id_WriteNotes.y));
+					
+					recordGridNotesPopUp.move(pt.x - 195, pt.y + 20);
+					
+					
+					recordGridNotesPopUp.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+						
+					}, false, 0, true);
+					
+					recordGridNotesPopUp.id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						recordGridNotesPopUp.SaveNotes();
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);								
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+						}
+						recordGridNotesPopUp.removeNotePanel();
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+					});
+					
+					
+					recordGridNotesPopUp.addEventListener("notesSaved", function(event:Event):void
+					{
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);								
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+						}
+					});
+				}
+			}
+			
+			private function browseFileHandler():void
+			{
+				
+			}
+			
+			private var recordLevelDicPanel:DictationPopup;
+			private function writeDictationClickHandler(event:Event):void
+			{
+				var addRecord:AddRecord = AddRecord(event.target);
+				
+				recordLevelDicPanel = QIDictationManager.show(addRecord, recordLevelDicPanel, addRecord.dictationDTO, addRecord.id_WriteDictation);
+				QIPopUpManager.addPopUp(recordLevelDicPanel, QIPopUpManager.IN_HOUSE_LAB);
+				recordLevelDicPanel.move( recordLevelDicPanel.x - 81, recordLevelDicPanel.y);
+				
+				recordLevelDicPanel.addEventListener(MouseEvent.CLICK, function():void
+				{
+					QIPopUpManager.removePopUp(recordLevelDicPanel, QIPopUpManager.IN_HOUSE_LAB);
+					
+					if(recordLevelDicPanel && recordLevelDicPanel.DictationID)
+					{
+						id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+					}
+					
+				}, true, 0, false);
+			}
+			
+			protected function checkbox1_changeHandler(event:Event):void
+			{
+				
+			}
+			
+			public function areRequiredFieldsProvidedAndValid():Boolean
+			{
+				/* calling isGetEdited() to check whether is there any change in view or not
+				just to set hasViewChanged boolean
+				*/
+				isGetEdited();
+				
+				if(UtilityFunctions.IsNullOrEmpty(id_TestCode.textInput.text ))
+					return false;
+				
+				if(UtilityFunctions.IsNullOrEmpty(id_TestName.textInput.text ))
+					return false;
+				
+				return true;
+			}
+			
+			private function addRecordClick(event:Event):void
+			{
+				/* if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_LAB_IN ) )*/
+				
+				id_Add.enableAll = areRequiredFieldsProvidedAndValid();
+				if( !id_Add.enableAll )
+				{
+					if( UtilityFunctions.IsNullOrEmpty( id_TestCode.selectedItem ) )
+					{
+						id_TestCode.errorString = "invalid Test Code";
+						id_TestCode.setFocus();
+					}
+					else if	(UtilityFunctions.IsNullOrEmpty(id_TestName.selectedItem) )
+					{
+						id_TestName.errorString = "invalid Test Name";
+						id_TestName.setFocus();
+					}
+					return; // invalid data
+				}
+				
+				var inHouseLabDTO: InHouseLabDTO= new InHouseLabDTO ();
+				//	inHouseLabDTO.InHouseLabTestType = id_TestCode.selectedItem as InHouseLabTestTypeDTO;
+				inHouseLabDTO.InHouseLabTestType = selectedDTO;
+				inHouseLabDTO.TestResult = id_Result.text;
+				
+				if(attachmentContent)
+					inHouseLabDTO.ResultAttachment = UtilityFunctions.convertBase64String(attachmentContent);
+				
+				inHouseLabDTO.CreatedAt = new Date();
+				inHouseLabDTO.CreatedBy = model.LoggedInUserId;
+				inHouseLabDTO.DictationID = Constants.GUID_FORMAT;
+				inHouseLabDTO.ModifiedAt = Constants.NULL_DATE;
+				inHouseLabDTO.PatientID = model.patientID;
+				
+				inHouseLabDTO.PatientInHouseLabTestID = 0;
+				inHouseLabDTO.IsDirty = true;
+				
+				
+				if( model.VisitID)
+				{
+					inHouseLabDTO.VisitDate = model.VisitDate;
+					inHouseLabDTO.VisitID 	= model.VisitID;
+				}
+				
+				if (id_Add.notesDTO)
+				{
+					inHouseLabDTO.Note = id_Add.notesDTO.Note;
+					inHouseLabDTO.NoteSubject = id_Add.notesDTO.NoteSubject; 
+				}
+				
+				if (id_Add.dictationDTO != null && id_Add.dictationDTO.DictationID != Constants.GUID_FORMAT)
+				{
+					inHouseLabDTO.DictationID = id_Add.dictationDTO.DictationID;
+				}
+				
+				
+				if(model.inHouseLabList== null)
+					model.inHouseLabList = new ArrayCollection();
+				
+				
+				model.inHouseLabList.addItem(inHouseLabDTO);
+				
+				
+				
+				var managePIH : ManagePatientInHouseLabsEvents = new ManagePatientInHouseLabsEvents();
+				CairngormEventDispatcher.getInstance().dispatchEvent( managePIH );
+				
+				if(hasViewChanged)
+					hasViewChanged = false;
+				
+				_hasGridChanged = true;
+				hasViewChanged  = true;
+				
+				resetFields();
+				id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+				id_Add.id_WriteDictation.setStyle("skinClass", QIDictationBtn);
+				
+				/* } */
+			}
+			
+			private function resetFields():void
+			{
+				id_TestCode.textInput.text				= "";
+				id_TestCode.selectedItem				= null;
+				
+				id_TestName.textInput.text				= "";
+				id_TestName.selectedItem				= null;
+				
+				id_Result.text 							= "";
+				
+				id_Add.enabled							= false;
+				id_Add.enableAll						= false;
+				
+				attachmentContent = null;
+				id_AttachBtn.label = "Attach";
+				
+				recordNotesDTO = new  ModuleNoteDTO ();
+				
+				if (id_Add.notesDTO)
+					id_Add.notesDTO = new ModuleNoteDTO ();
+				
+				if (id_Add.dictationDTO)
+					id_Add.dictationDTO = new ModuleDictationDTO();
+				
+				if (recordNotesPanel)
+					recordNotesPanel.removePopup();
+				
+				searchTerm	= '';
+				id_TestName.textInput.text = '';
+				id_TestCode.textInput.text = '';
+				selectedDTO = null;
+			}
+			
+			private function testNameChangeHandler():void
+			{
+				searchTerm = '';
+				searchTerm = id_TestName.textInput.text;
+				
+				id_TestCode.textInput.text 		= '';
+				id_TestCode.selectedIndex 		= -1;
+				selectedDTO 					= null;
+				id_Add.enabled 					= isGetEdited();
+				
+				//if value exceeds 2 characters then search Icd Code and map the Icd Code.
+				if(searchTerm.length >= 3)
+				{	
+					var labEvent : LoadInHouseLabTestTypeByClinicIdEvent = new LoadInHouseLabTestTypeByClinicIdEvent(searchTerm , loadData);
+					CairngormEventDispatcher.getInstance().dispatchEvent( labEvent );
+				}
+				
+				areRequiredFieldsProvidedAndValid();
+			}
+			
+			public function loadGridData():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(model.inHouseLabList))
+				{
+					var loadlabbVisitId : LoadPateintInHouseLabsByVisitIdEvent = new LoadPateintInHouseLabsByVisitIdEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( loadlabbVisitId );
+				}
+			}
+			
+			protected function id_nextBtn_clickHandler(event:MouseEvent):void
+			{
+				AllowMoveToNextPanel ( dispactchSelectSectionEvent );
+				
+			}
+			
+			private function dispactchSelectSectionEvent():void
+			{
+				dispatchEvent( new SelectSection('nextSection', 'id_labIn', true, true) );
+			}
+			
+			public function AllowMoveToNextPanel( callBack:Function ):void
+			{
+				if( id_Add.enableAll )
+				{
+					UtilityFunctions.AskMessage( "There are changes in the form, do you still want to leave form in current state?", function ():void
+					{
+						callBack(); 
+					}); 
+				}
+				else
+				{
+					callBack();
+				}
+			}
+			
+			
+			protected function CombochangeHandler(event:IndexChangeEvent):void
+			{
+				id_Add.enableAll = areRequiredFieldsProvidedAndValid();
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				gridView.addEventListener("NotesSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				gridView.addEventListener("DictationSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+			}
+			
+			protected function NotesDictationSavedFromGrid(event:Event):void
+			{
+				var evn:ManagePatientInHouseLabsEvents = new ManagePatientInHouseLabsEvents();
+				CairngormEventDispatcher.getInstance().dispatchEvent(evn);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<validators:ComboValidator id="comboValidator"/>
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		
+		<s:SkinnableContainer id="sc_LabIn" width="100%" >
+			<s:layout>
+				<s:VerticalLayout gap="4" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+			</s:layout>
+			
+			
+			<s:HGroup id="id_toparea" width="100%">
+				<s:VGroup width="100%">
+					<s:HGroup width="100%" gap="4">
+						<components:LabelComboBox id="id_TestCode" prompt="Test Code" width="100" 
+												  useHandCursor="true" buttonMode="true" toolTip="Test Code"
+												  keyUp="testCodeKeyUpHandler()"
+												  click="labIn_ClickHandler(event, 0)"
+												  change="CombochangeHandler(event)"
+												  skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.comboBoxSearchSkin" tabIndex="1"/>
+						<components:LabelComboBox id="id_TestName" prompt="Test Name" width="100%" toolTip="Test Name"
+												  keyUp="testNameChangeHandler()"
+												  click="labIn_ClickHandler(event, 1)"
+												  change="CombochangeHandler(event)"
+												  skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.comboBoxSearchSkin" tabIndex="2"/>
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<components:LabelTextArea id="id_Result" prompt="Result" width="100%" height="30" fontFamily="calibri" fontSize="11"
+												  keyUp="{id_Add.enabled = isGetEdited();}" maxChars="500" tabIndex="5" skinClass="com.adobe.gazuntite.skins.chrome.textInputSkins.optionalTextArea"/>
+					</s:HGroup>
+				</s:VGroup>
+				<s:VGroup>
+					<commons:AddRecord id="id_Add"  writeNotesClick="onWriteNotesClick(event)"  writeDictationClick="writeDictationClickHandler(event)"
+									   enabled="false" horizontalAlign="center" tabIndex="3" />
+					<s:Button id="id_AttachBtn" label="Attach" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QILabAttachBtn"
+							  useHandCursor="true" buttonMode="true" toolTip="Attach" click="browseFileHandler()" tabIndex="6" visible="false" includeInLayout="{id_AttachBtn.visible}"/>
+					
+					<s:CheckBox id="id_cbAttachement" label="Attachment" width="100%" change="checkbox1_changeHandler(event)" fontFamily="Calibri" color="#ffffff" visible="false" />
+				</s:VGroup>
+				
+			</s:HGroup>
+			<s:HGroup width="100%">
+				
+				<s:Button id="id_add" click="addRecordClick(event)" width="150"  enabled="{id_Add.enableAll}"
+						  buttonMode="true" useHandCursor="true" toolTip="Add Record" label="Add Lab In"
+						  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreTooltipBtn" tabIndex="7"/>
+				<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBG" 
+									  visible="{!id_add.enabled}" width="100%" />
+				<mx:Spacer width="100%"/>
+				<s:Button id="id_nextBtn" click="id_nextBtn_clickHandler(event)" label="Next" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin" buttonMode="true"
+						  toolTip="Move to next section Assessment" /> 
+			</s:HGroup>
+			<labin:LabInGridView id="gridView" width="100%"/>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</s:Group>

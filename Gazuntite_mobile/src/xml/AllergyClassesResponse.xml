@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Allergies xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<AllergyClass>
+    <AllergyClass ALLERGY_CLASS_ID="1" DISPLAY_NAME="carbapenem"/>
+    <AllergyClass ALLERGY_CLASS_ID="2" DISPLAY_NAME="cephalosporin"/>
+    <AllergyClass ALLERGY_CLASS_ID="4" DISPLAY_NAME="sulfonamide"/>
+    <AllergyClass ALLERGY_CLASS_ID="5" DISPLAY_NAME="aminoglycoside antibiotic"/>
+    <AllergyClass ALLERGY_CLASS_ID="6" DISPLAY_NAME="narcotic analgesic"/>
+    <AllergyClass ALLERGY_CLASS_ID="7" DISPLAY_NAME="acyclovir-like antiviral"/>
+    <AllergyClass ALLERGY_CLASS_ID="8" DISPLAY_NAME="methylxanthine"/>
+    <AllergyClass ALLERGY_CLASS_ID="9" DISPLAY_NAME="amphotericin B antifungal"/>
+    <AllergyClass ALLERGY_CLASS_ID="10" DISPLAY_NAME="sulfonylurea"/>
+    <AllergyClass ALLERGY_CLASS_ID="11" DISPLAY_NAME="thiazide or thiazide-like diuretic"/>
+    <AllergyClass ALLERGY_CLASS_ID="12" DISPLAY_NAME="thiazide-like diuretic"/>
+    <AllergyClass ALLERGY_CLASS_ID="13" DISPLAY_NAME="hydroxyzine derivative"/>
+    <AllergyClass ALLERGY_CLASS_ID="14" DISPLAY_NAME="sulfonamide-type loop diuretic"/>
+    <AllergyClass ALLERGY_CLASS_ID="15" DISPLAY_NAME="carbonic anhydrase inhibitor"/>
+    <AllergyClass ALLERGY_CLASS_ID="16" DISPLAY_NAME="sulfa drug"/>
+    <AllergyClass ALLERGY_CLASS_ID="17" DISPLAY_NAME="neuromuscular blocking agent"/>
+    <AllergyClass ALLERGY_CLASS_ID="18" DISPLAY_NAME="tetracyclic antidepressant"/>
+    <AllergyClass ALLERGY_CLASS_ID="19" DISPLAY_NAME="tricyclic antidepressant"/>
+    <AllergyClass ALLERGY_CLASS_ID="21" DISPLAY_NAME="iodinated radiocontrast agent"/>
+    <AllergyClass ALLERGY_CLASS_ID="22" DISPLAY_NAME="quinolone antibiotic"/>
+</AllergyClass>
+</Allergies>

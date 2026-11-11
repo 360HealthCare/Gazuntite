@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:pmh="com.gazuntite.patient.visit.view.pmh.*" 
+		 xmlns:physical="com.gazuntite.patient.visit.view.physical.*"
+		 xmlns:assessment="com.gazuntite.patient.visit.view.assessment.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 initialize="init(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.event.visit.GenerateSoapNotePreviewEvent;
+			import com.gazuntite.patient.visit.event.visit.LoadReviewHistroyEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.view.events.PatientVisitEvent;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.ObjectProxy;
+			
+			private var StatusWindow:PopupWindow ;
+			
+			private var m_bIsViewAllowed:Boolean = true;
+			
+			private var showReviewAllPopUp:ReviewAllPopUp = new ReviewAllPopUp();
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public function get IsViewAllowed():Boolean
+			{
+				return m_bIsViewAllowed;
+			}
+			
+			public function set IsViewAllowed(value:Boolean):void
+			{
+				m_bIsViewAllowed = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				QIModelLocator.getInstance().updateModel(597, 597, 3, 
+					7, "Test Practice", "Test Station", 1,
+					new ObjectProxy(), true, false, QIConstants.GUID_FORMAT);
+				
+				addEventListener('LoadMedicationPrescriptionDataEvent', onLoadMedicationPrescriptionDataEvent);
+			}
+			
+			protected function id_QIViews_changeHandler(event:IndexChangedEvent):void
+			{
+				
+			}
+			
+			protected function id_QIViews_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			private function reviewAllHandler(event:MouseEvent):void
+			{
+				showReviewAllPopUp.ShowPopup( UtilityFunctions.getTopLevelParentContainer() );
+				//showReviewAllPopUp.ShowPopup(FlexGlobals.topLevelApplication.mainContainer);
+				showReviewAllPopUp.title = "Review All";
+				var loadreviewhistroyevent:CairngormEvent = new LoadReviewHistroyEvent (model.LoggedInUserSessionID,model.VisitID,model.LoggedInUserId,callBackFunction);
+				CairngormEventDispatcher.getInstance().dispatchEvent(loadreviewhistroyevent); 
+				return;
+				
+			}
+			
+			private  function callBackFunction():void
+			{
+				showReviewAllPopUp.allSelected();
+				
+			}
+			
+			private function signCoSignClickHandler(event:MouseEvent):void
+			{
+				if(model.VisitProviderSelected != -1)
+				{
+					ShowNote( QIConstants.SIGN_COSIGN, event );
+				}
+				else
+				{
+					Alert.show('Please save a provider before visit save', 'info',4, FlexGlobals.topLevelApplication.mainContainer, closeHandler);
+				}
+			}
+			
+			private function ShowNote(titleStr:String, event:MouseEvent):void
+			{
+				var soapNote:soapNoteView = new soapNoteView();
+				soapNote.show(titleStr, quickInputVisitActionCallback, ShowStatusWindow);
+				
+				var callback:Function = function( note:String, isURL:Boolean = false ):void
+				{
+					soapNote.SoapNoteURL = note;
+				}
+				
+				var isMale:Boolean = model.IsloggedInUserFemale == "male";
+				var isAllSelected:Boolean 	= false;
+				var isTempVisit:Boolean 	= true;
+				
+				var evt:CairngormEvent;
+				
+				evt = new GenerateSoapNotePreviewEvent( 
+					isAllSelected,
+					isMale,
+					callback);
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+				/* logger.debug( "GenerateSoapNotePreviewEvent for " + event.target.toolTip + ": model.basicUserDTO.Gender-> " + model.basicUserDTO.Gender.GenderName.toLowerCase() + ", " +
+				"isMale->" + isMale );  */
+			}
+			
+			protected function id_VisitHistory_clickHandler(event:MouseEvent):void
+			{
+				var popup:ComingSoon = new ComingSoon();
+				popup.ShowPopup( this );
+				PopUpManager.centerPopUp(popup);
+				popup.height = 200;
+				popup.width = 200;
+			}
+			
+			protected function id_ReferBtn_clickHandler(event:MouseEvent):void
+			{
+				var popup:ComingSoon = new ComingSoon();
+				popup.ShowPopup( this );
+				PopUpManager.centerPopUp(popup);
+				popup.height = 200;
+				popup.width = 200;
+			}
+			
+			protected function Save_clickHandler(event:MouseEvent):void
+			{
+				if(model.VisitProviderSelected != -1)
+				{
+					var soapNote:soapNoteView = new soapNoteView();
+					soapNote.show(soapNoteView.SAVE_AND_REVIEW, quickInputVisitActionCallback, ShowStatusWindow );
+					soapNote.addEventListener('onSaveVisit', function(e:Event):void{
+						//Tahir Alvi - Dispach event for update VB Patient Encouner List.
+						dispatchEvent(new Event('updateVBPatientEncounerList', true, true));
+					});
+					var callback:Function = function( note:String, isURL:Boolean = false ):void
+					{
+						soapNote.SoapNoteURL = note;
+					}
+					var isMale:Boolean;
+					
+					//if(model.basicUserDTO.Gender)
+					isMale = model.IsloggedInUserFemale == "male";
+					
+					var isAllSelected:Boolean 	= false;
+					//var isTempVisit:Boolean 	= true;
+					//Tahir - new impl
+					//model.visitDTO.ClinicBranch.AvgPatientPerDay = 0;
+					
+					var evt:CairngormEvent;
+					evt = new GenerateSoapNotePreviewEvent( 
+						isAllSelected,
+						isMale,
+						callback);
+					
+					CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+				}else
+				{
+					Alert.show('Please save a provider before visit save', 'info',4, FlexGlobals.topLevelApplication.mainContainer, closeHandler);
+				}
+			}
+			//--tahir Alvi - alert close handler
+			private var popup:SetProviderPopup;
+			private function closeHandler(event:CloseEvent):void
+			{
+				if(event.detail == Alert.OK)
+				{
+					var popup:SetProviderPopup = new SetProviderPopup();
+					popup = PopUpManager.createPopUp(this, SetProviderPopup, true) as SetProviderPopup;
+					PopUpManager.centerPopUp(popup);
+					popup.id_btnSave.addEventListener(MouseEvent.CLICK, onSaveSetProviderPopup);
+					popup.id_closeBtn.addEventListener(MouseEvent.CLICK, onCloseSetProviderPopup);
+				}
+			}
+			//-- @ Close button of  setproviderpopup
+			private function onCloseSetProviderPopup(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(popup);
+			}
+			//-- @ Close of save setproviderpopup
+			private function onSaveSetProviderPopup(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(popup);
+			}
+			private function quickInputVisitActionCallback(actionName:String = "", visiID:int = 0):void
+			{
+				switch (actionName)
+				{
+					
+					case Constants.VISIT_SIGNE:
+						var signEv:PatientVisitEvent = new PatientVisitEvent(PatientVisitEvent.PATIENT_VISIT_SIGNED, true);
+						signEv.visitId = visiID;
+						dispatchEvent(signEv);
+						break;
+					
+					case Constants.VISIT_COSIGNED:
+						var cosignEv:PatientVisitEvent = new PatientVisitEvent(PatientVisitEvent.PATIENT_VISIT_COSIGNED, true);
+						cosignEv.visitId = visiID;
+						dispatchEvent(cosignEv);
+						break;
+					
+					case "RemoveLoadingPoPup":
+						break;
+					
+					default:
+						var saveEv:PatientVisitEvent = new PatientVisitEvent(PatientVisitEvent.PATIENT_VISIT_SAVED, true);
+						saveEv.visitId = visiID;
+						dispatchEvent(saveEv);
+						break;
+				}
+				
+				/* PatientEncounterView.refreshPatientVisitList();*/
+				
+				if( StatusWindow )
+					PopUpManager.removePopUp( StatusWindow ); 
+			}
+			
+			public function ShowStatusWindow(statusMessage :String ):void
+			{
+				StatusWindow = UtilityFunctions.ShowStatusMessage( statusMessage, this );
+			}
+			
+			
+			protected function id_PMHView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_PMHView.addEventListener("nextSection",function (event:Event):void
+				{
+					id_TabBar.selectedIndex = 1;
+					id_PhysicalView.setFirstTab() ;
+				});
+			}
+			
+			protected function id_PhysicalView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_PhysicalView.addEventListener("nextSection",function (event:Event):void
+				{
+					id_TabBar.selectedIndex = 2;
+					id_AssessmentView.setFirstTab() ;
+				});
+			}
+			
+			private var _onUpdateVBVisiList:Boolean;
+			[Bindable]
+			public function get onUpdateVBVisiList():Boolean
+			{
+				return _onUpdateVBVisiList;
+			}
+			
+			public function set onUpdateVBVisiList(value:Boolean):void
+			{
+				_onUpdateVBVisiList = value;
+			}
+			
+			private function onLoadMedicationPrescriptionDataEvent(e:Event):void
+			{
+				var securityHeaderXML:XML;
+				securityHeaderXML	 			= <Header />;					
+				securityHeaderXML.@EUserName	= "TESTUSER";
+				securityHeaderXML.@EPassword	= "TESTPASS";
+				securityHeaderXML.@ClinicID		= "sad";
+				//trace("Going to load prescription for "+GaxenID);
+				//model.gaxenID = GaxenID;//Tahir Alvi - assign patient gaxen id
+				
+				if(model.gaxenID.length > 0 && model.gaxenID != "" && model.gaxenID != "0")
+				{
+					var loadPatientPrescriptionEvent: LoadPatientMedEvent = new LoadPatientMedEvent("0", model.gaxenID, PrescriptionLoaded);				
+					loadPatientPrescriptionEvent.data = securityHeaderXML; 				
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadPatientPrescriptionEvent);
+				}
+				else
+				{
+					if(model.patientMedACList)
+						model.patientMedACList.removeAll();
+					if(model.patientChronicMedACList)
+						model.patientChronicMedACList.removeAll();
+					if(model.patientMedAC_inactiveList)
+						model.patientMedAC_inactiveList.removeAll();
+					if(model.patientChronicMedAC_inactiveList)
+						model.patientChronicMedAC_inactiveList.removeAll();
+				}
+			}
+			
+			public function PrescriptionLoaded(patientMedAC:ArrayCollection, patientChronicMedAC:ArrayCollection, patientMedAC_inactive:ArrayCollection, patientChronicMedAC_inactive:ArrayCollection):void
+			{
+				if(model.patientMedACList)
+					model.patientMedACList.removeAll();
+				else
+					model.patientMedACList = new ArrayCollection();
+				
+				if(model.patientMedAC_inactiveList)
+					model.patientMedAC_inactiveList.removeAll();
+				else
+					model.patientMedAC_inactiveList = new ArrayCollection();
+				
+				if(model.patientChronicMedAC_inactiveList)
+					model.patientChronicMedAC_inactiveList.removeAll();
+				else
+					model.patientChronicMedAC_inactiveList = new ArrayCollection();
+				
+				if(model.patientChronicMedACList)
+					model.patientChronicMedACList.removeAll();
+				else
+					model.patientChronicMedACList = new ArrayCollection();
+				
+				//For QI load
+				if(model.medicationDTOList)
+					model.medicationDTOList.removeAll();
+				else
+					model.medicationDTOList = new ArrayCollection();
+				
+				if(model.prescriptionDToList)
+					model.prescriptionDToList.removeAll();
+				else
+					model.prescriptionDToList = new ArrayCollection();
+				
+				model.patientMedACList 						= patientMedAC;//prescription list
+				model.patientChronicMedACList 				= patientChronicMedAC;//medication list
+				model.patientMedAC_inactiveList			 	= patientMedAC_inactive;
+				model.patientChronicMedAC_inactiveList	 	= patientChronicMedAC_inactive;
+				model.medicationDTOList 					= patientChronicMedAC;//for Qi
+				model.prescriptionDToList 					= patientMedAC;//for Qi
+			}
+			
+			protected function button1_buttonDownHandler(event:FlexEvent):void
+			{
+				func_ScrollUp();
+			}
+			
+			protected function button2_buttonDownHandler(event:FlexEvent):void
+			{
+				func_ScrollDown();
+			}
+			protected function ScrollUp(event:MouseEvent):void
+			{
+				func_ScrollUp();
+			}
+			
+			
+			protected function ScrollDown(event:MouseEvent):void
+			{
+				
+				func_ScrollDown();
+			}
+			
+			protected function  func_ScrollUp():void
+			{
+				
+				switch( id_QIViews.selectedIndex )
+				{
+					case 0:
+						id_PMHView.ScrollUp();
+						break;
+					case 1:
+						id_PhysicalView.ScrollUp();
+						break;
+					case 2:
+						id_AssessmentView.ScrollUp();
+						break;
+				}
+			}
+			protected function  func_ScrollDown ():void
+			{
+				switch( id_QIViews.selectedIndex )
+				{
+					case 0:
+						id_PMHView.ScrollDown();
+						break
+					case 1:
+						id_PhysicalView.ScrollDown();
+						break
+					case 2:
+						id_AssessmentView.ScrollDown();
+						break
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	<fx:Binding source="model.updateVBVisiList" destination="onUpdateVBVisiList" />
+	
+	
+	<s:layout>
+		<s:VerticalLayout gap="-3" paddingTop="6" />
+	</s:layout>
+	
+	
+	
+	
+	<s:HGroup horizontalAlign="left">
+		
+		<s:TabBar id="id_TabBar" dataProvider="{id_QIViews}" width="325" skinClass="com.adobe.gazuntite.skins.chrome.tabBarSkins.QITabsSkin" focusColor="#ff0000" />
+		
+	</s:HGroup>
+	
+	
+	<s:SkinnableContainer id="sc_QuickInput" width="100%" height="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIBarbackgroundSkin"
+						  visible="{IsViewAllowed}" includeInLayout="{sc_QuickInput.visible}">
+		
+		<s:layout>
+			<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="5" paddingLeft="7" paddingRight="7"  />
+		</s:layout>
+		<mx:ViewStack  id="id_QIViews" width="100%" height="100%" resizeToContent="true" change="id_QIViews_changeHandler(event)"
+					   creationComplete="id_QIViews_creationCompleteHandler(event)" >
+			<components1:CheckNavigator width="100%" label="PMH" ><!--hasChange="{id_PMHView.hasChange}" >-->
+				<pmh:PMHView id="id_PMHView" width="100%" height="100%" creationComplete="id_PMHView_creationCompleteHandler(event)" />
+			</components1:CheckNavigator>
+			<components1:CheckNavigator id="id_CNPhysical" width="100%" label="Physical" ><!--hasChange="{id_PhysicalView.hasChange}" >-->
+				<physical:PhysicalView id="id_PhysicalView" width="100%" height="100%" creationComplete="id_PhysicalView_creationCompleteHandler(event)" />
+			</components1:CheckNavigator>
+			<components1:CheckNavigator id="id_CNAssessment" width="100%" label="Assessment" ><!--hasChange="{id_AssessmentView.hasChange}" >-->
+				<assessment:AssessmentView id="id_AssessmentView" width="100%" height="100%" />
+			</components1:CheckNavigator>
+			
+		</mx:ViewStack>
+		
+		
+		
+		<s:HGroup width="100%" height="30" gap="5" horizontalAlign="center" verticalAlign="middle">
+			<s:Button label="Review All" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin"
+					  click="reviewAllHandler(event)" toolTip="Review History" buttonMode="true" useHandCursor="true"/>
+			<s:Button id="id_Sign_CoSign" label="Sign" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin"
+					  click="signCoSignClickHandler(event)" toolTip="Sign Visit" buttonMode="true" useHandCursor="true" enabled="{model.signCosignBtnEnabled}"
+					  />
+			<s:Button id="id_VisitHistory" label="Visit History" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin" toolTip="View Visit History" buttonMode="true" useHandCursor="true"
+					  click="id_VisitHistory_clickHandler(event)"/>
+			<s:Button id="id_ReferBtn" label="Refer" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin" toolTip="Refer Patient to another Doctor" buttonMode="true" useHandCursor="true"
+					  click="id_ReferBtn_clickHandler(event)"/>
+			<s:Button id="id_Save" label="Save / Review" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin"
+					  click="Save_clickHandler(event)" toolTip="Save Visit Data" buttonMode="true" useHandCursor="true" /><!--enabled="{hasChange}"/>-->
+			<s:Button id="id_CloseVisit"  label="Close Visit" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PMHTabBottomButtonsSkin" toolTip="Close Patient Record" buttonMode="true" useHandCursor="true"/>
+		</s:HGroup>
+
+	</s:SkinnableContainer>
+	<mx:Spacer height="15" />
+	
+	<s:HGroup width="100%" horizontalAlign="center">
+		
+		
+		<s:Button height="8" width="40" toolTip="Scroll Up"   buttonDown="button1_buttonDownHandler(event)"  autoRepeat="true"  click="ScrollUp(event)" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PEscrollUp"  
+				  buttonMode="true" useHandCursor="true"/>
+		<s:Button height="8" width="40" toolTip="Scroll Down" buttonDown="button2_buttonDownHandler(event)"   click="ScrollDown(event)"  autoRepeat="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.PEScrollDown" 
+				  buttonMode="true" useHandCursor="true"/>
+	</s:HGroup>
+	
+	
+</s:Group>

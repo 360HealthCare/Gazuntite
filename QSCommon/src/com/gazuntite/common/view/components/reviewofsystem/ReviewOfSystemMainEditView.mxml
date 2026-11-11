@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.components.*"
+		 xmlns:reviewofsystem="com.gazuntite.common.view.components.reviewofsystem.*" 
+		 xmlns:components1="com.gazuntite.common.view.components.*" 
+		 creationComplete="onCreated(event)"
+		 resize="onResize(event)" 
+		 
+		 >
+	<fx:Metadata>
+		[Event(name="saveData", type="flash.events.Event")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.GeneralEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import spark.components.ToggleButton;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			private var m_acDataProvider:ArrayCollection;
+			[Bindable]	protected var viewModel:PatientInputPhysicalReviewOfSystemViewModel = PatientInputPhysicalReviewOfSystemViewModel.getInstance();
+			[Bindable]	protected var selectedItemRow:int = 0;
+			[Bindable]	protected var listItemHeight:int = 27;
+		//cf	[Bindable]	protected var listItemWidth:int = 100;
+			[Bindable]	protected var listItemWidth:int = 150;
+			[Bindable]  public var selectedItem:IReviewOfSystemItem;
+			protected var selectedPage:int = 0;
+			private var _moduleName:String;
+			
+			[Bindable]
+			public function get moduleName():String
+			{
+				return _moduleName;
+			}
+			
+			public function set moduleName(value:String):void
+			{
+				_moduleName = value;
+			}
+			
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return m_acDataProvider;
+			}
+			
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				m_acDataProvider = value;
+				scrollToPage(0);
+			}
+			
+			protected function onItemSelected(event:IndexChangeEvent):void
+			{
+				selectedItem = uiList.selectedItem;
+				trace('onItemSelected:', selectedItem.label)
+				clearViewModel();
+				
+				var item_height:Number = listItemHeight;
+				var total_items:int = uiList.dataProvider.length;
+				var item_per_page:int = Math.ceil(uiListContainer.height/item_height)-1;
+				var total_pages:int = Math.ceil(total_items/item_per_page);
+				
+				selectedItemRow = uiList.selectedIndex - item_per_page*selectedPage;
+			}
+			
+			public function clearViewModel():void
+			{
+				viewModel.showRosItemDetailViewTopLevel 	= false;
+				viewModel.showRosItemViewHeentLevel 		= false;
+				viewModel.showRosItemLevel2DetailView 		= false;
+				viewModel.showRosItemViewHeentDetailLevel 	= false;
+				viewModel.rosDetailSelectedItemIndex 		= -1;
+				viewModel.rosHeentSelectedItemIndex 		= -1;
+			}
+			
+			protected function scrollToPage(newPage:Number):void
+			{
+				if ( dataProvider == null)
+				{
+					return;
+				}
+				var item_height:Number = listItemHeight;
+				var total_items:int = dataProvider.length;
+				var item_per_page:int = Math.ceil(uiListContainer.height/item_height)-1;
+				var total_pages:int = Math.ceil(total_items/item_per_page);
+				
+				if (newPage<0 || newPage>=total_pages)
+				{
+					return;
+				}
+				
+				clearViewModel();
+				viewModel.rosSelectedItemIndex = -1;
+				
+				
+				selectedPage = newPage;
+				var scroll_to_item:int = newPage*item_per_page;
+				var scroll_pos:int = scroll_to_item*item_height;
+				//				uiListContainer.verticalScrollPosition = scroll_pos;
+				uiScrollAnimatePath.valueTo = scroll_pos;
+				uiScrollAnimate.play();
+				uiPageLabel.text = (newPage+1).toString()+' of '+total_pages.toString();
+				
+				enableScrollButtons( total_pages > 1 );
+			}
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+				scrollToPage(0);
+				
+				addEventListener( "normalClick", uiList_clickHandler);
+				addEventListener( "childChanged", onChildChanged);
+			}
+			
+			protected function onResize(event:ResizeEvent):void
+			{
+				uiList.callLater( function ():void
+				{
+					scrollToPage(selectedPage);
+				});
+			}
+			
+			protected function uiList_clickHandler(event:Event):void
+			{
+				if( null == selectedItem ) return;
+				
+				trace('uiList_clickHandler:', selectedItem.label)
+				var btn:ToggleButton = event.target as ToggleButton;
+				if( null != btn )
+				{
+					selectedItem.IsDirty = false;
+					var setEmpty:Boolean = ! btn.selected ;	
+					selectedItem.IsDirty = ReviewOfSystemHelper.setNormal( selectedItem, setEmpty )  && ! setEmpty;	
+				}
+				
+				clearViewModel();
+				
+				if (selectedItem.label.toLowerCase() == "heent")
+				{
+					viewModel.showRosItemViewHeentLevel = true;
+				}
+				else
+				{
+					viewModel.showRosItemDetailViewTopLevel = true;
+				}
+			}
+			
+			protected function onChildChanged(event:GeneralEvent):void
+			{
+				selectedItem.IsDirty = false;
+				selectedItem.IsNormal = ReviewOfSystemHelper.IsAllChildrenNormal( selectedItem ).toString();
+				selectedItem.IsDirty = true;
+			}
+			
+			protected function textinput1_changeHandler(event:TextOperationEvent):void
+			{
+				clearViewModel();
+				if( id_txtSearch.text.length )
+				{
+					if( null == dataProvider.filterFunction )
+						dataProvider.filterFunction = defaultFilterFunction;
+				}
+				else
+				{
+					dataProvider.filterFunction = null;
+				}
+				
+				dataProvider.refresh();
+				
+				id_NorecordFound.visible = dataProvider.length == 0;
+			}
+			
+			private function defaultFilterFunction(item:IReviewOfSystemItem):Boolean
+			{
+				if (!item)
+					return false;
+				
+				var displayString:String = item.label.toLowerCase();
+				return (displayString.search(id_txtSearch.text.toLowerCase()) >= 0);
+			}
+			
+			public function clearData():void
+			{
+				var i:int;
+				for( i = 0; i < dataProvider.length; i++ )
+				{
+					var dto:IReviewOfSystemItem = dataProvider.getItemAt( i ) as IReviewOfSystemItem;
+					var setEmpty:Boolean = true;
+					ReviewOfSystemHelper.setNormal( dto, setEmpty );	
+					ReviewOfSystemHelper.setAbnormal( dto, setEmpty );	
+					ReviewOfSystemHelper.clearNotes( dto );	
+					dto.IsDirty = false;
+				}
+				
+				clearViewModel();
+			}
+			
+			public function ToggleAllNormal(setEmpty:Boolean):void
+			{
+				var i:int;
+				for( i = 0; i < dataProvider.length; i++ )
+				{
+					var dto:IReviewOfSystemItem = dataProvider.getItemAt( i ) as IReviewOfSystemItem;
+					dto.IsDirty = ReviewOfSystemHelper.setNormal( dto, setEmpty )  && ! setEmpty;	
+				}
+				
+				if( setEmpty )
+					clearViewModel();
+				
+				uiList.invalidateDisplayList();
+				uiList.invalidateProperties();
+			}
+			
+			public function IsDataDirty():Boolean
+			{
+				var i:int;
+				for( i = 0; i < dataProvider.length; i++ )
+				{
+					var dto:IReviewOfSystemItem = dataProvider.getItemAt( i ) as IReviewOfSystemItem;
+					if( dto.IsDirty )
+						return true
+				}
+				return false
+			}
+			
+			private function enableScrollButtons(value:Boolean):void
+			{
+				id_ScrollDown.enabled = value;
+				id_ScrollUp.enabled = value;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="uiScrollAnimate" target="{uiListContainer}" duration="300">
+			<s:motionPaths>
+				<s:SimpleMotionPath id="uiScrollAnimatePath" property="verticalScrollPosition" />
+			</s:motionPaths>
+			
+		</s:Animate>
+		
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="6"/>
+	</s:layout>
+	
+	<s:Group width="100%" height="100%">
+		
+		<s:BorderContainer height="100%" borderVisible="false" backgroundColor="#FFFFFF" cornerRadius="3" left="3">
+			<s:filters>
+				<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"	distance="0" hideObject="false" inner="false" knockout="false"	quality="3" strength="1"/>
+			</s:filters>
+			
+			<s:layout>
+				<s:VerticalLayout	horizontalAlign="center" paddingTop="2" paddingBottom="2" paddingLeft="2" paddingRight="2" gap="3"	/>
+			</s:layout>
+			
+			<s:TextInput id="id_txtSearch" 
+						 height="23"
+						 prompt="Search" 
+						 width="{uiListContainer.width}" 
+						 borderVisible="false" 
+						 change="textinput1_changeHandler(event)"
+						 skinClass="com.gazuntite.skins.controls.textInput.SearchTextInputSkin"
+						 />
+			
+			
+			<s:VGroup id="uiListContainer" height="100%" clipAndEnableScrolling="true" >
+				<s:Label id="id_NorecordFound" 
+						 width="100%" textAlign="center" fontFamily="CalibriCFFBold" text="No Record Found." visible="false" includeInLayout="{id_NorecordFound.visible}"/>
+				<s:List id="uiList" 
+						borderVisible="false" width="{listItemWidth}"
+						dataProvider="{dataProvider}"
+						selectedIndex="@{viewModel.rosSelectedItemIndex}"
+						itemRenderer="com.gazuntite.common.view.components.reviewofsystem.renderers.ReviewOfSystemItemRenderer"
+						change="onItemSelected(event)"
+						click="uiList_clickHandler(event)"
+						>
+					<s:layout>
+						<s:VerticalLayout gap="-1"/>
+					</s:layout>
+				</s:List>
+			</s:VGroup>
+			<s:HGroup width="{uiListContainer.width}" verticalAlign="middle">
+				<s:Button id="id_ScrollDown" 
+						  toolTip="Scroll Down" useHandCursor="true" buttonMode="true"
+						  click="scrollToPage(selectedPage-1)" 
+						  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.DownBtnSkin"
+						  />
+				<s:Label id="uiPageLabel" width="100%" textAlign="center" fontFamily="CalibriCFFBold"/>
+				<s:Button id="id_ScrollUp"
+						  toolTip="Scroll Up" useHandCursor="true" buttonMode="true"
+						  click="scrollToPage(selectedPage+1)" 
+						  skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.UpBtnSkin"
+						  />
+			</s:HGroup>
+		</s:BorderContainer>
+		
+		<s:Group left="181" right="0" height="100%" visible="{!uiList.selectedIndex >= 0}" includeInLayout="{!uiList.selectedIndex >= 0}">
+			<components1:PleaseSelectView label="Select any item for input" horizontalCenter="0" verticalCenter="0"  width="90%"/>
+		</s:Group>
+		
+		<reviewofsystem:ReviewOfSystemItemDetailView
+			top="0" bottom="24" right="2" 
+			left="{listItemWidth+12}"
+			dataItem="{selectedItem}"
+			selectedItemRow="{selectedItemRow}"
+			listItemHeight="{listItemHeight}"
+			includeInLayout="{viewModel.showRosItemDetailViewTopLevel}"
+			visible="{viewModel.showRosItemDetailViewTopLevel}"
+			/>
+		<!--			heentItemList="{dataModel.tempHeentItems}"-->
+		<reviewofsystem:ReviewOfSystemHeentEditView
+			top="2" bottom="2" right="2" left="2"
+			dataItem="{selectedItem}"
+			selectedItemRow="{selectedItemRow}"
+			listItemHeight="{listItemHeight}"
+			visible="{viewModel.showRosItemViewHeentLevel}"
+			includeInLayout="{viewModel.showRosItemViewHeentLevel}"
+			/>
+	</s:Group>
+	
+</s:Group>

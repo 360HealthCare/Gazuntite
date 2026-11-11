@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="com.gazuntite.controls.extended.components.*"
+					   width="200" height="100">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.utils.QIConstants;
+			private var _isPopUpShown:Boolean;
+			private var _popUpType:String;
+			private var _popUpTypeChanged:Boolean;
+			
+			private var _callback:Function;
+			
+			private var parentPopUp:DisplayObject;
+			
+			public function get popUpType():String
+			{
+				return _popUpType;
+			}
+			
+			public function set popUpType(value:String):void
+			{
+				_popUpType = value;
+				_popUpTypeChanged = true;
+				
+				invalidateProperties();
+			}
+			
+			public function get callback():Function
+			{
+				return _callback;
+			}
+			
+			public function set callback(value:Function):void
+			{
+				if (value != _callback)
+					_callback = value;
+			}
+			
+			private function okAndRetryClickHandler():void
+			{
+				removePopup();
+				/*if (parentPopUp)
+				{
+				if (_popUpType == INVALID_CREDENTIALS)
+				AuthenticationPopUp(parentPopUp).onInvalidCredentials();
+				else
+				AuthenticationPopUp(parentPopUp).visitSignCosignedSuccess();
+				}*/
+				
+				if (_callback != null)
+					_callback(popUpType);
+			}
+			
+			private function cancelClickHandler():void
+			{
+				removePopup();
+			}
+			
+			override public function ShowPopup(parent:DisplayObject):void
+			{
+				if (!_isPopUpShown)
+				{
+					parentPopUp = parent;
+					
+					super.ShowPopup(parent);
+					_isPopUpShown = true;
+					
+					this.x = parent.x + (parent.width - this.width)/2;
+					this.y = parent.y + (parent.height - this.height)/2;
+					
+					okAndRetry.setFocus();
+				}
+			}
+			
+			override public function removePopup():void
+			{
+				super.removePopup();
+				_isPopUpShown = false;
+			}
+			
+			override protected function commitProperties():void
+			{
+				
+				if (_popUpTypeChanged)
+				{
+					_popUpTypeChanged = false;
+					
+					switch(_popUpType)
+					{
+						case QIConstants.VISIT_SIGNED:
+							lbl.text = "Visit Signed Successfully";
+							okAndRetry.label = "OK";
+							cancel.visible = false;
+							cancel.includeInLayout = false;
+							break;
+						
+						case QIConstants.VISIT_CO_SIGNED:
+							lbl.text = "Visit Cosigned Successfully";
+							okAndRetry.label = "OK";
+							cancel.visible = false;
+							cancel.includeInLayout = false;
+							break;
+						
+						case QIConstants.INVALID_CREDENTIALS:
+							lbl.text = "Invalid Credentials";
+							okAndRetry.label = "Retry";
+							cancel.visible = true;
+							cancel.includeInLayout = true;
+							break;
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="#000000"/>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke color="#FFFFFF" weight="4"/>
+		</s:stroke>
+	</s:Rect>
+		<s:VGroup width="100%" verticalAlign="middle" horizontalAlign="center" paddingLeft="15" paddingRight="15" paddingBottom="15" paddingTop="15">
+			<s:Label id="lbl" color="#FFFFFF"/>
+			<s:HGroup gap="3">
+				<s:Button id="okAndRetry" click="okAndRetryClickHandler()" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin"/>
+				<s:Button id="cancel" label="Cancel" click="cancelClickHandler()" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.OKBtnSkin"/>
+			</s:HGroup>
+		</s:VGroup>
+</components:PopupGroup>

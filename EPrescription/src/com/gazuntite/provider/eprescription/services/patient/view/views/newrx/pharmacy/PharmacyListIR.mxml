@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				autoDrawBackground="false" 
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			[Bindable]
+			public var inEditMode:Boolean = false;
+			[Bindable]
+			public var model:Object;
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				model = value;
+				
+				if (model.hasOwnProperty("inEditMode"))
+				{
+					inEditMode = model.inEditMode;
+					showGlow();
+				}
+			}
+			
+			protected function toggleEditView(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			
+				inEditMode = !inEditMode;
+				showGlow();
+				
+				if (model.hasOwnProperty("inEditMode"))
+				{
+					model.inEditMode = inEditMode;
+				}
+			}
+			
+			/**
+			 * Ayesha: 21/05/2013
+			 * */
+			private function showGlow():void
+			{
+				if (inEditMode)
+				{
+					
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:layout >
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"/> 
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header"
+						  width="100%" height="35"   
+						  click="toggleEditView(event)" toolTip="Open/Close Details"  useHandCursor="true" buttonMode="true" >
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Label text="{model.StoreName}" toolTip="{model.StoreName}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="33%" verticalCenter="0"
+				 right="5" left="5"  maxDisplayedLines="1"/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label text="{model.AddressLine1}" toolTip="{model.AddressLine1}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="33%" verticalCenter="0"
+				 right="5" left="5"  maxDisplayedLines="1"/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label text="{model.Phone}" toolTip="{model.Phone}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="33%" verticalCenter="0"
+				 right="5" left="5"  maxDisplayedLines="1"/>
+		
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer width="{id_Header.width - 10}" height="65" includeInLayout="{inEditMode}" visible="{inEditMode}" skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin" >
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="3" paddingLeft="10" paddingRight="3" paddingTop="4" gap="5"/>
+		</s:layout>
+		
+		<s:VGroup width="75" horizontalAlign="left">
+			<s:Label text="Pharmacy ID :" fontFamily="CalibriCFF" fontSize="14"  maxDisplayedLines="1"/>
+			<s:Label text="NCPDPID :" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" verticalCenter="0"  maxDisplayedLines="1"/>
+			<s:Label text="Zip :" fontFamily="CalibriCFF" fontSize="14"  right="5" left="5" verticalCenter="0"  maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup width="100%" horizontalAlign="left">
+			<s:Label text="{model.PharmaciesID}" toolTip="{model.PharmaciesID}" fontFamily="CalibriCFFBold" fontSize="14" width="100%" maxDisplayedLines="1"/>
+			<s:Label text="{model.NCPDPID}" toolTip="{model.NCPDPID}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"  maxDisplayedLines="1"/>
+			<s:Label text="{model.Zip}" toolTip="{model.Zip}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"  maxDisplayedLines="1"/>
+		</s:VGroup>
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

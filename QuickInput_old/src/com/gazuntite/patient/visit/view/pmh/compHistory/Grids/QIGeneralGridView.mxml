@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:validators="com.gazuntite.common.util.validators.*" 
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 preinitialize="preInitializeHandler()" creationComplete="cc()"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.itemEditors.SparkComboBoxItemEditor;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.SaveMedicalHistoryEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Label;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CollectionEvent;
+			import mx.events.CollectionEventKind;
+			import mx.events.DataGridEvent;
+			import mx.events.ValidationResultEvent;
+			
+			import spark.components.ComboBox;
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _hasViewChanged:Boolean;
+			private var _hasGridChanged:Boolean;
+			
+			[Bindable]
+			public var deleteColumnData:Object;
+			private var m_bShowEditControls:Boolean;
+			
+			[Bindable]
+			public function get ShowEditControls():Boolean
+			{
+				return m_bShowEditControls;
+			}
+			
+			public function set ShowEditControls(value:Boolean):void
+			{
+				m_bShowEditControls = value;
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+				var mhDTO:MedicalHistoryDTO;
+				mhDTO.IsNA
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			private function cc():void
+			{
+				id_DataGrid.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true);
+			}
+			
+			public function displayRowNum(oItem:Object, iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_DataGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			private function preInitializeHandler():void
+			{
+				/* if (!deleteColumnData)
+				deleteColumnData = {};
+				
+				deleteColumnData["noteDataFields"] = {subject: "NoteSubject", note: "MedicalHistoryNote", header: "PatientMedicalHistoryDescription", statusFunction:RecordLevelNotesStatus};
+				deleteColumnData["dictationDataField"] = "DictationID";
+				deleteColumnData["recordIDField"] = "PatientMedicalHistoryID";
+				deleteColumnData["section"] = QIPopUpManager.VB_COMPREHENSIVE_HISTORY; */
+			}
+			
+			private function RecordLevelNotesStatus(hasNotes:Boolean, data:Object):void
+			{
+				/* var dicID:String = data.DictationID;
+				if ( hasNotes || ( dicID && dicID != Constants.GUID_FORMAT ) )
+				data.IsNone = Constants.STRING_FALSE;
+				else
+				data.IsNone = Constants.STRING_TRUE;
+				
+				model.medicalHistoryDTOListByPatient.refresh();
+				} */
+				
+			}
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				/* if(model.medicalHistoryDTOListByPatient!=null){
+				model.medicalHistoryDTOListByPatient.filterFunction=myFilter;
+				model.medicalHistoryDTOListByPatient.refresh();
+				} */
+			}
+			
+			private function myFilter(obj:*):Boolean
+			{
+				/* if(model.vbFilter == Constants.BY_VISIT)
+				{
+				if(model.vbVisitId == obj.VisitID)
+				{
+				return true;
+				}
+				else
+				{
+				return false;
+				}
+				} */
+				
+				return true;
+				
+			}
+			
+			public function OnStatus(item:Object, iCol:int):String
+			{
+				 if( item.IsNone.toString() == Constants.STRING_TRUE )
+					return Constants.STRING_NONE_UI;
+				else
+					return Constants.STRING_YES_UI;
+				
+			}
+			
+			public function OnIsActive(item:Object, iCol:int):String
+			{
+				//item.ICDCodeList[0].IsActive
+				 if( item.isActive.toString() == 'true' )
+					return Constants.STRING_YES_UI;
+			//	else if(item.isActive.toString() == 'false' )
+			//		return Constants.STRING_NO_UI;
+			//	else
+					return ""; 
+			}
+			
+			private function deleteRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				
+				if (!event.data)
+					return;
+				
+				var medicalHistoryDTO:MedicalHistoryDTO;
+				
+				if (event.data is MedicalHistoryDTO)
+					medicalHistoryDTO = event.data as MedicalHistoryDTO;
+				
+				if (!medicalHistoryDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record", function():void
+				{
+					medicalHistoryDTO.IsDeleted = true;
+					medicalHistoryDTO.IsDirty = true;
+					medicalHistoryDTO.ModifiedAt = new Date();
+					medicalHistoryDTO.ModifiedBy = model.LoggedInUserId;
+					
+					if (!model.GeneralMedicalHistoryList)
+						model.GeneralMedicalHistoryList = new ArrayCollection();
+					
+					model.GeneralMedicalHistoryList.addItemAt(medicalHistoryDTO, 0);
+					
+					dispatchEvent(new Event("saveGeneralHistoryEvent", true));
+				});
+			}
+			
+			private function getIcdCodeName(oItem:Object,iCol:int):String
+			{
+				var strIcdCodeName:String = '';
+				
+				if (oItem && oItem.ICDDTO && oItem.ICDDTO.IcdCodeName)
+				{
+					strIcdCodeName = oItem.ICDDTO.IcdCodeName;
+					if(strIcdCodeName == '0')
+					{
+						strIcdCodeName = '';
+					}
+				}
+				return strIcdCodeName;
+			}
+			private function setOnSet(oItem:Object,iCol:int):String
+			{
+				 var strVisitDate:String = '';
+				
+				if (oItem && oItem.OnSet)
+				{
+					strVisitDate = oItem.OnSet;
+					if(strVisitDate != '')
+					{
+						strVisitDate = strVisitDate.replace('-','/');
+						strVisitDate = strVisitDate.replace('-','/');
+					}
+				}
+				return strVisitDate;
+			}
+			
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	<s:Button label="Filter" click="button1_clickHandler(event)" visible="false" includeInLayout="false" id="id_applyFiler"/>
+	
+	<components:LabelDataGrid id="id_DataGrid" width="100%" useRollOver="false" maxHeight="100"
+							  dataProvider="{model.PreviousGeneralMedicalHistoryList}" 
+							  rowCount="{id_DataGrid.dataProvider.length ? id_DataGrid.dataProvider.length : 1}" 
+							  verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+							  columnWidths="{[25,'15%','9%','10%','20%','15%','10%',90]}">
+		<components:columns>
+			<mx:DataGridColumn headerText="Sr.#"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="displayRowNum"/>
+			<mx:DataGridColumn headerText="General History"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="medicalhistorytype.Name" editorDataField="editorText">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor width="100%" labelField="MedicalHistoryTypeName" /> <!-- dataProvider="{outerDocument.model.medicalHistoryDTOListByPatient}" -->												
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>	
+			<mx:DataGridColumn headerText="Status"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="IsNone" labelFunction="OnStatus" >
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor width="100%" height="100%" property="IsNone" SwapYesNo="true" />
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="ICD Code" dataField="ICDDTO.IcdCodeName"  labelFunction="getIcdCodeName" editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Description" dataField="ICDDTO.IcdCodeDescription" editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Onset" dataField="OnSet" labelFunction="setOnSet" editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="Active" dataField="isActive"  editable="false" labelFunction="OnIsActive" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" >
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor width="100%" height="100%" property="IsNone" SwapYesNo="true" />
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<commons:DataGridColumnEx data="{deleteColumnData}" headerText=""  editable="false"  itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DeleteRecordRendererCH"/>
+		</components:columns>
+	</components:LabelDataGrid>
+</s:Group>

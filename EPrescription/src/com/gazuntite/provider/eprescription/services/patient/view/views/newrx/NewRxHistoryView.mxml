@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc(event)" xmlns:components="com.gazuntite.components.*" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.controls.events.FlipViewEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.DropDownEvent;
+			
+			/* [Bindable]
+			private var showDictationFoChronic:Boolean;
+			
+			[Bindable]
+			private var showDictationFoPresprection:Boolean; */
+			
+			[Bindable]
+			public var newRXDictationNoteViewModel_forPresprection:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]
+			public var newRXDictationNoteViewModel_forChronic:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			private var model:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			private var _selectedPatient:PatientDTO = new PatientDTO();
+			
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			public function LoadMedications():void
+			{
+				model.ChronicMedCollection		= new ArrayCollection();
+				model.PresprectionCollection 	= new ArrayCollection();
+				
+				if(selectedPatient && selectedPatient.GAXENID != '') // check if patient have medication or not -> No GAXENID mean no medication , by Moeen Mohsin 
+				{
+					var eusername:String  	= model.SearchProviderDetailsResults.EUserName;
+					var epassword:String  	= model.SearchProviderDetailsResults.EPassword;
+					var gaxenUserId:String 	= model.SearchProviderDetailsResults.GAXENID;
+					
+					var securityHeaderXML:XML	 			= <Header />;					
+					securityHeaderXML.@EUserName	= eusername;
+					securityHeaderXML.@EPassword	= epassword;
+					securityHeaderXML.@ClinicID		= "sad";
+					
+					
+					var loadMedication:LoadPatientMedEvent = new LoadPatientMedEvent('0',selectedPatient.GAXENID,5 ,LoadMedicationCallBack);
+					loadMedication.data = securityHeaderXML;
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadMedication);
+				}
+			}
+			
+			private function LoadMedicationCallBack(patientMedAC:ArrayCollection, patientChronicMedAC:ArrayCollection, patientMedAC_inactive:ArrayCollection, patientChronicMedAC_inactive:ArrayCollection):void
+			{
+				model.ChronicMedCollection 		= patientChronicMedAC;
+				model.PresprectionCollection 	= patientMedAC;
+				
+				/* id_PresprectionList.dataProvider = patientMedAC;
+				id_ChronicList.dataProvider = patientChronicMedAC; */
+			}
+			
+			protected function uiInboxList_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				
+				 if(event.currentTarget.id == "DropdownPresprection")
+					DropdownPresprection.dropDown.x = DropdownPresprection.x + 100 ; //add container left padding, should convert to global if we really want perfect
+				else
+					DropdownChronic.dropDown.x = DropdownChronic.x + 100 ;  //add container left padding, should convert to global if we really want perfect
+				 
+			}
+			
+			protected function viewStack_changeHandler(event:IndexChangedEvent):void
+			{
+				
+			}
+			
+			private var moreOptionPopup:OptionPopUp;
+			protected function uiOptionButton_clickHandler(event:MouseEvent):void
+			{
+				
+				var toggleView:Boolean = null != moreOptionPopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				moreOptionPopup = new OptionPopUp();
+				moreOptionPopup.ShowPopup( this );
+				moreOptionPopup.addEventListener("ClosePopup", function(event:Event):void { removeAllPopups() } );
+				
+				//moreOptionPopup.minWidth = 245;
+				//moreOptionPopup.percentWidth = 100;
+				moreOptionPopup.width =  170;
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				moreOptionPopup.move( pt.x - moreOptionPopup.width + 25, pt.y + 25 );  
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				
+				
+			}
+			
+			public function removeAllPopups():void
+			{
+				
+				if( moreOptionPopup && moreOptionPopup.isPopUp )
+				{
+					moreOptionPopup.removePopup();
+					moreOptionPopup = null;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="-5" paddingTop="5" paddingBottom="5" paddingRight="5" paddingLeft="5"/>
+	</s:layout>
+	<s:Group width="100%">
+		<s:ButtonBar id="id_b1" width="45%"
+					 dataProvider="{viewStack}"  buttonMode="true" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+	</s:Group>
+	
+	<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderVisible="false">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="right" />
+		</s:layout>
+		
+		<mx:ViewStack id="viewStack"  width="100%"  height="100%" top="3" creationPolicy="all" change="viewStack_changeHandler(event)" >
+			<mx:VBox label="Prescription" width="100%" verticalGap="0">
+				<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+					<s:layout>
+						<s:VerticalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+					</s:layout>
+					<s:HGroup width="100%" verticalAlign="middle">
+						<s:Label text="Arrange By:" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="15"/>
+						<s:DropDownList id="DropdownPresprection"
+										skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+										selectedIndex="0"
+										open="onSortDropdownOpen(event)"
+										toolTip="Arrange By">
+							<s:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object label="Recently Added" />
+									<fx:Object label="Medicine Name" />
+								</s:ArrayCollection>
+							</s:dataProvider>
+						</s:DropDownList>
+						<s:Spacer width="100%" />
+						<s:ToggleButton id="presprectionOptionBtn" right="{presprectionOptionBtn.selected?24:28}" 
+										bottom="{presprectionOptionBtn.selected?-2:Number.NaN}" 
+										verticalCenter="{presprectionOptionBtn.selected?Number.NaN:0}"
+										skinClass="com.gazuntite.skins.controls.button.patient.PatientOptionToggleButtonSkin"
+										buttonMode="true" toolTip="More Options" selected="@{newRXDictationNoteViewModel_forPresprection.visible}"
+										/>
+						<s:Button click="{dispatchEvent(new FlipViewEvent())}" buttonMode="true" toolTip="Flip View" verticalCenter="0" skinClass="com.gazuntite.skins.controls.button.FlipViewButtonSkin" />
+					</s:HGroup>
+				</s:SkinnableContainer>
+				
+				<dictation2:PatientDictationNoteView id="id_notesDictation" isSectionLevel="true" width="100%" minHeight="47"
+													 viewModel="{newRXDictationNoteViewModel_forPresprection}"  isSaveButtonVisible="false"/>
+				
+				<s:List id="id_PresprectionList"
+						width="100%" allowMultipleSelection="false"
+						height="100%"
+						skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+						borderVisible="false"
+						dataProvider="{model.PresprectionCollection}"
+						itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.MedicationListItemRenderer"
+						creationComplete="uiInboxList_creationCompleteHandler(event)"/>
+			</mx:VBox>
+			<mx:VBox label="Chronic Medication" width="100%">
+				
+				<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+					<s:layout>
+						<s:VerticalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+					</s:layout>
+					<s:HGroup width="100%" verticalAlign="middle">
+						<s:Label text="Arrange By:" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="15" />
+						<s:DropDownList id="DropdownChronic"
+										skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+										selectedIndex="0"
+										open="onSortDropdownOpen(event)"
+										toolTip="Arrange By">
+							<s:dataProvider>
+								<s:ArrayCollection>
+									<fx:Object label="Recently Added" />
+									<fx:Object label="Medicine Name" />
+								</s:ArrayCollection>
+							</s:dataProvider>
+						</s:DropDownList>
+						<s:Spacer width="100%" />
+						<s:ToggleButton id="ChronicOptionBtn" right="{ChronicOptionBtn.selected?24:28}" 
+										bottom="{ChronicOptionBtn.selected?-2:Number.NaN}" 
+										verticalCenter="{ChronicOptionBtn.selected?Number.NaN:0}"
+										skinClass="com.gazuntite.skins.controls.button.patient.PatientOptionToggleButtonSkin"
+										buttonMode="true" toolTip="More Options"
+										selected="@{newRXDictationNoteViewModel_forChronic.visible}"
+										/><!-- -->
+						<s:Button click="{dispatchEvent(new FlipViewEvent())}" buttonMode="true" toolTip="Flip View" verticalCenter="0" skinClass="com.gazuntite.skins.controls.button.FlipViewButtonSkin" />
+					</s:HGroup>
+				</s:SkinnableContainer>
+				
+				<dictation2:PatientDictationNoteView id="id_ChronicNotesDictation" width="100%" minHeight="47" viewModel="{newRXDictationNoteViewModel_forChronic}" />
+				<s:List id="id_ChronicList"
+						width="100%" allowMultipleSelection="false"
+						height="100%"
+						skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+						borderVisible="false"
+						dataProvider="{model.ChronicMedCollection}"
+						itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.MedicationListItemRenderer"
+						creationComplete="uiInboxList_creationCompleteHandler(event)"/>
+			</mx:VBox>
+		</mx:ViewStack>
+	</s:BorderContainer>
+	
+</s:Group>

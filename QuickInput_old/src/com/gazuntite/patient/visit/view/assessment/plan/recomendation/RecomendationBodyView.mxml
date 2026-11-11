@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*"
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 creationComplete="cc(event)"
+		 xmlns:recomendation="com.gazuntite.patient.visit.view.assessment.plan.recomendation.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*"
+		 
+		>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.ImmunizationSpeakerBtn;
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIDictationBtn;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotes;
+			import com.adobe.gazuntite.skins.chrome.toggleButtonSkins.QIWriteNotesSelected;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.patient.visit.dto.ModuleDictationDTO;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.dto.PatientRecommendationDTO;
+			import com.gazuntite.patient.visit.dto.common.GeneralTypeDTO;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.LoadAllRecommendationDurationTypesEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.LoadAllRecommendationMethodTypesEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.LoadAllRecommendationPlanTypesEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.LoadPatientRecommendationByVisitIdEvents;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.LoadRecommendationLinksAutoCompleteEvent;
+			import com.gazuntite.patient.visit.event.assessment.plan.recomendation.ManagePatientRecommendationEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.ValidationUtils;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.managers.dictation.QIDictationManager;
+			import com.gazuntite.patient.visit.view.commons.dictation.DictationPopup;
+			import com.gazuntite.patient.visit.view.commons.notes.NotesPanel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import flashx.textLayout.factory.TruncationOptions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CollectionEvent;
+			import mx.events.DataGridEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			//private var _recommendationCollection:ArrayCollection;
+			
+			private var recordNotesDTO:ModuleNoteDTO;
+			public var recordNotesPanel:NotesPanel;
+			
+			private var _includeInLayoutChanged:Boolean = true;
+			private var _includeInLayout:Boolean;
+			
+			private var _hasGridChanged:Boolean;
+			private var _hasViewChanged:Boolean
+		
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+
+			public function get hasGridChanged():Boolean
+			{
+				return _hasGridChanged;
+			}
+
+			public function set hasGridChanged(value:Boolean):void
+			{
+				_hasGridChanged = value;
+			}
+
+			/*[Bindable]
+			public function get recommendationCollection():ArrayCollection
+			{
+				return _recommendationCollection;
+			}
+			
+			public function set recommendationCollection(value:ArrayCollection):void
+			{
+				_recommendationCollection = value;
+				
+				if (_recommendationCollection)
+				{
+					_recommendationCollection.addEventListener(CollectionEvent.COLLECTION_CHANGE, recommendationCollectionChanged, false, 0, true);
+					
+					if (_recommendationCollection.length)
+						includeGridInLayout = true;
+						
+					else
+						includeGridInLayout = false;
+				}
+				else
+					includeGridInLayout = false;
+			}
+			
+			private function recommendationCollectionChanged(event:CollectionEvent):void
+			{
+				if (recommendationCollection && recommendationCollection.length)
+				{
+					includeGridInLayout = true;
+					if(hasViewChanged)
+						hasViewChanged = false;
+					
+					hasViewChanged = true;
+				}
+				else
+				{
+					includeGridInLayout = false;
+					hasViewChanged = false;
+				}
+			}
+			
+			public function get includeGridInLayout():Boolean
+			{
+				return _includeInLayout;
+			}
+			
+			public function set includeGridInLayout(value:Boolean):void
+			{
+				_includeInLayout = value;
+				_includeInLayoutChanged = true;
+				
+				invalidateProperties();
+			}*/
+						
+			
+			private function comboChangeHandler():void
+			{
+				id_Add.enableAll = !isInvalid();
+				id_Add.enabled = isGetEdited();				
+			}
+			
+			public function isInvalid():Boolean
+			{
+				var notValid:Boolean = false;
+				
+				if (!(id_Plan.selectedIndex >= 0 || id_Plan.textInput.text.length > 3))//Free text
+					notValid = true;
+					
+				else if (!(id_Method.selectedIndex >= 0 || id_Method.textInput.text.length > 3))//Free text
+					notValid = true;
+					
+				else if (!(id_Duration.selectedIndex >= 0 || id_Duration.textInput.text.length > 2))//Free text
+					notValid = true;
+				
+				return notValid && ( id_DescriptionArea.text.length == 0 );
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				var edited:Boolean = false;
+				
+				if ((id_Plan.selectedIndex >= 0 || id_Plan.textInput.text.length > 3) ||
+					(id_Method.selectedIndex >= 0 || id_Method.textInput.text.length > 3) ||
+					(id_Links.selectedIndex >= 0 || id_Links.textInput.text.length > 3) ||
+					(id_Duration.selectedIndex >= 0 || id_Duration.textInput.text.length > 3))
+					
+					edited = true;
+				
+				//hasViewChanged = (_hasGridChanged)? _hasGridChanged : edited;
+				
+				return edited;
+			}
+			
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.charCode >= 32 && event.charCode <= 127 || event.charCode == 8)
+				{
+					if (event.currentTarget.id != "id_Links")
+					{
+						id_Add.enableAll = false;
+					}
+					if (event.currentTarget.id == "id_Plan" && ( event.currentTarget.textInput.text.length == 3 || event.currentTarget.textInput.text.length == 5) )
+					{
+						/* var laptEvent : LoadAllPlanTypesEvent = new LoadAllPlanTypesEvent();
+						CairngormEventDispatcher.getInstance().dispatchEvent( laptEvent ); */
+					}
+					if (event.currentTarget.id == "id_Method" && ( event.currentTarget.textInput.text.length == 3 || event.currentTarget.textInput.text.length == 5) )
+					{
+						/* var lmtEvent : LoadAllMethodTypesEvent = new LoadAllMethodTypesEvent();
+						CairngormEventDispatcher.getInstance().dispatchEvent( lmtEvent );  */
+					}
+					if (event.currentTarget.id == "id_Duration" && ( event.currentTarget.textInput.text.length == 3 || event.currentTarget.textInput.text.length == 5) )
+					{
+						/* var ladtEvent : LoadAllDurationTypesEvent = new LoadAllDurationTypesEvent();
+						CairngormEventDispatcher.getInstance().dispatchEvent( ladtEvent ); */
+					}
+					if( event.currentTarget.id == "id_AssociatedDiagnosis" && ( event.currentTarget.textInput.text.length == 3 || event.currentTarget.textInput.text.length == 5) )
+					{
+						/* var ldrbpid:LoadDiagnosisForRecommendationByPatientIdEvent = new LoadDiagnosisForRecommendationByPatientIdEvent();
+						CairngormEventDispatcher.getInstance().dispatchEvent(ldrbpid); */
+					}
+					else
+					{
+						var searchString:String = event.currentTarget.textInput.text;
+						
+						if (searchString.length > 2)
+						{
+							searchString = UtilityFunctions.convertStringToBase64String(searchString)
+							var loadLinksEv:LoadRecommendationLinksAutoCompleteEvent = new LoadRecommendationLinksAutoCompleteEvent(searchString);
+							CairngormEventDispatcher.getInstance().dispatchEvent(loadLinksEv); 
+						}
+					}
+					
+					id_Add.enabled = true;
+				}
+				
+				/* calling isGetEdited() to check whether is there any change in view or not
+				just to set hasViewChanged boolean
+				*/
+				isGetEdited();
+			}
+			
+			protected function id_AssociatedDiagnosis_clickHandler(event:MouseEvent):void
+			{
+				 /* var ldrbpid:LoadDiagnosisForRecommendationByPatientIdEvent = new LoadDiagnosisForRecommendationByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ldrbpid);  */
+			}
+			
+			public function associatedDiagnosisLabel(oItem:Object):String
+			{
+				if(null == model.patientDiagnosisDTOListByPatientId ||  model.patientDiagnosisDTOListByPatientId.length <1)
+					return '';
+				
+				var label:String = "";
+				
+				if (oItem && oItem.IcdDto )
+				{
+					if (oItem.hasOwnProperty("IcdDto"))
+					{
+						label += oItem.IcdDto.IcdCodeName + ", ";
+					}
+					
+					if (oItem.hasOwnProperty("IcdDto"))
+					{
+						label += oItem.IcdDto.IcdCodeDescription;
+					}
+					
+					label += oItem.IsChronic ? " (Chronic) " : " (Acute) ";
+				}
+				return label;
+			}
+			
+			private var recordGridNotesPopUp:NotesPanel;
+			private var section:String;
+			
+			private function onWriteNotesClick(event:Event):void
+			{
+				if (!recordGridNotesPopUp)
+					recordGridNotesPopUp = new NotesPanel();
+				
+				if (!recordGridNotesPopUp.isPanelShown)
+				{
+					var headingLabel:String = "";
+					
+					
+					
+					var addRecord:AddRecord = AddRecord(event.target);
+					
+					recordGridNotesPopUp 				= new NotesPanel();
+					recordGridNotesPopUp.width			= 250;
+					recordGridNotesPopUp.height			= 110;
+					recordGridNotesPopUp.HeadingLable 	= id_AssociatedDiagnosis.textInput.text;
+					recordGridNotesPopUp.VisitDateLable = UtilityFunctions.FormatDate(model.VisitDate, "MM-DD-YYYY");//new Date().toDateString();
+					recordGridNotesPopUp.ShowPopup(this);
+					
+					
+					
+					recordGridNotesPopUp.notesDTO		=  addRecord.notesDTO; //gridNotesDTO;
+					
+					QIPopUpManager.addPopUp(recordGridNotesPopUp, section);
+					
+					var pt:Point = id_Add.localToGlobal(new Point(id_Add.id_WriteNotes.x ,id_Add.id_WriteNotes.y));
+					
+					recordGridNotesPopUp.move(pt.x - 195, pt.y + 20);
+					
+					
+					recordGridNotesPopUp.id_header.id_CloseBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+						
+					}, false, 0, true);
+					
+					recordGridNotesPopUp.id_header.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{
+						recordGridNotesPopUp.SaveNotes();
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);
+							
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+							
+						}
+						recordGridNotesPopUp.removeNotePanel();
+						QIPopUpManager.removePopUp(recordGridNotesPopUp, section);
+					});
+					
+					recordGridNotesPopUp.addEventListener("notesSaved", function(event:Event):void
+					{
+						if(recordGridNotesPopUp.id_body.id_message.text.length > 0)
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotesSelected);								
+						}
+						else
+						{
+							id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+						}
+					});
+				}
+			}
+			
+			private var recordLevelDicPanel:DictationPopup;
+			private function writeDictationClickHandler(event:Event):void
+			{
+				var addRecord:AddRecord = AddRecord(event.target);
+				
+				recordLevelDicPanel = QIDictationManager.show(addRecord, recordLevelDicPanel, addRecord.dictationDTO, addRecord.id_WriteDictation);
+				
+				QIPopUpManager.addPopUp(recordLevelDicPanel, QIPopUpManager.RECOMMENDATION);
+				recordLevelDicPanel.move( recordLevelDicPanel.x - 81, recordLevelDicPanel.y);
+				recordLevelDicPanel.addEventListener(MouseEvent.CLICK, function():void
+				{
+					QIPopUpManager.removePopUp(recordLevelDicPanel, QIPopUpManager.RECOMMENDATION);
+					
+					if(recordLevelDicPanel && recordLevelDicPanel.DictationID)
+					{
+						id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationSpeakerBtn);
+					}
+					
+				}, true, 0, false);
+			}
+			
+			private function DescriptionChangeHandler(event:Event):void
+			{
+				
+			}
+			
+			private function addRecordClickHandler():void
+			{
+				var patientRecommendationDTO:PatientRecommendationDTO = new PatientRecommendationDTO();
+				
+				if( id_Plan.selectedIndex >= 0 )
+				{
+					patientRecommendationDTO.plantype = id_Plan.selectedItem as GeneralTypeDTO;
+				}
+				else if( id_Plan.textInput.text.length > 2)//free text
+				{
+					//patientRecommendationDTO.RecommendationPlanTypeID 	= 0;
+					patientRecommendationDTO.plantype = id_Plan.selectedItem as GeneralTypeDTO;
+					patientRecommendationDTO.plantype.ID = 0;
+				}
+				
+				if( id_Method.selectedIndex >= 0 )
+				{
+					patientRecommendationDTO.methodtype = id_Method.selectedItem as GeneralTypeDTO;
+				}
+				else if( id_Method.textInput.text.length > 2 )//free text
+				{
+					patientRecommendationDTO.methodtype = id_Method.selectedItem as GeneralTypeDTO;
+					patientRecommendationDTO.methodtype.ID = 0;
+				}
+				
+				if( id_Duration.selectedIndex >= 0 )
+				{
+					patientRecommendationDTO.DurationType = id_Duration.selectedItem as GeneralTypeDTO;
+				}
+				else if( id_Duration.textInput.text.length > 2 )//free text
+				{
+					patientRecommendationDTO.DurationType = id_Duration.selectedItem as GeneralTypeDTO;
+					patientRecommendationDTO.DurationType.ID = 0;
+					
+				}
+				
+				if( id_AssociatedDiagnosis.selectedItem )
+				{
+					patientRecommendationDTO.Diagnosistype = id_AssociatedDiagnosis.selectedItem as GeneralTypeDTO;
+				}
+				
+				patientRecommendationDTO.PatientID = model.patientID;
+				patientRecommendationDTO.VisitID = model.VisitID;
+				patientRecommendationDTO.ID = 0;
+				patientRecommendationDTO.IsDirty = true;
+				
+				if (id_Yes.selected)
+					patientRecommendationDTO.IsDiscussedWithPatient = true; //Constants.STRING_TRUE;
+				else if (id_No.selected)
+					patientRecommendationDTO.IsDiscussedWithPatient = false; //Constants.STRING_FALSE;
+				
+				
+				patientRecommendationDTO.Description = id_DescriptionArea.text;
+				patientRecommendationDTO.CreatedByUserTypeID = model.LoggedInUserProviderTypeId;
+				
+				patientRecommendationDTO.ClinicBranchID = model.LoggedInUserSelectedBranchId;
+				patientRecommendationDTO.VisitDate = model.VisitDate;
+				
+				patientRecommendationDTO.CreatedAt = new Date();
+				patientRecommendationDTO.ModifiedAt = new Date();
+				patientRecommendationDTO.DictationID = Constants.GUID_FORMAT;
+				
+				 
+				if (id_Add.notesDTO)
+				{
+					patientRecommendationDTO.Note = id_Add.notesDTO.Note;
+					patientRecommendationDTO.NoteSubject = id_Add.notesDTO.NoteSubject;
+				}
+				//H
+				if (id_Add.dictationDTO && id_Add.dictationDTO.DictationID != null)
+				{
+					patientRecommendationDTO.DictationID = id_Add.dictationDTO.DictationID;
+				} 
+				
+				var linkRef:String = ValidationUtils.TrimString(id_Links.textInput.text);
+				
+				patientRecommendationDTO.Links = linkRef;
+					
+				if (linkRef.length)
+				{	
+					if(model.linksList == null)
+						model.linksList = new ArrayCollection();
+					model.linksList.addItem(linkRef);
+				}
+				
+				if(null == model.RecommendationDTOList)
+					model.RecommendationDTOList = new ArrayCollection();
+				
+				model.RecommendationDTOList.addItemAt(patientRecommendationDTO, 0);
+				
+				var rptEvent : ManagePatientRecommendationEvent= new ManagePatientRecommendationEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( rptEvent );
+				
+				resetFields();
+				
+				if(hasViewChanged)
+					hasViewChanged = false;
+				
+				_hasGridChanged = true;
+				hasViewChanged  = true;
+				
+				
+				id_Add.id_WriteNotes.setStyle("skinClass", QIWriteNotes);
+				id_Add.id_WriteDictation.setStyle("skinClass", QIDictationBtn);
+			}
+			
+			private function resetFields():void
+			{
+				id_Plan.selectedIndex = -1;
+				id_Plan.textInput.text = "";
+				
+				id_AssociatedDiagnosis.selectedIndex = -1;
+				id_AssociatedDiagnosis.textInput.text = "";
+				
+				id_Method.selectedIndex = -1;
+				id_Method.textInput.text = "";
+				
+				id_Duration.selectedIndex = -1;
+				id_Duration.textInput.text = "";
+				
+				id_Links.selectedIndex = -1;
+				id_Links.textInput.text = "";
+				
+				id_DescriptionArea.text = "";
+				
+				id_Yes.selected = false;
+				id_No.selected = false;
+				
+				id_Add.enableAll = false;
+				
+				id_Add.notesDTO = new ModuleNoteDTO();
+				id_Add.dictationDTO = new ModuleDictationDTO();
+				
+				recordNotesDTO = new ModuleNoteDTO();
+				
+				if (recordNotesPanel)
+					recordNotesPanel.removePopup(); 
+				
+				/* id_Add.id_WriteNotes.setStyle("skinClass", ImmunizationWriteNotesBtn);
+				id_Add.id_WriteDictation.setStyle("skinClass", ImmunizationDictationBtn); */
+			}
+			
+			public function loadGridData():void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(model.RecommendationDTOList))
+				{
+					var rptEvent : LoadPatientRecommendationByVisitIdEvents= new LoadPatientRecommendationByVisitIdEvents();
+					CairngormEventDispatcher.getInstance().dispatchEvent( rptEvent );
+				}
+				
+				loadStaticData();
+			}
+			
+			private function loadStaticData():void
+			{
+				if(model.recommendationPlanTypeDTOList==null || model.recommendationPlanTypeDTOList.length==0)
+				{
+					var rptEvent : LoadAllRecommendationPlanTypesEvent= new LoadAllRecommendationPlanTypesEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( rptEvent );
+				}
+				
+				if(model.recommendationMethodTypeDTOList==null || model.recommendationMethodTypeDTOList.length==0)
+				{
+					var rmtEvent : LoadAllRecommendationMethodTypesEvent= new LoadAllRecommendationMethodTypesEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( rmtEvent );
+				}
+				
+				if(model.recommendationDurationTypeDTOList==null || model.recommendationDurationTypeDTOList.length==0)
+				{
+					var rdtEvent : LoadAllRecommendationDurationTypesEvent= new LoadAllRecommendationDurationTypesEvent();
+					CairngormEventDispatcher.getInstance().dispatchEvent( rdtEvent );
+				}
+			}
+			
+			protected function id_DescriptionArea_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(id_DescriptionArea.text.length > 0)
+				{
+					id_Add.enableAll = true;
+				}
+				else
+					id_Add.enableAll = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				gridView.addEventListener("NotesSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+				gridView.addEventListener("DictationSavedFromGrid", NotesDictationSavedFromGrid, false, 0, true);
+			}
+			
+			protected function NotesDictationSavedFromGrid(event:Event):void
+			{
+				var evn:ManagePatientRecommendationEvent = new ManagePatientRecommendationEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(evn);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="0" verticalAlign="middle" gap="1"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" gap="1">
+		<components1:LabelComboBox id="id_Plan" prompt="Select Plan" width="200"  labelField="Name" 
+								  change="comboChangeHandler()" keyUp="comboKeyUpHandler(event)"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" dataProvider="{model.recommendationPlanTypeDTOList}" tabIndex="1"/>
+		
+		<components1:LabelComboBox id="id_AssociatedDiagnosis" prompt="Associated Diagnosis" width="90%" 
+								   labelFunction="associatedDiagnosisLabel"
+								  change="comboChangeHandler()" keyUp="comboKeyUpHandler(event)" click="id_AssociatedDiagnosis_clickHandler(event)"
+								  tabIndex="2"
+								  dataProvider="{model.patientDiagnosisDTOListByPatientId}"
+								  />
+		<commons:AddRecord id="id_Add" verticalAlign="middle" writeNotesClick="onWriteNotesClick(event)"  writeDictationClick="writeDictationClickHandler(event)" 
+						   tabIndex="3" paddingLeft="8" enableAll="false" enabled="{id_add.enabled}" />
+		
+	</s:HGroup>
+	<s:HGroup width="100%" gap="2">
+		<components1:LabelComboBox id="id_Links" prompt="Web Links" width="200" 
+								  maxChars="500" change="comboChangeHandler()" keyUp="comboKeyUpHandler(event)" tabIndex="5"
+								  dataProvider="{model.recommendationLinkAutoCompleteDTOList}"/><!--dataProvider="{model.linksList}"-->
+		<components1:LabelComboBox id="id_Method" prompt="Method" width="100%"  labelField="Name" 
+								  change="comboChangeHandler()" keyUp="comboKeyUpHandler(event)"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" tabIndex="6" dataProvider="{model.recommendationMethodTypeDTOList}" />
+		<components1:LabelComboBox id="id_Duration" prompt="Duration" width="100%"  labelField="Name"
+								  change="comboChangeHandler()" keyUp="comboKeyUpHandler(event)"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationRequiredSkin" tabIndex="7" dataProvider="{model.recommendationDurationTypeDTOList}" /><!---->
+		<s:HGroup width="100%" paddingTop="5" paddingLeft="5">
+			<s:Label text="Discussed with Patient?" fontFamily="Calibri" fontSize="12" color="#FFFFFF" paddingRight="8" verticalAlign="bottom"/>
+			<s:HGroup gap="0" paddingLeft="5" verticalAlign="middle" horizontalAlign="center" >
+				<s:RadioButton id="id_Yes"  skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton" tabIndex="8" toolTip="Yes" buttonMode="true"/>
+				<s:RadioButton id="id_No"  skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.NRadioButton" toolTip="No" buttonMode="true"/>
+			</s:HGroup>
+		</s:HGroup>
+	</s:HGroup>
+	<components1:LabelTextArea id="id_DescriptionArea" prompt="Description" width="100%" height="50" change="DescriptionChangeHandler(event)"
+							  maxChars="1500" color="#000000"
+							  keyUp="id_DescriptionArea_keyUpHandler(event)"
+							  skinClass="com.adobe.gazuntite.skins.textAreaReqSkin" tabIndex="9" />
+	
+	
+	<s:HGroup width="100%" paddingBottom="0" paddingTop="1">
+		<s:Button id="id_add" click="addRecordClickHandler()" enabled="{id_Add.enableAll}" buttonMode="true" useHandCursor="true"
+				  toolTip="Add Record" label="Add Recommendation" width="150"
+				  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreTooltipBtn" tabIndex="10"/>
+		<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBG" visible="{!id_add.enabled}" width="100%" />
+		<mx:Spacer width="100%" />
+		<s:Button id="id_nextBtn" label="Next" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QInextBtnSkin"  buttonMode="true"
+				  toolTip="Next Section" enabled="true"/>
+		
+	</s:HGroup>
+	<recomendation:RecommendationBodyGridView id="gridView" width="100%"/>
+</s:Group>

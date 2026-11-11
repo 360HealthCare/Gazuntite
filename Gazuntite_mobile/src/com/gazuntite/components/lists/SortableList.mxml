@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:controls="com.gazuntite.components.controls.*"
+		 creationComplete="init(event)" 
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.ArrangeByEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.components.supportClasses.ItemRenderer;
+			
+			private var _itemRenderer:IFactory;
+			private var _sortAbleIRList:ArrayCollection;
+			private var _dataProvider:ArrayCollection;
+			private var _label:String;
+			
+			
+			[Bindable]
+			public function get label():String
+			{
+				return _label;
+			}
+
+			public function set label(value:String):void
+			{
+				_label = value;
+			}
+
+			[Bindable]
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+
+			[Bindable]
+			public function get sortableIRList():ArrayCollection
+			{
+				return _sortAbleIRList;
+			}
+
+			public function set sortableIRList(value:ArrayCollection):void
+			{
+				_sortAbleIRList = value;
+			}
+
+			[Bindable]
+			public function get itemRenderer():IFactory
+			{
+				return _itemRenderer;
+			}
+
+			public function set itemRenderer(value:IFactory):void
+			{
+				_itemRenderer = value;
+			}
+
+			protected function init(event:FlexEvent):void
+			{
+				
+				
+			}
+			
+			protected function arrangebycalloutbutton2_arrangeByHandler(event:ArrangeByEvent):void
+			{
+				id_ListView.itemRenderer = new ClassFactory(event.currentTarget.list.selectedItem.irClass);
+				
+				/* switch(event.field)
+				{
+					case "Order Method":
+						id_ListView.itemRenderer = new ClassFactory(DiagnosisIRAssociatedWith);
+						break;
+					case "Test Code":
+						id_ListView.itemRenderer = new ClassFactory(DiagnosisIRICD);
+						break;
+					case "Test Name":
+						id_ListView.itemRenderer = new ClassFactory(DiagnosisIRChronic);
+						break;
+				}  */
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:BorderContainer width="100%"
+					   height="24"
+					   borderWeight="1" 
+					   borderColor="0x898989"
+					   cornerRadius="4" 
+					   dropShadowVisible="false"
+					   borderAlpha="1">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0x898989" ratio=".1"/>
+				<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="bottom" paddingLeft="10" paddingBottom="10"/>
+		</s:layout>
+		
+		
+		
+		<controls:ArrangeByCalloutButton label="Arrange By:"
+										 color="0x000000"
+										 dataProvider="{sortableIRList}"
+										 arrangeBy="arrangebycalloutbutton2_arrangeByHandler(event)">
+			
+			<!--<controls:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object name="Treatment With"/>
+					<fx:Object name="F1"/>
+					<fx:Object name="F2"/>
+				</s:ArrayCollection>
+			</controls:dataProvider>-->
+			
+		</controls:ArrangeByCalloutButton>
+		
+		<s:Label text="{label}:" styleName="listLabel"/>
+		
+		
+		
+	</s:BorderContainer>
+	
+	<s:List id="id_ListView"
+			width="100%"
+			height="70%"
+			contentBackgroundColor="0xffffff"
+			dataProvider="{dataProvider}"
+			itemRenderer="{itemRenderer}"/>
+	
+	
+	
+	
+</s:Group>

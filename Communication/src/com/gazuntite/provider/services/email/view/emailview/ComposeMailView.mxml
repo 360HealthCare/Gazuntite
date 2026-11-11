@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  creationComplete="group1_creationCompleteHandler(event)" 
+					  width="100%" height="100%" 
+					  xmlns:emailview="com.gazuntite.provider.services.email.view.emailview.*"
+					  xmlns:components="com.gazuntite.controls.extended.components.*">
+	<fx:Metadata>
+		[Event(name="RefreshEmailEvent", type="com.gazuntite.provider.services.email.view.event.RefreshInboxPanel")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.services.email.dto.EmailDTO;
+			import com.gazuntite.provider.services.email.event.SendEmailEvent;
+			import com.gazuntite.provider.services.email.util.AttachmentArray;
+			import com.gazuntite.provider.services.email.util.EmailConstant;
+			import com.gazuntite.provider.services.email.util.EmailServiceMethods;
+			import com.gazuntite.provider.services.email.view.ItemRenderer.DownloadFileItemRenderer;
+			import com.gazuntite.provider.services.email.view.event.RefreshInboxPanel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ListCollectionView;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.skins.halo.BusyCursor;
+			
+			import spark.events.TextOperationEvent;
+			
+			private var filerefList:ArrayCollection=new ArrayCollection();
+			
+			private var fileReference:FileReference;
+			private var mLoader:Loader;
+			
+			
+			
+			
+			///////////////////
+			import mx.rpc.AsyncToken;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			private var fileRef:FileReference;
+			
+			private var UploadFiles:Array = new Array();
+			private var listFiles:Array = new Array();
+			private var HasAttachment:Boolean = false;
+			
+			private var _emailAddress:String;
+			private var _userID:int;
+			private var _senderID:int;
+			private var _stationdID:int;
+			private var _branchID:int;
+			private var _isReply:Boolean;
+			
+			[Bindable]
+			public function get isReply():Boolean
+			{
+				return _isReply;
+			}
+			
+			public function set isReply(value:Boolean):void
+			{
+				_isReply = value;
+			}
+			
+			
+			private var totalFilesSize:int =0;
+			
+			//EmailConstant.RESTFULL_SERVICE_BASE_URL 
+			private var FILE_UPLOAD_URL:String =EmailConstant.RESTFULL_SERVICE_BASE_URL+ EmailServiceMethods.UPLOAD_FILE_EMAIL; //"http://localhost:50427/CommunicationService.svc/fileupload/";
+			
+			//var file:File = new File();
+			
+			private function BrowseandSelect():void
+			{
+				
+				
+				
+			}
+			
+			
+			
+			public function browseAndUpload():void 
+			{
+				fileRef = new FileReference();
+				fileRef.addEventListener(Event.SELECT, fileRef_select);
+				/* fileRef.addEventListener(ProgressEvent.PROGRESS, fileRef_progress);
+				fileRef.addEventListener(Event.COMPLETE, fileRef_complete);
+				fileRef.addEventListener(Event.CANCEL, fileRef_cancel); */
+				fileRef.browse();
+				
+			}
+			private var urlVars:URLVariables;
+			private var urlReq:URLRequest;
+			/* private function fileRef_select(evt:Event):void {
+			try {
+			
+			if((totalFilesSize + ((fileRef.size/1024)/1024)) > 10)
+			{
+			Alert.show("Attachement size is greater than 10 Mb");
+			}
+			
+			else
+			{
+			totalFilesSize += (fileRef.size/1024)/1024;
+			var url:String = 	FILE_UPLOAD_URL + "/160/TEST";
+			
+			uploadProgress.setProgress(0,100);
+			fileRef.upload(new URLRequest(url),fileRef.name,true);
+			uploadProgress.visible = true;
+			}
+			
+			} catch (err:Error) {
+			//	message.text = "ERROR: zero-byte file";
+			Alert.show("Error in uploading");
+			}
+			} */
+			
+			private function fileRef_select(evt:Event):void 
+			{
+				try {
+					
+					if((totalFilesSize + ((fileRef.size/1024)/1024)) > 10)
+					{
+						Alert.show("Attachement size is greater than 10 Mb","Email Sending Error" ,4,this);
+						//UtilityFunctions.ShowMessage("Attachement size is greater than 10 Mb","Email Sending Error");
+						
+					}
+						
+					else
+					{
+						filerefList.addItem(fileRef);
+						
+						totalFilesSize += (fileRef.size/1024)/1024;
+						fileAttachmentArray.addItem(new AttachmentArray(true,fileRef.name));
+						id_AttachmentGrid.visible=true;
+						id_AttachmentGrid.includeInLayout = true;
+					}
+					
+				} catch (err:Error) {
+					//	message.text = "ERROR: zero-byte file";
+					Alert.show("Error in uploading","File Upload Error",4,this);
+					//UtilityFunctions.ShowMessage("Error in uploading","File Upload Error");
+					
+				}
+			} 
+			
+			
+			
+			private var bcursor:BusyCursor =new BusyCursor(null);
+			private function fileRef_progress(event:ProgressEvent):void {
+				//	progressBar.visible = true;
+				bcursor.visible=true;
+				uploadProgress.setProgress(event.bytesLoaded, event.bytesTotal);	
+			}
+			
+			
+			[Bindable]
+			public var fileAttachmentArray:ArrayCollection =new ArrayCollection();
+			/* private function fileRef_complete(evt:Event):void 
+			{
+			HasAttachment=true;
+			bcursor.visible=false;
+			Alert.show("File Uploaded");
+			//	message.text += " (complete)";
+			bcursor.visible = false;
+			
+			//   Changes on 21 Feb
+			// if(id_AttachmentPanel.visible != true)
+			//{
+			//id_AttachmentPanel.visible = true;
+			//} 
+			fileAttachmentArray.addItem(new AttachmentArray(true,fileRef.name));
+			id_AttachmentGrid.visible=true;
+			id_AttachmentGrid.includeInLayout = true;
+			uploadProgress.visible = false;
+			//
+			} */
+			
+			
+			private function fileRef_complete(evt:Event):void 
+			{
+				HasAttachment=true;
+				bcursor.visible=false;
+				//Alert.show("File Uploaded");
+				bcursor.visible = false;
+				id_AttachmentGrid.visible=true;
+				id_AttachmentGrid.includeInLayout = true;
+				uploadProgress.visible = false;
+				fileCounter++;
+				if(fileCounter == fileAttachmentArray.length)
+				{
+					isUploadComplete = true;
+				}
+				UploadAllFiles();
+				//
+			}
+			
+			private function fileRef_cancel(evt:Event):void {
+				uploadProgress.visible = false;
+			}
+			//////////////////
+			var fileCounter:int=0;
+			public var isUploadComplete:Boolean=false;
+			var filesName:String="";
+			
+			private function UploadAllFiles():void
+			{
+				for(fileCounter=fileCounter;fileCounter < fileAttachmentArray.length ;fileCounter++)
+				{
+					
+					if(ListCollectionView(id_AttachmentGrid.dataProvider).getItemAt(fileCounter)["isSelected"] == true)
+					{
+						
+						fileRef=new FileReference();
+						fileRef = filerefList[fileCounter];
+						fileRef.addEventListener(ProgressEvent.PROGRESS, fileRef_progress);
+						fileRef.addEventListener(Event.COMPLETE, fileRef_complete);
+						fileRef.addEventListener(Event.CANCEL, fileRef_cancel);
+						
+						filesName += ListCollectionView(id_AttachmentGrid.dataProvider).getItemAt(fileCounter)["fileName"].toString()+";";
+						
+						var url:String = 	FILE_UPLOAD_URL + "/160/TEST";
+						
+						uploadProgress.setProgress(0,100);
+						fileRef.upload(new URLRequest(url),ListCollectionView(id_AttachmentGrid.dataProvider).getItemAt(fileCounter)["fileName"].toString(),true);
+						uploadProgress.visible = true;
+						return;
+					}
+				}
+				if(fileCounter  == fileAttachmentArray.length  || isUploadComplete == true)
+				{
+					//isUploadComplete=true;
+					SendMail(filesName);
+				}
+			}
+			
+			
+			
+			/* protected function id_SendBtn_clickHandler(event:MouseEvent):void
+			{
+			if(id_email.text != "")
+			{
+			if(id_subject.text != "")
+			{
+			// 21 Feb Changes
+			var filesName:String = "";
+			for(var fileCounter:int=0;fileCounter < fileAttachmentArray.length ;fileCounter++)
+			{
+			
+			if(ListCollectionView(id_AttachmentGrid.dataProvider).getItemAt(fileCounter)["isSelected"] == true)
+			{
+			filesName += ListCollectionView(id_AttachmentGrid.dataProvider).getItemAt(fileCounter)["fileName"].toString()+";";
+			}
+			
+			
+			
+			var dp:Object=id_AttachmentGrid.dataProvider;
+			var cursor:IViewCursor=dp.createCursor();
+			while( !cursor.afterLast )
+			{
+			// Access each column field like: cursor.current.MyFieldName
+			trace(cursor.current.isSelected);
+			
+			// Obviously don't forget to move to next row:
+			cursor.moveNext();
+			
+			}
+			
+			}
+			
+			// 21 Feb Changes
+			var objEmailDTO:EmailDTO = new EmailDTO();
+			objEmailDTO.ClinicBranchID= branchID;
+			objEmailDTO.StationID = stationdID;
+			objEmailDTO.EmailStateID = 1;
+			objEmailDTO.EmailTypeID = 1;
+			
+			objEmailDTO.EmailTemplateID =0;
+			objEmailDTO.HasAttachment = HasAttachment.toString();
+			if(HasAttachment)
+			objEmailDTO.AttachedFileName = filesName;
+			//objEmailDTO.AttachedFileName = fileRef.name;
+			objEmailDTO.Message= id_message.text;
+			
+			
+			if(isReply)
+			{
+			//objEmailDTO.RECIEVERID = senderID;
+			//objEmailDTO.SENDERID =userID; 
+			objEmailDTO.RECIEVERID = userID;
+			objEmailDTO.SENDERID =senderID;
+			}
+			else
+			{
+			objEmailDTO.RECIEVERID = userID;
+			objEmailDTO.SENDERID =senderID;
+			}
+			objEmailDTO.Subject=id_subject.text;
+			
+			
+			var sendMailEvent : SendEmailEvent = new SendEmailEvent(objEmailDTO);
+			CairngormEventDispatcher.getInstance().dispatchEvent(sendMailEvent);
+			//	Alert.show("Mail Sent");
+			//PopUpManager.removePopUp(this);
+			
+			var refreshEmail:RefreshInboxPanel  = new RefreshInboxPanel();
+			dispatchEvent( refreshEmail );
+			id_message.text="";
+			id_subject.text="";
+			id_email.text = "";
+			}
+			else
+			Alert.show("Enter Email Subject.");
+			}
+			else
+			Alert.show("Enter Email Id of the recipient.");
+			
+			} */
+			
+			
+			protected function id_SendBtn_clickHandler(event:MouseEvent):void
+			{
+				if(fileAttachmentArray.length > 0 )
+				{
+					UploadAllFiles();
+				}
+				else
+				{
+					SendMail("");
+				}
+				
+				event.stopImmediatePropagation();
+				
+			} 
+			
+			private function SendMail(ListfilesName:String):void
+			{
+				if(id_email.text != "")
+				{
+					if(id_subject.text != "")
+					{					
+						var objEmailDTO:EmailDTO = new EmailDTO();
+						objEmailDTO.ClinicBranchID= branchID;
+						objEmailDTO.StationID = stationdID;
+						objEmailDTO.EmailStateID = 1;
+						objEmailDTO.EmailTypeID = 1;
+						objEmailDTO.EmailTemplateID =0;
+						objEmailDTO.HasAttachment = HasAttachment.toString();
+						if(HasAttachment)
+							objEmailDTO.AttachedFileName = ListfilesName;
+						objEmailDTO.Message= id_message.text;
+						
+						
+						if(isReply)
+						{
+							
+							objEmailDTO.RECIEVERID = userID;
+							objEmailDTO.SENDERID =senderID;
+						}
+						else
+						{
+							objEmailDTO.RECIEVERID = userID;
+							objEmailDTO.SENDERID =senderID;
+						}
+						objEmailDTO.Subject=id_subject.text;
+						
+						
+						var sendMailEvent : SendEmailEvent = new SendEmailEvent(objEmailDTO);
+						CairngormEventDispatcher.getInstance().dispatchEvent(sendMailEvent);
+						
+						var refreshEmail:RefreshInboxPanel  = new RefreshInboxPanel();
+						dispatchEvent( refreshEmail );
+						id_message.text="";
+						id_subject.text="";
+						id_email.text = "";
+					}
+					else
+					{
+						
+						Alert.show("Enter Email Subject.","Email Sending Error",4,this);
+						//UtilityFunctions.ShowMessage("Enter Email Subject.","Email Sending Error");
+					}
+					
+				}
+				else
+					Alert.show("Enter Email Id of the recipient." ,"Email Sending Error",2,this);
+					//UtilityFunctions.ShowMessage("Enter Email Id of the recipient." ,"Email Sending Error");
+				
+			}
+			
+			
+			protected function btnClsoe_clickHandler(event:MouseEvent):void
+			{
+				id_message.text="";
+				id_subject.text="";
+				id_email.text = "";
+				id_AttachmentGrid.dataProvider = null;
+				
+				var refreshEmail:RefreshInboxPanel  = new RefreshInboxPanel();
+				dispatchEvent( refreshEmail );
+				
+				
+				
+				//PopUpManager.removePopUp(this);
+				
+			}
+			
+			
+			protected function id_Attach_clickHandler(event:MouseEvent):void
+			{
+				browseAndUpload();
+			}
+			
+			public function get EmailAddress():String
+			{
+				return _emailAddress;
+			}
+			[Bindable]
+			public function set EmailAddress(value:String):void
+			{
+				_emailAddress = value;
+			}
+			
+			public function get userID():int
+			{
+				return _userID;
+			}
+			
+			public function set userID(value:int):void
+			{
+				_userID = value;
+				//id_email.text=EmailAddress;
+				//id_AttachmentGrid.visible=false;
+			}
+			
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_email.text=EmailAddress;
+				if(fileAttachmentArray.length < 1)
+					id_AttachmentGrid.visible=false;
+				id_AttachmentGrid.includeInLayout = false;
+				
+			}
+			
+			public function get senderID():int
+			{
+				return _senderID;
+			}
+			
+			public function set senderID(value:int):void
+			{
+				_senderID = value;
+			}
+			
+			public function get stationdID():int
+			{
+				return _stationdID;
+			}
+			
+			public function set stationdID(value:int):void
+			{
+				_stationdID = value;
+			}
+			
+			public function get branchID():int
+			{
+				return _branchID;
+			}
+			
+			public function set branchID(value:int):void
+			{
+				_branchID = value;
+			}
+			
+			
+			
+			protected function id_email_changeHandler(event:TextOperationEvent):void
+			{
+				if(id_subject.text.search("Forward") != -1)
+				{
+					//id_ContactSearch.visible=true;
+				}
+			}
+			// true in communication View and false in Patient View
+			private var _showNav:Boolean = true;
+			
+			[Bindable]
+			public function get showNav():Boolean
+			{
+				return _showNav;
+			}
+			
+			public function set showNav(value:Boolean):void
+			{
+				_showNav = value;
+				
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingTop="5" paddingRight="5" paddingLeft="5" paddingBottom="5" gap="5" />
+	</s:layout>
+	
+	<s:HGroup  horizontalAlign="right" width="100%" gap="6" height="30" verticalAlign="top" visible="{showNav}" includeInLayout="{showNav}">
+		<s:Button visible="false" includeInLayout="false" id="id_SendBtne" buttonMode="true" useHandCursor="true" label="Send"  click="id_SendBtn_clickHandler(event)"
+				  toolTip="Click here to send an Email"  styleName="communicationButtonSkin"  height="20"   />
+		<s:Button visible="false" includeInLayout="false" id="btnClsoe" label="Discard"   height="20" 
+				  click="btnClsoe_clickHandler(event)" buttonMode="true" toolTip="Discard" styleName="communicationButtonSkin"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" >
+		<s:VGroup width="100%">
+			<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="left" >
+				<!--<s:Label  text="To" width="{uiSubject.width}" textAlign="right" fontFamily="CalibriCFF" fontSize="14" color="{!showNav ? 0xFFFFFF:0x000000}" />-->
+				<components:LabelTextInput id="id_email" editable="false"
+										   width="100%" text="{EmailAddress}"  prompt="To: Email Address"
+										   change="id_email_changeHandler(event)"  skinClass="com.gazuntite.skins.controls.text.EmailFieldSkin"/>
+				
+				<s:Button id="id_Attach" 
+						  useHandCursor="true" buttonMode="true" toolTip="Attach"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.AttachBtnSkin"
+						  click="id_Attach_clickHandler(event)" />
+				
+				<s:Button id="id_SendBtn" 
+						  buttonMode="true" useHandCursor="true" toolTip="Send"  
+						  click="id_SendBtn_clickHandler(event)"
+						  skinClass="com.gazuntite.skins.controls.button.communication.SendButtonSkin" />
+			</s:HGroup>
+			
+			<!--<emailview:ContactEmailSearchView id="id_ContactSearch" visible="false"/>-->
+			
+			<s:HGroup width="100%" verticalAlign="middle"  >
+				<!--<s:Label  text="Subject" id="uiSubject" textAlign="right" fontFamily="CalibriCFF"  fontSize="14" color="{!showNav ? 0xFFFFFF:0x000000}" />-->
+				<components:LabelTextInput id="id_subject" width="100%"  prompt="Subject" skinClass="com.gazuntite.skins.controls.text.EmailFieldSkin" />
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+		<s:HGroup  gap="5">
+			
+			<s:Button buttonMode="true" useHandCursor="true" label="Send"  click="id_SendBtn_clickHandler(event)"
+					  toolTip="Click here to send an Email"  skinClass="com.gazuntite.skins.controls.button.communication.SendEmailButtonSkin"    
+					  visible="false" includeInLayout="false"/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	
+	<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle" >
+		<!--<s:Rect width="{uiSubject.width}" />-->
+		<mx:ProgressBar id="uploadProgress" visible="false" includeInLayout="{uploadProgress.visible}" label="" mode="manual"  height="10" width="100" />
+	</s:HGroup>
+	<!--Multiple files attachment-->
+	<!--<s:Panel id="id_AttachmentPanel" visible="false" height="50" width="500" >
+	</s:Panel>
+	-->
+	<s:HGroup width="100%" includeInLayout="{id_AttachmentGrid.visible}" visible="{id_AttachmentGrid.visible}">
+		<mx:Spacer width="50"/>
+		<mx:DataGrid id="id_AttachmentGrid"  dataProvider="{fileAttachmentArray}" styleName="transparentGridStyle" 
+					 verticalScrollPolicy="auto" showHeaders="false"  
+					 headerHeight="0" rowCount="{id_AttachmentGrid.dataProvider.length ? id_AttachmentGrid.dataProvider.length :0 }"
+					 width="100%" height="35"  >
+			<mx:columns>
+				<mx:DataGridColumn id="id_col_IsSelected"  headerText="" sortable="false" dataField="isSelected"  width="20"
+								   itemRenderer="com.gazuntite.provider.services.email.view.ItemRenderer.DownloadFileItemRenderer"  
+								   rendererIsEditor="true" editorDataField="selected" editable="true" />
+				
+				<mx:DataGridColumn id="id_col_FileName" headerText="" width="300" dataField="fileName"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</s:HGroup>
+	
+	<!--Changes ends here -->
+	<!--<s:BorderContainer width="100%" height="100%" cornerRadius="5" borderVisible="true" borderWeight="1" borderColor="0x000000" backgroundColor="0xF1F1F1">-->
+		<components:LabelTextArea id="id_message" 
+								  width="100%" height="100%"  prompt="Message" 
+								  skinClass="com.gazuntite.controls.skins.LabelTextAreaRoundedSkin"
+								  /> <!--minHeight="100"-->
+	<!--</s:BorderContainer>-->	
+	<!--							  skinClass="com.zigron.gazuntite.skins.controls.text.EMailContentSkin"-->
+	<!--Multiple files attachment-->
+	<!--Changes ends here -->
+</s:SkinnableContainer>

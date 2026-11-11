@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:renderer="com.gazuntite.patient.visit.view.pmh.compHistory.renderer.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 xmlns:notes="com.gazuntite.patient.visit.view.notes.*" 
+		 creationComplete="group1_creationCompleteHandler(event)" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerNotes;
+			import com.gazuntite.patient.visit.dto.FamilyHistroyDTO;
+			import com.gazuntite.patient.visit.dto.ch.FamilyHistoryDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var m_oFamilyHistoryDto:FamilyHistoryDTO;
+			private var m_bShowNotes:Boolean 		= false;
+			private var _miniView:Boolean 			= false;
+			
+			[Bindable]
+			public function get miniView():Boolean
+			{
+				return _miniView;
+			}
+			
+			public function set miniView(value:Boolean):void
+			{
+				_miniView = value;
+			}
+			
+			[Bindable]
+			public function get ShowNotes():Boolean
+			{
+				return m_bShowNotes;
+			}
+			
+			public function set ShowNotes(value:Boolean):void
+			{
+				m_bShowNotes = value;
+			}
+			
+			[Bindable]
+			public function get FamilyHistoryDto():FamilyHistoryDTO
+			{
+				return m_oFamilyHistoryDto;
+			}
+			
+			public function set FamilyHistoryDto(value:FamilyHistoryDTO):void
+			{
+				m_oFamilyHistoryDto = value;
+				//id_View.id_DetailsView.fam 	= m_oFamilyHistoryDto;
+				id_GridView.FamilyHistoryDto 				= m_oFamilyHistoryDto;
+				
+				/* if( ! model.isNewVisitCreated && value )
+				{
+					LoadForm(this.id);
+					
+				} */
+			}
+			
+			private function LoadForm(componentId:String):void
+			{
+				/* id_View.id_DetailsView.id_PastBtn.selected 		= !FamilyHistoryDto.IsPresent;
+				id_View.id_DetailsView.id_PresentBtn.selected 	= FamilyHistoryDto.IsPresent;
+				
+				id_View.id_DetailsView.selectRelationship( FamilyHistoryDto.ReletionshipTypeID );
+				id_View.id_DetailsView.selectDisease( FamilyHistoryDto.DiseaseID , componentId); */
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_View.id_DetailsView.id_header.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick);
+				id_View.id_DetailsView.id_PastBtn.addEventListener(MouseEvent.CLICK, OnPastPresentClick);
+				id_View.id_DetailsView.id_PresentBtn.addEventListener(MouseEvent.CLICK, OnPastPresentClick);
+				
+				//id_View.id_DetailsView.id_Relation.addEventListener(IndexChangeEvent.CHANGE, OnIndexChangeEvent);
+				//id_View.id_DetailsView.id_TypeOfDisease.addEventListener(IndexChangeEvent.CHANGE, OnIndexChangeEvent);
+				
+				id_View.id_DetailsView.id_header.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_View.id_DetailsView.id_header.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick, false, 0, true);
+				
+				id_NotesHeader.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_NotesHeader.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick);
+				
+				id_GridHeader.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+				id_GridHeader.id_NotesBtn.addEventListener(MouseEvent.CLICK, OnNotesClick);
+				
+				addEventListener("ICD_Change", function(event:Event):void
+				{
+					if( id_View.id_DetailsView.isGetEdited() || id_NotesView.NotesText.length > 0 )
+					{
+						id_add.enabled = true;
+						//id_add.visible = true;
+					}
+				});
+				
+				addEventListener('clearNotesEvent', function(event:Event):void
+				{
+					id_View.id_DetailsView.id_header.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+					id_NotesHeader.id_NotesBtn.setStyle("skinClass", QIInnerNotes);
+					
+				});
+			}
+			
+			//private var dictationPopUp:dictationPopUp;
+			private function voiceBtnClickHandler(event:MouseEvent):void
+			{
+				/* var dictationDTO:ModuleDictationDTO = new ModuleDictationDTO();
+				
+				if (FamilyHistoryDto)
+					dictationDTO.DictationID = FamilyHistoryDto.DictationID;
+				
+				dictationPopUp = QIDictationManager.show(id_View.id_DetailsView.id_header.id_VoiceBtn.parent, dictationPopUp, dictationDTO, id_View.id_DetailsView.id_header.id_VoiceBtn);
+				QIPopUpManager.addPopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				dictationPopUp.move( dictationPopUp.x - 81, dictationPopUp.y);
+				dictationPopUp.id_closeBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					if (dictationDTO && FamilyHistoryDto)
+					{
+						FamilyHistoryDto.DictationID = dictationDTO.DictationID;
+						FamilyHistoryDto.IsDirty = true;
+						
+						if(FamilyHistoryDto && FamilyHistoryDto.DictationID && FamilyHistoryDto.DictationID.length)
+						{
+							dispatchEvent(new Event("dictationChange",true, true ));
+							if(FamilyHistoryDto.DictationID != Constants.GUID_FORMAT)
+							{
+								id_View.id_DetailsView.id_header.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+								
+								id_NotesHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+								id_NotesView.id_BoxHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+								
+								id_GridHeader.id_VoiceBtn.setStyle("skinClass", QIInnerSpeakerBtn);
+							}
+						}
+					}
+					QIPopUpManager.removePopUp(dictationPopUp, QIPopUpManager.COMPREHENSIVE_HISTORY);
+				}); */
+				
+				//M , false, 0, true
+			}
+			
+			private function OnNotesClick(event:MouseEvent):void
+			{
+				//this.ShowNotes 												= true;
+				id_Views.selectedIndex 							 			= 1; //select notes 
+				id_NotesHeader.id_SpinerList.currIndex  				 	= 1;
+				id_GridHeader.id_SpinerList.currIndex  				 		= 1;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex 	= 1;
+				/* id_NotesView.NotesText = FamilyHistoryDto.FamilyHistoryNote;
+				id_NotesView.id_TextArea.addEventListener(TextOperationEvent.CHANGE, function(event:TextOperationEvent):void
+				{
+					FamilyHistoryDto.FamilyHistoryNote = id_NotesView.NotesText; 
+					FamilyHistoryDto.IsDirty = true;
+					
+					dispatchEvent( new Event( "notesChange", true, true ) );
+				}); */
+				id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+			}
+			
+			private function OnPastPresentClick(event:MouseEvent):void
+			{
+				FamilyHistoryDto.IsDirty = true;
+				
+				/* if(event.currentTarget.id == "id_PastBtn" )
+				{
+					FamilyHistoryDto.IsPresent = false;
+					id_View.id_DetailsView.id_PresentBtn.selected = false;
+				}
+				else
+				{
+					FamilyHistoryDto.IsPresent = true;
+					id_View.id_DetailsView.id_PastBtn.selected = false;
+				} */
+			}
+			
+			/*private function OnIndexChangeEvent(event:IndexChangeEvent):void
+			{
+				FamilyHistoryDto.IsDirty = true;
+				
+				if( event.currentTarget.id == "id_Relation" && event.currentTarget.selectedItem )
+				{
+					FamilyHistoryDto.ReletionshipTypeID = ( id_View.id_DetailsView.id_Relation.selectedItem as RelationshipTypeDTO).RelationshipId;
+					FamilyHistoryDto.ReletionshipTypeName = ( id_View.id_DetailsView.id_Relation.selectedItem as RelationshipTypeDTO).RelationshipName;
+				}
+				else if( event.currentTarget.id == "id_TypeOfDisease" && event.currentTarget.textInput.text.length > 3 )
+				{
+					if( id_View.id_DetailsView.id_TypeOfDisease.selectedIndex >= 0 )
+					{
+						var diseaseDTO:DiseaseTypeDTO = (id_View.id_DetailsView.id_TypeOfDisease.selectedItem as DiseaseTypeDTO);
+						if(diseaseDTO!=null)
+						{
+							FamilyHistoryDto.DiseaseID 			= diseaseDTO.DiseaseTypeID;
+							FamilyHistoryDto.DiseaseName  		= diseaseDTO.Description;
+							FamilyHistoryDto.IsSystemSpecified 	= true;
+						}
+						else
+						{
+							FamilyHistoryDto.IsSystemSpecified 	= false;
+							FamilyHistoryDto.DiseaseName 		= id_View.id_DetailsView.id_TypeOfDisease.textInput.text;
+						}
+					}
+				}
+			}*/
+			
+			protected function YesNoLabel_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_View.id_DetailsView.id_header.id_SpinerList.DataProvider = id_MenuList;
+				id_View.id_DetailsView.id_header.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+				id_View.id_DetailsView.id_header.id_SpinerList.id_minBtn.toolTip = "Switch to Notes";
+				id_View.id_DetailsView.id_header.id_SpinerList.id_MaxBtn.toolTip = "Switch to Notes";
+//				id_View.id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+//				id_View.id_DetailsView.id_header.id_SpinerList.id_DDList.selectedIndex = 0;
+				
+				id_NotesView.id_BoxHeader.id_CloseBtn.addEventListener(MouseEvent.CLICK, OnNotesCloseClick);
+				id_NotesView.id_BoxHeader.visible 			= false;
+				id_NotesView.id_BoxHeader.includeInLayout 	= false;
+				id_NotesView.id_notesBorder.height = 100;
+				
+				id_NotesHeader.id_SpinerList.DataProvider = id_MenuList;
+				id_NotesHeader.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+//				id_NotesHeader.id_SpinerList.currIndex = 1;
+//				id_NotesHeader.id_SpinerList.id_DDList.selectedIndex = 1;
+				id_NotesHeader.id_SpinerList.id_minBtn.toolTip = "Switch to Form";
+				id_NotesHeader.id_SpinerList.id_MaxBtn.toolTip = "Switch to Form";
+				
+				id_GridHeader.id_SpinerList.DataProvider = id_MenuList;
+				id_GridHeader.id_SpinerList.addEventListener(IndexChangeEvent.CHANGE, OnHeaderClick );
+//				id_GridHeader.id_SpinerList.currIndex = 2;
+//				id_GridHeader.id_SpinerList.id_DDList.selectedIndex = 2;
+				id_GridHeader.id_SpinerList.id_minBtn.toolTip = "Switch to Notes";
+				id_GridHeader.id_SpinerList.id_MaxBtn.toolTip = "Switch to Form";
+				
+				id_View.id_Views.addEventListener(IndexChangedEvent.CHANGE, function(e:IndexChangedEvent):void
+				{
+					if(id_View.id_Views.selectedIndex == 1)
+					{
+						id_ButtonContainer.visible 	= true;
+						id_add.visible				= true;
+					}
+					else if(id_View.id_Views.selectedIndex == 0)
+					{
+						id_ButtonContainer.visible 	= false;
+						id_add.visible				= false;
+					}
+				});
+			}
+			
+			private function OnNotesCloseClick(event:MouseEvent):void
+			{
+				this.ShowNotes = false;
+				id_Views.selectedIndex = 0;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex = 0;
+				event.stopImmediatePropagation();
+			}
+			
+			private function OnHeaderClick(event:IndexChangeEvent):void
+			{
+				if( event.newIndex == 1 )
+				{
+					OnNotesClick ( null );
+				}
+				else 
+				{
+					selectByIndex(event.newIndex);
+				}
+				
+				event.stopImmediatePropagation();
+			}
+			
+			private function selectByIndex(index:int):void
+			{
+				id_Views.selectedIndex 							 			= index;
+				id_GridHeader.id_SpinerList.currIndex  		 				= index;
+				id_NotesHeader.id_SpinerList.currIndex  		 			= index;
+				id_View.id_DetailsView.id_header.id_SpinerList.currIndex 	= index;
+			}
+			// add record click handler
+			protected function id_add_clickHandler(event:MouseEvent):void
+			{
+				model.selectedFamilyHistoryRecord = new FamilyHistroyDTO();
+				
+				 var selectedIcdCodeDTO:FamilyHistroyDTO;
+				if( id_View.id_DetailsView.isGetEdited() )
+				{
+					selectedIcdCodeDTO = id_View.id_DetailsView.selectedIcdCodeDTO;
+					id_View.id_DetailsView.resetFields();
+				}
+				
+				if( null == selectedIcdCodeDTO )
+					selectedIcdCodeDTO = new FamilyHistroyDTO();
+									
+				selectedIcdCodeDTO.FamilyHistoryNote 		= id_NotesView.id_TextArea.text;
+				selectedIcdCodeDTO.CreatedAt 				= model.VisitDate;
+				selectedIcdCodeDTO.CreatedBy 				= model.LoggedInUserId;
+				selectedIcdCodeDTO.PatientID 				= model.patientID;
+				selectedIcdCodeDTO.VisitDate 				= model.VisitDate;
+				selectedIcdCodeDTO.VisitID   				= model.VisitID;
+				selectedIcdCodeDTO.IsDirty   				= true;
+				selectedIcdCodeDTO.IsYesSelected 			= Constants.STRING_TRUE;
+				selectedIcdCodeDTO.IsNA 					= false;
+				selectedIcdCodeDTO.FamilyHistoryType.ID 	= FamilyHistoryDto.id;
+				selectedIcdCodeDTO.FamilyHistoryType.Name 	= QIUtilityFunctions.getModuleFamilyNamebyID( FamilyHistoryDto.id);
+				selectedIcdCodeDTO.DiseaseType.Name 		= selectedIcdCodeDTO.IcdCodeDescription;
+
+				id_NotesView.id_TextArea.text = "";//clear notes
+				
+				if( null == FamilyHistoryDto.PatientDiseaseList)
+					this.FamilyHistoryDto.PatientDiseaseList = new ArrayCollection();
+				
+				selectedIcdCodeDTO.DictationID = FamilyHistoryDto.DictationID;// copy dictation to this record.
+				model.selectedFamilyHistoryRecord = selectedIcdCodeDTO;
+				id_add.enabled = false; 
+				
+				//update skins for icons....
+				dispatchEvent(new Event("clearNotesEvent",true, true ));
+				
+				//update controls
+				dispatchEvent( new Event("data_added", true, true) );
+				dispatchEvent( new Event("saveFamilyHistoryEvent", true, true) );
+				
+				selectByIndex(0); //show form;
+			}
+			
+			protected function id_Views_changeHandler(event:IndexChangedEvent):void
+			{
+				if( event.newIndex == 0 || event.newIndex == 1 )
+				{
+					//id_add.visible = true;
+					
+					id_ButtonContainer.visible = true;
+					if(id_View.id_Views.selectedIndex == 0)
+					{
+						id_ButtonContainer.visible = false;
+					}
+					
+					id_add.enabled = true;
+					//event.newIndex == 1? id_ButtonContainer.paddingRight = 45: id_ButtonContainer.paddingRight = 10;
+				}
+				else
+				{
+					//id_add.visible = false;
+					id_add.enabled = false;
+					id_ButtonContainer.visible = false;
+				}
+				
+				if( id_View.id_DetailsView )
+				{
+					id_add.enabled = id_View.id_DetailsView.isGetEdited();
+					id_add.visible = true;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:ArrayList id="id_MenuList">
+			<fx:String>Form</fx:String>
+			<fx:String>Notes</fx:String>
+			<!--<fx:String>Grid</fx:String>-->
+		</s:ArrayList>
+	</fx:Declarations>
+	
+	<fx:Binding source="id_View.id_DetailsView.id_header.id_SpinerList.currIndex" destination="id_NotesHeader.id_SpinerList.currIndex" twoWay="true" />
+	<fx:Binding source="id_GridHeader.id_SpinerList.currIndex" destination="id_NotesHeader.id_SpinerList.currIndex" twoWay="true" />
+	
+	<s:VGroup width="100%" gap="-20">
+		
+		<mx:ViewStack id="id_Views" width="100%" height="115" resizeToContent="true" change="id_Views_changeHandler(event)"  
+					  creationPolicy="all" selectedIndex="{ShowNotes ? 1:0}" >
+			<s:NavigatorContent width="100%" >
+				<renderer:YesNoLabel id="id_View" width="100%" height="100%" creationComplete="YesNoLabel_creationCompleteHandler(event)" />
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" > <!-- 2 Notes View -->
+				<s:layout>
+					<s:VerticalLayout gap="0" />
+				</s:layout>
+				
+				<family:DetailViewHeader id="id_NotesHeader" width="100%" />
+				<notes:NotesBox id="id_NotesView" width="100%" height="86"  />
+				
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" > <!-- 3 Grid View -->
+				<s:layout>
+					<s:VerticalLayout />
+				</s:layout>
+				
+				<family:DetailViewHeader id="id_GridHeader" width="100%" />
+				<family:FamilyGridView id="id_GridView" width="100%" height="90" miniView="{miniView}"  />
+				
+			</s:NavigatorContent>
+		</mx:ViewStack>
+		<s:HGroup id="id_ButtonContainer" width="100%" horizontalAlign="left" paddingLeft="4" paddingRight="4" paddingTop="5" visible="false" gap="1"> 			
+			<s:Button id="id_add" label="Add" enabled="false" tabIndex="5" click="id_add_clickHandler(event)" toolTip="Add Record" buttonMode="true" 
+					  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.AddMoreRecordBtn" visible="true"/>
+			<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.tooltipBGSmall" visible="{id_add.visible &amp;&amp; !id_add.enabled}"  />
+		</s:HGroup>
+		
+	</s:VGroup>	
+</s:Group>

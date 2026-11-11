@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*"
+		 >
+	<fx:Declarations>
+	</fx:Declarations>
+	<fx:Script>
+		
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function id_DiagnosisView_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+
+			public function loadChronicDiagnosis():void
+			{
+				/*var ev:LoadPatientChronicDiagnosisByPatientIdEvent = new LoadPatientChronicDiagnosisByPatientIdEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);*/
+			}
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		<s:SkinnableContainer id="sc_Diagnosis"  width="100%" >
+			<s:layout>
+				<s:VerticalLayout  verticalAlign="top" gap="0"  /> 
+			</s:layout>
+			<s:SkinnableContainer  width="100%" minHeight="50">
+				<s:layout>
+					<s:VerticalLayout gap="-7" horizontalAlign="right"  paddingLeft="3" paddingRight="3" paddingTop="1" paddingBottom="5"/>
+				</s:layout>
+				
+				<diagnosis:DiagnosisContent id="id_DiagnosisView" width="100%" creationComplete="id_DiagnosisView_creationCompleteHandler(event)" />
+				
+				<s:HGroup width="100%">	
+					<s:HGroup id="id_IndicatorGrp" width="100%" horizontalAlign="left" >
+						<s:Button id="id_noteIndicator" label="Notes" visible="false" 
+								  toolTip="View Notes" 
+								  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesIndicatorBtnSkin" />
+						<s:Button id="id_dictationIndicator" label="Dictation" visible="false" toolTip="Play Dictation" 
+								  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.dictationIndicatorBtnSkin"/>
+					</s:HGroup>
+					<s:Group id="id_spacer" width="100%" height="2" />
+					
+				</s:HGroup>
+			</s:SkinnableContainer>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+</s:Group>

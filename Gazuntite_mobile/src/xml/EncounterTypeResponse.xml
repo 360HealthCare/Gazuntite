@@ -1,0 +1,65 @@
+<EncounterTypeResponse xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.Visit" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<EncounterTypeList xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Acute</a:EncounterTypeName>
+<a:VisitEncounterTypeID>1</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Chronic</a:EncounterTypeName>
+<a:VisitEncounterTypeID>2</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Complete PE</a:EncounterTypeName>
+<a:VisitEncounterTypeID>10</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Complete PE/Acute</a:EncounterTypeName>
+<a:VisitEncounterTypeID>5</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Complete PE/Chronic</a:EncounterTypeName>
+<a:VisitEncounterTypeID>4</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Email Consult</a:EncounterTypeName>
+<a:VisitEncounterTypeID>7</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Phone Call</a:EncounterTypeName>
+<a:VisitEncounterTypeID>6</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Video Consult</a:EncounterTypeName>
+<a:VisitEncounterTypeID>8</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+<a:EncounterTypeDTO>
+<a:Code i:nil="true"/>
+<a:Description i:nil="true"/>
+<a:EncounterTypeName>Virtual Encounter</a:EncounterTypeName>
+<a:VisitEncounterTypeID>11</a:VisitEncounterTypeID>
+</a:EncounterTypeDTO>
+</EncounterTypeList>
+</EncounterTypeResponse>
+

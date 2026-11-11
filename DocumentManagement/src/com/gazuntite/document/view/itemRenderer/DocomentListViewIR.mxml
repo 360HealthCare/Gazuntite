@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]	public var inEditMode:Boolean = true;
+			
+			private var arr:Array;
+			
+			[Bindable]
+			private var Header:String;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if(null != value)
+				{
+					Header =  DisplyDate();
+					
+					id_bodyList.height = 40 * data.DTOCollection.length;
+				}
+				
+			}
+			
+			protected function toggleEditView():void
+			{
+				inEditMode = !inEditMode;
+			}
+			
+			private function DisplyDate():String
+			{
+				
+				if (data.Heading.indexOf("/") != -1)
+				{
+					arr =  new Array();
+					arr = data.Heading.split("/");
+					
+					var day:int = new Date().date;
+					
+					if(day - parseInt(arr[0]) == 0)
+						return "Today ("+ data.Heading +")";
+					else if(day - parseInt(arr[0]) == 1)
+						return "Yesterday ("+ data.Heading +")";
+					else
+					{
+						var weekDay:int = new Date(data.Heading).day;
+						
+						var dayName:Array = ['Sunday', 'Monday', 'Tuesday','Wednesday', 'Thursday', 'Friday', 'Saturday'];
+						
+						
+						
+						return dayName[weekDay] +" (" + data.Heading +")";
+					}
+				}
+				else
+					return data.Heading;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<!--<s:BorderContainer width="100%" height="100%" borderWeight="1" >-->
+	
+	<s:layout>
+		<s:VerticalLayout gap="-1"/>
+	</s:layout>
+	
+	<s:SkinnableContainer height="20" width="100%" skinClass="com.gazuntite.skins.controls.container.dmg.DMGRecordHeaderSkin"
+						  click="toggleEditView()" buttonMode="true" useHandCursor="true" toolTip="{data.Heading}"
+						  includeInLayout="{null != data}" visible="{null != data}" >
+		<s:Label width="100%" text="{Header}" fontFamily="CalibriCFFBold" left="8" verticalCenter="0"/>
+	</s:SkinnableContainer>
+	
+	<s:List id="id_bodyList" 
+			width="100%" height="100%" 
+			verticalScrollPolicy="off"
+			dataProvider="{data.DTOCollection}"  
+			borderVisible="false"
+			skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+			itemRenderer="com.gazuntite.document.view.itemRenderer.ListViewInternalIR" 
+			includeInLayout="{inEditMode}" visible="{inEditMode}" 
+			/>
+	
+	<!--</s:BorderContainer>-->
+	
+	
+</s:ItemRenderer>

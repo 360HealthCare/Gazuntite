@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			private var _firstName:String;
+			private var _middleName:String;
+			private var _lastName:String;
+			private var _email:String;
+			private var _userID:int;
+			
+			private var _homePage:String;
+			private var _gmapPage:String;
+			private var _notes:String;
+			private var _address:String;
+
+			private var _LastUpdated:String;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			[Bindable]
+			public function get userID():int
+			{
+				return _userID;
+			}
+
+			public function set userID(value:int):void
+			{
+				_userID = value;
+			}
+
+			[Bindable]
+			public function get LastUpdated():String
+			{
+				return _LastUpdated;
+			}
+
+			public function set LastUpdated(value:String):void
+			{
+				_LastUpdated = value;
+			}
+
+			[Bindable]
+			public function get address():String
+			{
+				return _address;
+			}
+
+			public function set address(value:String):void
+			{
+				_address = value;
+			}
+
+			[Bindable]
+			public function get notes():String
+			{
+				return _notes;
+			}
+
+			public function set notes(value:String):void
+			{
+				_notes = value;
+			}
+
+			[Bindable]
+			public function get gmapPage():String
+			{
+				return _gmapPage;
+			}
+
+			public function set gmapPage(value:String):void
+			{
+				_gmapPage = value;
+			}
+
+			[Bindable]
+			public function get homePage():String
+			{
+				return _homePage;
+			}
+
+			public function set homePage(value:String):void
+			{
+				_homePage = value;
+			}
+
+			
+			[Bindable]
+			public function get email():String
+			{
+				return _email;
+			}
+			
+			public function set email(value:String):void
+			{
+				_email = value;
+			}
+			
+			[Bindable]
+			public function get lastName():String
+			{
+				return _lastName;
+			}
+			
+			public function set lastName(value:String):void
+			{
+				_lastName = value;
+			}
+			
+			[Bindable]
+			public function get middleName():String
+			{
+				return _middleName;
+			}
+			
+			public function set middleName(value:String):void
+			{
+				_middleName = value;
+			}
+			
+			[Bindable]
+			public function get firstName():String
+			{
+				return _firstName;
+			}
+			
+			public function set firstName(value:String):void
+			{
+				_firstName = value;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:HorizontalLayout paddingTop="10" verticalAlign="top" gap="10" />
+	</s:layout>
+	
+	
+	<s:VGroup width="30%" horizontalAlign="right"  gap="2">
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay1" tabStops="S0 S50 S100 S150" 
+					text="First Name :"  />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay2" tabStops="S0 S50 S100 S150" 
+					text="Middle Name :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay3" tabStops="S0 S50 S100 S150" 
+					text="Last Name :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay4" tabStops="S0 S50 S100 S150" 
+					text="Email :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay5" tabStops="S0 S50 S100 S150" 
+					text="User ID :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay6" tabStops="S0 S50 S100 S150" 
+					text="Address :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay7" tabStops="S0 S50 S100 S150" 
+					text="Web :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay8" tabStops="S0 S50 S100 S150" 
+					text="Notes :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay9" tabStops="S0 S50 S100 S150" 
+					text="Map :" />
+		<s:RichText color="#666666" fontFamily="Calibri" fontSize="12" id="textDisplay10" tabStops="S0 S50 S100 S150" 
+					text="Last Updated on :" />
+		
+	</s:VGroup>
+	<s:VGroup width="70%" horizontalAlign="left" gap="2">
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{firstName}"
+					/>
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{middleName}" 
+					/>
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{lastName}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{email}"  />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{userID == 0 ? '':userID}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{address}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{homePage}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{notes}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{gmapPage}" />
+		<s:RichText color="#000000" fontFamily="Calibri" fontSize="12" lineBreak="toFit" maxDisplayedLines="1" width="100%"
+					text="{LastUpdated}" />
+		
+	</s:VGroup>
+	
+	
+</s:SkinnableContainer>

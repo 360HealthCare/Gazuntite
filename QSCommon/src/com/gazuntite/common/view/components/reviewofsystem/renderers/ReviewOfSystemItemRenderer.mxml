@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				height="28" width="100%"
+				creationComplete="onCreated(event)"
+				render="OnRenderHandler(event)"
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.components.reviewofsystem.IReviewOfSystemItem;
+			import com.gazuntite.common.view.components.reviewofsystem.ReviewOfSystemHelper;
+			
+			import mx.events.FlexEvent;
+			
+			private var m_oDataItem:IReviewOfSystemItem;
+			
+			[Bindable]
+			public function get dataItem():IReviewOfSystemItem
+			{
+				return m_oDataItem;
+			}
+			
+			public function set dataItem(value:IReviewOfSystemItem):void
+			{
+				m_oDataItem = value;
+			}
+			
+			[Bindable]
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				dataItem = value as IReviewOfSystemItem;
+			}
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+//				uiAbnormal.visible = Math.random()>0.7;
+//				uiAbnormal.includeInLayout = uiAbnormal.visible;
+//				uiNoteSign.visible = Math.random()>0.6;
+//				uiNoteSign.includeInLayout = uiNoteSign.visible;
+			}
+			
+			protected function set onDataIsDirty(value:Boolean):void
+			{
+				if( value )
+				{
+					var hasAbnormal:Boolean = ReviewOfSystemHelper.IsAnyChildAbnormal(dataItem);
+					if(hasAbnormal)
+					{
+						id_AbnormalIndicator.visible = true;
+						id_NormalIndicator.visible = false;
+					}
+					else
+					{
+						id_AbnormalIndicator.visible = false;
+						id_NormalIndicator.visible = true;
+					}
+				}
+				else
+				{
+					id_AbnormalIndicator.visible = false;
+					id_NormalIndicator.visible = false;
+				}
+			}
+			
+			protected function OnRenderHandler(event:Event):void
+			{
+				onDataIsDirty = dataItem.IsDirty;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="dataItem.IsDirty" destination="onDataIsDirty" />
+	
+	<s:Rect left="0" right="0" top="0" bottom="0" alpha="1" radiusX="0">
+		<s:stroke>
+			<s:SolidColorStroke caps="round" color="#545454" joints="miter" miterLimit="3" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D7D7D7" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#BDBBB5" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#D1D1D1" ratio="0.9058823529411765"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<s:HGroup left="0" right="0" top="0" bottom="0" verticalAlign="middle"	  paddingLeft="5" paddingRight="4" gap="2"  >
+		<s:RichText color="#000000" fontFamily="Calibri"
+					fontSize="12" 
+					text="{data.label}"
+					width="100%" maxDisplayedLines="1" showTruncationTip="true"
+					/>	
+		
+		<s:Button id="id_AbnormalIndicator" label="^" width="14" skinClass="com.gazuntite.skins.controls.button.input.AbnormalNotesButtonSkin" 
+				  visible="false" includeInLayout="{id_AbnormalIndicator.visible}"/>
+		
+		<s:ToggleButton id="id_NormalIndicator" skinClass="com.gazuntite.controls.extended.skins.changeIndicator"
+						width="14" height="14" visible="false" includeInLayout="{id_NormalIndicator.visible}"
+						/>
+		
+		
+		<s:ToggleButton selected="{dataItem.IsNormal == QSConstants.STRING_TRUE}"
+						skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.NTB1"
+						buttonMode="true" useHandCursor="true" toolTip="Normal"
+						/>
+	</s:HGroup>
+	
+</s:ItemRenderer>

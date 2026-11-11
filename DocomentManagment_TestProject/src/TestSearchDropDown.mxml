@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:search="com.gazuntite.components.search.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.search.SearchDropDownEvent;
+			
+			protected function searchdropdown1_startSearchHandler(event:SearchDropDownEvent):void
+			{
+				trace(event.SearchQuery, event.searchTypePrompt, event.searchTypeIndex, event.SelectedItem);
+				//do service call here for searching and when search result is ready pass arraycollection to SearchDropDown
+				
+				resultCallBack();
+			}
+			
+			protected function resultCallBack():void
+			{
+				id_searchDD.ShowResult( new ArrayCollection(["Result 1","Result 2","Result 3","Result 4","Result 5","Result 6"]) );
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:Label text="Some label value" toolTip="text" />
+	<s:Label text="Some label value" toolTip="text" />
+	
+	<search:SearchDropDown id="id_searchDD" width="100%" height="30" PromptFieldName="label" startSearch="searchdropdown1_startSearchHandler(event)" >
+		<search:DataProvider>
+			<s:ArrayCollection>
+				<fx:Object label="First Name" icon="check_icon.png" />
+				<fx:Object label="Last Name" icon="check_icon.png" />
+				<fx:Object label="SSN" icon="check_icon.png" />
+				<fx:Object label="Location" icon="check_icon.png" />
+			</s:ArrayCollection>
+		</search:DataProvider>
+	</search:SearchDropDown>
+	
+</s:WindowedApplication>

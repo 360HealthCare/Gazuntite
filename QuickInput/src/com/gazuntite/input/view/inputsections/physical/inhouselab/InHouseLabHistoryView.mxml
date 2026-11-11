@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:allergy="com.gazuntite.input.view.inputsections.history.allergy.*"
+					  xmlns:vitals="com.gazuntite.input.view.inputsections.physical.vitals.*" 
+					  xmlns:chiefcomplaint="com.gazuntite.input.view.inputsections.physical.chiefcomplaint.*"
+					  creationComplete="cc()" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:skins="com.gazuntite.input.view.skins.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.SortType;
+			import com.gazuntite.input.view.inputsections.assessment.plan.followUp.PatientInputAssessmentFollowUpEvent;
+			import com.gazuntite.input.view.inputsections.assessment.treatment.procedure.PatientInputAssessmentProcedureEvent;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var viewModel:PatientInputPhysicalInHouseLabViewModel = PatientInputPhysicalInHouseLabViewModel.getInstance();
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputPhysicalInHouseLabEvent.PATIENT_INPUT_IN_HOUSE_LAB_ITEM_EDIT_KEY_UP_EVENT, 
+					inHouseLabItemEditKeyUpHandler, false, 0, true);
+				addEventListener(PatientInputPhysicalInHouseLabEvent.PATIENT_INPUT_IN_HOUSE_LAB_EDIT_EVENT,
+					manageInHouseLabHandler, false, 0, true);
+				addEventListener(PatientInputPhysicalInHouseLabEvent.PATIENT_INPUT_IN_HOUSE_LAB_DELETE_EVENT,
+					manageInHouseLabHandler, false, 0, true);
+			}
+			
+			private function inHouseLabItemEditKeyUpHandler(event:PatientInputPhysicalInHouseLabEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 0 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				viewModel.loadInHouseLabTestForHistoryView(event.searchString, event.searchType);
+			}
+			
+			private function manageInHouseLabHandler(event:PatientInputPhysicalInHouseLabEvent):void
+			{
+				viewModel.manageInHouseLab(QIConstants.HISTORY_VIEW);
+				
+				dispatchEvent(new PatientInputAssessmentFollowUpEvent(PatientInputAssessmentFollowUpEvent.PATIENT_INPUT_LOAD_FOLLOW_UP_LABS, true));
+			}
+			
+			private function sortDropDownChangeHandler(event:IndexChangeEvent):void
+			{
+				var sortType:String = "";
+				
+				if (event.newIndex == 0)
+				{
+					sortType = SortType.RECENTLY_ADDED;
+				}
+				else
+				{
+					sortType = SortType.IN_HOUSE_LAB_TEST_NAME;
+				}
+				
+				viewModel.inputListSortType = sortType;
+				viewModel.sortInHouseLabList(sortType, QIConstants.HISTORY_VIEW);
+			}
+			
+			protected function on_gotoNextSectionEventHandler(event:Event):void
+			{
+				//dispatchEvent(new SelectSection(SelectSection.SelectTabEvent,'id_InputAssessmentMain'));
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="10"/>
+	</s:layout>
+	<skins:PatientSubViewTitleBar width="100%" label="IN-HOUSE LAB"  maxSectionCounter="5" sectionNumber="5" showInputPart="false" showHistoryPart="true" inputCounter="0"
+								  PrevSectionLabel="Physical"
+								  NextSectionLabel=""
+								  MainSectionLabel="Physical"
+								  NavItems="{NavItems}"
+								  dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}"
+								  gotoNextSectionEvent="on_gotoNextSectionEventHandler(event)"
+									  />
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}"
+												dictationNoteDataProvider="{model.inHouseLabDictationNoteHistoryDTOList}"/>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+		<s:DropDownList id="uiSort"  
+						selectedIndex="0"
+						buttonMode="true" 
+						toolTip="Sort List"
+						skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+						change="sortDropDownChangeHandler(event)"
+						>
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Recently Added" />
+					<fx:Object label="Test Name" />
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Spacer width="100%" />
+	</s:SkinnableContainer>
+	
+	<s:List id="uiInboxList"
+			width="100%" height="100%"
+			allowMultipleSelection="false"
+			borderVisible="false"
+			dataProvider="{model.inHouseLabDTOHistoryList}"
+			skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+			itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.inHouseLab.InHouseLabInputListItemRenderer"
+			/>
+</s:SkinnableContainer>

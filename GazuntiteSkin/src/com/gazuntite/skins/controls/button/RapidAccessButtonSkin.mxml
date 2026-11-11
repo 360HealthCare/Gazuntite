@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		>
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Path includeIn="disabled,disabledAndSelected,up" x="0" y="0" width="60"
+			data="M 5.804 0 L 40.628 0 C 42.231 0 43.531 1.299 43.531 2.902 L 46.433 17.138 C 46.433 18.74 45.134 20.04 43.531 20.04 L 2.902 20.04 C 1.299 20.04 0 18.74 0 17.138 L 2.902 2.902 C 2.902 1.299 4.201 0 5.804 0 Z"
+			y.disabled="4"
+			height.disabledAndSelected="31"
+			y.up="4">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B1B1B1" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#9B9C9C" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:Path includeIn="down,downAndSelected,over,overAndSelected,up,upAndSelected" x="0" y="9"
+			width="60"
+			data="M 5.804 0 L 40.628 0 C 42.231 0 43.531 1.299 43.531 2.902 L 46.433 17.138 C 46.433 18.74 45.134 20.04 43.531 20.04 L 2.902 20.04 C 1.299 20.04 0 18.74 0 17.138 L 2.902 2.902 C 2.902 1.299 4.201 0 5.804 0 Z"
+			y.down="4"
+			y.downAndSelected="0" height.downAndSelected="31"
+			y.over="4"
+			y.overAndSelected="0" height.overAndSelected="31"
+			visible.up="false"
+			y.upAndSelected="0" height.upAndSelected="31">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#53BDDA" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2A81A9" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#1876A2" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#369AC4" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="2" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter includeIn="downAndSelected" alpha="0.75" angle="90" blurX="2"
+								blurY="2" color="#000000" distance="2" hideObject="false"
+								inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:BitmapImage includeIn="disabled,down,over,up" smooth="true"
+				   source="@Embed('/assets/images/rapidaccessheadericon.png')"
+				   horizontalCenter="0" y="5"
+				   >
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="10" blurY="10" color="#FFFFFF" includeIn="down,over" inner="true" knockout="false" quality="3" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#0078C1" distance="0" hideObject="false" includeIn="over" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" includeIn="down,over" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#595959" includeIn="disabled" inner="true" knockout="false" quality="3" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="disabled" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+	<s:BitmapImage includeIn="disabledAndSelected,downAndSelected,over,overAndSelected,upAndSelected"
+				   horizontalCenter="0" smooth="true" source="@Embed('/assets/images/rapidaccessheadericonwhite.png')"
+				   x.disabledAndSelected="16" y.disabledAndSelected="3"
+				   x.downAndSelected="16" y.downAndSelected="3"
+				   visible.over="false" y.over="0"
+				   x.overAndSelected="16" y.overAndSelected="3"
+				   x.upAndSelected="16" y.upAndSelected="3">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" includeIn="downAndSelected,overAndSelected,upAndSelected" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="10" blurY="10" color="#595959" includeIn="disabledAndSelected" inner="true" knockout="false" quality="2" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="disabledAndSelected" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

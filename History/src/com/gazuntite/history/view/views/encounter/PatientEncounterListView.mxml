@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  creationComplete="cc()"
+					  width="100%" height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.history.model.HistoryModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			
+			/* [Bindable]
+			private var dummyDp:ArrayCollection;*/
+			
+			[Bindable]
+			private var model:HistoryModelLocator = HistoryModelLocator.getInstance();
+			
+			private function cc():void
+			{
+				/* dummyDp = new ArrayCollection();
+				dummyDp.source = [{serialNumber: 1, VisitDate: new Date(), Location: "Location 1", VisitType: "VisitType 1",
+						PlaceOfService: "Office", Provider: "Provider 1", Status: "Signed"}, 
+					{serialNumber: 2, VisitDate: new Date(), Location: "Location 2", VisitType: "VisitType 2", 
+						PlaceOfService: "Office", Provider: "Provider 2", Status: "Un-Signed"}, 
+					{serialNumber: 3, VisitDate: new Date(), Location: "Location 3", VisitType: "VisitType 3",
+						PlaceOfService: "Office", Provider: "Provider 3", Status: "Signed"}, 
+					{serialNumber: 4, VisitDate: new Date(), Location: "Location 4", VisitType: "VisitType 4",
+						PlaceOfService: "Office", Provider: "Provider 4", Status: "Un-Signed"}, 
+					{serialNumber: 5, VisitDate: new Date(), Location: "Location 5", VisitType: "VisitType 5",
+						PlaceOfService: "Office", Provider: "Provider 5", Status: "Signed"}]; */
+			}
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="25" skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBgSkin">
+		<s:Label verticalCenter="0" left="5" text="Encounter List" fontFamily="CalibriCFFBold" fontSize="15"/>
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer id="id_ListHeader" width="100%" height="29" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="10"/>
+		</s:layout>
+		
+		<s:Label width="30" text="Sr.#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+		
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Visit Date" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Location" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Visit Type" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Place of Service" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:HGroup>
+		
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Provider" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Status" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		
+		<s:HGroup gap="0" width="10%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:List id="id_EncounterList"
+			width="100%" height="125" borderVisible="false"
+			dataProvider="{model.patientEncounterList}"
+			skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+			itemRenderer="com.gazuntite.history.view.views.encounter.PatientEncounterListIR"/>
+</s:SkinnableContainer>

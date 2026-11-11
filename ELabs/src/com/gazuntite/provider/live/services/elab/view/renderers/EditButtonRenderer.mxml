@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.controls.extended.components.LabelDataGrid;
+			import com.gazuntite.provider.live.services.elab.view.event.ElabActionEvent;
+			
+			private var m_bIsDirty:Boolean;
+			
+			public override function set data(value:Object):void
+			{
+				super.data = value;
+			}
+			
+			private function onViewClick(event:MouseEvent):void	
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_ORDER_VIEW_DOCUMENT_CLICK));
+			}
+			
+			private function onEditClick(event:MouseEvent):void	
+			{
+				id_Save.visible = true;
+				id_Edit.visible = false;
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_ORDER_EDIT_CLICK));
+				//				id_Edit.styleName = "blackButtonSkin";
+				//id_Edit.setStyle("skinClass", blackButton);
+			}
+			
+			private function onSaveClick(event:MouseEvent):void	
+			{
+				//dispatchEvent(new ElabActionEvent(ElabActionEvent.SAVE_RECORD_CLICK));
+				
+				var g:LabelDataGrid = this.parent.parent as LabelDataGrid;
+				if( g.editable )
+				{
+					id_Save.visible 	= false;
+					id_Edit.visible 	= true;
+					g.editable 			= false;
+					dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_ORDER_SAVE_CLICK));
+				}
+			}
+			
+			[Bindable]
+			public function get IsDirty():Boolean
+			{
+				return m_bIsDirty;
+			}
+			
+			public function set IsDirty(value:Boolean):void
+			{
+				m_bIsDirty = value;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Binding source="data.IsDirty" destination="IsDirty" />
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle"/>
+	</s:layout>
+	
+	<s:Button id="id_View" 
+			  width="45" click="onViewClick(event)" label="{data.Method.Name}" toolTip="View {data.Method.Name}"
+			  buttonMode="true" useHandCursor="true" styleName="blackButtonSkin"  />
+	
+	<s:Button id="id_Edit" 
+			  width="12" height="12" click="onEditClick(event)" toolTip="Edit" buttonMode="true" useHandCursor="true"
+			  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton" includeInLayout="{id_Edit.visible}"/>
+	
+	<s:Button id="id_Save" 
+			  width="12" height="12" click="onSaveClick(event)" toolTip="Save" buttonMode="true" useHandCursor="true"
+			  visible="false" includeInLayout="{id_Save.visible}"  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" />
+	
+	<!--	<s:Button id="id_Edit" 
+	width="45" click="onEditClick(event)" toolTip="Edit" buttonMode="true" useHandCursor="true"
+	visible="{!id_Save.visible}" includeInLayout="{id_Edit.visible}" styleName="editButtonSkin" />
+	
+	<s:Button id="id_Save" 
+	width="12" height="12" click="onSaveClick(event)" toolTip="Save" buttonMode="true" useHandCursor="true"
+	visible="{IsDirty}" includeInLayout="{id_Save.visible}"  styleName="saveButtonSkin" />-->
+</s:MXDataGridItemRenderer>

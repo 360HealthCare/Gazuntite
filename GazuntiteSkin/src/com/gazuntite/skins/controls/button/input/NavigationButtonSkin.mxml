@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+             xmlns:s="library://ns.adobe.com/flex/spark" 
+             xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+			 width="20" height="20"
+			 creationComplete="skin1_creationCompleteHandler(event)"
+             alpha.disabled="0.5">
+     
+    <fx:Metadata>
+        <![CDATA[ 
+        [HostComponent("spark.components.Button")]
+        ]]>
+    </fx:Metadata>
+    
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			[Bindable] private var value_text:String = '';
+			
+			protected function skin1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(hostComponent.label)
+				{
+					value_text		= hostComponent.label;
+				//	hostComponent.toolTip   = value_text;
+					hostComponent.buttonMode = true;
+				}
+				if(hostComponent.toolTip)
+					hostComponent.toolTip = hostComponent.toolTip;
+			}
+			
+		]]>
+	</fx:Script>
+	
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" />
+        <s:State name="down" />
+        <s:State name="disabled" />
+    </s:states>
+    
+	<s:Ellipse width="20" height="20">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#4E4E4E" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#595757" ratio="0.48627450980392156"/>
+				<s:GradientEntry alpha="1.0" color="#686969" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#656565" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Ellipse>
+	
+	<s:RichText id="labelDisplay" width="20" color="#FFFFFF" fontFamily="CalibriCFF" fontSize="14"
+				tabStops="S0" verticalCenter="0" horizontalCenter="0" textAlign="center">
+	</s:RichText>
+    
+</s:SparkButtonSkin>

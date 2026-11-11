@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  width="100%" height="100%"  styleName="blackTitleBGContainerSkin3"
+					  creationComplete="creationCompleteHandler()" 
+					  xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<s:layout>
+		<s:VerticalLayout paddingTop="12" paddingBottom="7" paddingLeft="2" paddingRight="5" />
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllAppointmentRequestByProviderEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentRequestEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.components.RejectionPopUp;
+			import com.gazuntite.provider.live.services.scheduler.view.event.LoadAppointmentEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.Base64Encoder;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			private var rejectionPopup:RejectionPopUp;
+			
+			//cre comp control from main waititng room
+			public function creComp():void
+			{
+				addEventListener('loadAppointmentEvent', loadRequests);
+				loadAppointmentRequest();
+			}
+			// loadAppointmentEvent handlers
+			private function loadRequests(e:LoadAppointmentEvent):void
+			{
+				removeEventListener('loadAppointmentEvent', loadRequests);
+				loadAppointmentRequest();
+			}
+			// load appointment request
+			private function loadAppointmentRequest():void
+			{
+				if(model.RequestList != null)
+				{
+					if(model.RequestList.length > 0)
+						model.RequestList.removeAll();
+				}
+				
+				var RAppEvent:LoadAllAppointmentRequestByProviderEvent = new LoadAllAppointmentRequestByProviderEvent(model.loggedInUserProviderId, model.loggedInUserSelectedStationId, populateRequests);
+				CairngormEventDispatcher.getInstance().dispatchEvent( RAppEvent );
+				cursorManager.setBusyCursor();
+			}
+			// on result call back function of appointments
+			private function populateRequests(val:* =null):void
+			{
+				if(model.RequestList.length > 0)
+				{
+					dg_Requests.dataProvider = model.RequestList;
+					dg_Requests.visible       = true;
+				}else{
+					dg_Requests.visible       = false;
+				}
+			}
+			//Label Function for Grid	
+			public function getTime(item:Object,column:DataGridColumn):String
+			{
+				var startTime:String = item.StartTime;
+				var endTime:String   = item.EndTime;
+				startTime = startTime.substring(11, startTime.length);
+				endTime = endTime.substring(11, endTime.length);
+				return startTime +' - '+ endTime;
+			}
+			// getdate label function 
+			public function getDate(item:Object,column:DataGridColumn):String
+			{
+				var strDate:String = item.RequestDate;
+				var arr:Array   = strDate.split('T', strDate.length);
+				
+				return df.format(arr[0]);
+			}
+			// creation complete handler
+			protected function creationCompleteHandler():void
+			{
+				//addEventListener('rejectionViewOpenEvent', rejectionViewOpen);
+			}
+			
+			//Open rejection View
+			private function rejectionViewOpen(event:Event):void
+			{
+				rejectionPopup = PopUpManager.createPopUp(this, RejectionPopUp,true) as RejectionPopUp;
+				PopUpManager.centerPopUp(rejectionPopup);
+				
+				rejectionPopup.addEventListener('hideRejectionPopupEvent', onhideRejectionPopup);
+			}
+			// on addevent listner of hideRejectionPopup
+			private function onhideRejectionPopup(event:Event):void
+			{
+				rejectionPopup.removeEventListener('hideRejectionPopupEvent', onhideRejectionPopup);
+				PopUpManager.removePopUp(rejectionPopup);
+				
+				onRejection(); // on rejection reason save
+			}
+			
+			//on Rejection reason popup save click handler
+			private function onRejection():void
+			{
+				var date:Date = new Date();
+				var strModiedAt:String =  dateFormatter2.format(date.toDateString());//+'T'+time.format(date);
+				var statusID:int	= 1;
+				model.RejectionReason = getBase64String(model.RejectionReason);
+				
+				var RREvent:ManageAppointmentRequestEvent = new ManageAppointmentRequestEvent(model.SelectedRequestID, statusID, model.loggedInUserProviderId, strModiedAt,	'false', model.loggedInUserSelectedBranchId, model.RejectionReason , populateRequests2);
+				CairngormEventDispatcher.getInstance().dispatchEvent( RREvent );
+				cursorManager.setBusyCursor();
+			}
+			//Callback function
+			private function populateRequests2(val:* =null):void
+			{
+				loadAppointmentRequest();
+			}
+			
+			//Convert string to base64 string before pass to service
+			public static function getBase64String(text:String):String
+			{
+				var base64Dec:Base64Encoder = new Base64Encoder();
+				base64Dec.encode(text);
+				return base64Dec.toString();
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="MM-DD-YYYY" />
+		<mx:DateFormatter id="dateFormatter2" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+	</fx:Declarations>
+	
+	
+	
+	<s:HGroup width="100%" paddingLeft="5" verticalAlign="middle">
+		<s:Label text="{'Total Records'+' '+ '('+model.totalRecords_PendReq.toString()+')'}"   horizontalCenter="0" fontFamily="Calibri"  color="#F1BE6E" fontWeight="bold" fontSize="13" 
+				 visible="false" includeInLayout="false"/>
+	</s:HGroup>
+	
+	<s:Scroller width="100%" height="100%">
+		<s:VGroup id="gpRequests" width="100%" height="100%" horizontalAlign="center" verticalAlign="top">
+			<s:Label id="id_norecord" text="There are no entries/data." fontFamily="Calibri" fontSize="13"  color="#FFFFFF" fontWeight="bold" verticalAlign="top" visible="{!dg_Requests.visible}" includeInLayout="{id_norecord.visible}"/>
+			<components1:LabelDataGrid id="dg_Requests" width="100%" rowCount="{dg_Requests.dataProvider.length +1}"
+									  sortableColumns="false" resizableColumns="false" allowDragSelection="false" verticalScrollBarStyleName="VScrollBar"
+									  visible="false" includeInLayout="{dg_Requests.visible}"
+									  columnWidths="{['30%','15%','15%','25%','10%','10%']}">
+				<components1:columns>
+					<mx:DataGridColumn headerText="Patient Name" 	 dataField="PatientFullName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<!--<mx:DataGridColumn headerText="Time"         labelFunction="getTime" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>-->
+					<mx:DataGridColumn headerText="Time"     	 	 dataField="AppointmentDuration" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Request Date"     labelFunction="getDate" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Location"         dataField="LocationName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					
+					<mx:DataGridColumn headerText="Reject"           
+									   itemRenderer="com.gazuntite.provider.live.services.scheduler.view.itemrenderer.RejectRequestRenderer" />
+					<mx:DataGridColumn headerText="Approve"          
+									   itemRenderer="com.gazuntite.provider.live.services.scheduler.view.itemrenderer.ApproveRequestRenderer"/>
+				</components1:columns>
+			</components1:LabelDataGrid>
+		</s:VGroup>
+	</s:Scroller>
+</s:SkinnableContainer>
+
+

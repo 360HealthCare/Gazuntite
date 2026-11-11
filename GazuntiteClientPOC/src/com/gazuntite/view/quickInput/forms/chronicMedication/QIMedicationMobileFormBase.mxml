@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms1:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.view.controls.*"
+					  width="100%" 
+					  height="100%"
+					  creationComplete="init(event)"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*" xmlns:forms1="com.gazuntite.view.quickInput.forms.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Metadata>
+		[ManagedEvents("getGenericnameEvent")]
+		[ManagedEvents("getMedicationFormDataEvent")]
+		[ManagedEvents("getMedicineNameEvent")]
+		[ManagedEvents("getNDCEvent")]
+		[ManagedEvents("getStrengthEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.chronicMedication.GetGenericnameEvent;
+			import com.gazuntite.events.chronicMedication.GetMedicationFormDataEvent;
+			import com.gazuntite.events.chronicMedication.GetMedicineNameEvent;
+			import com.gazuntite.events.chronicMedication.GetNDCEvent;
+			import com.gazuntite.events.chronicMedication.GetStrengthEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			public override function set isEditForm(value:Boolean):void
+			{
+				_isEditForm = value;
+				
+				if(value == true)
+				{
+					this.currentState = "presentation";
+				}else
+				{
+					this.currentState = "normal";
+				} 
+				
+			}
+			
+			
+			
+			public function set selectedRecord(value:ObjectProxy):void
+			{
+				_selectedRecord = value;
+				setForm();
+			}
+			
+			protected function validateForm():Boolean
+			{
+				if(id_medicineName.selectedItemText == "")
+				{
+					Alert.show("select medicine name", "invalid input" );;
+					return false;
+				}
+				
+				if(id_strength.selectedItemText == "")
+				{
+					Alert.show("select strength", "invalid input" );;
+					return false;
+				}
+				
+				if(id_GenericName.selectedItemText == "")
+				{
+					Alert.show("select generic name", "invalid input" );;
+					return false;
+				}
+				
+				if(id_NDC.selectedItemText == "")
+				{
+					Alert.show("select NDC", "invalid input" );;
+					return false;
+				}
+				
+				if(id_Dose.selectedItemText == "")
+				{
+					Alert.show("select Dose", "invalid input" );;
+					return false;
+				}
+				
+				
+				return true;
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				if(id_medicineName.selectedItemText == "")
+				{
+					Alert.show("select medicine name", "invalid input" );;
+					return false;
+				}
+				
+				if(id_strength.selectedItemText == "")
+				{
+					Alert.show("select strength", "invalid input" );;
+					return false;
+				}
+				
+				if(id_GenericName.selectedItemText == "")
+				{
+					Alert.show("select generic name", "invalid input" );;
+					return false;
+				}
+				
+				if(id_NDC.selectedItemText == "")
+				{
+					Alert.show("select NDC", "invalid input" );;
+					return false;
+				}
+				
+				if(id_Dose.selectedItemText == "")
+				{
+					Alert.show("select Dose", "invalid input" );;
+					return false;
+				}
+				
+				return true;
+			}
+			
+			protected function updateRecord(event:MouseEvent):void
+			{
+				
+				if( validateForm() )
+				{
+					// dummy data for test binding
+					var medication:ObjectProxy = new ObjectProxy();
+					
+					medication.medicineName = id_medicineName.selectedItemText;
+					medication.strength 	= id_strength.selectedItemText;
+					medication.genericName 	= id_GenericName.selectedItemText;
+					medication.dose 		= id_Dose.selectedItemText;
+					medication.dosageFrom = id_DosageForm.selectedItemText;
+					
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = medication;
+					
+					if(_isEditForm)
+					{
+						e.isUpdate = true;
+					}
+					else
+					{	
+						clearForm();
+					}
+						
+					
+					
+					dispatchEvent(e);
+					
+					
+				} 
+			}
+			
+			protected function setForm():void
+			{
+				this.currentState = "presentation";
+				id_medicineName.selectedItemText = _selectedRecord.Term;
+				id_strength.selectedItemText = _selectedRecord.strength;
+				//dsl1.selectedItemText = _selectedRecord.onSet; 
+				
+			}
+			
+			protected function clearForm():void
+			{
+				id_medicineName.selectedItemText = "";
+				id_strength.selectedItemText = "";
+				id_Active.selected = false;
+				id_AssociatedVisit.selectedItemText = "";
+				id_DosageForm.selectedItemText = "";
+				id_Dose.selectedItemText = "";
+				id_GenericName.selectedItemText = "";
+				id_medicineName.selectedItemText = "";
+				id_NDC.selectedItemText = "";
+				id_Quantity.selectedItemText = "";
+				id_QuantityForm.selectedItemText = "";
+				
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				if(sharedModel.immunizationHistoryAC.length > 0)
+				{
+					_selectedRecord = sharedModel.immunizationHistoryAC.getItemAt(0) as ObjectProxy;
+				}
+				
+				
+				dispatchEvents();
+			}
+			
+			private function dispatchEvents():void
+			{
+				var e1:GetGenericnameEvent = new GetGenericnameEvent();
+				dispatchEvent( e1 );
+				
+				var e2:GetMedicationFormDataEvent = new GetMedicationFormDataEvent();
+				dispatchEvent( e2 );
+				
+				var e3:GetMedicineNameEvent = new GetMedicineNameEvent();
+				dispatchEvent( e3 );
+				
+				var e4:GetNDCEvent = new GetNDCEvent();
+				dispatchEvent( e4 );
+				
+				var e5:GetStrengthEvent = new GetStrengthEvent();
+				dispatchEvent( e5 );
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<forms:states>
+		<s:State name="normal"/>
+		<s:State name="presentation"/>
+	</forms:states>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="0"
+						  paddingLeft="3"
+						  paddingRight="3"
+						  paddingTop="0"
+						  gap="1"
+						  horizontalAlign="center"
+						  verticalAlign="top"/>
+	</forms:layout>
+	
+	<s:BorderContainer id="presentationForm" 
+					   width="100%"
+					   height="100%"
+					   borderWeight="0" 
+					   cornerRadius="0" 
+					   dropShadowVisible="false"
+					   borderAlpha="0">
+		
+		<s:backgroundFill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="0xf3f3f3"/>
+				<s:GradientEntry color="0xffffff"/>
+			</s:LinearGradient>
+		</s:backgroundFill>
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="0"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="5"
+							  gap="5"/>
+		</s:layout>
+		
+		<s:HGroup height="100%">
+			<s:Image source="assets/done.png" includeInLayout="{_isEditForm}"/>
+			<s:Image source="assets/edit.png" includeInLayout="{!_isEditForm}"/>
+			
+			<s:VGroup width="100%">
+				<controls:CalloutLabelText id="id_medicineName" 
+										   styleName="title" 
+										   labelField="Term" 
+										   buttonLabel="Medicine Name:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   dataProvider="{sharedModel.MedicationMedicineNameList}"
+										   />
+				
+				<controls:CalloutLabelText id="id_strength"
+										   styleName="subTitle" 
+										   labelField="strength" 
+										   buttonLabel="Strength:"
+										   required="true"
+										   isEditForm="{_isEditForm}" 
+										   >
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object strength="1"/>
+							<fx:Object strength="2"/>
+							<fx:Object strength="3"/>
+							<fx:Object strength="4"/>
+							<fx:Object strength="5"/>
+							<fx:Object strength="7"/>
+							<fx:Object strength="8"/>
+							<fx:Object strength="9"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			
+			<s:Spacer width="16"/>
+			
+			<s:VGroup width="100%">
+				
+				<controls:CalloutLabelText id="id_GenericName" 
+										   styleName="grayText" 
+										   labelField="Term" 
+										   buttonLabel="Generic Name:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   dataProvider="{sharedModel.MedicationGenericnameList}"
+										   />
+				
+				<controls:CalloutLabelText id="id_NDC" 
+										   styleName="grayText" 
+										   labelField="Term" 
+										   buttonLabel="NDC:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   dataProvider="{sharedModel.MedicationNDCList}"
+										   />
+				
+				<controls:CalloutLabelText id="id_Dose" 
+										   styleName="grayText" 
+										   labelField="Dose" 
+										   buttonLabel="Dose:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   />
+				
+				
+				<controls:ToggleSwitchLabel id="id_Active" 
+											label="Active:"/>
+				
+				
+			</s:VGroup>
+			
+			<s:VGroup width="100%">
+				
+				<controls:CalloutLabelText id="id_DosageForm"
+										   styleName="grayText" 
+										   labelField="Term" 
+										   buttonLabel="Dosage Form:"
+										   required="true"
+										   isEditForm="{_isEditForm}" 
+										   dataProvider="{sharedModel.MedicationDosageFormList}"/>
+				
+				<controls:CalloutLabelText id="id_Quantity" 
+										   styleName="grayText" 
+										   labelField="Quantity" 
+										   buttonLabel="Quantity:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   
+										   />
+				
+				<controls:CalloutLabelText id="id_QuantityForm" 
+										   styleName="grayText" 
+										   labelField="Term" 
+										   buttonLabel="Quantity Form:"
+										   required="true" 
+										   isEditForm="{_isEditForm}"
+										   dataProvider="{sharedModel.MedicationQuantityFormList}"
+										   />
+				
+				<controls:CalloutLabelDateSpinner id="id_AssociatedVisit" 
+												  styleName="grayText" 
+												  labelField="AssociatedVisit" 
+												  buttonLabel="Select Associated Visit:"
+												  required="true" 
+												  isEditForm="{_isEditForm}"
+												  
+												  />
+				
+				
+				<s:Button id="actionBtn"
+						  styleName="button"
+						  label="{_buttonLabel}"
+						  click="updateRecord(event)"/>
+				
+				
+				
+			</s:VGroup>
+			
+			
+		</s:HGroup>
+		<!--<controls:NotesAndDictationCalloutButton label="bala bala" id="id_NotesDictation"  width="21"
+														 skinClass="com.gazuntite.skins.RecordLevelNotesDictationBtnSkin"/>-->
+	</s:BorderContainer>
+	
+	
+	<!-- end presentation form -->
+	
+	
+	
+	
+</forms1:MobileFormBase>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:sf="http://www.spicefactory.org/parsley"
+					  creationComplete="init(event)">
+	
+	<fx:Metadata>
+		[ManagedEvents("doctorStatusChangeEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.DoctorStatusChangeEvent;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			protected function init(event:FlexEvent):void
+			{
+				/* if(sharedModel.doctorStatus != "")
+				{
+				setIcons(sharedModel.doctorStatus);
+				} */
+			}
+			
+			[MessageHandler]
+			public function setIcons(event:DoctorStatusChangeEvent):void
+			{
+				var status:String = event.status;
+				
+				switch(status)
+				{
+					case "Available":
+						awayBtn.alpha = .7;
+						busyBtn.alpha = .7;
+						availableBtn.alpha = 1;
+						sharedModel.doctorStatusImg = "assets/profileIconAvailable.png";
+						break;
+					case "Away":
+						availableBtn.alpha = .7;
+						busyBtn.alpha = .7;
+						awayBtn.alpha = 1;
+						sharedModel.doctorStatusImg = "assets/profileIconAway.png";
+						break;
+					case "Busy":
+						availableBtn.alpha = .7;
+						busyBtn.alpha = 1;
+						awayBtn.alpha = .7;
+						sharedModel.doctorStatusImg = "assets/profileIconBusy.png";
+						break;
+					
+				}
+				
+				
+				sharedModel.doctorStatus = status;
+			}
+			
+			protected function clickHandler(event:MouseEvent):void
+			{
+				var status:String = event.currentTarget.label;
+				
+				//setIcons(status);
+				var e:DoctorStatusChangeEvent = new DoctorStatusChangeEvent(DoctorStatusChangeEvent.DOCTOR_STATUS_CHANGE_EVENT);
+				e.status = status;
+				dispatchEvent(e);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout gap="0"/>
+	</s:layout>
+	
+	<s:Button id="availableBtn" 
+			  label="Available" 
+			  color="0xffffff"
+			  iconPlacement="left"
+			  icon="assets/statusAvailableIcon.png"
+			  skinClass="com.gazuntite.skins.StatusSkinButton"
+			  click="clickHandler(event)"/>
+	
+	<s:Button id="awayBtn" 
+			  label="Away" 
+			  color="0xffffff"
+			  iconPlacement="left"
+			  icon="assets/statusAwayIcon.png"
+			  skinClass="com.gazuntite.skins.StatusSkinButton"
+			  click="clickHandler(event)"/>
+	
+	<s:Button id="busyBtn" 
+			  label="Busy" 
+			  color="0xffffff"
+			  iconPlacement="left"
+			  icon="assets/statusBusyIcon.png"
+			  skinClass="com.gazuntite.skins.StatusSkinButton"
+			  click="clickHandler(event)"/>
+	
+</s:Group>

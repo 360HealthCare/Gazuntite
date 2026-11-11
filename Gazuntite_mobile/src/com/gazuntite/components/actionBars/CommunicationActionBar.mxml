@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:sf="http://www.spicefactory.org/parsley" 
+					  width="100%" 
+					  height="80" 
+					  height.down="50%"
+					  creationComplete="init(event)"
+					  backgroundAlpha="0" 
+					  xmlns:controls="com.gazuntite.components.controls.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.communication.CommunicationView;
+			import com.gazuntite.communication.PatientProfileView;
+			import com.gazuntite.communication.RapidAccessView;
+			import com.gazuntite.communication.SearchView;
+			import com.gazuntite.model.SharedModel;
+			
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.ButtonBar;
+			import spark.events.IndexChangeEvent;
+			
+			import ws.tink.spark.controls.BorderDataNavigator;
+			import ws.tink.spark.skins.controls.BorderDataNavigatorSkin;
+			
+			[Bindable]
+			protected var _labelText:String;
+			
+			[Bindable]
+			protected var open:Boolean = false;
+			
+			protected var vs:BorderDataNavigator;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			public function get labelText():String
+			{
+				return _labelText;
+			}
+			
+			public function set labelText(value:String):void
+			{
+				_labelText = value;
+			}
+			
+			protected function checkState():void
+			{
+				if(open == true)
+				{
+					open = false;
+					this.currentState = "normal";
+					
+					removeElement(vs);
+				}else
+				{
+					open = true;
+					this.currentState = "down";
+					
+				}
+				
+			}
+			
+			protected function minimizeWindow():void 
+			{
+				this.stage.nativeWindow.minimize();
+			}
+			
+			protected function maximizeWindow():void 
+			{
+				//this.stage.nativeWindow.maximize();
+			}
+			
+			protected function closeWindow():void 
+			{
+				this.stage.nativeWindow.close();
+			}
+			
+			protected function moveWindow(event:MouseEvent):void 
+			{
+				this.stage.nativeWindow.startMove();
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleOpenEffectEnd(event:EffectEvent):void
+			{
+				createSubviews();
+			}
+			
+			protected function createSubviews():void
+			{
+				
+				vs.addItem(new RapidAccessView());
+				vs.addItem(new PatientProfileView());
+				vs.addItem(new SearchView());
+				vs.addItem(new CommunicationView());
+				
+				vs.selectedIndex = tabBar.selectedIndex;
+				
+			}
+			
+			protected function tabbar1_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				//trace(event.oldIndex + " : " + event.newIndex);
+				//trace(tabBar.selectedIndex);
+				
+				if(event.newIndex < 0)
+				{
+					open = false;
+					// must have toggled button to close
+					removeElement(vs);
+					vs = null;
+					this.currentState = "normal";
+					return;
+				}
+				
+				if(!open)
+				{
+					
+					open = true;
+					this.currentState = "down";
+					
+					vs = new BorderDataNavigator();
+					vs.setStyle("skinClass", ws.tink.spark.skins.controls.BorderDataNavigatorSkin);
+					
+					vs.percentHeight = 99;
+					vs.percentWidth = 100;
+					vs.y = 32;
+					
+					addElement(vs);
+					
+				}else
+				{
+					if(vs != null)
+					{
+						vs.selectedIndex = tabBar.selectedIndex;
+					}
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:transitions>
+		<s:Transition fromState="normal" toState="down">
+			<s:Parallel duration="200" effectEnd="handleOpenEffectEnd(event)">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="down" toState="normal">
+			<s:Parallel duration="350">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<!-- chrome buttons -->
+	<s:Group width="100%" 
+			 height="10">
+		
+		<s:Button mouseDown="moveWindow(event)" 
+				  alpha="0" 
+				  width="100%"/>
+		
+		<s:VGroup top="0" 
+				  right="0" 
+				  horizontalAlign="right"
+				  height="100%">
+			<s:HGroup gap="1">
+				<s:Button skinClass="com.gazuntite.skins.MinimizeBtnSkin"
+						  click="minimizeWindow()"
+						  toolTip="Minimize window"/>
+				<s:Button skinClass="com.gazuntite.skins.MaximizeBtnSkin"
+						  click="maximizeWindow()"
+						  toolTip="Maximize window"/>
+				<s:Button skinClass="com.gazuntite.skins.CloseBtnSkin"
+						  click="closeWindow()"
+						  toolTip="Close window"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:Group>
+	
+	<!-- Main header -->
+	<s:HGroup width="100%" y="8">
+		
+		<s:Image source="assets/shield-gazuntite.png"
+				 scaleMode="letterbox"/>
+		
+		<s:VGroup id="mainView" 
+				  height="100%"
+				  width="100%">
+			
+			<s:HGroup verticalAlign="middle">
+				
+				<s:VGroup verticalAlign="middle" horizontalAlign="center" gap="-2">
+					<s:Label text="Gazuntite Online Clinic"
+							 styleName="gazuntiteTitle"/>
+					<s:Label id="lblVersion"
+							 styleName="versionLabel"
+							 text="{sharedModel.versionNumber}"/>
+					
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:ButtonBar skinClass="com.gazuntite.skins.CommButtonBarSkin"
+						 width="100%"
+						 id="tabBar"
+						 chromeColor="0x000000"
+						 labelField="label"
+						 selectedIndex="-1"
+						 change="tabbar1_changeHandler(event)">
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="Rapid Access" 
+								   icon="@Embed('assets/rapidAccessIcon.png')"/>
+						<fx:Object label="Patient Profile" 
+								   icon="@Embed('assets/patientProfileIcon.png')"/>
+						<fx:Object label="Search" 
+								   icon="@Embed('assets/searchIcon.png')"/>
+						<fx:Object label="Communication" 
+								   icon="@Embed('assets/commIcon.png')"/>
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:ButtonBar>
+			
+		</s:VGroup>
+		
+		<s:HGroup height="100%" 
+				  width="100%"
+				  paddingTop="8"
+				  paddingRight="8"
+				  horizontalAlign="right">
+			
+			<s:Image source="assets/profileIcon.png"/>
+			
+			<s:VGroup>
+				<s:Label id="actionBarTitle"
+						 text="{'Welcome ' + sharedModel.doctorName}" 
+						 styleName="drName"/>
+				
+				<controls:CalloutLabelText labelField="label"
+										   buttonLabel="Status:"
+										   selectedItemText="Available"
+										   color="white"
+										   showButton="false">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Available"/>
+							<fx:Object label="Invisible"/>
+							<fx:Object label="Away"/>
+							<fx:Object label="Busy"/>
+							<fx:Object label="Offline"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:CalloutLabelText>
+			</s:VGroup>
+			<!--<controls:RapidAccessCalloutButton useHandCursor="true"
+			buttonMode="true"/>-->
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<!-- Put main comm content here -->
+	
+</s:SkinnableContainer>

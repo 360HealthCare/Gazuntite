@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		height="25"
+		creationComplete="skin1_creationCompleteHandler(event)">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected function skin1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var ttp:String = hostComponent.label.substring(0,1).toUpperCase() + hostComponent.label.substring(1).toLocaleLowerCase();
+				
+				if(ttp.indexOf("disease") > -1)
+					ttp = "Heart Disease";
+				
+				if(hostComponent.label)
+				{
+					hostComponent.toolTip 			= ttp;
+					hostComponent.useHandCursor 	= true;
+					hostComponent.buttonMode 		= true;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" stateGroups="overStates" />
+		<s:State name="down" stateGroups="downStates" />
+		<s:State name="disabled" stateGroups="disabledStates" />
+		<s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+		<s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+		<s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+		<s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+	</s:states>
+	<s:Rect x="0" y="0" width="115" height="23" alpha="1" radiusX="3"
+			visible.down="false"
+			visible.downAndSelected="false"
+			visible.over="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#E0E0E0" ratio="0.48627450980392156"/>
+				<s:GradientEntry alpha="1.0" color="#D6D6D6" ratio="0.49411764705882355"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect includeIn="down,downAndSelected,over,overAndSelected,upAndSelected" alpha="1" radiusX="3"
+			x.down="0.5" y.down="0.5" 
+			
+			width="120" 
+			width.selectedStates="125"
+			
+			height.down="23"
+			x.downAndSelected="0" y.downAndSelected="0" 
+			height.downAndSelected="25"
+			x.over="0.5" y.over="0.5" 
+			height.over="25"
+			x.overAndSelected="0" y.overAndSelected="0" 
+			height.overAndSelected="25"
+			x.upAndSelected="0" y.upAndSelected="0" 
+			height.upAndSelected="25">
+		<s:fill>
+			<s:LinearGradient rotation.down="90"
+							  rotation.downAndSelected="180"
+							  rotation.over="90"
+							  rotation.overAndSelected="180"
+							  rotation.upAndSelected="180">
+				<s:GradientEntry alpha="1.0" color="0x83A3FE" ratio="0"/>
+				<s:GradientEntry includeIn="down,over" alpha="1.0"
+								 color="0x83A3FE" ratio="0.49411764705882355"/>
+				<s:GradientEntry includeIn="down,over" alpha="1.0"
+								 color="0x83A3FE" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="0x83A3FE" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" alpha="0.75" angle="90" blurX="2" blurY="2"
+								color="#000000" distance="1" hideObject="false" inner="false"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke.over>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke.over>
+		<s:stroke.down>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke.down>
+	</s:Rect>
+	<s:RichText id="labelDisplay" x="4" color="#333333" tabStops="S0 S50"
+				verticalCenter="0"
+				fontFamily="CalibriCFF" 
+				fontFamily.selectedStates="CalibriCFFBold"
+				fontSize="12"
+				fontSize.selectedStates="13" 
+				fontWeight="normal"
+				fontWeight.selectedStates="bold"
+				width="100%"
+				maxDisplayedLines="1"
+				showTruncationTip="true"/>
+</s:Skin>

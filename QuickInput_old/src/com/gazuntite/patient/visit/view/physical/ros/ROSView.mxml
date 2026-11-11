@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.dto.ROSDTO;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.patient.visit.utils.rosPhysical.ROSPhysicalFunctions;
+			import com.gazuntite.patient.visit.view.physical.rosPhysicalCommon.FooterRenderer;
+			import com.gazuntite.patient.visit.view.physical.rosPhysicalCommon.MainCatRenderer;
+			import com.gazuntite.patient.visit.view.physical.rosPhysicalCommon.SubCatRenderer;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			
+			
+			[Bindable]
+			private var m_acDataProvider:ArrayCollection;// = createDummyData();
+			
+			private var m_bHasChange:Boolean;
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+			}
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return m_acDataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				m_acDataProvider = value;
+				
+			//	if(value && value.length > 0)
+			//	{
+			//		UpdateCheckStatus();
+			//	}
+			}
+			
+			private var previouslySelectedItem:SubCatRenderer;
+			
+			protected function treelist1_ItemClickEventHandler(event:ItemClickEvent):void
+			{
+				if( event.relatedObject is SubCatRenderer )
+				{
+					var dto:ROSDTO = event.currentTarget.ParentSelectedItem.data as ROSDTO;
+					dto.IsNormal = IsAllChildNormal( dto ) ? QIConstants.STRING_TRUE : QIConstants.STRING_FALSE;
+					
+					if (event.relatedObject != previouslySelectedItem)
+					{
+						QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.ROS);
+						previouslySelectedItem = SubCatRenderer(event.relatedObject);
+					}
+					
+				}
+				if (event.relatedObject is MainCatRenderer)
+				{
+					QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.ROS);
+				}
+				
+			}
+			private function IsAllChildNormal( dto:ROSDTO ):Boolean
+			{
+				var retVal:Boolean = true;
+				var i:int;
+				for( i = 0; i < dto.children.length; i++ )
+				{
+					var child:ROSDTO = dto.children.getItemAt(i) as ROSDTO ;
+					retVal = child.IsNormal != QIConstants.STRING_FALSE ;
+					
+					if( ! retVal )
+						break;
+				}
+				
+				return retVal;
+			}
+			
+			protected function treelist1_footerClickHandler(event:ItemClickEvent):void
+			{
+				var itemIndex:int = DataProvider.getItemIndex( id_TreeList.ParentSelectedItem.data );
+				switch( event.item.id )
+				{
+					case "id_AllNormalBtn":
+						var dataDTO:ROSDTO = id_TreeList.ParentSelectedItem.data as ROSDTO;
+						//if 2nd level parent is selected, check it
+						if( id_TreeList.ParentSelectedItem2level )
+							dataDTO = id_TreeList.ParentSelectedItem2level.data as ROSDTO;
+						
+						trace( "id_AllNormalBtn", dataDTO.label);
+						
+						var mainCatID:int = dataDTO.ROSMainCategoryTypeID;
+						var subCatID:int = -1;
+						if( dataDTO.ROSSubCategoryTypeID && dataDTO.ROSSubCategoryTypeID != 0 )
+							subCatID = dataDTO.ROSSubCategoryTypeID;
+						
+						if( ROSPhysicalFunctions.checkMainCategoryNotes( DataProvider, mainCatID, subCatID ) )
+						{
+							Alert.show("This action will clear all notes/dictation in this section, Are you sure you want to clear all notes/dictation?","Clear Notes and Dictation", Alert.YES|Alert.NO, 
+								this, function(event:CloseEvent):void
+								{
+									if( event.detail == Alert.YES)
+									{
+										hasChange = ROSPhysicalFunctions.setMainCategoryToNormal( DataProvider, mainCatID, true, subCatID );
+										if( hasChange )
+											dispatchEvent( new Event("dataIsDirty", true, true) );
+									}
+									else if( event.detail == Alert.NO)
+									{
+										// NO button was clicked, do nothing
+									}
+								});
+						}
+						else
+						{
+							hasChange = ROSPhysicalFunctions.setMainCategoryToNormal( DataProvider, mainCatID, false, subCatID );
+							if( hasChange )
+								dispatchEvent( new Event("dataIsDirty", true, true) );
+						}
+						break;
+					case "id_PreviousBtn":
+						id_TreeList.selectItemByIndex( --itemIndex )
+						break;
+					case "id_NextBtn":
+						id_TreeList.selectItemByIndex( ++itemIndex )
+						break;
+				}
+			}
+			
+			public function UpdateCheckStatus():void
+			{
+				( id_TreeList.ParentSelectedItem as MainCatRenderer ).UpdateCheckStatus();
+				if( id_TreeList.ParentSelectedItem2level )
+					( id_TreeList.ParentSelectedItem2level as MainCatRenderer ).UpdateCheckStatus();
+				
+				hasChange = true;
+			}
+			
+			protected function id_TreeList_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_TreeList.setStyle("rollOverAlpha", 0);
+				id_TreeList.setStyle("useRollOver", false);
+				id_TreeList.setStyle("selectionColor", 0xffffff);
+				
+				addEventListener( "dataIsDirty", function(event:Event):void
+				{
+					trace("dataIsDirty", id_TreeList.ParentSelectedItem.label);
+					var p:MainCatRenderer = id_TreeList.ParentSelectedItem as MainCatRenderer;
+					p.BaseDTO.IsDirty = true;
+					if( id_TreeList.ParentSelectedItem2level )
+					{
+						var p2:MainCatRenderer = id_TreeList.ParentSelectedItem2level as MainCatRenderer;
+						p2.BaseDTO.IsDirty = true;
+						p2.UpdateCheckStatus();
+					}
+					p.UpdateCheckStatus();
+					
+					hasChange = true;
+				});
+			}
+			
+			private var StatusWindow:PopupWindow ;
+			public function ShowStatusWindow(statusMessage :String ):void
+			{
+				StatusWindow = UtilityFunctions.ShowStatusMessage( statusMessage, this );
+			}
+			
+			public function RemoveStatusWindow():void
+			{
+				if( StatusWindow )
+					StatusWindow.removePopup();
+				
+				StatusWindow = null;				
+			}
+			
+			protected function id_TreeList_layoutCompletedHandler(event:Event):void
+			{
+				RemoveStatusWindow();
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Scroller id="id_Scroller" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="auto"  >
+		
+		<components1:ListTree id="id_TreeList" width="100%" MaxRows="15" DataProvider="{DataProvider}" 
+							  itemRenderer="{new ClassFactory( MainCatRenderer)}"  
+							  childItemRenderer="{new ClassFactory( SubCatRenderer )}" 
+							  footerItemRenderer="{new ClassFactory( FooterRenderer )}"
+							  itemClick="treelist1_ItemClickEventHandler(event)" 
+							  footerClick="treelist1_footerClickHandler(event)"
+							  skinClass="com.adobe.gazuntite.skins.QuickInput.ros.QIPhysicalBG"							
+							  creationComplete="id_TreeList_creationCompleteHandler(event)"
+							  layoutCompleted="id_TreeList_layoutCompletedHandler(event)"
+							  />
+		<!--childBGSkin="com.adobe.gazuntite.view.controls.skins.SkinnableContainers.QIPhysicalChildBG"-->
+		
+	</s:Scroller>
+	
+</s:Group>

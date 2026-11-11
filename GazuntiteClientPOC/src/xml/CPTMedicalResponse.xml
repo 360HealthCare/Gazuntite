@@ -1,0 +1,31 @@
+<CPTMedicalTypeResponse xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.QuickInput" 
+xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseList xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs.QuickInputTypeDTOs">
+  <a:CPTMedicalTypeDTO>
+    <a:CPTMedicalTypeID>0</a:CPTMedicalTypeID>
+    <a:ProcedureCode>abc</a:ProcedureCode>
+    <a:ProcedureDescription>xyz</a:ProcedureDescription>
+  </a:CPTMedicalTypeDTO>
+  <a:CPTMedicalTypeDTO>
+    <a:CPTMedicalTypeID>1</a:CPTMedicalTypeID>
+    <a:ProcedureCode>abc</a:ProcedureCode>
+    <a:ProcedureDescription>xyz</a:ProcedureDescription>
+  </a:CPTMedicalTypeDTO>
+  <a:CPTMedicalTypeDTO>
+    <a:CPTMedicalTypeID>2</a:CPTMedicalTypeID>
+    <a:ProcedureCode>abc</a:ProcedureCode>
+    <a:ProcedureDescription>xyz</a:ProcedureDescription>
+  </a:CPTMedicalTypeDTO>
+  <a:CPTMedicalTypeDTO>
+    <a:CPTMedicalTypeID>3</a:CPTMedicalTypeID>
+    <a:ProcedureCode>abc</a:ProcedureCode>
+    <a:ProcedureDescription>xyz</a:ProcedureDescription>
+  </a:CPTMedicalTypeDTO>
+</a:ResponseList>
+</CPTMedicalTypeResponse>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/><s:State name="disabledWithPrompt"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	
+	<s:Ellipse height="14" width="14" >
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1" color="#AF0000" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#EE0202" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Ellipse>
+	<s:RichText color="#FFFFFF" fontFamily="Arial" fontSize="10" fontWeight="bold" tabStops="S0" text="A" x="3" y="3"/>
+	
+</s:Skin>

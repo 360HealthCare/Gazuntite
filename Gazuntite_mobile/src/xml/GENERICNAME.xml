@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfProduct xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Product GenericName="Calcium Gluceptate" GENPRODUCT_ID="3555" CSA_CODE="0"/>
+	<Product GenericName="Accupril" GENPRODUCT_ID="2865" CSA_CODE="0"/>
+	<Product GenericName="Accupril" GENPRODUCT_ID="2866" CSA_CODE="0"/>
+	<Product GenericName="Accupril" GENPRODUCT_ID="2869" CSA_CODE="0"/>
+	<Product GenericName="Accupril" GENPRODUCT_ID="2870" CSA_CODE="0"/>
+	<Product GenericName="Cort-Dome High Potency" GENPRODUCT_ID="271" CSA_CODE="0"/>
+	<Product GenericName="Celestone Phosphate" GENPRODUCT_ID="758" CSA_CODE="0"/>
+	<Product GenericName="Cortisporin" GENPRODUCT_ID="755" CSA_CODE="0"/>
+	<Product GenericName="Diprivan" GENPRODUCT_ID="2762" CSA_CODE="0"/>
+	<Product GenericName="Flurazepam Hydrochloride" GENPRODUCT_ID="1163" CSA_CODE="4"/>
+	<Product GenericName="Flurazepam Hydrochloride" GENPRODUCT_ID="1165" CSA_CODE="4"/>
+	<Product GenericName="Flurbiprofen" GENPRODUCT_ID="1171" CSA_CODE="0"/>
+	<Product GenericName="Flurbiprofen" GENPRODUCT_ID="1170" CSA_CODE="0"/>
+	<Product GenericName="Flurbiprofen" GENPRODUCT_ID="15412" CSA_CODE="0"/>
+	<Product GenericName="Flurbiprofen Sodium, Ophthalmic" GENPRODUCT_ID="1174" CSA_CODE="0"/>
+	<Product GenericName="Corticotropin" GENPRODUCT_ID="72" CSA_CODE="0"/>
+	<Product GenericName="CellCept" GENPRODUCT_ID="2118" CSA_CODE="0"/>
+	<Product GenericName="CellCept" GENPRODUCT_ID="6382" CSA_CODE="0"/>
+	<Product GenericName="CellCept" GENPRODUCT_ID="7012" CSA_CODE="0"/>
+	<Product GenericName="CellCept" GENPRODUCT_ID="6755" CSA_CODE="0"/>
+</ArrayOfProduct>

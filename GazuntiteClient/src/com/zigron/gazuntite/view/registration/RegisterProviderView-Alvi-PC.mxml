@@ -1,0 +1,1206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 	
+				   backgroundColor="0x161616" cornerRadius="5"
+				   creationComplete="CC(event)" 
+				   xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+				   xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*" 
+				   xmlns:validator="com.gazuntite.validator.*"
+				   >
+	
+	<fx:Metadata>
+		[Event(name="RegisterProvider", type="com.zigron.gazuntite.view.event.RegisterProviderViewEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ImageDTO;
+			import com.gazuntite.common.dto.baseDTO.BaseUserDTO;
+			import com.gazuntite.common.dto.provider.SpecialityCodeDTO;
+			import com.gazuntite.common.dto.typeDTO.GenderTypeDTO;
+			import com.gazuntite.common.dto.typeDTO.StatusTypeDTO;
+			import com.gazuntite.common.dto.typeDTO.UserTypeDTO;
+			import com.gazuntite.common.event.ValidatePracticeKeyEvent;
+			import com.gazuntite.common.event.VerifyUserEmailEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.zigron.gazuntite.event.registration.CreateClinicUserProfileEvent;
+			import com.zigron.gazuntite.event.registration.RegisterBaseUserEvent;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.utils.AppUtils;
+			import com.zigron.gazuntite.utils.ChromeUtil;
+			import com.zigron.gazuntite.utils.Constants;
+			import com.zigron.gazuntite.utils.GazuntiteAssetsUtility;
+			import com.zigron.gazuntite.view.common.AlertHelper;
+			import com.zigron.gazuntite.view.event.RegisterProviderViewEvent;
+			
+			import flashx.textLayout.events.FlowElementMouseEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.ToolTip;
+			import mx.core.FlexGlobals;
+			import mx.core.IUIComponent;
+			import mx.events.FlexEvent;
+			import mx.graphics.codec.JPEGEncoder;
+			import mx.managers.ToolTipManager;
+			
+			import spark.components.WindowedApplication;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]	public var model:ApplicationModel = ApplicationModel.getInstance();
+			
+			private static const SPECIAL_CHARS:String = "@()<>,;:\\\"[]-_+ `~!#$%^&*={}|/?'";
+			private static const NUMBER_CHARS:String = "1234567890";
+			
+			private var _SpecialityTypes:ArrayCollection = new ArrayCollection([
+				{ BitValue:"1", SpecialityName:"Mail Order Pharmacy"},
+				{ BitValue:"2", SpecialityName:"Fax Pharmacy"},
+				{ BitValue:"4", SpecialityName:"Prescriber is used for Medication Reconciliation"},
+				{ BitValue:"8", SpecialityName:"Retail Pharmacy"},
+				{ BitValue:"16", SpecialityName:"Specialty Pharmacy"},
+				{ BitValue:"32", SpecialityName:"Long-Term Care Pharmacy"},
+				{ BitValue:"64", SpecialityName:"24 Hour Pharmacy"},
+				{ BitValue:"128", SpecialityName:"Prescriber is Doctor"},
+				{ BitValue:"256", SpecialityName:"Prescriber is Physician Assistant"},
+				{ BitValue:"512", SpecialityName:"Prescriber is Nurse Practitioner"},
+				{ BitValue:"1024", SpecialityName:"Prescriber is Resident"},
+				{ BitValue:"2048", SpecialityName:"Prescriber is an In-Store Clinic"}]
+			);
+			
+			[Bindable]
+			public function get SpecialityTypes():ArrayCollection
+			{
+				return _SpecialityTypes;
+			}
+			
+			public function set SpecialityTypes(value:ArrayCollection):void
+			{
+				_SpecialityTypes = value;
+			}
+			
+			[Bindable] 
+			private var GenderTypes:ArrayCollection = new ArrayCollection([
+				
+				{ID:'1', Code:'M', Gender:'Male'},
+				{ID:'2', Code:'F', Gender:'Female'},
+				{ID:'3', Code:'UN', Gender:'Undifferentiated'},
+				
+			]);
+			private var _RoleTypes:ArrayCollection = new ArrayCollection([
+				
+				{UserTypeName:'Physician'}
+				
+			]);
+			
+			[Bindable]
+			public function get RoleTypes():ArrayCollection
+			{
+				return _RoleTypes;
+			}
+			
+			public function set RoleTypes(value:ArrayCollection):void
+			{
+				if(value)
+					_RoleTypes = value;
+			}
+			
+			
+			private var openFile:File = null;
+			[Bindable] private var m_oImageContent:ByteArray;
+			[Bindable] private var m_oImageContentString:String;
+			
+			private var _isUserNameAsyncOperationPending:Boolean; 
+			private var _isEmailAsyncOperationPending:Boolean; 
+			
+			public function get isEmailAsyncOperationPending():Boolean
+			{
+				return _isEmailAsyncOperationPending;
+			}
+			
+			public function set isEmailAsyncOperationPending(value:Boolean):void
+			{
+				_isEmailAsyncOperationPending = value;
+			}
+			
+			private var _isPracticeKeyAsyncPending:Boolean;
+			
+			public function get isPracticeKeyAsyncPending():Boolean
+			{
+				return _isPracticeKeyAsyncPending;
+			}
+			
+			public function set isPracticeKeyAsyncPending(value:Boolean):void
+			{
+				_isPracticeKeyAsyncPending = value;
+			}
+			
+			
+			public function get isUserNameAsyncOperationPending():Boolean
+			{
+				return _isUserNameAsyncOperationPending;
+			}
+			
+			public function set isUserNameAsyncOperationPending(value:Boolean):void
+			{
+				_isUserNameAsyncOperationPending = value;
+			}
+			
+			protected function linkelement1_clickHandler(event:FlowElementMouseEvent):void
+			{
+				var url:String = "https://www.gazuntite.com";
+				navigateToURL(new URLRequest(url), '_blank');
+			}
+			
+			protected function id_browse_clickHandler(event:MouseEvent):void
+			{
+				var fileTypes:FileFilter = new FileFilter( "Image Files", "*.gif;*.jpeg;*.jpg;*.png" );
+				openFile = new File();
+				openFile.addEventListener(Event.SELECT, fileRef_select);
+				openFile.addEventListener(Event.CANCEL, fileRef_cancel);
+				openFile.browse([fileTypes]);
+			}	
+			
+			private function fileRef_select(evt:Event):void 
+			{
+				try
+				{
+					id_imagePath.text = evt.target.nativePath;
+					id_upload.enabled = true;				
+					
+				} 
+				catch (err:Error)
+				{
+					Alert.show(err.message,"Error",4,this);
+				}
+			}
+			private function fileRef_cancel(evt:Event):void 
+			{
+				if(id_imagePath.text.length)
+					id_upload.enabled = true;
+				else
+					id_upload.enabled = false;
+				
+			}
+			
+			protected function id_upload_clickHandler(event:MouseEvent):void
+			{
+				var stream:FileStream = new FileStream(); // open filestream
+				stream.open(openFile, FileMode.READ); // open the file
+				
+				var size_500K:Number = 500 * 1024;
+				
+				if (stream.bytesAvailable <= size_500K)
+				{
+					m_oImageContent = new ByteArray();
+					stream.readBytes( m_oImageContent, 0, stream.bytesAvailable ); // read file
+					stream.close(); // close file
+					id_ProviderImge.source =  m_oImageContent;
+					m_oImageContentString  =  AppUtils.getBase64String(m_oImageContent);
+					id_upload.enabled = false;
+				}
+				else
+				{
+					Alert.show("Image size can not be greater than 500k.\n", "Image size error", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						id_upload.setFocus();
+					});
+				}
+			}
+			
+			protected function id_register_clickHandler(event:MouseEvent):void
+			{
+				if (isInvalid()) 						// Mandatory Field validation 
+					return;
+				
+				registerBaseUser();
+				
+			}
+			
+			private function registerBaseUser():void
+			{
+				var baseUser:BaseUserDTO = new BaseUserDTO();
+				
+				var gender:GenderTypeDTO = new GenderTypeDTO();
+				gender.GenderId = id_gender.selectedItem.ID;
+				gender.GenderCode = id_gender.selectedItem.Code;
+				gender.GenderName = id_gender.selectedItem.Gender;
+				
+				baseUser.ActiveUserType = id_role.selectedItem as UserTypeDTO
+				baseUser.ClinicBranhId = parseInt(id_key.text);
+				baseUser.CreatedBy = 0;
+				baseUser.FirstName = id_firsName.text;
+				baseUser.Gender = gender;				
+				baseUser.IsActive = true;
+				baseUser.IsDeleted = false;
+				baseUser.LastName = id_lastName.text;
+				baseUser.UserEmail = id_email.text;
+				baseUser.MiddleName = "";
+				baseUser.Suffix = "";
+				baseUser.UserPassword = id_password.text;
+				baseUser.TextPassword = id_password.text;
+				baseUser.UserName = id_UserName.text;
+				baseUser.LicenseNumber = "";
+				baseUser.FederalTaxId = "";
+				baseUser.SSN = "";
+				baseUser.EIN = "";
+				baseUser.QuivusUserID = "";
+				baseUser.UserId = 0;
+				baseUser.OtherID = "12345";
+				baseUser.AccountStatus = new StatusTypeDTO();
+				baseUser.AccountStatus.StatusID = 1;
+				baseUser.AccountStatus.StatusName = "Active";
+				
+				//saving user image
+				if(m_oImageContentString.length)
+				{
+					baseUser.Image = new ImageDTO();
+					
+					baseUser.Image.UserTypeID 			= (id_role.selectedItem as UserTypeDTO).ID;
+					baseUser.Image.CreatedBy 			= 0;
+					baseUser.Image.UserId 				= 0;
+					baseUser.Image.ImageCaption 		= "ProfileImage";
+					baseUser.Image.ImageData 			= m_oImageContentString;
+					baseUser.Image.ImageId 				= 0;
+					baseUser.Image.ImageName 			= "ProfileImage";
+					baseUser.Image.ImagePath			= "";
+					baseUser.Image.ImageTypeId 			= 1;
+					baseUser.Image.ImageThumbnailData 	= "";
+				}
+				
+				
+				var rbue:RegisterBaseUserEvent = new RegisterBaseUserEvent(baseUser,registerBaseUserResponse);
+				CairngormEventDispatcher.getInstance().dispatchEvent(rbue);
+			}
+			
+			private function registerBaseUserResponse(result:XML):void
+			{
+				var userID:int = parseInt(result.toString())
+				if(userID > 0)
+				{
+					var upe:CreateClinicUserProfileEvent = new CreateClinicUserProfileEvent(userID,(id_role.selectedItem as UserTypeDTO).ID,parseInt(id_key.text),
+						(id_specaility.selectedItem as SpecialityCodeDTO).SpecialtyID,id_npi.text,createClinicUserProfile);
+					CairngormEventDispatcher.getInstance().dispatchEvent(upe);	
+				}
+				else
+					Alert.show("User not registered.");
+			}
+			
+			private var doctorID:int  = 0;
+			private function createClinicUserProfile(result:XML):void
+			{
+				doctorID = parseInt(result.toString())
+				if(doctorID > 0)
+				{					
+					Alert.show("User [" + id_UserName.text+ "] registered successfully","New User Registration", 4, FlexGlobals.topLevelApplication.mainContainer);
+					
+					var e:RegisterProviderViewEvent = new RegisterProviderViewEvent(RegisterProviderViewEvent.REGISTER_PROVIDER);
+					e.success = true;
+					e.registeredProviderId = id_UserName.text;
+					dispatchEvent(e);
+					
+				}
+				else
+					Alert.show("Clinic user not created.");
+			}
+			
+			private var toSetFocus:Object;
+			
+			public function isInvalid() : Boolean 
+			{
+				var isNotValid:Boolean 	= false;
+				var errorStr:String 	= ""; 
+				toSetFocus 				= null;
+				
+				if ( id_role.selectedItem == null)
+				{
+					isNotValid = true;
+					errorStr += "Please select a Role.\n";
+					if (!toSetFocus)
+						toSetFocus = id_role;
+				}
+				
+				if (id_gender.selectedItem == null)
+				{
+					isNotValid = true;
+					errorStr += "Please select a Gender.\n";
+					if (!toSetFocus)
+						toSetFocus = id_gender;
+				}
+				
+				if (UtilityFunctions.TrimString(id_firsName.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter First Name.\n";
+					if (!toSetFocus)
+						toSetFocus = id_firsName;
+				}
+				
+				if (UtilityFunctions.TrimString(id_lastName.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Last Name.\n";
+					if (!toSetFocus)
+						toSetFocus = id_lastName;
+				}
+				
+				if (UtilityFunctions.TrimString(id_email.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Email.\n";
+					if (!toSetFocus)
+						toSetFocus = id_email;
+				}
+				
+				if (id_EmailValidatorWithEmailExists.isEmailExists)
+				{
+					isNotValid = true;
+					errorStr += "Email already exists, please re-enter a valid Email. \n";
+					if (!toSetFocus)
+						toSetFocus = id_email;
+				}
+				else if (UtilityFunctions.TrimString(id_email.text).length > 0 && id_imgEmail.source != Constants.IMG_GREEN)
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid Email.\n";
+					if (!toSetFocus)
+						toSetFocus = id_email;
+				}
+				
+				if (UtilityFunctions.TrimString(id_UserName.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter User Name.\n";
+					if (!toSetFocus)
+						toSetFocus = id_UserName;
+				}
+				
+				if (id_UserNameValidator.isUserNameExists)
+				{
+					isNotValid = true;
+					errorStr += "User Name already exists, please re-enter a valid User Name. \n";
+					if (!toSetFocus)
+						toSetFocus = id_UserName;
+				}
+				else if (UtilityFunctions.TrimString(id_UserName.text).length > 0 && id_imgUserName.source != Constants.IMG_GREEN)
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid User Name.\n";
+					if (!toSetFocus)
+						toSetFocus = id_UserName;
+				}
+				
+				if (UtilityFunctions.TrimString(id_password.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Password.\n";
+					if (!toSetFocus)
+						toSetFocus = id_password;
+				}
+				
+				if (UtilityFunctions.TrimString(id_password.text).length > 0 && UtilityFunctions.TrimString(id_password.text).length < 8 )
+				{
+					isNotValid = true;
+					errorStr += "Password field should be upto 8-32 characters with 1 Symbol or Number and 1 Upper case letter.\n";
+					if (!toSetFocus)
+						toSetFocus = id_password;
+				}
+				else 
+				{ 
+					var isNumOrSpecCharFound:Boolean = false;
+					for (var i:int = 0; i < id_password.text.length; i++)
+					{
+						if (SPECIAL_CHARS.indexOf(id_password.text.charAt(i)) > -1 || NUMBER_CHARS.indexOf(id_password.text.charAt(i)) > -1)
+						{
+							isNumOrSpecCharFound = true;
+							break;
+						}
+					}
+					
+					var isCapCharFound:Boolean = false;
+					for (var i:int = 0; i < id_password.text.length; i++)
+					{
+						if (UtilityFunctions.isUpper(id_password.text.charAt(i)))
+						{
+							isCapCharFound = true;
+							break;
+						}
+					}
+					
+					if (!isNumOrSpecCharFound && !isCapCharFound)
+					{
+						isNotValid = true;
+						errorStr += "Password field should contain at least 1 Symbol or Number and 1 Upper case letter.\n";
+						if (!toSetFocus)
+							toSetFocus = id_password;
+					}
+					else if (isNumOrSpecCharFound && !isCapCharFound)
+					{
+						isNotValid = true;
+						errorStr += "Password field should contain at least 1 Upper case letter.\n";
+						if (!toSetFocus)
+							toSetFocus = id_password;
+					}
+					else if (!isNumOrSpecCharFound && isCapCharFound)
+					{
+						isNotValid = true;
+						errorStr += "Password field should contain at least 1 Symbol or Number.\n";
+						if (!toSetFocus)
+							toSetFocus = id_password;
+					}
+				}
+				
+				if (UtilityFunctions.TrimString(id_ConfirmPassword.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Confirmed Password.\n";
+					if (!toSetFocus)
+						toSetFocus = id_ConfirmPassword;
+				}
+				
+				if (UtilityFunctions.TrimString(id_ConfirmPassword.text).length > 0 && id_imgConfirmPassword.source != Constants.IMG_GREEN  )
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid Confirmed Password exactly matching with Password.\n";
+					if (!toSetFocus)
+						toSetFocus = id_ConfirmPassword;
+				}
+				
+				if (UtilityFunctions.TrimString(id_phone.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Phone.\n";
+					if (!toSetFocus)
+						toSetFocus = id_phone;
+				}
+				
+				if (UtilityFunctions.TrimString(id_phone.text).length > 0 && UtilityFunctions.TrimString(id_phone.text).length < 13 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid 10 digit Phone.\n";
+					if (!toSetFocus)
+						toSetFocus = id_phone;
+				} 
+				
+				if (UtilityFunctions.TrimString(id_npi.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter NPI.\n";
+					if (!toSetFocus)
+						toSetFocus = id_npi;
+				}
+				
+				if (UtilityFunctions.TrimString(id_npi.text).length > 0 && UtilityFunctions.TrimString(id_npi.text).length < 10 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid 10 digit NPI.\n";
+					if (!toSetFocus)
+						toSetFocus = id_npi;
+				}
+				
+				if (id_specaility.selectedItem == null)
+				{
+					isNotValid = true;
+					errorStr += "Please select a Specialty.\n";
+					if (!toSetFocus)
+						toSetFocus = id_specaility;
+				}
+				
+				if (UtilityFunctions.TrimString(id_key.text).length == 0 )
+				{
+					isNotValid = true;
+					errorStr += "Please enter Practice Key.\n";
+					if (!toSetFocus)
+						toSetFocus = id_key;
+				}
+				
+				if (id_PracticeKeyValidator.isPracticeKeyInvalid)
+				{
+					isNotValid = true;
+					errorStr += "Practice Key does not exist, please enter a valid Key. \n";
+					if (!toSetFocus)
+						toSetFocus = id_key;
+				}
+				else if (UtilityFunctions.TrimString(id_key.text).length > 0 && id_imgKey.source != Constants.IMG_GREEN)
+				{
+					isNotValid = true;
+					errorStr += "Please enter a valid Practice Key.\n";
+					if (!toSetFocus)
+						toSetFocus = id_key;
+				}
+				
+				if (isEmailAsyncOperationPending)
+				{
+					isNotValid = true;
+					errorStr += "\nPlease wait for server side validation to complete for Email... \n";
+					if (!toSetFocus)
+						toSetFocus = id_email;
+				}
+				else if (isUserNameAsyncOperationPending)
+				{
+					isNotValid = true;
+					errorStr += "\nPlease wait for server side validation to complete for User Name... \n";
+					if (!toSetFocus)
+						toSetFocus = id_UserName;
+				}
+				else if (isPracticeKeyAsyncPending)
+				{
+					isNotValid = true;
+					errorStr += "\nPlease wait for server side validation to complete for Practice Key... \n";
+					if (!toSetFocus)
+						toSetFocus = id_key;
+				}
+				
+				if (isNotValid && errorStr.length && !( 
+					(toSetFocus == id_email && isEmailAsyncOperationPending) || 
+					(toSetFocus == id_UserName && isUserNameAsyncOperationPending) ||
+					(toSetFocus == id_key && isPracticeKeyAsyncPending)
+				)
+				)
+					Alert.show(errorStr, "Registration Form Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+						toSetFocus = null;
+					});
+				
+				return isNotValid;
+			}
+			
+			protected function id_gotoSignIn_clickHandler(event:MouseEvent):void
+			{
+				if(doctorID == 0)
+				{
+					UtilityFunctions.AskMessage("Do you want to leave the form without Registering?",function(): void
+					{
+						var e:RegisterProviderViewEvent = new RegisterProviderViewEvent(RegisterProviderViewEvent.REGISTER_PROVIDER);
+						e.success = false;
+						e.registeredProviderId = "";
+						dispatchEvent(e);
+					});
+				}
+				else
+				{
+					var e:RegisterProviderViewEvent = new RegisterProviderViewEvent(RegisterProviderViewEvent.REGISTER_PROVIDER);
+					e.success = true;
+					e.registeredProviderId = id_email.text;
+					dispatchEvent(e);
+				}
+			}
+			
+			protected function id_reset_clickHandler(event:MouseEvent):void
+			{
+				resetFileds();			
+			}
+			public function resetFileds():void
+			{
+				if(RoleTypes.length > 1)
+				{
+					for each (var role:UserTypeDTO in RoleTypes) 
+					{
+						if(role.UserTypeName == "Physician")
+						{
+							id_role.selectedItem 		= 	role;
+						}
+					}
+				}
+				else
+					id_role.selectedItem 	= RoleTypes[0] as Object;
+				
+				id_gender.selectedItem 		= null;				
+				id_specaility.selectedItem 	= null;					
+				id_specaility.text 			= "";				
+				
+				id_acceptTerms.selected 	= false;				
+				id_email.text 				= "";				
+				id_imgEmail.source			= Constants.IMG_RED;				
+				id_firsName.text 			= "";				
+				id_lastName.text 			= "";				
+				id_imagePath.text 			= "";
+				id_upload.enabled 			= false;
+				id_imgUserName.source		= Constants.IMG_RED;
+				id_UserName.text 			= "";				
+				id_imgPassword.source		= Constants.IMG_RED;
+				id_password.text 			= "";				
+				id_imgConfirmPassword.source			= Constants.IMG_RED;
+				id_ConfirmPassword.text 				= "";				
+				id_imgKey.source			= Constants.IMG_RED;
+				id_key.text 				= "";				
+				id_npi.text 				= "";				
+				id_phone.text				= "";	
+				id_ProviderImge.source 		= Constants.BLANK_PROFILE_IMAGE;
+				
+				if(id_role.enabled)
+					id_role.setFocus();
+				else
+					id_gender.setFocus();
+				
+				doctorID = 0;
+				m_oImageContentString = "";
+			}
+			
+			protected function CC(event:FlexEvent):void
+			{
+				resetFileds();
+			}
+			
+			public function changeToopTip():void
+			{
+				if(id_restore.toolTip=='Restore')
+				{
+					id_restore.toolTip='Maximize';
+				}
+				else if(id_restore.toolTip=='Maximize')
+				{
+					id_restore.toolTip='Restore';
+				}
+			}
+			
+			protected function id_close_clickHandler():void
+			{
+				var modified_views:ArrayCollection = PatientInputViewModel.getInstance().getDirtyViewList();
+				if (modified_views.length>0)
+				{
+					var msg:String = "The following views contain unsaved data:";
+					for each (var view_name:String in modified_views)
+					{
+						msg += "\n  "+view_name;
+					}
+					msg += "\nThe unsaved data will be lost. Do you want to continue?";
+					AlertHelper.showContinueQuestion(confirmedClose, msg);
+				}
+				else
+				{
+					UtilityFunctions.AskMessage(  "Do you really want to exit 'Gazuntite Online Clinic'", function():void
+					{
+						confirmedClose();
+					});
+				}
+			}
+			protected function confirmedClose():void
+			{
+				//	dispatchEvent(new LogoutViewEvent(true));
+				(FlexGlobals.topLevelApplication as WindowedApplication).exit();
+				
+				
+				/* var logoutevent:LogoutEvent = new LogoutEvent(function ():void{ ChromeUtil.closeWindow(); });
+				CairngormEventDispatcher.getInstance().dispatchEvent(logoutevent); */
+			}
+			
+			public function applyMask():void
+			{
+				var s:String      = id_phone.text.replace(/[^0-9]/g,"");
+				id_phone.text = '('+s.substring(0,3) + (s.length>3?")"+s.substring(3,6) + (s.length>6?"-"+s.substring(6,10):""):"");
+				id_phone.selectRange(id_phone.text.length, id_phone.text.length);
+				
+				if(id_phone.text.length == 1 && id_phone.text == '(')
+					id_phone	.text = '';
+			}
+			
+			protected function id_phone_changeHandler(event:TextOperationEvent):void
+			{
+				applyMask();
+			}
+			
+			private var webCamPopup:RegistrationWebCamPopup = null;
+			
+			protected function id_snapShot_clickHandler(event:MouseEvent):void
+			{
+				if(webCamPopup && webCamPopup.isPopUp) return;
+				
+				webCamPopup = new RegistrationWebCamPopup();				
+				webCamPopup.ShowPopup(this);				
+				webCamPopup.getCamera();
+				webCamPopup.move((this.width/2 )- 175, (this.height/2) - 150) ;
+				webCamPopup.id_uploadBtn.addEventListener(MouseEvent.CLICK,snapShot);				
+			}
+			
+			private function snapShot(event:MouseEvent):void
+			{
+				var jpgEncode:JPEGEncoder = new JPEGEncoder(50);
+				var imageByte:ByteArray = jpgEncode.encode(webCamPopup.ImageSourceFromWebCam);
+				m_oImageContentString  =  AppUtils.getBase64String(imageByte);
+				id_ProviderImge.source = new Bitmap(webCamPopup.ImageSourceFromWebCam);
+				webCamPopup.myvideo.attachCamera(null);
+				webCamPopup.myvideo = null;
+				webCamPopup.cam = null;
+				webCamPopup.removePopup();
+			}
+			
+			protected function id_deletePic_clickHandler(event:MouseEvent):void
+			{
+				if(id_ProviderImge.source == Constants.BLANK_PROFILE_IMAGE) return;
+				
+				id_ProviderImge.source = Constants.BLANK_PROFILE_IMAGE;
+				m_oImageContentString = "";			
+				id_imagePath.text = "";
+			}		
+			
+			private function checkIfEmailisUnique():void
+			{
+				if(toSetFocus == id_email && isEmailAsyncOperationPending) 
+				{
+					cursorManager.setBusyCursor();
+					return;
+				}
+				
+				id_EmailValidatorWithEmailExists.isEmailExists = false;
+				isEmailAsyncOperationPending = true;
+				var vem:VerifyUserEmailEvent = new VerifyUserEmailEvent(id_email.text,isUniqueEmail);
+				CairngormEventDispatcher.getInstance().dispatchEvent(vem);
+			}
+			
+			private function isUniqueEmail(result:XML):void
+			{
+				cursorManager.removeBusyCursor();
+				if(result.toString() == "false")
+				{
+					id_EmailValidatorWithEmailExists.isEmailExists = true;
+					if(toSetFocus == id_email)
+						Alert.show("Email already exists, please re-enter a valid Email.", "Registration Form Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer);
+				}	
+				else if(toSetFocus == id_email)
+					registerBaseUser();
+				
+				isEmailAsyncOperationPending = false;
+			}
+			
+			private function checkIfUserNameisUnique():void
+			{
+				if(toSetFocus == id_UserName && isUserNameAsyncOperationPending)
+				{
+					cursorManager.setBusyCursor();
+					return;
+				}
+				
+				id_UserNameValidator.isUserNameExists = false;
+				isUserNameAsyncOperationPending = true;
+				var vem:VerifyUserEmailEvent = new VerifyUserEmailEvent(id_UserName.text,isUniqueUserName,true);
+				CairngormEventDispatcher.getInstance().dispatchEvent(vem);
+			}
+			
+			private function isUniqueUserName(result:XML):void
+			{
+				cursorManager.removeBusyCursor();
+				if(result.toString() == "false")
+				{
+					id_UserNameValidator.isUserNameExists = true;
+					if(toSetFocus == id_UserName)
+						Alert.show("User Name already exists, please re-enter a valid User Name.", "Registration Form Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer);
+				}	
+				else if(toSetFocus == id_UserName)
+					registerBaseUser();
+				
+				isUserNameAsyncOperationPending = false;
+			}
+			
+			private function checkIfPracticeKeyDoesNotExist():void
+			{
+				if(toSetFocus == id_key && isPracticeKeyAsyncPending)
+				{
+					cursorManager.setBusyCursor();
+					return;
+				}
+				
+				id_PracticeKeyValidator.isPracticeKeyInvalid = false;
+				isPracticeKeyAsyncPending = true;
+				var vpke:ValidatePracticeKeyEvent = new ValidatePracticeKeyEvent(id_key.text,isPracticeKeyExists);
+				CairngormEventDispatcher.getInstance().dispatchEvent(vpke);
+			}
+			
+			private function isPracticeKeyExists(result:XML):void
+			{
+				cursorManager.removeBusyCursor();
+				if(result.toString() == "false")
+				{
+					id_PracticeKeyValidator.isPracticeKeyInvalid = true;
+					if(toSetFocus == id_key)
+						Alert.show("Practice Key does not exist, please enter a valid Key.", "Registration Form Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer);
+				}
+				else if(toSetFocus == id_key)
+					registerBaseUser();
+				
+				isPracticeKeyAsyncPending = false;
+			}
+			
+			protected function id_password_focusOutHandler(event:FocusEvent):void
+			{
+				resetApp();// call for reset tooltip
+				
+				id_imgPassword.source = Constants.IMG_GREEN;
+				id_password.errorString = "";
+				if (UtilityFunctions.TrimString(id_password.text).length > 0 && UtilityFunctions.TrimString(id_password.text).length < 8 )
+				{	
+					id_imgPassword.source = Constants.IMG_RED
+					id_password.errorString = "Password should have 8-32 characters.";					
+				}
+				else if (UtilityFunctions.TrimString(id_password.text).length > 0)
+				{ 
+					var isNumOrSpecCharFound:Boolean = false;
+					for (var i:int = 0; i < id_password.text.length; i++)
+					{
+						if (SPECIAL_CHARS.indexOf(id_password.text.charAt(i)) > -1 || NUMBER_CHARS.indexOf(id_password.text.charAt(i)) > -1)
+						{
+							isNumOrSpecCharFound = true;
+							break;
+						}
+					}
+					
+					var isCapCharFound:Boolean = false;
+					for (var j:int = 0; j < id_password.text.length; j++)
+					{
+						if (UtilityFunctions.isUpper(id_password.text.charAt(j)))
+						{
+							isCapCharFound = true;
+							break;
+						}
+					}
+					
+					if (!isNumOrSpecCharFound && !isCapCharFound)
+					{
+						id_imgPassword.source = Constants.IMG_RED
+						id_password.errorString = "Password should have one symbol or number and one uppercase letter.";
+					}
+					else if (isNumOrSpecCharFound && !isCapCharFound)
+					{
+						id_imgPassword.source = Constants.IMG_RED
+						id_password.errorString = "Password should have one uppercase letter.";
+					}
+					else if (!isNumOrSpecCharFound && isCapCharFound)
+					{
+						id_imgPassword.source = Constants.IMG_RED
+						id_password.errorString = "Password should have one symbol or number.";
+					}
+				}				
+			}
+			//Alvi - Tooltip Implementation.
+			
+			private var errorTip:ToolTip;
+			private var myError:String;
+			
+			protected function id_password_focusInHandler(event:FocusEvent):void
+			{
+				if (errorTip)
+					resetApp();
+				
+				myError="Password should have 8-32 characters with one symbol or number and one uppercase letter.";
+				
+				var pt:Point 	= event.currentTarget.localToGlobal( new Point(event.currentTarget.x, event.currentTarget.y));
+				
+				errorTip = ToolTipManager.createToolTip( myError, pt.x, pt.y - 75, null, IUIComponent(event.currentTarget)) as ToolTip;
+				//errorTip = ToolTipManager.createToolTip( myError, pt.x + id_password.width, pt.y - 18, null, IUIComponent(event.currentTarget)) as ToolTip;
+				
+				// Apply the errorTip class selector.
+				errorTip.setStyle("styleName", "infoTip");
+			}
+			private function resetApp():void 
+			{
+				if (errorTip) {
+					ToolTipManager.destroyToolTip(errorTip);
+					errorTip = null;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:StringValidator id="vFirstName" property="text" required="false"
+							source="{ id_firsName }"  />
+		<mx:StringValidator id="vLastName" property="text"  required="false"
+							source="{ id_lastName }"/>
+		
+		<!--<mx:EmailValidator  source="{id_email}" property="text" 
+		valid="id_imgEmail.source = Constants.IMG_GREEN"
+		invalid="id_imgEmail.source = Constants.IMG_RED"
+		required="false" />	-->	
+		
+		<validator:EmailValidatorWithEmailExists id="id_EmailValidatorWithEmailExists"
+												 ASyncValidationCallBack="{checkIfEmailisUnique}"
+												 emailAlreadyExistsMessage="Email already exists"
+												 source="{id_email}" property="text" 
+												 valid="id_imgEmail.source = Constants.IMG_GREEN"
+												 invalid="id_imgEmail.source = Constants.IMG_RED"
+												 required="false" />
+		
+		<validator:UserNameValidator id="id_UserNameValidator"
+									 ASyncValidationCallBack="{checkIfUserNameisUnique}"										
+									 source="{id_UserName}" property="text" 
+									 valid="id_imgUserName.source = Constants.IMG_GREEN"
+									 invalid="id_imgUserName.source = Constants.IMG_RED"
+									 required="false" />
+		
+		<validator:PracticeKeyValidator id="id_PracticeKeyValidator"
+										ASyncValidationCallBack="{checkIfPracticeKeyDoesNotExist}"
+										practiceKeyDoesNotExistMessage="Practice Key does not exist"
+										practiceKeyMustBeNonZeroMessage="Practice Key must be non zero"
+										source="{id_key}" property="text" 
+										valid="id_imgKey.source = Constants.IMG_GREEN"
+										invalid="id_imgKey.source = Constants.IMG_RED"
+										required="false" />
+		
+		
+	</fx:Declarations>	
+	
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="top"/>
+	</s:layout>
+	
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" />
+		</s:layout>
+		
+		<s:HGroup id="id_windowControlButtons" gap="2" width="100%" horizontalAlign="right" paddingTop="3" paddingRight="5">
+			<s:Button id="id_min" height="15" width="16" useHandCursor="true" buttonMode="true" 
+					  skinClass="com.gazuntite.skins.controls.button.MiniButtonSkin" 
+					  click="ChromeUtil.minimizeWindow()" toolTip="Minimize"/>
+			
+			<s:Button id="id_restore" height="15" width="16" skinClass="com.gazuntite.skins.controls.button.restoreButton" visible="false" includeInLayout="false"
+					  click="ChromeUtil.toggleMaximizeWindow(); changeToopTip()" toolTip="Maximize" useHandCursor="true" buttonMode="true"/>					
+			
+			<s:Button id="id_close" height="15" width="16" skinClass="com.gazuntite.skins.controls.button.CloseButtonSkin"
+					  click="id_close_clickHandler()" toolTip="Close" useHandCursor="true" buttonMode="true"/>
+			
+		</s:HGroup>
+		<s:Spacer height="40%"/>
+		
+		<s:Image source="{UtilityFunctions.getByteArray(GazuntiteAssetsUtility.LOGIN_LOGO_B4STR)}" />
+		
+		<s:Spacer height="20%"/>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.LoginBlueBGSkin" 
+							  verticalCenter="0" horizontalCenter="0" width="400" height="470">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center"  verticalAlign="middle" gap="10" paddingTop="10" paddingLeft="15" paddingRight="15" paddingBottom="10"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{id_role.selectedItem != null ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Role:" width="100%" />
+					</s:HGroup>				
+					<s:DropDownList id="id_role"
+									buttonMode="true" width="100%" height="25" 
+									selectedIndex="0" tabIndex="0" enabled="false"
+									labelField="UserTypeName"
+									toolTip="{id_role.selectedItem.Role}"									
+									prompt="--Select--"
+									dataProvider="{RoleTypes}"
+									skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+									itemRenderer="com.zigron.gazuntite.view.registration.RoleIRenderer"
+									/>
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{id_gender.selectedItem != null ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Gender:" width="100%" />
+					</s:HGroup>	
+					<s:DropDownList id="id_gender"									
+									width="100%" height="25" 
+									selectedIndex="0" tabIndex="1"
+									labelField="Gender"
+									toolTip="{id_gender.selectedItem.Gender}"
+									click="id_gender.openDropDown()"
+									prompt="--Select--"
+									dataProvider="{GenderTypes}"
+									itemRenderer="com.zigron.gazuntite.view.registration.GenderIRenderer"
+									skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+									/>
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{UtilityFunctions.TrimString(id_firsName.text).length > 2 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="First Name:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_firsName" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%"  prompt="First Name" toolTip="First Name: {id_firsName.text }" tabIndex="2" />
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{UtilityFunctions.TrimString(id_lastName.text).length > 2 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Last Name:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_lastName" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%"  prompt="Last Name" toolTip="Last Name: {id_lastName.text }" tabIndex="3"/>
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  id="id_imgEmail" source="{UtilityFunctions.TrimString(id_email.text).length > 0 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Email:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_email" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%"  prompt="Email" toolTip="Email: {id_email.text }" tabIndex="4"/>
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  id="id_imgUserName" source="{UtilityFunctions.TrimString(id_UserName.text).length > 2 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="User Name:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_UserName" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%"  prompt="User Name" toolTip="User Name: {id_UserName.text }" tabIndex="5"/>
+				</s:VGroup>
+			</s:HGroup>
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage id="id_imgPassword" source="{UtilityFunctions.TrimString(id_password.text).length >= 8 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Password:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_password" 
+														 focusOut="id_password_focusOutHandler(event)" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%" prompt="Password" toolTip="Password" maxChars="32" tabIndex="6" displayAsPassword="true"
+														 focusIn="id_password_focusInHandler(event)"/>
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage id="id_imgConfirmPassword" 
+									   source="{id_password.text.length > 0 &amp;&amp; id_ConfirmPassword.text.length == id_password.text.length &amp;&amp; id_ConfirmPassword.text.indexOf(id_password.text) > -1 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Confirm Password:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_ConfirmPassword" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%" prompt="Confirm Password" toolTip="Confirm Password" displayAsPassword="true" maxChars="32" tabIndex="7"/>
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage id="id_imgPhone" source="{UtilityFunctions.TrimString(id_phone.text).length == 13 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Phone:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_phone" change="id_phone_changeHandler(event)"
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%" prompt="Phone" toolTip="Phone: {id_phone.text }" restrict="[0-9]" maxChars="13" tabIndex="8"/>
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{UtilityFunctions.TrimString(id_npi.text).length == 10 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="NPI:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_npi" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%" prompt="NPI" toolTip="NPI: {id_npi.text }" restrict="[0-9]" maxChars="10" tabIndex="9"/>
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="10">
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage  source="{id_specaility.selectedItem != null ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Specialty:" width="100%" />
+					</s:HGroup>
+					<autoComplete:AutoComplete id="id_specaility"
+											   width="100%"  height="25" prompt="Select Specialty" dataProvider="{SpecialityTypes}" labelField="SpecialityName"
+											   toolTip="Specialty:  {id_specaility.selectedItem? id_specaility.selectedItem.label : '' }" tabIndex="10"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   />
+				</s:VGroup>
+				<s:VGroup width="50%" gap="3">
+					<s:HGroup width="100%" gap="5">
+						<s:BitmapImage id="id_imgKey" source="{UtilityFunctions.TrimString(id_key.text).length > 0 &amp;&amp; parseInt(UtilityFunctions.TrimString(id_key.text)) > 0 ? Constants.IMG_GREEN : Constants.IMG_RED}"   />
+						<s:Label text="Practice Key:" width="100%" />
+					</s:HGroup>
+					<advancedTextInput:AdvancedTextInput id="id_key" 
+														 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+														 width="100%"  prompt="Key" toolTip="Practice Key: {id_key.text }" tabIndex="11" restrict="[0-9]" maxChars="3"/>
+				</s:VGroup>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="0" verticalAlign="middle" horizontalAlign="left">			
+				<s:CheckBox id="id_acceptTerms"
+							label="I understand and agree with" toolTip="I understand and agree with Gazuntite Terms and Conditions" tabIndex="12"
+							skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+							useHandCursor="true" buttonMode="true"/>
+				
+				<s:RichEditableText id="richTxt" width="100%" editable="false" focusEnabled="false" toolTip="Gazuntite Terms and Conditions">
+					<s:textFlow>
+						<s:TextFlow>
+							<s:p fontSize="13" fontFamily="CalibriCFF" >
+								<s:a click="linkelement1_clickHandler(event)">
+									<s:span color="#382E95" textDecoration="none" fontFamily="CalibriCFF" fontSize="13" > Gazuntite Terms and Conditions</s:span></s:a>
+							</s:p>
+						</s:TextFlow>
+					</s:textFlow> 
+				</s:RichEditableText>
+			</s:HGroup>
+			
+			<s:HGroup width="100%" gap="6" >
+				<s:VGroup width="65" gap="4" verticalAlign="top" horizontalAlign="center">
+					<s:BitmapImage id="id_ProviderImge" 
+								   smooth="true" source="{Constants.BLANK_PROFILE_IMAGE}" 
+								   width="60" height="60"
+								   horizontalCenter="0" verticalCenter="0"/>
+					<s:Button id="id_deletePic" 
+							  useHandCursor="true" buttonMode="true"  enabled="{id_ProviderImge.source != Constants.BLANK_PROFILE_IMAGE}"
+							  click="id_deletePic_clickHandler(event)" 
+							  fontWeight="bold" toolTip="Delete Picture" 
+							  skinClass="com.gazuntite.skins.controls.button.UnderlineButtonSkin"
+							  />
+				</s:VGroup>
+				<s:VGroup width="100%" height="100%" gap="12">
+					<s:HGroup width="100%" horizontalAlign="right">
+						<s:TextInput id="id_imagePath" 
+									 width="70%"  height="24" editable="false" toolTip="{id_imagePath.text}" 
+									 skinClass="com.gazuntite.skins.controls.textInput.ReadonlyTISkin"/>
+						<s:Button id="id_browse" 
+								  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" useHandCursor="true" 
+								  buttonMode="true" toolTip="Browse"
+								  label="Browse" width="30%"  height="24" click="id_browse_clickHandler(event)" tabIndex="13"/>	
+					</s:HGroup>
+					<s:Group width="100%"   >
+						<s:Button id="id_upload" left="0" useHandCursor="true" buttonMode="true" toolTip="Upload"
+								  label="Upload" width="30%" enabled="false" click="id_upload_clickHandler(event)" tabIndex="14"
+								  skinClass="com.gazuntite.skins.controls.button.DisableButtonSkin"/>	
+						<s:Button id="id_snapShot" right="0" useHandCursor="true" buttonMode="true" toolTip="Take a Snapshot"
+								  label="Take Snapshot"  tabIndex="15" click="id_snapShot_clickHandler(event)"
+								  skinClass="com.gazuntite.skins.controls.button.SnapshotButtonSkin"/>	
+					</s:Group>		 
+				</s:VGroup>				
+			</s:HGroup>
+			
+			<s:Line width="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right" gap="10">
+				<s:Button id="id_gotoSignIn"   useHandCursor="true" buttonMode="true" 
+						  click="id_gotoSignIn_clickHandler(event)" toolTip="Go to Sign In" tabIndex="18"
+						  skinClass="com.gazuntite.skins.controls.button.LoginBackButtonSkin"/>
+				<s:Spacer width="100%" />
+				<s:Button id="id_reset" 
+						  label="Reset"  useHandCursor="true" buttonMode="true"  
+						  click="id_reset_clickHandler(event)" 
+						  fontWeight="bold" toolTip="Reset Fields" tabIndex="17"
+						  skinClass="com.gazuntite.skins.controls.button.ResetButtonSkin"/>
+				<s:Button id="id_register"
+						  label="Register Now" width="112"  height="30" click="id_register_clickHandler(event)" 
+						  enabled="{id_acceptTerms.selected}" tabIndex="16" toolTip="Register Now"
+						  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" useHandCursor="true" buttonMode="true" 
+						  />					 
+			</s:HGroup>
+			
+		</s:SkinnableContainer>			
+		
+		<s:Spacer height="100%"/>
+		
+		<s:RichText color="#5D5D5D" fontFamily="CalibriCFF" fontSize="14" tabStops="S0 S50" text="Gazuntite {model.AppVersion}" />
+		<s:RichText color="#5D5D5D" fontFamily="CalibriCFF" fontSize="13" tabStops="S0 S50 S100 S150 S200 S250 S300 S350" text="Copyrights 2011-2013 Gazuntite Online Clinic LLC. All Rights Reserved." whiteSpaceCollapse="preserve" paddingBottom="10"/>
+		
+	</s:Group>
+</s:BorderContainer>

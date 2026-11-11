@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.VitalsDTO;
+			import com.gazuntite.skins.controls.button.communication.NinetyDegreeNoteButtonSkin;
+			import com.gazuntite.skins.controls.button.input.LeftConnectionNotesTBSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+
+			
+			private var _vitalDto:VitalsDTO;
+			private var _enableNotesBtn:Boolean = true;
+			
+			[Bindable]
+			public function get enableNotesBtn():Boolean
+			{
+				return _enableNotesBtn;
+			}
+
+			public function set enableNotesBtn(value:Boolean):void
+			{
+				_enableNotesBtn = value;
+			}
+
+			[Bindable]
+			public function get vitalDto():VitalsDTO
+			{
+				return _vitalDto;
+			}
+			
+			public function set vitalDto(value:VitalsDTO):void
+			{
+				_vitalDto = value;
+			}
+			
+			public function ClearVitals():void
+			{
+				id_temp.text		= '';
+				id_BP.text 			= '';
+				id_sugarLevel.text	= '';
+				id_pulse.text 		= '';
+				id_resp.text 		= '';
+				id_notesText.text   = '';
+				id_notesText_ChangeSkin();
+			}
+			
+			protected function noteClickHandler(event:MouseEvent):void
+			{
+				id_NotesPlaceholder.visible = event.currentTarget.selected;				
+			}
+			
+			protected function id_notesText_ChangeSkin():void
+			{
+				if(UtilityFunctions.TrimString(id_notesText.text).length > 0)
+					note.setStyle("skinClass",LeftConnectionNotesTBSkin);
+				else
+					note.setStyle("skinClass",NinetyDegreeNoteButtonSkin);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:Group id="id_NotesPlaceholder" width="1" height="1" visible="false" includeInLayout="{id_NotesPlaceholder.visible}">
+			
+			<s:BorderContainer
+				id="uiNoteContainer"
+				borderColor="0x545454" borderWeight="2" cornerRadius="3"
+				width="200" height="150"
+				x="{-(uiNoteContainer.width + 7)}"
+				>
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+				</s:layout>
+				<s:TextArea id="id_notesText" maxChars="1000" width="100%" height="100%"
+							 color="#333333" keyUp="id_notesText_ChangeSkin()"
+							minHeight="24" /><!--text="@{vitalDto.Note}"-->
+				
+			</s:BorderContainer>
+			
+		</s:Group>
+	
+	<s:SkinnableContainer width="100%" height="100%" >
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" />
+		</s:layout>
+		
+		
+		
+		<!--<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsRedInputBg" width="100%" height="28">-->
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsBlueInputBg" width="100%" height="28">
+			<s:HGroup verticalAlign="middle" width="100%" height="100%" gap="4" paddingRight="3">
+				
+				<s:ToggleButton visible="{enableNotesBtn}" tabIndex="0"
+					id="note" depth="3" includeInLayout="{enableNotesBtn}"
+					buttonMode="true" toolTip="Notes"
+					skinClass="com.gazuntite.skins.controls.button.communication.NinetyDegreeNoteButtonSkin"
+					click="noteClickHandler(event)"/>
+				
+				<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0" text="BP" textAlign="right" 
+							visible="{enableNotesBtn}" includeInLayout="{enableNotesBtn}"/>
+				<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0" text="BP" textAlign="right" width="50%"
+							visible="{!enableNotesBtn}" includeInLayout="{!enableNotesBtn}" />
+				<components:LabelTextInput id="id_BP" tabIndex="1"
+										   text="{vitalDto.BPDys}" color="#333333" fontFamily="Calibri" fontSize="11" width="50%" 
+										   restrict="[0-9./]" maxChars="7" skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsBlueInputBg" width="100%" height="28">
+			<s:HGroup verticalAlign="middle" width="100%" height="100%" gap="4" paddingRight="3">
+				<s:RichText color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0" text="Temp" textAlign="right" width="50%"/>
+				<components:LabelTextInput id="id_temp" tabIndex="2"
+										   text="{vitalDto.Temperature}" color="#333333" fontFamily="Calibri" fontSize="12"  width="50%"
+										   restrict="[0-9.]" maxChars="6" skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsBlueInputBg" width="100%" height="28">
+			<s:HGroup verticalAlign="middle" width="100%" height="100%" gap="4" paddingRight="3">
+				<s:RichText text="Sugar Level" color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0"  textAlign="right" width="50%"/>
+				<components:LabelTextInput id="id_sugarLevel" tabIndex="3"
+										   text="{vitalDto.sugarLevel}"  color="#333333" fontFamily="Calibri" fontSize="11" width="50%"  
+										   restrict="[0-9.]" maxChars="6" skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsBlueInputBg" width="100%" height="28">
+			<s:HGroup verticalAlign="middle" width="100%" height="100%" gap="4" paddingRight="3">
+				<s:RichText text="Pulse" color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0"  textAlign="right" width="50%"/>
+				<components:LabelTextInput id="id_pulse" tabIndex="4"
+										   text="{vitalDto.Pulse}"  color="#333333" fontFamily="Calibri" fontSize="11" width="50%"  
+										   restrict="[0-9.]" maxChars="6" skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin" />
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.Communication.VitalsBlueInputBg" width="100%" height="28">
+			<s:HGroup verticalAlign="middle" width="100%" height="100%" gap="4" paddingRight="3">
+				<s:RichText text="Resp" color="#333333" fontFamily="Calibri" fontSize="11" tabStops="S0"  textAlign="right" width="50%"/>
+				<components:LabelTextInput id="id_resp" tabIndex="5"
+										   text="{vitalDto.Respiration}"  color="#333333" fontFamily="Calibri" fontSize="11" width="50%"  
+										   restrict="[0-9.]" maxChars="6" skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin" />
+			</s:HGroup>
+			
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+</s:Group>

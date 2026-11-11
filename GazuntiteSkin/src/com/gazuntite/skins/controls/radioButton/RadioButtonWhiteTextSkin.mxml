@@ -1,0 +1,55 @@
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="88" height="20">
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Ellipse x="0.5" y="0.5" width="19" height="19">
+		<s:fill>
+			<s:LinearGradient rotation="270"
+							  rotation.down="90"
+							  rotation.downAndSelected="90">
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#494A4A" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="270"
+									weight="1"
+									rotation.over="90"
+									rotation.overAndSelected="90">
+				<s:GradientEntry alpha="1.0" color="#898A8A" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#878787" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Ellipse>
+	<s:Ellipse x="6" y="6" width="8" height="8"
+			   visible.disabled="false"
+			   alpha.disabledAndSelected="0.7000000000000001"
+			   visible.down="false"
+			   visible.over="false"
+			   visible.up="false"
+			   alpha.upAndSelected="1">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#DDDEDE" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="0" blurY="0" color="#000000"
+								distance="1" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Ellipse>
+	<s:RichText x="27" y="4" color="#FFFFFF" fontFamily="Calibri" fontSize="14" tabStops="S0 S50"
+				id="labelDisplay"/>
+</s:Skin>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		 creationComplete="cc(event)" xmlns:procedure="com.gazuntite.provider.live.services.billing.superBill.view.procedure.*" 
+		 xmlns:search="com.gazuntite.components.search.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.typeDTO.CPTMedicalTypeDTO;
+			import com.gazuntite.common.event.visit.LoadCPTMedicalTypesEvent;
+			import com.gazuntite.components.search.SearchDropDownEvent;
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			import com.gazuntite.provider.live.services.billing.superBill.view.event.procedure.SuperBillProcedureSelectedEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			[Embed(source="com/gazuntite/provider/live/services/billing/view/assets/search_text.png")]
+			[Bindable]	public var searchText:Class;
+			
+			[Bindable]
+			public var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			private var _isInputView:Boolean;
+			
+			[Bindable]
+			public function get isInputView():Boolean
+			{
+				return _isInputView;
+			}
+			
+			public function set isInputView(value:Boolean):void
+			{
+				_isInputView = value;
+				if(value && selectedProcedure)
+					id_selectProcedureVS.selectedIndex = 1;
+				else
+					id_selectProcedureVS.selectedIndex = 0;
+			}
+			
+			private var _selectedProcedure:CPTMedicalTypeDTO;
+			
+			[Bindable]
+			public function get selectedProcedure():CPTMedicalTypeDTO
+			{
+				return _selectedProcedure;
+			}
+			
+			public function set selectedProcedure(value:CPTMedicalTypeDTO):void
+			{
+				_selectedProcedure = value;
+				if(value)
+					id_selectProcedureVS.selectedIndex = 1;
+			}
+			
+			
+			private function toggleView():void
+			{
+				var toggleView:Boolean = id_selectProcedureVS.selectedIndex == 0;
+				
+				if( null != selectedProcedure && toggleView)
+				{
+					id_selectProcedureVS.selectedIndex = 1;
+				}
+				else
+				{
+					id_selectProcedureVS.selectedIndex = 0;
+				}
+			}
+			
+			protected function selectionView_clickHandler(event:MouseEvent):void
+			{
+				toggleView();
+			}
+			
+			/* protected function whenProcedureSelected(event:SuperBillProcedureSelectedEvent):void
+			{
+				selectedProcedure = event.selection as CPTMedicalTypeDTO;
+				
+				toggleView();
+			} */
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				parent.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if(null != selectedProcedure)
+					{
+						id_selectProcedureVS.selectedIndex = 1;
+					}
+				});				
+			}
+			
+			protected function searchdropdown1_startSearchHandler(event:SearchDropDownEvent):void
+			{
+				trace(event.SearchQuery, event.searchTypePrompt, event.searchTypeIndex, event.SelectedItem);
+				//do service call here for searching and when search result is ready pass arraycollection to SearchDropDown
+				var ProcedureEvent: LoadCPTMedicalTypesEvent = new LoadCPTMedicalTypesEvent(event.SearchQuery,event.searchTypeIndex + 1,model.LoggedInUserSessionID,model.LoggedInUserId,resultCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ProcedureEvent); 
+				
+				//resultCallBack();
+			}
+			
+			protected function resultCallBack(searchTerm:String, type:int, cptList:ArrayCollection):void
+			{
+				model.CptMedicalTypeDTOList = cptList;
+				id_searchDD.ShowResult(model.CptMedicalTypeDTOList);
+			}
+			
+			protected function id_searchDD_searchResultSelectionChangeHandler(event:SearchDropDownEvent):void
+			{
+				selectedProcedure = event.SelectedItem;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:LabelViewStack id="id_selectProcedureVS" width="100%" height="100%"  borderVisible="false" backgroundAlpha="0">
+		<s:ArrayList>
+			<search:SearchDropDown id="id_searchDD" width="100%" height="30" PromptFieldName="label" 
+								   includeInLayout="{isInputView}" visible="{isInputView}" ShowResultAsPopup="true"
+								   searchResultSelectionChange="id_searchDD_searchResultSelectionChangeHandler(event)"
+								   startSearch="searchdropdown1_startSearchHandler(event)"
+								   ResultRenderer="com.gazuntite.provider.live.services.billing.superBill.view.itemRenderer.procedure.SuperBillProcedureSearchIR"
+								   >
+				<search:DataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="CPT Code" icon="{searchText}" />
+						<fx:Object label="Procedure" icon="{searchText}" />
+					</s:ArrayCollection>
+				</search:DataProvider>
+			</search:SearchDropDown>
+			
+			<s:Group width="100%" height="100%" click="selectionView_clickHandler(event)" includeInLayout="{isInputView}" visible="{isInputView}"
+					 toolTip="{selectedProcedure.ProcedureCode +' - '+ selectedProcedure.ProcedureDescription }"
+					 >
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="5"/>
+				</s:layout>
+				
+				<s:Label text="{selectedProcedure.ProcedureCode}"  fontWeight="bold" fontFamily="CalibriCFFBold" fontSize="15" color="#666666"/>
+				<s:Label text="{selectedProcedure.ProcedureDescription}"
+						 fontWeight="bold" fontFamily="CalibriCFFBold" 
+						 fontSize="15" width="100%"  color="#000000" maxDisplayedLines="1" />
+			</s:Group>
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+</s:Group>

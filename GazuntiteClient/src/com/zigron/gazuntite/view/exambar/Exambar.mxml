@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:exambar="com.zigron.gazuntite.view.exambar.*" 
+					  xmlns:email="com.zigron.provider.services.email.view.*" 
+					  xmlns:sms="com.zigron.provider.services.sms.view.*" 
+					  xmlns:common="com.zigron.gazuntite.view.common.*" 
+					  xmlns:view="com.gazuntite.provider.services.email.view.*" 
+					  xmlns:view1="com.gazuntite.provider.services.sms.view.*" 
+					  xmlns:view2="com.gazuntite.provider.search.services.patient.view.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  skinClass="com.gazuntite.skins.controls.container.patientExamHeaderSkin"
+					  creationComplete="cc(event)"
+					  click="exambar_clickHandler(event)"
+					  resize="onResize(event)"
+					  height="35"
+					  >
+	<fx:Metadata>
+		[Event(name="ClearInputFormEvent", type="flash.events.Event")]
+		[Event(name="ExambarAnyClick", type="flash.events.Event")]
+		[Event(name="tabBarAction", type="spark.events.IndexChangeEvent")]
+		[Event(name="PatientSelected", type="com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent")] 
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.util.xml.XmlUtils;
+			import com.gazuntite.common.view.MainContainerViewModel;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.history.event.GetProviderListEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.view.viewmodel.PatientInputEvent;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.search.services.patient.view.events.PatientSelectedEvent;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.patient.RecentPatientList;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.logging.ILogger;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable] private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable] private var Historymodel : HistoryModelLocator = HistoryModelLocator.getInstance();
+			[Bindable] private var EpresprectionyModel : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			[Bindable]	protected var viewModel:PatientViewModel = PatientViewModel.getInstance();
+			
+			private var _selectedPatient:PatientDTO;
+			private	var optionBarPopup:ExambarOptionPopup;
+			private	var confirlLoadPopup:ConfirmPatientLoadPopup;
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				_selectedPatient = value;
+			}
+			
+			// on Resize
+			protected function onResize(event:ResizeEvent):void
+			{
+				viewModel.examBarHeight = this.height;
+			}
+			
+			
+			private function LoadRecentPatients():void
+			{
+				model.recentPatientList = new RecentPatientList();
+				model.recentPatientList.FromXML( RecentPatientList.recentPatientsXML );
+				//logger.info( "Recent Patient Loaded." );
+			}
+			
+			/* public function removeAllPopups():void
+			{
+			if( patientSearchPopup && patientSearchPopup.isPopUp )
+			{
+			patientSearchPopup.removePopup();
+			patientSearchPopup = null;
+			} 
+			
+			} */
+			
+			public function whenPatientCloseRequested(event:Event = null, callBackAfterClose:Function = null):void 
+			{
+				Alert.show("Are you sure you want to close this patient ?",	"Confirmation Required!", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+				{
+					if( event.detail == Alert.YES )
+					{
+						model.isPatientAlredayLoaded			= false;
+						model.selectedPatientName 		= 'Search Patient';
+						model.selectedPatientDTO 		= null;
+						selectedPatient					= null;
+						CloseAllPanel();
+						viewModel.closeAllTabs();
+						enableActionButton(false);
+						viewModel.selectedPatient 		= null;
+						HistoryModelLocator.getInstance().PatientGaxenID = '';
+						PatientInputViewModel.getInstance().clearOldQuickInputData();//TA--Clear All Sections(Array, list, forms etc) of Quick Input on new patien Load
+						
+						switchToDefault();
+						
+						if( null != callBackAfterClose )
+						{
+							callBackAfterClose();
+						}
+					}
+					else if( event.detail == Alert.NO )
+					{
+						return;
+					}
+				});
+			}
+			
+			protected function whenRecentPatientSelected(event:PatientSelectedEvent):void 
+			{
+				selectedPatient 				= event.selection as PatientDTO;
+				viewModel.selectedPatient 		= selectedPatient;
+				
+				CloseAllPanel();
+				
+				if(!viewModel.showMainInputTab)
+					viewModel.showMainInputTab 	= true;
+				model.isPatientAlredayLoaded			= true;
+				
+			} 
+			
+			private function CloseAllPanel():void
+			{
+				removeExamBarPopup();
+			}
+			
+			protected function max_clickHandler(event:MouseEvent):void
+			{
+				MainContainerViewModel.getInstance().dispatchEvent(new Event(MainContainerViewModel.EVENT_CLOSE_TOPBAR));
+				viewModel.showMainInputTab = true;
+			}
+			
+			protected function close_clickHandler(event:MouseEvent):void
+			{
+				viewModel.closeAllTabs();
+			}
+			
+			/////////////// Patient Select //////////////////////////////////////////
+			protected function whenPatientSelected(event:PatientSelectedEvent):void 
+			{
+				switchToDefault(); // For switching Selected name and Search Patient.
+				selectedPatient = event.selection as PatientDTO;
+				
+				if(model.isPatientAlredayLoaded)
+				{
+					model.confirmLoadPatientName = selectedPatient.FullName;
+					showConfirlLoadPopup();
+					return;
+				}
+				
+				setPatientSelection();
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			} 
+			// Actually assign the seleted patient in application after Patient Search or Confirmation.
+			private function setPatientSelection():void
+			{
+				viewModel.selectedPatient = selectedPatient;
+				
+				if(selectedPatient)
+				{
+					PatientInputViewModel.getInstance().clearOldQuickInputData();//Clear All Sections(Array, list, forms etc) of Quick Input on new patien Load
+					
+					dispatchEvent(new Event("ClearInputFormEvent")); //TA ---Disptach this event on every patient load, clear all input form fields from Quick input
+					
+					CloseAllPanel();
+					
+					QIModelLocator.getInstance().patientDTO 						= viewModel.selectedPatient; 
+					QIModelLocator.getInstance().LoggedInUserId 					= model.LoggedInUserDTO.UserId;
+					QIModelLocator.getInstance().LoggedInUserName 					= model.LoggedInUserDTO.FullName;
+					
+					QIModelLocator.getInstance().LoggedInUserProviderId 			= model.LoggedInProvider.UserId;
+					QIModelLocator.getInstance().LoggedInUserProviderTypeId 		= model.LoggedInUserSessionDTO.UserTypeID;
+					
+					QIModelLocator.getInstance().userSelectedRoleDTO				= model.userSelectedRoleDTO;
+					QIModelLocator.getInstance().LoggedInUserSessionID 				= model.LoggedInUserSessionDTO.SessionID;
+					QIModelLocator.getInstance().LoggedInUserSelectedBranchId 		= model.userSelectedClinicBranchDTO.ClinicBranch.ClinicBranchIdSeq;
+					
+					QIModelLocator.getInstance().LoggedInUserSelectedPracticeName 	= model.selectedProvider.FullName;
+					QIModelLocator.getInstance().IsloggedInUserProvider 			= model.IsProviderLoggedIn;
+					QIModelLocator.getInstance().IsloggedInUserFemale 				= model.LoggedInUserDTO.Gender.toLowerCase().charAt(0) == "f";
+					
+					QIModelLocator.getInstance().LoggedInUserGaxenID 				= model.LoggedInuserGaxenID;
+					
+					EpresprectionyModel.LoggedInUserGaxenID 						=  model.LoggedInuserGaxenID
+					
+					Historymodel.PatientGaxenID 									= selectedPatient.GAXENID;
+					
+					PatientInputViewModel.getInstance().createVisit();
+					
+					if(!selectedPatient.GAXENID == '' &&  !selectedPatient.GAXENID == '0')
+						QIModelLocator.getInstance().isAtRegGaxenID = true;// means the selected patient have gaxen id
+					
+					if(!viewModel.showMainInputTab)
+						viewModel.showMainInputTab = true;
+					
+					enableActionButton(true);
+					
+					LoadHistoryViewData();
+					
+					EpresprectionyModel.ChronicMedCollection = new ArrayCollection();
+					EpresprectionyModel.PresprectionCollection = new ArrayCollection();
+					
+					
+					QIModelLocator.getInstance().CurrentprescriptionDToList = new ArrayCollection();
+				}
+				
+				model.selectedPatientName 	= selectedPatient.FullName;
+				model.selectedPatientDTO 	= selectedPatient;
+				model.isPatientAlredayLoaded 		= true;
+			}
+			
+			private function onLoadPatientGaxenID(result:XML):void
+			{
+				var gaxenID:String = result[0];
+				
+				if (!gaxenID)
+					return;
+				
+				if (gaxenID == "0")
+					return;
+				
+				QIModelLocator.getInstance().patientDTO.GAXENID = gaxenID;
+				QIModelLocator.getInstance().gaxenIDSaved = true;
+				
+				//HistoryModelLocator.getInstance().gaxenID = gaxenID; 
+				//[09/02/2013] Shahid Munir, gaxenID was updated instead of PatientGaxenID in above line
+				Historymodel.PatientGaxenID = gaxenID;
+			}
+			
+			private function LoadHistoryViewData():void
+			{
+				var eve:GetProviderListEvent  = new GetProviderListEvent();
+				eve.data = getproviderXml();
+				CairngormEventDispatcher.getInstance().dispatchEvent(eve);
+				
+				
+				//Ayesha--09/07/2013 load patient encounter list
+				loadPatientEncounterList();
+				
+				
+			}
+			
+			private function loadPatientEncounterList():void
+			{
+				/* if (!viewModel.selectedPatient)
+				return;
+				
+				if (!model.userSelectedClinicBranchDTO)
+				return;
+				
+				if (!model.userSelectedClinicBranchDTO.ClinicBranch)
+				return;
+				
+				if (!viewModel.selectedPatient.Gender)
+				return;
+				
+				HistoryModelLocator.getInstance().isMale = viewModel.selectedPatient.Gender.toLowerCase().charAt(0) != 'f';
+				
+				var patientID:int = viewModel.selectedPatient.ID;
+				var clinicBranchID:int = model.userSelectedClinicBranchDTO.ClinicBranch.ClinicBranchIdSeq;
+				var userID:int = model.LoggedInUserSessionDTO.UserID;
+				var providerTypeID:int = model.LoggedInUserSessionDTO.UserTypeID;
+				var sessionID:String = model.LoggedInUserSessionDTO.SessionID;
+				
+				var encounterListEv:LoadPatientVisitsByPatientIdAndClinicIdEvent = new LoadPatientVisitsByPatientIdAndClinicIdEvent(patientID, clinicBranchID, false,
+				userID, providerTypeID, sessionID);
+				
+				CairngormEventDispatcher.getInstance().dispatchEvent(encounterListEv);
+				
+				addEventListener(PatientInputEvent.REFRESH_PATIENT_ENCOUNTER_LIST, refreshPatientEncounterList, false, 0, true); */
+			}
+			
+			private function refreshPatientEncounterList(event:PatientInputEvent):void
+			{
+				/* loadPatientEncounterList(); */
+			}
+			
+			public function getproviderXml():XML
+			{
+				
+				var x:XML = XmlUtils.getNodeByTagName('PatientVisitProviderRequest');
+				
+				x.@PatientID			= selectedPatient.ID;
+				x.@DemandPageNo			='1';
+				x.@ClinicBranchId		= model.userSelectedClinicBranchDTO.ClinicBranch.ClinicBranchIdSeq;
+				//x.@ClinicBranchId		= model.LoggedInProvider.UserSelectedClinicBranchDTO.ClinicBranch.cl .UserSelectedStation.StationID;
+				//x.@UserTypeId			='7';
+				x.@UserTypeId			=model.LoggedInUserDTO.AllUserTypes[0].UserTypeId;
+				x.@OrderByType			='1';
+				
+				/* var x :XML = <PatientVisitProviderRequest PatientID="43070" DemandPageNo="1" ClinicBranchId="7" UserTypeId="3" OrderByType="1" /> ; */
+				return x ;
+				
+			}
+			//---------------------- New Exambar Impl -------------------------------------
+			// enable or disable buttons on patient load.
+			private function enableActionButton(bool:Boolean):void
+			{
+				id_HistoryTButton.enabled 	= bool;
+				id_InputTButton.enabled 	= bool;
+				id_ClosePatient.enabled 	= bool;
+				id_patientProfile.enabled	= bool;
+				//id_tbOption.enabled			= bool;
+				if(bool)
+					id_InputTButton.selected = bool;
+				else
+					id_InputTButton.selected = bool;
+			}
+			//-------------------------  on searchPatientView_focusOutHandler -------------------------------
+			protected function searchPatientView_focusOutHandler(event:FocusEvent):void
+			{
+				/* if(!id_searchPatientView.id_SearchListView.visible)
+				{
+				switchToDefault();
+				}
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault(); */
+			}
+			// on ShowOptionPanelHandler
+			protected function ShowOptionPanelHandler(event:MouseEvent):void
+			{
+				if(id_tbOption.selected)
+				{
+					optionBarPopup = new ExambarOptionPopup();
+					optionBarPopup.ShowPopup(this);
+					optionBarPopup.selectedPatient = selectedPatient;
+					optionBarPopup.addEventListener(PatientSelectedEvent.PATIENT_SELECTED, function(event:PatientSelectedEvent):void
+					{
+						//whenRecentPatientSelected(event);
+						whenPatientSelected(event);
+						
+						if( optionBarPopup && optionBarPopup.isPopUp )
+						{
+							optionBarPopup.removePopup();
+							optionBarPopup = null;
+						}
+					});
+					
+					var pt:Point = id_tbOption.localToGlobal(new Point(event.localX, event.localY));
+					
+					optionBarPopup.move( 0 , pt.y + (optionBarPopup.height - 25));
+					
+					//	optionBarPopup.y = 120;
+					optionBarPopup.width = this.width -5;
+				}
+				else
+				{
+					removeOptionBarPopup();
+				}
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+				
+			}
+			// on removeOptionBarPopup
+			private function removeOptionBarPopup():void
+			{
+				if( optionBarPopup && optionBarPopup.isPopUp )
+				{
+					optionBarPopup.removePopup();
+					optionBarPopup = null;
+					if(id_tbOption.selected)
+						id_tbOption.selected = false;
+				}
+			}
+			// on showConfirlLoadPopup  
+			private function showConfirlLoadPopup():void
+			{
+				confirlLoadPopup = new ConfirmPatientLoadPopup();
+				confirlLoadPopup.ShowPopup(this);
+				
+				var pt:Point = id_selectedSearchPatientView.localToGlobal(new Point(id_selectedSearchPatientView.x, id_selectedSearchPatientView.y));
+				confirlLoadPopup.move( 67, pt.y + id_selectedSearchPatientView.height-35);
+				
+				confirlLoadPopup.width = id_selectedSearchPatientView.width;
+				confirlLoadPopup.addEventListener("ConfirmLoadPatient", ConfirmLoadPatientHandler);
+				confirlLoadPopup.addEventListener("CancelLoadPatient", CancelLoadPatientHandler);
+			}
+			// on ConfirmLoadPatientHandler
+			protected function ConfirmLoadPatientHandler(event:Event):void
+			{
+				HistoryModelLocator.getInstance().PatientGaxenID = '';
+				PatientInputViewModel.getInstance().clearOldQuickInputData();//Clear All Sections(Array, list, forms etc) of Quick Input on new patien Load
+				setPatientSelection();
+				removeConfirmPatientLoadPopup();
+			}
+			// on CancelLoadPatientHandler
+			protected function CancelLoadPatientHandler(event:Event):void
+			{
+				removeConfirmPatientLoadPopup();
+			}
+			//Remove ConfirmPatientLoadPopup
+			private function removeConfirmPatientLoadPopup():void
+			{
+				if( confirlLoadPopup && confirlLoadPopup.isPopUp )
+				{
+					confirlLoadPopup.removePopup();
+					confirlLoadPopup = null;
+				}
+			}
+			// Exambar Click handler
+			protected function exambar_clickHandler(event:MouseEvent):void
+			{
+				switchToDefault();
+				
+				/* event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault(); */
+			}
+			
+			public function switchToDefault():void
+			{
+				if(currentState == 'flipped')
+				{
+					currentState = 'default';
+					id_searchPatientView.removeFocus();
+				}
+				
+				removeExamBarPopup();
+			}
+			
+			protected function id_selectedSearchPatientView_clickHandler(event:MouseEvent):void
+			{
+				removeExamBarPopup();
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			protected function bar_clickHandler(event:MouseEvent):void
+			{
+				removeExamBarPopup();
+				
+				if(event.currentTarget.id == 'id_HistoryTButton' && event.currentTarget.selected)
+				{
+					LoadHistoryViewData();
+				}
+				Historymodel.patientID = model.selectedPatientDTO.ID;
+				Historymodel.PatientGaxenID = model.selectedPatientDTO.GAXENID;
+				
+			}
+			
+			protected function id_searchPatientView_clickHandler(event:MouseEvent):void
+			{
+				removeExamBarPopup();
+				
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+			}
+			
+			private function removeExamBarPopup():void
+			{
+				removeConfirmPatientLoadPopup();
+				removeOptionBarPopup();
+			}
+			
+			protected function wipe_effectEndHandler(event:EffectEvent):void
+			{
+				if(currentState != 'flipped' && null != id_searchPatientView.id_patientSearch)
+				{
+					id_searchPatientView.id_patientSearch.text = '';
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					switchToDefault();
+				});
+			}
+			
+		]]>
+	</fx:Script>
+	<!-- START States For patient selected Name and SearchPatient Component -->
+	<s:states>
+		<s:State name="default"/>
+		<s:State name="flipped"/>
+	</s:states>
+	
+	<s:transitions>
+		<s:Transition id="t1">
+			<s:Wipe id="wipe"
+					direction="left"
+					target="{id_selectedSearchPatientView}"
+					effectEnd="wipe_effectEndHandler(event)"
+					duration="500" />
+		</s:Transition>
+	</s:transitions>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" paddingRight="23" paddingTop="0" paddingLeft="21" paddingBottom="0"  gap="10"/>
+	</s:layout>
+	
+	<s:HGroup width="50%" gap="1" verticalAlign="middle">
+		<s:ToggleButton id="id_patientProfile"
+						buttonMode="true" useHandCursor="true"
+						width="35" height="35"
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.bar.PatientProfileTBSkin"
+						toolTip="Patient Profile" enabled="false"
+						selected="@{viewModel.showMainProfileTab}"
+						click="bar_clickHandler(event)"
+						/>
+		<s:Group width="100%" height="100%">
+			<view2:AutoCompleteSearch id="id_searchPatientView" 
+									  width="100%"  
+									  horizontalCenter="0" top="5"
+									  visible.flipped="true" 
+									  PatientSelected="whenPatientSelected(event)"
+									  focusOut="searchPatientView_focusOutHandler(event)"
+									  click="id_searchPatientView_clickHandler(event)"
+									  />
+			<exambar:SeletecSearchPatientView id="id_selectedSearchPatientView"
+											  width="100%" height="100%" 
+											  buttonMode="true" useHandCursor="true"
+											  visible.flipped="false" 
+											  ShowSearchPanel="{currentState = 'flipped'; id_searchPatientView.id_patientSearch.setFocus() }"
+											  click="id_selectedSearchPatientView_clickHandler(event)"/>
+		</s:Group>
+	</s:HGroup>
+	
+	<s:HGroup width="50%" paddingTop="12" horizontalAlign="right" gap="5" verticalAlign="middle">
+		
+		<s:HGroup paddingTop="6" height="100%">
+			<s:ToggleButton id="id_HistoryTButton"
+							enabled="false"
+							useHandCursor="true" buttonMode="true" toolTip="History"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.bar.HistoryTBSkin"
+							selected="@{viewModel.showMainHistoryTab}"
+							click="bar_clickHandler(event)"
+							/>
+			<s:ToggleButton id="id_InputTButton"
+							enabled="false"
+							useHandCursor="true" buttonMode="true" toolTip="Input"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.bar.InputTBSkin"
+							selected="@{viewModel.showMainInputTab}"
+							click="bar_clickHandler(event)"
+							/>
+		</s:HGroup>
+		<s:Spacer width="10" />
+		<s:HGroup paddingTop="6" height="100%">
+			<s:ToggleButton id="id_tbOption"
+							verticalCenter="0" buttonMode="true" useHandCursor="true" toolTip="More Options"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.bar.OptionTBSkin" 
+							click="ShowOptionPanelHandler(event)" 
+							/>
+			<s:Button id="id_ClosePatient"
+					  click="whenPatientCloseRequested()"
+					  useHandCursor="true" buttonMode="true" toolTip="Close Patient"
+					  skinClass="com.gazuntite.skins.controls.button.bar.ClosePatientButtonSkin"
+					  enabled="false"
+					  />
+		</s:HGroup>
+	</s:HGroup>
+	
+</s:SkinnableContainer>

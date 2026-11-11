@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:view="com.zigron.gazuntite.view.*" 
+					   xmlns:login="com.zigron.gazuntite.view.login.*"
+					   xmlns:tink="spark.tink.controls.*"
+					   xmlns:components="com.gazuntite.controls.extended.components.*"  
+					   showStatusBar="false"
+					   backgroundAlpha="0"
+					   initialize="init(event)"
+					   creationComplete="cc(event)" 
+					   closing="windowedapplication1_closingHandler(event)" xmlns:registration="com.zigron.gazuntite.view.registration.*"
+					   >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.appController.QSCommonController;
+			import com.gazuntite.common.dto.provider.SpecialityCodeDTO;
+			import com.gazuntite.common.dto.typeDTO.UserTypeDTO;
+			import com.gazuntite.common.event.GetPatientGaxenIdEvent;
+			import com.gazuntite.common.event.LoadAllUserTypeEvent;
+			import com.gazuntite.common.event.provider.GetSpecialityEvent;
+			import com.gazuntite.common.model.QSCommonModelLocater;
+			import com.gazuntite.common.util.LoggingUtil;
+			import com.gazuntite.common.util.xml.XmlUtils;
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.dictation.controller.DictationController;
+			import com.gazuntite.dictation.model.DictationModelLocator;
+			import com.gazuntite.history.controller.HistoryController;
+			import com.gazuntite.input.controller.QIController;
+			import com.gazuntite.provider.eprescription.services.patient.appController.EPrescriptionController;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.live.services.billing.appController.BillingController;
+			import com.gazuntite.provider.live.services.billing.model.BillingModelLocator;
+			import com.gazuntite.provider.live.services.elab.appController.ELabsController;
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.search.services.patient.appController.SearchPatientController;
+			import com.gazuntite.provider.search.services.patient.model.SearchPatientModelLocator;
+			import com.gazuntite.provider.search.services.provider.appController.SearchProviderController;
+			import com.gazuntite.provider.search.services.provider.model.SearchProviderModelLocator;
+			import com.gazuntite.provider.services.email.appController.EmailController;
+			import com.gazuntite.provider.services.email.model.EmailModelLocator;
+			import com.gazuntite.provider.services.sms.appController.SMSController;
+			import com.gazuntite.provider.services.sms.model.SMSModelLocator;
+			import com.gazuntite.utils.HTMLToolTip;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.video.chat.manager.VideoChatManager;
+			import com.gazuntite.webRTC.manager.OpenTokWebViewManager;
+			import com.gazuntite.webRTC.model.WebRTCModel;
+			import com.gazuntite.webRTC.webRTCcontroller.WebRTCcontroller;
+			import com.zigron.gazuntite.controller.GazuntiteClientController;
+			import com.zigron.gazuntite.event.login.LoadUserSessionTypeEvent;
+			import com.zigron.gazuntite.event.login.LogoutEvent;
+			import com.zigron.gazuntite.logging.FileTarget;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.provider.ProviderList;
+			import com.zigron.gazuntite.utils.ChromeUtil;
+			import com.zigron.gazuntite.view.event.LoginViewEvent;
+			import com.zigron.gazuntite.view.event.LogoutViewEvent;
+			import com.zigron.gazuntite.view.event.RegisterProviderViewEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			import mx.logging.Log;
+			import mx.logging.LogEventLevel;
+			import mx.logging.targets.TraceTarget;
+			import mx.managers.ToolTipManager;
+			
+			[Embed(source='assets/fonts/CALIBRI.TTF', fontWeight='bold', fontName='CalibriCFF', mimeType='application/x-font',embedAsCFF='true')] 
+			private var font1:Class;
+			
+			[Embed(source='assets/fonts/CALIBRIB.TTF', fontWeight='bold', fontName='CalibriCFFBold', mimeType='application/x-font', embedAsCFF='true')] 
+			private var font2:Class;
+			
+			private var configurationFile:File;
+			//private var LogTarget : LineFormattedTarget;
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable] private var opentokManager:OpenTokWebViewManager = OpenTokWebViewManager.getInstance();
+			
+			[Bindable] private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable] protected var viewModel:PatientViewModel = PatientViewModel.getInstance();
+			
+			protected function init(event:FlexEvent):void
+			{
+				ToolTipManager.toolTipClass = HTMLToolTip;
+				
+				ChromeUtil.topLevelWindow 			= nativeWindow;
+				ChromeUtil.topLevelMainContainer 	= id_MainContainer;
+				ChromeUtil.topLevelApplication 		= this;
+				
+				this.x = 0;
+				this.y = 0;
+				if((Capabilities.os.indexOf("Windows") >= 0))
+				{
+					ChromeUtil.topLevelWindowXpos = this.x;
+					ChromeUtil.topLevelWindowYpos = this.y;
+				}
+				else if((Capabilities.os.indexOf("Mac") >= 0))
+				{
+					//this.y = 25;
+					ChromeUtil.topLevelWindowXpos = this.x;
+					ChromeUtil.topLevelWindowYpos = this.y;
+				} 
+				else 
+				{
+					ChromeUtil.topLevelWindowXpos = this.x;
+					ChromeUtil.topLevelWindowYpos = this.y;
+				}
+				
+				this.width 			 = Capabilities.screenResolutionX; //screen.width;
+				this.height 		 = Capabilities.screenResolutionY - 45; //screen.height - 30;
+				
+				
+				LoadApplicationConfig();
+			}
+			
+			
+			
+			protected function LoadApplicationConfig():void
+			{
+				this.configurationFile = new File("app:/config/AppConfigurations.xml");
+				
+				if( configurationFile && configurationFile.exists )
+				{
+					var stream:FileStream = new FileStream();
+					stream.open( configurationFile, FileMode.READ);
+					
+					var prefsXML:XML 						= XML(stream.readUTFBytes(stream.bytesAvailable));
+					
+					stream.close();
+					stream = null;
+					this.configurationFile = null;
+					
+					var settings_config:XML 				= prefsXML.settings[0];
+					model.SettingConfigXML 					= settings_config;
+					
+					initLogging();
+					
+					if( Log.isDebug() )
+						logger.debug( "SettingConfigXML: " + model.SettingConfigXML );		
+					
+					var service_config:XML 					= prefsXML.service.(@type == prefsXML.@type)[0];
+					model.ServiceConfigXML 					= service_config;
+					
+					UpdateConfigurations(service_config);
+					
+				}
+				
+				var appXml:XML 		= NativeApplication.nativeApplication.applicationDescriptor;
+				var ns:Namespace 	= appXml.namespace();
+				var appId:String 	= appXml.ns::id[0];
+				var appName:String 	= appXml.ns::filename[0];
+				
+				var appVersion:String = appXml.ns::versionNumber[0];
+				model.AppVersion = "V " + appVersion;
+
+				logger.info( "Application ID is " + appId + ", having Name " + appName + " and Version is " + appVersion );
+				
+			}
+			
+			private function UpdateConfigurations(service_config:XML):void
+			{
+				QIController.getInstance().ConfigXML 					= service_config ;
+				EPrescriptionModelLocator.getInstance().ConfigXML 		= service_config;
+				BillingModelLocator.getInstance().ConfigXML				= service_config;
+				EmailModelLocator.getInstance().ConfigXML 				= service_config;
+				SMSModelLocator.getInstance().ConfigXML 				= service_config;
+				ELabsAppModelLocator.getInstance().ConfigXML 			= service_config;
+				WebRTCModel.getInstance().ConfigXML 					= service_config;
+				SchedulerModelLocator.getInstance().ConfigXML 			= service_config;
+				SearchPatientModelLocator.getInstance().ConfigXML 		= service_config;
+				SearchProviderModelLocator.getInstance().ConfigXML 		= service_config;
+				QSCommonModelLocater.getInstance().ConfigXML 			= service_config;
+				DictationModelLocator.getInstance().ConfigXML 			= service_config;
+				
+			}
+				
+			protected function cc(event:FlexEvent):void
+			{
+				GazuntiteClientController.getInstance();
+				SearchPatientController.getInstance();
+				SearchProviderController.getInstance();
+				WebRTCcontroller.getInstance();
+				EPrescriptionController.getInstance();
+				ELabsController.getInstance();
+				HistoryController.getInstance();
+				SMSController.getInstance();
+				EmailController.getInstance();
+				BillingController.getInstance();
+				QSCommonController.getInstance();
+				DictationController.getInstance();
+				//LoadAllProviders function is not needed, 
+				//remove this function when actual login impl. is done
+				LoadAllProviders();
+				
+				addEventListener("signOut", OnSignOut);
+				
+				
+				
+			}
+			
+			protected function OnSignOut(event:Event):void
+			{
+				mainContainer.selectedIndex = 0;
+			}
+			
+			private function LoadAllProviders():void
+			{
+				model.AllProviders = new ProviderList();
+				model.AllProviders.FromXML( ProviderList.providersXML );
+				logger.info( "All Providers Loaded." );
+			}
+			
+			
+			/**
+			 * Application logs activity to a file in HTML file. Press <b> Ctrl + L</b> to see log in default browser. 
+			 * The Log file is stored in following lcation on the file system as per OS:
+			 * <br>
+			 * <b>On Windows(2000, XP etc.)--In:</b><br>
+			 * 	/Documents and Settings/{user_name}/Application Data/applicationID.publisherID/Local Store/log/<br>
+			 * 
+			 * <b>On Windows 7--In:</b><br> 	
+			 * 	/Users/{user_name}/AppData/Roaming/Quivus/Local Store/log/GazuntiteClient/log/<br>
+			 * 
+			 * <b>On Mac OS--In:</b><br>
+			 *	/Users/{user_name}/Library/Preferences/applicationID.publisherID/Local Store/log/<br>
+			 * 
+			 * <P>Press <b> Ctrl + L</b> to see log in default browser </P>
+			 * 
+			 */
+			private function initLogging():void
+			{
+				initTraceLogging();
+				initFileLogging();
+				
+				logger.info( "Logging initialization completed." );
+			}
+			
+			private function initFileLogging():void 
+			{
+				
+				var LogTarget:FileTarget 		= new FileTarget(); //new TextAreaTarget( out );
+				
+				var filters:String				= XmlUtils.getPropertyValueByName( 'FILTERS', model.SettingConfigXML );
+				var level:String 				= XmlUtils.getPropertyValueByName( 'LOG_LEVEL', model.SettingConfigXML );
+
+				if( UtilityFunctions.IsNotNullOrEmpty( filters ) && UtilityFunctions.IsNotNullOrEmpty( level ) )
+				{
+					LogTarget.filters 			= [filters];
+					LogTarget.level 			= LoggingUtil.getLogLevel( level ); //LogEventLevel.ALL;
+				}
+				else
+				{
+					LogTarget.level 			= LogEventLevel.ALL;
+				}
+				
+				// Add date, time, category, and log level to the output
+				LogTarget.includeDate 		= true;
+				LogTarget.includeTime 		= true;
+				LogTarget.includeCategory 	= true;
+				LogTarget.includeLevel 		= true;
+				
+				Log.addTarget(LogTarget);		// Begin logging.
+			}
+			
+			private function initTraceLogging():void 
+			{
+				// Create a target.
+				var logTarget:TraceTarget = new TraceTarget();
+				
+				var filters:String				= XmlUtils.getPropertyValueByName( 'FILTERS', model.SettingConfigXML );
+				var level:String 				= XmlUtils.getPropertyValueByName( 'LOG_LEVEL', model.SettingConfigXML );
+				
+				if( UtilityFunctions.IsNotNullOrEmpty( filters ) && UtilityFunctions.IsNotNullOrEmpty( level ) )
+				{
+					logTarget.filters 			= [filters];
+					logTarget.level 			= LoggingUtil.getLogLevel( level ); //LogEventLevel.ALL;
+				}
+				else
+				{
+					logTarget.level 			= LogEventLevel.ALL;
+				}
+				
+				// Add date, time, category, and log level to the output.
+				logTarget.includeDate 		= true;
+				logTarget.includeTime 		= true;
+				logTarget.includeCategory 	= true;
+				logTarget.includeLevel 		= true;
+				logTarget.includeCategory 	= true;
+				
+				Log.addTarget(logTarget);		// Begin logging.
+				
+				
+			}
+			
+			
+			protected function id_LoginView_loginHandler(event:LoginViewEvent):void
+			{
+				mainContainer.selectedIndex = event.success ? 1 : 0;
+				
+				if(event.success)
+				{
+					var eve:GetPatientGaxenIdEvent = new GetPatientGaxenIdEvent(model.LoggedInUserDTO.UserId.toString(), onGetPatientGaxenId, true);
+					CairngormEventDispatcher.getInstance().dispatchEvent(eve);
+				}
+				
+				var sessiontypeEvent:LoadUserSessionTypeEvent = new LoadUserSessionTypeEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(sessiontypeEvent);
+			}
+			
+				private function onGetPatientGaxenId(result:XML):void
+				{
+					var gaxenID:String = result[0];
+					
+					if (!gaxenID || gaxenID == "0")
+					{
+						return;
+					}
+					
+					model.LoggedInuserGaxenID = gaxenID;
+					
+				}
+			
+			protected function windowedapplication1_closingHandler(event:Event):void
+			{
+				VideoChatManager.getInstance().logoff();
+				Logout(new LogoutViewEvent(false));
+				logger.debug( " application closing - logoff video chat " );
+			}
+			
+			public function Logout(event:LogoutViewEvent):void
+			{
+				doApplicatiopClosed = event.doApplicatiopClosed;
+				
+				if(viewModel.selectedPatient != null)
+				{
+					logger.debug( " application closing - requesting close patient " );
+					id_MainContainer.id_examBar.whenPatientCloseRequested(null, requestServiceLogout);
+				}
+				else
+				{
+					requestServiceLogout();
+				}
+				
+			}
+			
+			private var doApplicatiopClosed:Boolean;
+			private function requestServiceLogout():void
+			{
+				var logoutevent:LogoutEvent = new LogoutEvent(serviceLogoutCallback);
+				logger.debug( " application closing - requesting service logout " );
+				CairngormEventDispatcher.getInstance().dispatchEvent(logoutevent);
+				
+				opentokManager.isAvailable = true;
+				opentokManager.VideoChat_URL = '';
+			}
+			
+			private function serviceLogoutCallback():void
+			{
+				logger.debug( " application closing - service logout successfully " );
+				mainContainer.selectedIndex = 0;
+				if(doApplicatiopClosed)
+					ChromeUtil.closeWindow();
+				
+				model.ResetModel();
+				logger.debug( " application closed - successfully " );
+			}
+			
+			protected function id_MainContainer_creationCompleteHandler(event:FlexEvent):void
+			{
+				addEventListener(LogoutViewEvent.LOG_OUT,Logout);
+			}
+			
+			protected function id_RegiterProvider_RegisterProviderHandler(event:RegisterProviderViewEvent):void
+			{
+				mainContainer.selectedIndex =  0;
+				
+				if(event.success)
+				{
+					id_LoginView.userNameTxt.text = event.registeredProviderId;
+					id_LoginView.passwordTxt.text = "";
+				}
+			}
+			
+			protected function id_LoginView_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_LoginView.id_registerProvider.addEventListener(MouseEvent.CLICK,viewRegistrProviderForm);
+			}
+			private function viewRegistrProviderForm(event:MouseEvent):void
+			{
+				if( !SpecialityList || SpecialityList.length == 0)
+				{
+					getSpecialityList();
+				}
+				if( !UserTypeList || UserTypeList.length == 0)
+				{
+					//cursorManager.setBusyCursor();
+					loadUserTypes();
+				}
+				else
+				{ 
+					if(id_RegiterProvider && id_RegiterProvider.id_role)
+						id_RegiterProvider.resetFileds();
+					mainContainer.selectedIndex =  2;
+				}
+			}
+			
+			//[08/06/2013] Shahid Munir, for provider registration
+			
+			private var _SpecialityList:ArrayCollection;
+			private var _UserTypeList:ArrayCollection;
+
+			[Bindable]
+			public function get UserTypeList():ArrayCollection
+			{
+				return _UserTypeList;
+			}
+
+			public function set UserTypeList(value:ArrayCollection):void
+			{
+				_UserTypeList = value;
+			}
+
+
+			[Bindable]
+			public function get SpecialityList():ArrayCollection
+			{
+				return _SpecialityList;
+			}
+
+			public function set SpecialityList(value:ArrayCollection):void
+			{
+				_SpecialityList = value;
+			}
+
+			private function loadUserTypes():void
+			{
+				var ute:LoadAllUserTypeEvent = new LoadAllUserTypeEvent(loadUserTypesResponse);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ute);
+			}
+			
+			private function loadUserTypesResponse(userTypeXML:XML):void
+			{
+				UserTypeList = new ArrayCollection();
+				
+				var xUserTypes:XMLList = userTypeXML.users;
+				var i:int = 0;					
+				for( i = 0; i < xUserTypes.length(); i++ )
+				{
+					var dto:UserTypeDTO = new UserTypeDTO();
+					dto.FromXML( xUserTypes[i][0] );
+					UserTypeList.addItem( dto );
+				}	
+				
+				if(id_RegiterProvider && id_RegiterProvider.id_role)
+					id_RegiterProvider.resetFileds();
+				//cursorManager.removeBusyCursor();
+				mainContainer.selectedIndex =  2;
+			}
+			
+			private function getSpecialityList():void
+			{
+				
+				var securityHeaderXML:XML	 			= <Header />;					
+				securityHeaderXML.@EUserName	= "null";
+				securityHeaderXML.@EPassword	= "null";
+				securityHeaderXML.@ClinicID		= "sad";
+				
+				var spe:GetSpecialityEvent = new GetSpecialityEvent(getSpecialityListResponse,true);
+				spe.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent(spe);
+			}
+			
+			private function getSpecialityListResponse(specialityXML:XML):void
+			{
+				SpecialityList = new ArrayCollection();
+				
+				var xSpecialityList:XMLList = specialityXML.SpecialityList.SpecialityCodes;
+				var i:int = 0;					
+				for( i = 0; i < xSpecialityList.length(); i++ )
+				{
+					var dto:SpecialityCodeDTO = new SpecialityCodeDTO();
+					dto.FromXML( xSpecialityList[i][0]);
+					SpecialityList.addItem( dto );
+				}	
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Style source="assets/css/AppStyle.css" />
+	
+	<s:layout>
+		<s:VerticalLayout paddingRight="5" paddingLeft="5" paddingBottom="5" paddingTop="5" gap="0"/>
+	</s:layout>
+			 
+	<components:LabelViewStack id="mainContainer" width="50%" height="100%" cornerRadius="8" selectedIndex="0">
+		<s:ArrayList>
+			<login:LoginView id="id_LoginView" name="Login" width="100%" height="100%" creationComplete="id_LoginView_creationCompleteHandler(event)" 
+							 login="id_LoginView_loginHandler(event)" skinClass="com.gazuntite.skins.controls.container.AppbackgroundSkin"/>
+			
+			<view:MainContainer id="id_MainContainer" name="Content" width="100%" height="100%" creationComplete="id_MainContainer_creationCompleteHandler(event)"
+								skinClass="com.gazuntite.skins.controls.container.AppbackgroundSkin" />
+			<registration:RegisterProviderView id="id_RegiterProvider" width="100%" height="100%" 
+											   SpecialityTypes="{SpecialityList}" RoleTypes="{UserTypeList}"
+											   skinClass="com.gazuntite.skins.controls.container.AppbackgroundSkin"
+											   RegisterProvider="id_RegiterProvider_RegisterProviderHandler(event)" />
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+</s:WindowedApplication>

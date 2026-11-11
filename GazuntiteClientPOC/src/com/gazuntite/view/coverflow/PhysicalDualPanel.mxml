@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dualpanel:DualPanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:components="com.gazuntite.components.*"
+					 xmlns:forms="com.gazuntite.view.quickInput.forms.*" 
+					 xmlns:input="com.gazuntite.view.controls.custom.patientExamView.quickInput.immunization.input.*" 
+					 xmlns:controls="com.gazuntite.view.controls.*" 
+					 xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+					 xmlns:immunization="com.gazuntite.view.quickInput.forms.immunization.*" 
+					 xmlns:allergies="com.gazuntite.view.quickInput.forms.allergies.*"
+					 skinClass="com.riavalue.components.dualpanel.SpinSkin"
+					 width="100%"
+					 height="100%"
+					 transitionDuration="300"
+					 xmlns:ros="com.gazuntite.view.quickInput.forms.ros.*" 
+					 creationComplete="creationCompleteHandler(event)" xmlns:Physical="com.gazuntite.view.quickInput.forms.Physical.*" xmlns:dualpanel="com.riavalue.components.dualpanel.*" 
+					 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.OptionsButtonClickedEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.rosPhysical.PhysicalDTO;
+			import com.gazuntite.services.valueObjects.rosPhysical.ROSDTO;
+			import com.gazuntite.utils.QSUtilityFunctions;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]
+			protected var selectedRecord:int;
+			
+			[Bindable]
+			protected var editObject:Object;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			[Bindable]
+			public var dataProvider:ArrayCollection;
+			
+			
+			private function UpdateChange():void
+			{
+				try
+				{
+					UpdateCheckStatus();
+					
+					if( UtilityFunctions.IsNotNullOrEmpty( dataProvider ))
+					{
+						var hasData:Boolean = QSUtilityFunctions.checkROSNormal(dataProvider);
+						
+						if( hasData == false )
+							hasData = QSUtilityFunctions.checkROSNotes(dataProvider);
+						
+						hasChange =  hasData;
+					}
+				}
+				catch( e:Error )
+				{
+					trace( "UpdateChange -> QIPhysical::Physical", e.message );
+				}
+			}
+			
+			private var m_bHasChange:Boolean;
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				trace( "Physical Change:",value );
+				
+				m_bHasChange = value;
+				
+				
+				/* if( value )
+				{
+				id_Header.id_ChangeIndicator.visible		 = true;
+				id_Header.id_ChangeIndicator.includeInLayout = true;
+				}
+				else
+				{
+				id_Header.id_ChangeIndicator.visible		 = false;
+				id_Header.id_ChangeIndicator.includeInLayout = false;
+				} */
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				dataProvider 					= createDummyData(15);
+				QSUtilityFunctions.rosDTOList 	= dataProvider;
+			}
+			
+			public function UpdateCheckStatus():void
+			{
+				var currIndex:int = id_PhysicalView.id_TreeList.ParentSelectedIndex;
+				var i:int;
+				for( i = 0 ; i <  id_PhysicalView.DataProvider.length ; i++ )
+				{
+					id_PhysicalView.id_TreeList.selectItemByIndex( i );
+					id_PhysicalView.UpdateCheckStatus();
+				}
+				
+				id_PhysicalView.id_TreeList.selectItemByIndex( currIndex );
+				hasChange = true;
+			}
+			
+			
+			private function createDummyData( maxDataSize:int = 10, max2rdLevelDataSize:int = 23, max3rdLevelDataSize:int = 23 ):ArrayCollection
+			{
+				var dummy:ArrayCollection = new ArrayCollection();
+				var i:int;
+				for( i = 0; i < maxDataSize; i++ )
+				{
+					var pDTO:PhysicalDTO = new PhysicalDTO();
+					pDTO.MainCategoryName = "Parent " + i;
+					pDTO.label = "Parent " + i;
+					pDTO.children = new ArrayCollection();
+					var j:int;
+					var add:Boolean = true;
+					for( j = 0; j < max2rdLevelDataSize; j++ )
+					{
+						add = true;
+						var cDTO:PhysicalDTO = new PhysicalDTO();
+						cDTO.label = "Child " + i + " " + j;
+						cDTO.SubCategoryName = "Child " + i + " " + j;
+						if( i == 4 || i == 6 || i == 8 )
+						{
+							add = false;
+							if( j == 3 || j == 5 || j == 7 )
+							{
+								add = true;
+								cDTO.children = new ArrayCollection();
+								var k:int;
+								for( k = 0; k < max3rdLevelDataSize; k++ )
+								{
+									var ccDTO:PhysicalDTO = new PhysicalDTO();
+									ccDTO.label = "Child " + i + " " + j + " " + k;
+									ccDTO.PhysicalSubLevel3CategoryName= "Child " + i + " " + j + " " + k;
+									cDTO.children.addItem( ccDTO );
+								}
+							}
+						}
+						if( add )
+							pDTO.children.addItem( cDTO );
+					}
+					dummy.addItem( pDTO );
+				}
+				
+				return dummy;
+			}
+			
+			protected function optionsButtonClickedHandler(event:OptionsButtonClickedEvent):void
+			{
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	
+	<dualpanel:frontView>
+		<controls:CoverFlowPanelView id="frontPanel" 
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="{'Physical: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 optionsButtonClicked="optionsButtonClickedHandler(event)">
+			
+			<s:SkinnableContainer id="physical_BackView" skinClass="com.gazuntite.skins.ros.QISectionBGSkin" width="100%" 
+								  >
+				<s:layout>
+					<s:VerticalLayout  verticalAlign="top" gap="0"   horizontalAlign="center" paddingRight="3" paddingBottom="2"
+									   paddingTop="2" paddingLeft="2"/>
+				</s:layout>
+				<Physical:PhysicalView id="id_PhysicalView" width="100%" DataProvider="{dataProvider}" />
+				<!--<ros:ROSView id="id_ROSView" width="100%" DataProvider="{dataProvider}" />-->
+				
+				
+			</s:SkinnableContainer>
+			
+		</controls:CoverFlowPanelView>
+	</dualpanel:frontView>
+	
+	<dualpanel:backView>
+		<controls:CoverFlowPanelView id="backPanel" 
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 borderAlpha="0"
+									 title="{'Review of System: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 optionsButtonClicked="optionsButtonClickedHandler(event)">
+			
+			<s:SkinnableContainer id="Physical_FrontView" skinClass="com.gazuntite.skins.ros.QISectionBGSkin" width="100%" 
+								  >
+				<s:layout>
+					<s:VerticalLayout  verticalAlign="top" gap="0"   horizontalAlign="center" paddingRight="3" paddingBottom="2"
+									   paddingTop="2" paddingLeft="2"/>
+				</s:layout>
+				
+				<Physical:PhysicalView  id="id_PhysicalviewBV" width="100%" DataProvider="{dataProvider}" />
+				<!--<ros:ROSView id="id_ROSViewBV" width="100%" DataProvider="{dataProvider}" />-->
+				
+				
+			</s:SkinnableContainer>
+			
+		</controls:CoverFlowPanelView>
+	</dualpanel:backView>
+	
+	
+	
+	
+</dualpanel:DualPanel>

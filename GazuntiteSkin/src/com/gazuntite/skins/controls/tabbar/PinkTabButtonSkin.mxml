@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark" 
+                   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+                   minWidth="70" minHeight="21" 
+                   alpha.disabledStates="0.5">
+	
+	<fx:Metadata>[HostComponent("spark.components.ButtonBarButton")]</fx:Metadata>
+    
+    <!-- host component -->
+    <fx:Script fb:purpose="styling">
+        
+		<![CDATA[
+			import spark.components.supportClasses.ToggleButtonBase;
+		/* Define the skin elements that should not be colorized. 
+           For toggle button, the graphics are colorized but the label is not. */
+        static private const exclusions:Array = ["labelDisplay"];
+
+        /**
+         * @private
+         */    
+        override public function get colorizeExclusions():Array {return exclusions;}
+        
+        /**
+         * @private
+         */
+        override protected function initializationComplete():void
+        {
+            useChromeColor = true;
+            super.initializationComplete();
+        }
+        
+        /**
+         * @private
+         */
+        override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+        {
+             super.updateDisplayList(unscaledWidth, unscaledHeight);
+			 if ((hostComponent as ToggleButtonBase).selected)
+			 {
+				 labelDisplay.text 		= hostComponent.label.toUpperCase();
+			 }
+			 else
+			 {
+				 labelDisplay.text 		= hostComponent.label;
+			 }
+        }
+        
+        private var cornerRadius:Number = 2;
+		]]>
+    </fx:Script>
+    
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" stateGroups="overStates" />
+        <s:State name="down" stateGroups="downStates" />
+        <s:State name="disabled" stateGroups="disabledStates" />
+        <s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+        <s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+        <s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+        <s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+    </s:states>
+    
+	<s:Rect x="0" y="0" width="100%" height="25" alpha="1" radiusX="4"
+			height.disabledAndSelected="30"
+			visible.down="false"
+			visible.downAndSelected="false"
+			visible.over="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#676767" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#353535" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:Rect includeIn="down,downAndSelected,over,overAndSelected,up,upAndSelected" x="0" y="0"
+			width="100%" radiusX="4"
+			height.down="25"
+			height.downAndSelected="28"
+			height.over="25"
+			height.overAndSelected="28"
+			visible.up="false" height.up="25"
+			height.upAndSelected="28">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#DB8493" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FBD7D1"
+								 ratio.down="1"
+								 ratio.downAndSelected="0.803921568627451"
+								 ratio.over="1"
+								 ratio.overAndSelected="0.803921568627451"
+								 ratio.up="1"
+								 ratio.upAndSelected="0.803921568627451"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="#936A6A"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+    <!-- layer 8: text -->
+    <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay -->
+    <s:Label id="labelDisplay"
+             textAlign="center"
+             verticalAlign="middle"
+             maxDisplayedLines="1"
+             horizontalCenter="0" verticalCenter="-1" verticalCenter.selectedStates="1"
+			 fontFamily="CalibriCFF" fontFamily.selectedStates="CalibriCFFBold" fontWeight.selectedStates="bold"
+			 fontSize="13" fontSize.selectedStates="14"
+			 color="#FFFFFF" color.selectedStates="#000000" color.overStates="#000000" paddingLeft="5" paddingRight="5"
+			 >
+    </s:Label>
+    
+</s:SparkButtonSkin>

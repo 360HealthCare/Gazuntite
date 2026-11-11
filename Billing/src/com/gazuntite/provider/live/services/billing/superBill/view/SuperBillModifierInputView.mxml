@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="cc(event)"
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model : SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			[Bindable]
+			public var modifierDispalyNo:int = 1; 
+			
+			private var popup:SuperBillModifierInputPopup = new SuperBillModifierInputPopup();
+			
+			[Bindable]
+			public var GeneratedSig:String = "";
+			
+			private var isStaticDataLoaded:Boolean;
+			
+			public var selectedModifier1	:Object;
+			public var selectedModifier2	:Object;
+			public var selectedModifier3	:Object;
+			public var selectedModifier4	:Object;
+			
+			public var selectedBtn:String = '';
+			
+			protected function InputButton_clickHandler(event:MouseEvent):void
+			{
+				var id:String = event.currentTarget.id;
+				var isDefaultDisplay:Boolean = true;
+				
+				if(popup.isPopUp) // already a pop is openned. close that popuop to open the next one.
+				{
+					if(event.currentTarget.id != selectedBtn)
+						event.currentTarget.selected = false;
+					else
+						event.currentTarget.selected = true;
+					
+					event.stopImmediatePropagation();
+					event.preventDefault();					
+					//popup.removePopup();
+					return;
+				}
+				
+				popup = new SuperBillModifierInputPopup();
+				
+				switch(id)
+				{
+					case "id_Modifier1Btn":
+					{
+						popup.DataProvider = model.CPTModifierTypeList1;
+						popup.labelFeild   = "ModifierDescription";
+						selectedBtn = 'id_Modifier1Btn';
+						if(null != selectedModifier1)
+						{
+							popup.selectedItem = selectedModifier1.item;							
+						}
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							id_Modifier1.text = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[0]);
+							id_Modifier1.toolTip = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[1]);
+							
+							id_Modifier1Btn.selected = false ;
+							selectedBtn = '';
+							
+							selectedModifier1 = {item:popup.selectedItem};
+							setModifierNo();
+						});
+						popup.addEventListener("CancelClick", function(event:Event):void
+						{
+							id_Modifier1Btn.selected = false ;
+							selectedBtn = '';
+						});
+						
+						break;
+					}
+						
+					case "id_Modifier2Btn":
+					{
+						popup.DataProvider = model.CPTModifierTypeList2;
+						popup.labelFeild   = "ModifierDescription";
+						selectedBtn = 'id_Modifier2Btn';
+						if(null != selectedModifier2)
+						{
+							popup.selectedItem = selectedModifier2.item;
+						}
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							id_Modifier2.text = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[0]);
+							id_Modifier2.toolTip = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[1]);
+							
+							id_Modifier2Btn.selected = false ;
+							selectedBtn = '';
+							
+							selectedModifier2 = {item:popup.selectedItem};
+							setModifierNo();
+						});
+						popup.addEventListener("CancelClick", function(event:Event):void
+						{
+							id_Modifier2Btn.selected = false ;
+							selectedBtn = '';
+						});
+						
+						break;
+					}
+					case "id_Modifier3Btn":
+					{
+						popup.DataProvider = model.CPTModifierTypeList3;
+						popup.labelFeild   = "ModifierDescription";
+						selectedBtn = 'id_Modifier3Btn';
+						if(null != selectedModifier3)
+						{
+							popup.selectedItem = selectedModifier3.item;
+						}
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							id_Modifier3.text = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[0]);
+							id_Modifier3.toolTip = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[1]);
+							
+							id_Modifier3Btn.selected = false ;
+							selectedBtn = '';
+							
+							selectedModifier3 = {item:popup.selectedItem};
+							setModifierNo();
+						});
+						popup.addEventListener("CancelClick", function(event:Event):void
+						{
+							id_Modifier3Btn.selected = false ;
+							selectedBtn = '';
+						});
+						
+						break;
+					}
+					case "id_Modifier4Btn":
+					{
+						popup.DataProvider = model.CPTModifierTypeList4;
+						popup.labelFeild   = "ModifierDescription";
+						selectedBtn = 'id_Modifier4Btn';
+						if(null != selectedModifier4)
+						{
+							popup.selectedItem = selectedModifier4.item;
+						}
+						popup.addEventListener("OkClick", function(event:Event):void
+						{
+							id_Modifier4.text = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[0]);
+							id_Modifier4.toolTip = UtilityFunctions.TrimString(popup.selectedItem.ModifierDescription.split("-")[1]);
+							
+							id_Modifier4Btn.selected = false ;
+							selectedBtn = '';
+							
+							selectedModifier4 = {item:popup.selectedItem};
+							setModifierNo();
+							
+						});
+						popup.addEventListener("CancelClick", function(event:Event):void
+						{
+							id_Modifier4Btn.selected = false ;
+							selectedBtn = '';
+						});
+						
+						break;
+					}
+						
+				}
+				
+				popup.ShowPopup( this);
+				
+				if(isDefaultDisplay)
+				{
+					var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+					popup.move( pt.x  , pt.y + event.currentTarget.height  - 4); 
+				}else
+				{
+					var pt2:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+					popup.move( (pt2.x + event.currentTarget.width)  - popup.width - 5 , pt2.y + event.currentTarget.height  - 4); 
+				}
+			}
+			
+			public function setModifierNo():void
+			{				
+				if(UtilityFunctions.IsNotNullOrEmpty(id_Modifier3.text))
+					modifierDispalyNo = 4;
+				else if(UtilityFunctions.IsNotNullOrEmpty(id_Modifier2.text))
+					modifierDispalyNo = 3;
+				else if(UtilityFunctions.IsNotNullOrEmpty(id_Modifier1.text))
+					modifierDispalyNo = 2;
+				else
+					modifierDispalyNo = 1;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				
+			}
+			
+			public function loadStaticData():void
+			{
+				if( isStaticDataLoaded ) return; //static data is already loaded
+											
+				isStaticDataLoaded = true;			
+			}
+			
+			public function ResetFields():void
+			{
+				selectedModifier1				= null;
+				selectedModifier2				= null;
+				selectedModifier3				= null;
+				selectedModifier4				= null;
+				
+				
+				id_Modifier1.text				= '';
+				id_Modifier2.text				= '';
+				id_Modifier3.text				= '';
+				id_Modifier4.text				= '';
+		
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_header" width="100%" height="55" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputViewBg">
+		
+		<s:layout>
+			<s:HorizontalLayout gap="0" />
+		</s:layout>
+		
+		<s:VGroup width="25%" horizontalAlign="center">
+			<s:ToggleButton id="id_Modifier1Btn" label="Modifier 1" width="100%"  click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin"
+							toolTip="Modifier 1"/>
+			<s:Label id="id_Modifier1"  fontSize="14" width="95%" fontFamily="CalibriCFF" maxDisplayedLines="1"	/>
+		</s:VGroup>
+		
+		<s:Line height="100%" visible="{modifierDispalyNo > 1? true: false}">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center" visible="{modifierDispalyNo > 1? true: false}">
+			<s:ToggleButton id="id_Modifier2Btn" label="Modifier 2" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Modifier 2"/>
+			<s:Label id="id_Modifier2"  fontSize="14" width="95%" fontFamily="CalibriCFF" maxDisplayedLines="1"		/>
+		</s:VGroup>
+		
+		<s:Line height="100%" visible="{modifierDispalyNo > 2? true: false}">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center" visible="{modifierDispalyNo > 2? true: false}">
+			<s:ToggleButton id="id_Modifier3Btn" label="Modifier 3" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Modifier 3"/>
+			<s:Label id="id_Modifier3"  fontSize="14" width="95%" fontFamily="CalibriCFF" maxDisplayedLines="1" 	/>
+		</s:VGroup>
+		
+		<s:Line height="100%" visible="{modifierDispalyNo > 3? true: false}">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:VGroup width="25%" horizontalAlign="center" visible="{modifierDispalyNo > 3? true: false}">
+			<s:ToggleButton id="id_Modifier4Btn" label="Modifier 4" width="100%" click="InputButton_clickHandler(event)" 
+							useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ePrescription.MedicineInputToggleButtonSkin" 
+							toolTip="Modifier 4"/>
+			<s:Label id="id_Modifier4"   fontSize="14" width="95%" fontFamily="CalibriCFF" maxDisplayedLines="1" />
+		</s:VGroup>		
+		
+	</s:SkinnableContainer>
+	
+	<s:Line width="100%">
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Line>
+</s:Group>

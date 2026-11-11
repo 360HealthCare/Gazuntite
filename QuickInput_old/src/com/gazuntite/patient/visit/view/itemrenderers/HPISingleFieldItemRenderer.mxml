@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="100%"
+		  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:DateFormatter id="formatDateTime" formatString="MM-DD-YY" />
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.common.view.events.HPIEvent;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.DataGridActionEvent;
+			
+			import mx.controls.ComboBase;
+			import mx.controls.DateField;
+			import mx.core.UIComponent;
+			import mx.events.ValidationResultEvent;
+			import mx.validators.ValidationResult;
+			import mx.validators.Validator;
+			
+			import spark.components.ComboBox;
+			import spark.components.TextInput;
+			
+			private var _data:Object;
+			private var _dataChanged:Boolean;
+			
+			private var _valueEditor:UIComponent;
+			private var _validator:Validator;
+			
+			private var _disableEditableMode:Boolean;
+			
+			[Bindable]
+			public function get data():Object
+			{
+				return _data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				_data = value;
+				
+				if (_data)
+				{
+					if (_data.hasOwnProperty("itemEditor") && _data.itemEditor)
+					{
+						_valueEditor = new _data.itemEditor();
+						_valueEditor.percentWidth = 100;
+						valueEditorGrp.addElement(_valueEditor);
+						
+						_valueEditor.x = valueLbl.x;
+						_valueEditor.y = valueLbl.y;
+						_valueEditor.visible = false;
+						
+						if( _valueEditor is TextInput )
+						{
+							var txtFld:TextInput = TextInput(_valueEditor);
+							txtFld.text = _data.value;
+							
+							txtFld.setStyle("fontFamily", "Calibri");
+							txtFld.setStyle("fontSize", 11);
+						}
+						else
+						if (_valueEditor is DateField)
+						{
+							var dtFld:DateField = DateField(_valueEditor);
+							dtFld.yearNavigationEnabled = true;
+							dtFld.text = _data.value;
+							dtFld.selectableRange = {rangeEnd : new Date()};
+							//dtFld.minHeight = 350;
+							/* dtFld.setStyle("fontFamily", "Calibri");
+							dtFld.setStyle("fontSize", 11); */
+						}
+						
+						else if (_valueEditor is ComboBox && _data.hasOwnProperty("dataProvider"))
+						{
+							var cmboBox:ComboBox = ComboBox(_valueEditor);
+							cmboBox.dataProvider = _data.dataProvider;
+							
+							cmboBox.setStyle("fontFamily", "Calibri");
+							cmboBox.setStyle("fontSize", 11);
+						}
+					}
+					
+					if (_data.hasOwnProperty("validator") && _data.validator)
+					{
+						_validator = _data.validator;
+					}
+					
+					_dataChanged = true;
+					invalidateProperties();
+				}
+			}
+			
+			public function get disableEditableMode():Boolean
+			{
+				return _disableEditableMode;
+			}
+			
+			public function set disableEditableMode(value:Boolean):void
+			{
+				_disableEditableMode = value;
+				
+				if (_disableEditableMode && valueLbl.hasEventListener(MouseEvent.CLICK))
+				{
+					valueLbl.removeEventListener(MouseEvent.CLICK, onLabelClick);
+				}
+			}
+
+			public function makeItEditable():void
+			{
+				valueLbl.visible = false;
+				
+				if (_valueEditor)
+				{
+					_valueEditor.visible = true;
+					_valueEditor.setFocus();
+					_valueEditor.addEventListener(FocusEvent.FOCUS_OUT, editorFocusOutHandler, false, 0, true);
+					_valueEditor.addEventListener(KeyboardEvent.KEY_UP, editorKeyUpHandler, false, 0, true);
+					
+					if (_valueEditor is ComboBox)
+						ComboBox(_valueEditor).textInput.text = data.hasOwnProperty("value")? data["value"]: "";
+				}
+			}
+			
+			private function onLabelClick(event:MouseEvent):void
+			{
+				if (_disableEditableMode)
+				{
+					valueLbl.removeEventListener(MouseEvent.CLICK, onLabelClick);
+					return;
+				}
+				
+				makeItEditable();
+			}
+			
+			private function editorFocusOutHandler(event:FocusEvent):void
+			{
+				valueLbl.visible = true;
+				
+				if (_valueEditor)
+				{
+					_valueEditor.visible = false;
+					
+					if (_valueEditor is ComboBox)
+					{
+						var editor:ComboBox = ComboBox(_valueEditor);
+						if (valueLbl.text != editor.textInput.text)
+						{
+							_data.value = editor.textInput.text;
+							_dataChanged = true;
+							
+							invalidateProperties();
+						}
+					}
+					else if (_valueEditor is DateField)
+					{
+						var dateFld:DateField  = DateField(_valueEditor);
+						_data.value = dateFld.selectedDate;
+						_dataChanged = true;
+						
+						invalidateProperties();
+					}
+					else if(_valueEditor is TextInput)
+					{
+						var dataFld:TextInput  = TextInput(_valueEditor);
+						_data.value = dataFld.text;
+						_dataChanged = true;
+						
+						invalidateProperties();
+					}
+				}
+			}
+			
+			private function editorKeyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.DOWN || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.ENTER)
+					return;
+					
+				if (!event.currentTarget)
+					return;
+				
+				var searchStr:String;
+				
+				if (event.currentTarget is ComboBox)
+					searchStr = ComboBox(event.currentTarget).textInput.text;
+				
+				if (event.currentTarget is TextInput)
+					searchStr = TextInput(event.currentTarget).text;
+				
+				if (event.currentTarget is DateField)
+					searchStr = DateField(event.currentTarget).text;
+				
+				var ev:DataGridActionsEvent = new DataGridActionsEvent(DataGridActionsEvent.ITEM_EDIT_KEY_UP, true);
+				ev.searchString = searchStr;
+				ev.data = data;
+				
+				dispatchEvent(ev);
+			}
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (_dataChanged)
+				{
+					_dataChanged = false;
+					
+					label.text = _data.label;
+					
+					if (_data.value is Date)
+					{
+						var dateRecieved:Date = _data.value;
+						var nullDate:Date = QIConstants.NULL_DATE;
+						
+						//handling null date, 
+						if (dateRecieved.getFullYear() <= nullDate.getFullYear() && dateRecieved.getMonth() <= nullDate.getMonth())
+							valueLbl.text = "";
+						else
+							valueLbl.text = formatDateTime.format(_data.value);
+					}
+					else
+						valueLbl.text = (_data.value)? _data.value: "";
+					
+					var ev:HPIEvent = new HPIEvent(HPIEvent.LIST_SINGLE_ITEM_EDIT_END, true);
+					
+					ev.data = _data;
+					
+					/* if (_validator)
+					{
+						_validator.source = valueLbl;
+						var res:ValidationResultEvent = _validator.validate(valueLbl.text);
+						
+						if (res && res.results && !res.results.length)
+						{
+							ev.isEditedValueValid = true;
+						}
+						else
+						{
+							ev.isEditedValueValid = false;
+						}
+					} */
+					
+					dispatchEvent(ev);
+				}
+			}
+		]]>
+	</fx:Script>
+	<!--<s:Group width="100%">-->
+		<s:Rect width="100%" height="100%">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+		</s:Rect>
+		<s:HGroup horizontalAlign="right" width="100%">
+			<s:Label id="label" text="{data.label}:" textAlign="right" color="#111111" width="20%" paddingTop="5" paddingBottom="5" fontFamily="Calibri" fontSize="11"/>
+			<s:Group width="80%" id="valueEditorGrp">
+				<s:Label id="valueLbl" text="{data.value}" textAlign="left" width="100%" paddingTop="5" paddingBottom="5" fontFamily="Calibri" fontSize="11" click="onLabelClick(event)"/>
+				<!--<s:ComboBox id="valueEditor" visible="{!value.visible}" includeInLayout="{!value.visible}"/>-->
+			</s:Group>
+		</s:HGroup>
+	<!--</s:Group>-->
+</s:Group>

@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" 
+				xmlns:components="com.gazuntite.controls.extended.components.*" 
+				xmlns:lab="com.gazuntite.provider.live.services.elab.view.lab.*"
+				creationComplete="creationCompleteHandler(event)"
+				autoDrawBackground="false" width="100%"
+				>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.elab.dto.LabTypeDTO;
+			import com.gazuntite.provider.live.services.elab.dto.TestTypeDTO;
+			import com.gazuntite.provider.live.services.elab.event.LoadOrderDocumentEvent;
+			import com.gazuntite.provider.live.services.elab.model.ELabsAppModelLocator;
+			import com.gazuntite.provider.live.services.elab.view.event.ElabActionEvent;
+			import com.gazuntite.provider.live.services.elab.view.lab.ELabDocumentViewer;
+			import com.gazuntite.provider.live.services.elab.view.lab.vo.LabVO;
+			import com.gazuntite.skins.controls.button.eLab.CourierButton;
+			import com.gazuntite.skins.controls.button.eLab.FaxButton;
+			import com.gazuntite.skins.controls.button.eLab.Hl7Button;
+			import com.gazuntite.skins.controls.button.eLab.PrintButton;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			import flash.filesystem.File;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:ELabsAppModelLocator = ELabsAppModelLocator.getInstance();
+			
+			[Bindable]
+			private var labVO:LabVO;
+			
+			override public function get data():Object
+			{
+				return super.data;
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (!data)
+					return;
+				
+				if (data is LabVO)
+				{
+					labVO = LabVO(data);
+					
+					/**
+					 * Everytime renderer is displayed its mode should be set accordingly either in edit, in view or in expanded
+					 * */
+					setInEditMode(labVO.inEditMode);
+					setExpandedMode(labVO.inExpandedMode);
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function setInEditMode(value:Boolean):void
+			{
+				labVO.inEditMode = value;
+				
+				makeTestCmboVisible(labVO.inEditMode);
+				
+				if (!labVO.inEditMode)
+				{
+					makeLabCmboVisible(labVO.inEditMode);
+				}
+			}
+			
+			private function makeTestCmboVisible(value:Boolean):void
+			{
+				testCmb.visible = value;
+				testCmb.includeInLayout = value;
+				
+				testLbl.visible = !value;
+				testLbl.includeInLayout = !value;
+				
+				if (value)
+					testCmb.setFocus();
+			}
+			
+			private function makeLabCmboVisible(value:Boolean):void
+			{
+				labCmb.visible = value;
+				labCmb.includeInLayout = value;
+				
+				labLbl.visible = !value;
+				labLbl.includeInLayout = !value;
+				
+				if (value)
+					labCmb.setFocus();
+			}
+			
+			private function headerClickHandler():void
+			{
+				setExpandedMode(!labVO.inExpandedMode);
+				
+				id_ExpandedView.height = 80;
+				
+				if (labVO.inExpandedMode)
+				{
+					viewStack.selectedIndex = 0;
+				}
+			}
+			
+			private function checkBoxClickHandler(event:MouseEvent):void
+			{
+				if (!labVO)
+					return;
+				
+				labVO.isSelected = checkBox.selected;
+				
+				var ev:ElabActionEvent = new ElabActionEvent(ElabActionEvent.ELAB_ORDER_SELECTED);
+				dispatchEvent(ev);
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function testLblClickHandler(event:MouseEvent):void
+			{
+				if (labVO.inEditMode)
+				{
+					event.stopImmediatePropagation();
+					makeTestCmboVisible(labVO.inEditMode);
+				}
+			}
+			
+			private function testCmbFocusInHandler():void
+			{
+				if (!testCmb.dataProvider)
+					return;
+				
+				var found:Boolean;
+				
+				for (var i:int = 0; i < testCmb.dataProvider.length; i++)
+				{
+					var testType:TestTypeDTO = testCmb.dataProvider[i] as TestTypeDTO;
+					
+					if (testType)
+					{
+						if (testType.Name == testLbl.text)
+						{
+							testCmb.selectedIndex = i;
+							testCmb.selectedItem = testType;
+							
+							testCmb.textInput.text = testType.Name;
+							
+							found = true;
+						}
+					}
+				}
+				
+				if (!found)
+					testCmb.textInput.text = testLbl.text;
+			}
+			
+			private function testCmbFocusOutHandler():void
+			{
+				var testTypeDTO:TestTypeDTO;
+				
+				if (testCmb.selectedIndex >= 0 && testCmb.selectedIndex < testCmb.dataProvider.length)
+				{
+					testTypeDTO = testCmb.dataProvider[testCmb.selectedIndex] as TestTypeDTO;
+				}
+				
+				else if (testCmb.selectedItem)
+				{
+					testTypeDTO = testCmb.selectedItem as TestTypeDTO;
+				}
+				
+				if (testTypeDTO)
+				{
+					testLbl.text = testTypeDTO.Name;
+					
+					labVO.labDTO.Test.ID = testTypeDTO.ID;
+					labVO.labDTO.Test.Name = testTypeDTO.Name;
+					labVO.labDTO.Test.Code = testTypeDTO.Code;
+					
+					labVO.labDTO.IsDirty = true;
+				}
+				
+				makeTestCmboVisible(false);
+			}
+			
+			private function testCmbKeyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode != Keyboard.ENTER)
+				{
+					var ev:ElabActionEvent = new ElabActionEvent(ElabActionEvent.ELAB_ORDER_ITEM_EDIT_KEY_UP);
+					ev.searchString = testCmb.textInput.text;
+					
+					dispatchEvent(ev);
+				}
+			}
+			
+			private function testCmbClickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function labLblClickHandler(event:MouseEvent):void
+			{
+				if (labVO.inEditMode)
+				{
+					event.stopImmediatePropagation();
+					
+					makeLabCmboVisible(labVO.inEditMode);
+				}
+			}
+			
+			private function labCmbFocusInHandler():void
+			{
+				if (!labCmb.dataProvider)
+					return;
+				
+				for (var i:int = 0; i < labCmb.dataProvider.length; i++)
+				{
+					var lab:LabTypeDTO = labCmb.dataProvider[i] as LabTypeDTO;
+					
+					if (lab)
+					{
+						if (labLbl.text == lab.Name)
+						{
+							labCmb.selectedIndex = i;
+							labCmb.selectedItem = lab;
+							
+							labCmb.textInput.text = lab.Name;
+						}
+					}
+				}
+			}
+			
+			private function labCmbFocusOutHandler():void
+			{
+				var labType:LabTypeDTO;
+				
+				if (labCmb.selectedIndex >= 0 && labCmb.selectedIndex < labCmb.dataProvider.length)
+				{
+					labType = labCmb.dataProvider[labCmb.selectedIndex] as LabTypeDTO;
+				}
+				
+				else if (labCmb.selectedItem)
+				{
+					labType = labCmb.selectedItem as LabTypeDTO;
+				}
+				
+				if (labType)
+				{
+					labLbl.text = labType.Name;
+					
+					labVO.labDTO.LabID = labType.ID;
+					labVO.labDTO.LabName = labType.Name;
+					
+					labVO.labDTO.IsDirty = true;
+				}
+				
+				makeLabCmboVisible(false);
+			}
+			
+			private function labCmbClickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function orderTypeClickHandler(event:MouseEvent):void
+			{
+				if (!labVO.labDTO)
+					return;
+				
+				if (!labVO.labDTO.Method)
+					return;
+				
+				var docType:String = "";
+				
+				switch (labVO.labDTO.Method.Name)
+				{
+					case "HL7":
+						docType = "hl7";
+						break;
+					
+					default:
+						docType = "pdf";
+						break;
+				}
+				
+				var orderID:int = parseInt(labVO.labDTO.OrderID);
+				
+				var ev:LoadOrderDocumentEvent = new LoadOrderDocumentEvent(orderID, docType, onOrderDocumentLoad);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if (!labVO.inExpandedMode)
+					setExpandedMode();
+				
+				viewStack.selectedIndex = 1;
+				
+				id_ExpandedView.height = 150;
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function onOrderDocumentLoad(url:String):void
+			{
+				if (!url)
+					return;
+				
+				if (!url.length)
+					return;
+				
+				documentViewer.load("Gazuntite Lab Order", url);
+			}
+			
+			private function editClickHandler(event:MouseEvent):void
+			{
+				setInEditMode(true);
+				
+				if (!labVO.inExpandedMode)
+				{
+					setExpandedMode();
+				}
+				
+				id_ExpandedView.height = 80;
+				viewStack.selectedIndex = 0;
+				
+				var ev:ElabActionEvent = new ElabActionEvent(ElabActionEvent.ELAB_ORDER_EDIT_CLICK);
+				dispatchEvent(ev);
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			private function saveClickHandler(event:MouseEvent):void
+			{
+				setInEditMode(false);
+				
+				var ev:ElabActionEvent = new ElabActionEvent(ElabActionEvent.ELAB_ORDER_SAVE_CLICK);
+				ev.selection = labVO.labDTO;
+				
+				dispatchEvent(ev);
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				if(labVO.labDTO.Method.Name.toLowerCase() == 'hl7' )
+				{
+					orderType.setStyle('skinClass', Hl7Button);
+					orderType.toolTip = 'HL7';
+				}
+				else if(labVO.labDTO.Method.Name.toLowerCase() == 'print')
+				{
+					orderType.setStyle('skinClass', PrintButton);
+					orderType.toolTip = 'Print';
+				}
+				else if(labVO.labDTO.Method.Name.toLowerCase() == 'fax')
+				{
+					orderType.setStyle('skinClass', FaxButton);
+					orderType.toolTip = 'Fax';
+				}
+				else if(labVO.labDTO.Method.Name.toLowerCase() == 'courier')
+				{
+					orderType.setStyle('skinClass', CourierButton);
+					orderType.toolTip = 'Courier';
+				}
+			}
+			
+			private function setExpandedMode(doExpand:Boolean = true):void
+			{
+				if (!labVO)
+					return;
+				
+				labVO.inExpandedMode = doExpand;
+				setGlow();
+			}
+			
+			private function setGlow():void
+			{
+				if (!labVO)
+					return;
+				
+				if (labVO.inExpandedMode)
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:layout >
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"/> 
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header"
+						  width="100%" height="35"   
+						  click="headerClickHandler()" 
+						  toolTip="Open/Close Details" useHandCursor="true" buttonMode="true" >
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:CheckBox id="checkBox"
+					width="20" selected="{labVO.isSelected}" click="checkBoxClickHandler(event)"
+					skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+					useHandCursor="true" buttonMode="true"
+					/>
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:Label id="SrNo" 
+				 text="{labVO.serialNumber}" fontFamily="CalibriCFF" fontSize="14" width="30"
+				 paddingLeft="6" maxDisplayedLines="1"/>
+		
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="orderId" 
+					 text="{labVO.labDTO.ID}" toolTip="{labVO.labDTO.ID}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="20%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		<!--<s:Group width="20%">
+		</s:Group>-->
+		
+		
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:Label id="orderDate" 
+				 text="{labVO.labDTO.OrderDate}" toolTip="{labVO.labDTO.OrderDate}" 
+				 fontFamily="CalibriCFF" fontSize="14" width="21%"
+				 paddingLeft="6"  maxDisplayedLines="1"/>
+		
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			
+		<s:Group width="21%">
+			<s:Label id="testLbl" 
+					 text="{labVO.labDTO.Test.Name}" toolTip="{labVO.labDTO.Test.Name}"
+					 click="testLblClickHandler(event)"
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+			<components:LabelComboBox id="testCmb" 
+									  width="100%" visible="false" includeInLayout="false" 
+									  focusIn="testCmbFocusInHandler()" focusOut="testCmbFocusOutHandler()" 
+									  keyUp="testCmbKeyUpHandler(event)" click="testCmbClickHandler(event)"
+									  dataProvider="{model.TestTypeList}" labelField="Name"/>
+		</s:Group>
+	
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:Group width="20%">
+			<s:Label id="labLbl" 
+					 text="{labVO.labDTO.LabName}" toolTip="{labVO.labDTO.LabName}"
+					 click="labLblClickHandler(event)"
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+			<components:LabelComboBox id="labCmb" width="100%" visible="false" includeInLayout="false"
+									  focusIn="labCmbFocusInHandler()" focusOut="labCmbFocusOutHandler()"
+									  click="labCmbClickHandler(event)"
+									  dataProvider="{model.LaboratoryListDto.Laboratories}" labelField="Name"/>
+		</s:Group>
+		
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:HGroup width="50" verticalAlign="middle" horizontalAlign="center" paddingLeft="0">
+			
+			<s:Button id="orderType" 
+					  label="{labVO.labDTO.Method.Name}" click="orderTypeClickHandler(event)"/>
+			
+			<s:Group width="30">
+				<s:Button id="edit" 
+						  label="edit" visible="{!labVO.inEditMode}" includeInLayout="{!labVO.inEditMode}" 
+						  click="editClickHandler(event)"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton" 
+						  buttonMode="true" useHandCursor="true" toolTip="Edit"
+						  />
+				<s:Button id="save" 
+						  label="save" 
+						  visible="{labVO.inEditMode}" includeInLayout="{labVO.inEditMode}"
+						  click="saveClickHandler(event)"
+						  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"
+						  />
+			</s:Group>
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer id="id_ExpandedView" 
+						  width="{id_Header.width - 10}" 
+						  horizontalCenter="0" height="80" 
+						  visible="{labVO.inExpandedMode}" includeInLayout="{labVO.inExpandedMode}" 
+						  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin"
+						  >
+		<components:LabelViewStack id="viewStack" width="100%" height="100%" backgroundAlpha="0">
+			<s:ArrayList>
+				<s:NavigatorContent width="100%" height="100%">
+					<s:layout>
+						<s:HorizontalLayout paddingBottom="3" paddingLeft="10" paddingRight="3" paddingTop="4" gap="5"/>
+					</s:layout>
+					
+					<s:VGroup  width="100" horizontalAlign="left">
+						<s:Label text="Patient:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" maxDisplayedLines="1"/>
+						<s:Label text="Provider:" fontFamily="CalibriCFF" fontSize="14" right="5" left="5" verticalCenter="0" maxDisplayedLines="1"/>
+					</s:VGroup>
+					
+					<s:VGroup width="100%" horizontalAlign="left">
+						<s:Label text="{labVO.labDTO.Patient.FullName}" toolTip="{labVO.labDTO.Patient.FullName}" fontFamily="CalibriCFFBold" fontSize="14" width="100%" maxDisplayedLines="1"/>
+						<s:Label text="{labVO.labDTO.Provider.FullName}" toolTip="{labVO.labDTO.Provider.FullName}" fontFamily="CalibriCFFBold" fontSize="14" width="100%"  maxDisplayedLines="1"/>
+					</s:VGroup>
+				</s:NavigatorContent>
+				<s:NavigatorContent width="100%" height="100%">
+					<lab:ELabDocumentViewer id="documentViewer" width="100%" height="100%" isOrder="true"/>
+				</s:NavigatorContent>
+			</s:ArrayList>
+		</components:LabelViewStack>
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

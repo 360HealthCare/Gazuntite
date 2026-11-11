@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				width="400"
+				height="94%"
+				creationComplete="init(event)"
+				xmlns:dualpanel="com.rialvalue.components.dualpanel.*" 
+				xmlns:components="com.gazuntite.components.*"
+				mouseChildren="{data.en}">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.BlankVBView;
+			import com.gazuntite.components.BlankViewForTesting;
+			import com.gazuntite.components.viewBackground.VBAllergiesView;
+			import com.gazuntite.components.quickInput.coverflow.AllergiesDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.BlankPanel;
+			import com.gazuntite.components.quickInput.coverflow.ChiefComplaintDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ChronicMedicationDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ComprehensiveHistoryDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ImmunizationDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.InHouseLabDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.PhysicalDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.ReviewOfSystemDualPanel;
+			import com.gazuntite.components.quickInput.coverflow.VitalsDualPanel;
+			
+			import mx.events.FlexEvent;
+			
+			protected function init(event:FlexEvent):void
+			{
+				//calculateSizeRequirements();
+				assignForms();
+			}
+			
+			protected function calculateSizeRequirements():void
+			{
+				//trace(Capabilities.screenResolutionX);
+				
+				if(Capabilities.screenResolutionX <= 1345)
+				{
+					this.width = 380;
+					this.height = 400;
+				}
+				
+				if(Capabilities.screenResolutionX <= 1280)
+				{
+					this.width = 370;
+					this.height = 370;
+				}
+			}
+			
+			protected function assignForms():void
+			{
+				switch(data.title)
+				{
+					case "Allergies":
+						addElement(new VBAllergiesView());
+						break;
+					default:
+						addElement(new BlankVBView());// base view
+						break;
+				} 
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>  
+	
+</s:ItemRenderer>

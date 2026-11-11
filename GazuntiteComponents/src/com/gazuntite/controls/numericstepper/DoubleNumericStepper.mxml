@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 horizontalAlign="center" gap="4"
+		 >
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			public var label:String;
+			
+			[Bindable]
+			public var leftValue:Number;
+			
+			[Bindable]
+			public var rightValue:Number;
+			
+			[Bindable]
+			public var leftMin:Number = 0;
+			
+			[Bindable]
+			public var leftMax:Number = 300;
+			
+			[Bindable]
+			public var rightMin:Number = 0;
+			
+			[Bindable]
+			public var rightMax:Number = 300;
+			
+			
+			protected const clickSwitchAreaWidth:Number = 24;
+			[Bindable]
+			protected var showMinValue:Boolean = true;
+			
+			protected function onClick(event:MouseEvent):void
+			{
+				if (event.localX < this.width/2 && event.localX >= this.width/2-clickSwitchAreaWidth)
+				{
+					uiRightNumericStepper.depth = 0;
+					uiLeftNumericStepper.depth = 1;
+					uiLeftNumericStepper.setFocus();
+				}
+				else if (event.localX>this.width/2 && event.localX<=this.width/2+clickSwitchAreaWidth)
+				{
+					uiLeftNumericStepper.depth = 0;
+					uiRightNumericStepper.depth = 1;
+					uiRightNumericStepper.setFocus();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:RichText color="#464646" fontFamily="Calibri"
+				fontSize="14"
+				text="{label}"/>
+	<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.numericstepper.DoubleNumericStepperContainerSkin"
+						  width="96" height="24"
+						  click="onClick(event)"
+						  >
+		<s:NumericStepper id="uiRightNumericStepper" 
+						  width="100%" height="100%" 
+						  minimum="{rightMin}" maximum="{rightMax}"
+						  skinClass="com.gazuntite.skins.controls.numericstepper.RightNumericStepperSkin"
+						  focusAlpha="0.3"
+						  value="@{rightValue}"
+						  />
+		<s:NumericStepper id="uiLeftNumericStepper" 
+						  width="100%" height="100%" 
+						  minimum="{leftMin}" maximum="{leftMax}"
+						  skinClass="com.gazuntite.skins.controls.numericstepper.LeftNumericStepperSkin"
+						  focusAlpha="0.3"
+						  value="@{leftValue}"
+						  />
+		
+	</s:SkinnableContainer>
+</s:VGroup>

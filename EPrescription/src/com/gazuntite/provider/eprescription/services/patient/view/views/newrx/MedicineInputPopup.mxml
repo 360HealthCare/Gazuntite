@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   creationComplete="cc(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
+			
+			
+			private var _MaxTextLength:int;
+			
+			private var _inputValue:String;
+			
+			[Bindable]
+			public var showSearch:Boolean = true;
+			
+			[Bindable]
+			public function get MaxTextLength():int
+			{
+				return _MaxTextLength;
+			}
+
+			public function set MaxTextLength(value:int):void
+			{
+				_MaxTextLength = value;
+			}
+
+			[Bindable]
+			public function get inputValue():String
+			{
+				return _inputValue;
+			}
+			
+			public function set inputValue(value:String):void
+			{
+				_inputValue = value;
+			}
+			
+			private var _selectedItem:Object;
+			
+			[Bindable]
+			public function get selectedItem():Object
+			{
+				return _selectedItem;
+			}
+			
+			public function set selectedItem(value:Object):void
+			{
+				_selectedItem = value;
+			}
+			
+			
+			private var _ShowInput:Boolean = true;
+			
+			[Bindable]
+			public function get ShowInput():Boolean
+			{
+				return _ShowInput;
+			}
+			
+			public function set ShowInput(value:Boolean):void
+			{
+				_ShowInput = value;
+			}
+			
+			private var _ShowPRN:Boolean = false;
+			
+			[Bindable]
+			public function get ShowPRN():Boolean
+			{
+				return _ShowPRN;
+			}
+			
+			public function set ShowPRN(value:Boolean):void
+			{
+				_ShowPRN = value;
+			}
+			
+			private var _DataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return _DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				_DataProvider = value;
+			}
+			
+			private var _labelFeild:String;
+			
+			[Bindable]
+			public function get labelFeild():String
+			{
+				return _labelFeild;
+			}
+			
+			public function set labelFeild(value:String):void
+			{
+				_labelFeild = value;
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						dispatchEvent( new Event( "CancelClick", true ) ); // to deselect the Toggle buttons.
+						ClosePopUP();
+					}
+				});
+				
+				// TODO Auto-generated method stub
+				if(null != selectedItem)
+				{
+					
+					id_list.selectedItem = selectedItem;
+					
+				}
+				
+				if(null != inputValue)
+				{
+					id_txtValue.text = inputValue;
+				}
+				
+				if(null != inputValue || null != selectedItem)
+				{
+					Value_changeHandler();
+				}
+				
+				id_txtValue.setFocus(); // focus on First Field
+			}
+			
+			protected function OK_clickHandler(event:MouseEvent):void
+			{
+				/* if(ValidateSelection())
+				{
+					
+					dispatchEvent( new Event( "OkClick", true ) );
+					removePopup();
+				} */
+			}
+			
+			
+			public function ClosePopUP():void
+			{
+				removePopup();
+				id_SearchValue.text = '';
+				filterDataProvider();
+			}
+			
+			private function ValidateSelection():Boolean
+			{
+				if(id_list.selectedIndex == -1 && !id_PRN.selected)
+				{
+					id_list.setFocus();
+					return false;
+				}
+				else if(id_txtValue.text == '' && ShowInput)
+				{
+					id_txtValue.setFocus();
+					return false;
+				}
+				else if (ShowPRN)
+				{
+					if(id_list.selectedIndex != -1 || id_PRN.selected)
+					{
+						return true;
+					}
+					else 
+						return false;
+				}
+				
+				return true;
+			}
+			
+			protected function Cancel_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event( "CancelClick", true ) );
+				ClosePopUP();
+			}
+			
+			protected function Value_changeHandler():void
+			{
+				id_outValue.text = ShowInput? id_txtValue.text + ' - ':"";
+				id_outValue.toolTip = id_outValue.text;
+				
+				if( null != id_list.selectedItem )
+				{
+					id_outValue.text += id_list.selectedItem[labelFeild];
+					id_outValue.toolTip += id_outValue.text;
+				}
+				
+				id_PRN.selected = inputValue == 'true'? true : false;
+				
+				if(inputValue == 'true')
+				{
+					id_list.selectedIndex = -1;
+				}
+				
+				inputValue = ShowInput? id_txtValue.text:"";
+				/* if( ShowPRN )
+				inputValue = id_PRN.selected.toString(); */
+				selectedItem = id_list.selectedItem;
+				
+			}
+			
+			protected function checkbox1_changeHandler(event:Event):void
+			{
+				if(event.currentTarget.selected)
+				{
+					id_list.selectedIndex = -1;
+					id_outValue.text = 'As Needed';
+				}
+				
+				inputValue = event.currentTarget.selected;
+				
+				
+			}
+			
+			
+			protected function id_list_clickHandler(event:MouseEvent):void
+			{
+				if(ValidateSelection())
+				{
+					dispatchEvent( new Event( "OkClick", true ) );
+					ClosePopUP();
+				}
+			}
+			
+			protected function id_SearchValue_changeHandler(event:TextOperationEvent):void
+			{
+				filterDataProvider();				
+			}
+			
+			private function filterDataProvider():void
+			{
+				if(DataProvider)
+				{
+					DataProvider.filterFunction = filter_Value; 
+					DataProvider.refresh(); 
+					
+					id_txtValue.restrict = '0-9.';
+				}
+				
+			}
+			
+			public function filter_Value(item:Object):Boolean
+			{
+				var query:String = id_SearchValue.text;
+				var matchingValue:String = item[labelFeild];
+
+				if(matchingValue.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				else 
+					return false;
+				
+				return false;
+				
+				//filter logged in provider --- don't show
+				/* if(firstName.toLowerCase().indexOf(model.LoggedInProvider.FirstName.toLowerCase()) != -1)
+					return false;
+				
+				if(firstName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(midName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true;
+				if(lastName.toLowerCase().indexOf(query.toLowerCase()) != -1)
+					return true; */
+			} 
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupSkin" >
+		<s:layout>
+			<s:VerticalLayout paddingBottom="4" paddingTop="5" paddingLeft="5" paddingRight="5" gap="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer  skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupInnerSkin">
+			<s:HGroup width="100%" height="100%"  verticalAlign="top" horizontalAlign="left" paddingLeft="3" paddingRight="3" gap="2">
+				<s:TextInput id="id_txtValue" 
+							 width="30" change="Value_changeHandler()" visible="{ShowInput}" includeInLayout="{ShowInput}" 
+							  fontFamily="CalibriCFF" skinClass="com.gazuntite.skins.controls.textInput.RxTextInputSkin" focusAlpha="0" restrict="[0-9]"/>
+				<s:Line height="100%" visible="{id_txtValue.visible}" includeInLayout="{id_txtValue.visible}" >
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				<s:VGroup width="100%" height="100%">
+					<components:LabelTextInput id="id_SearchValue" 
+											   visible="{showSearch}"
+											   includeInLayout="{showSearch}"
+											   width="100%"
+											   prompt="Search"
+											   change="id_SearchValue_changeHandler(event)" 
+											   maxChars="{MaxTextLength}"
+											   />
+					<s:List id="id_list" 
+							width="100%" height="100%" change="Value_changeHandler()"
+							left="3" right="3" top="3" bottom="3"
+							horizontalScrollPolicy="off"
+							maxHeight="70" borderVisible="false"
+							dataProvider="{DataProvider}" labelField="{labelFeild}" 
+							click="id_list_clickHandler(event)"
+							skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+							itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.RxInputRenderer"/>
+					
+				</s:VGroup>
+				
+				<s:Line height="100%" visible="{ShowPRN}" includeInLayout="{ShowPRN}">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:CheckBox id="id_PRN" 
+							label="PRN" change="checkbox1_changeHandler(event)" visible="{ShowPRN}" includeInLayout="{ShowPRN}" fontFamily="CalibriCFF" fontSize="14"
+							useHandCursor="true" buttonMode="true" toolTip="Select PRN"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:Group width="100%" visible="false" includeInLayout="false">
+			<s:Label id="id_outValue" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="14" verticalCenter="0" maxDisplayedLines="1"  left="0" width="70"/>
+			
+			<s:Button id="id_OK" click="OK_clickHandler(event)"
+					  useHandCursor="true" buttonMode="true" verticalCenter="0" toolTip="Select"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"	right="23"/>
+			<s:Button id="id_Cancel" click="Cancel_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" verticalCenter="0" toolTip="Close"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"  right="0"/>
+		</s:Group>
+		
+	</s:SkinnableContainer>
+	
+	
+</components:PopupGroup>

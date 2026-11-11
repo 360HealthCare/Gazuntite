@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   creationComplete="onCreated(event)"
+					   show="onShow(event)"
+					   mouseDownOutside="onMouseDownOutside(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.events.FlexMouseEvent;
+			
+			import spark.events.IndexChangeEvent;
+			[Bindable]
+			public var valueA:Number;
+			
+			[Bindable]
+			public var valueAMin:Number = 0;
+			
+			[Bindable]
+			public var valueAMax:Number = 400;
+			
+			[Bindable]
+			public var valueB:Number;
+			
+			[Bindable]
+			public var valueBMin:Number = 0;
+			
+			[Bindable]
+			public var valueBMax:Number = 400;
+			
+			public var ValueAChanged:Boolean = false;
+			public var ValueBChanged:Boolean = false;
+			
+			
+			protected var oldValueA:Number;
+			protected var oldValueB:Number;
+
+			protected function onCreated(event:FlexEvent):void
+			{
+				oldValueA = valueA;
+				oldValueB = valueB;
+				adjustListDisplay();
+			}
+			protected function onShow(event:Event):void
+			{
+				oldValueA = valueA;
+				oldValueB = valueB;
+				adjustListDisplay();
+			}
+			public function adjustListDisplay():void
+			{
+				adjustListItemPosition(uiListLeft);
+				adjustListItemPosition(uiListRight);
+			}
+			protected function adjustListItemPosition(uiList:List):void
+			{
+				if (uiList!=null && uiList.selectedIndex!=-1)
+				{
+					uiList.ensureIndexIsVisible(uiList.selectedIndex-1);
+					uiList.ensureIndexIsVisible(uiList.selectedIndex+1);
+				}
+			}
+			
+			protected function handleCancel():void
+			{
+				valueA = oldValueA; valueB = oldValueB; dispatchEvent(new Event('Cancel'))
+			}
+			
+			protected function onMouseDownOutside(event:FlexMouseEvent):void
+			{
+				handleCancel();
+			}
+			
+			protected function ListClicked(id:String):void
+			{
+				if(id == 'uiListLeft')
+					ValueAChanged = true;
+				else if (id == 'uiListRight')
+					ValueBChanged = true;
+				
+				ValueChangeComplete();
+			}
+			
+			
+			private function ValueChangeComplete():void
+			{
+				if(ValueAChanged && ValueBChanged)
+				{
+					dispatchEvent(new Event('OK'));
+					ValueAChanged = false;
+					ValueBChanged = false;
+				}
+			}
+			
+			protected function onValueChange(event:IndexChangeEvent):void
+			{
+				adjustListDisplay();
+				ListClicked(event.currentTarget.id);
+			}
+			
+			/* protected function id_main_keyDownHandler(event:KeyboardEvent):void
+			{
+				
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					ClosepopUp();
+				}
+				var pressedCharter:String = String.fromCharCode(event.charCode);
+				if(event.keyCode == Keyboard.BACKSPACE)
+				{
+					//remove elment
+					if(TempValueA.length)
+					{
+						TempValueA = TempValueA.substring(0,TempValueA.length - 1) // remove the last element form the string 
+					}
+				}
+				else
+				{
+					if(NUMBER_CHARS.indexOf(pressedCharter.charAt(0)) > -1) // make sure its an allowed key hit
+					{
+						if(pressedCharter.charAt(0) == '.')//switching decision Time
+						{
+							uiListRight.setFocus();
+							isDecimalnumFlag = false;
+							TempValueA = '';
+						}
+						else
+							TempValueA += pressedCharter.charAt(0)
+						
+					}
+					
+					
+				}
+				
+				if(TempValueA != '')
+				{
+					var ev:IndexChangeEvent = new IndexChangeEvent(IndexChangeEvent.CHANGE, true);
+					if(isDecimalnumFlag)
+					{
+						ev.oldIndex = uiListLeft.selectedIndex;
+						integerValue = parseInt(TempValueA);
+						uiListLeft.selectedIndex = parseInt(TempValueA);
+						ev.newIndex = parseInt(TempValueA);
+						//uiListLeft.dispatchEvent(ev);
+					}
+					else
+					{
+						fractionValue = parseInt(TempValueA);
+						uiListRight.selectedIndex = parseInt(TempValueA);
+						
+					}
+					
+				}
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			} */
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Metadata> 
+		[Event(name="OK", type="flash.events.Event")] 
+		[Event(name="Cancel", type="flash.events.Event")] 
+	</fx:Metadata> 
+	<fx:Script>
+		<![CDATA[
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.input.view.skins.VitalInputPopupSkin" >
+		<s:layout>
+			<s:VerticalLayout paddingBottom="4" paddingTop="5" paddingLeft="5" paddingRight="5" gap="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer  width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupInnerSkin">
+			<s:layout>
+				
+				<s:HorizontalLayout  verticalAlign="middle" horizontalAlign="left" paddingLeft="3" paddingRight="3" gap="2"/>
+			</s:layout>
+			<s:List id="uiListLeft" 
+					width="50" height="100%"
+					horizontalScrollPolicy="off"
+					maxHeight="55" borderVisible="false"
+					selectedItem="@{valueA}"
+					skinClass="com.gazuntite.skins.controls.list.NumericSpinnerInputListSkin"
+					itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.NumericSpinnerInputRenderer"
+					change="onValueChange(event)"
+					click="ListClicked('uiListLeft')"
+					>
+				<s:dataProvider>
+					<s:NumericDataProvider minimum="{valueAMin}" maximum="{valueAMax}"/>
+				</s:dataProvider>
+			</s:List>
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="#333333" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			<s:List id="uiListRight"
+					width="50" height="100%"
+					horizontalScrollPolicy="off"
+					maxHeight="55" borderVisible="false"
+					selectedItem="@{valueB}"
+					skinClass="com.gazuntite.skins.controls.list.NumericSpinnerInputListSkin"
+					itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.NumericSpinnerInputRenderer"
+					change="onValueChange(event)"
+					click="ListClicked('uiListRight')"
+					>
+				<s:dataProvider>
+					<s:NumericDataProvider minimum="{valueBMin}" maximum="{valueBMax}"/>
+				</s:dataProvider>
+			</s:List>
+			
+		</s:SkinnableContainer>
+		
+		<!--<s:Group width="100%">
+			<s:Label id="id_outValue" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="14" verticalCenter="0" maxDisplayedLines="1"  left="0" width="70"/>
+			
+			<s:Button id="id_OK" 
+					  useHandCursor="true" buttonMode="true" verticalCenter="0" toolTip="Select"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"	right="23"
+					  click="dispatchEvent(new Event('OK'))"
+					  />
+			<s:Button id="id_Cancel" 
+					  buttonMode="true" useHandCursor="true" verticalCenter="0" toolTip="Close"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"  right="0"
+					  click="handleCancel()"
+					  />
+		</s:Group>-->
+		
+	</s:SkinnableContainer>
+	
+	
+</components:PopupGroup>

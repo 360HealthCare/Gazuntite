@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Strengths xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Strengths>
+		<Strength STRENGTH_ID="3598" STRENGTH_DESCRIPTION="5 mg"/>
+		<Strength STRENGTH_ID="3599" STRENGTH_DESCRIPTION="50 mg"/>
+		<Strength STRENGTH_ID="3597" STRENGTH_DESCRIPTION="15 mg"/>
+		<Strength STRENGTH_ID="3592" STRENGTH_DESCRIPTION="25 mg"/>
+	</Strengths>
+</Strengths>

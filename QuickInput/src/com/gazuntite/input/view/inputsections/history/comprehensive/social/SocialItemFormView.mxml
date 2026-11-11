@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:components="com.gazuntite.controls.extended.components.*" 
+		  xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+		  xmlns:dictation="com.gazuntite.components.dictation.*"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryMediumTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.SocialHistoryUsageAmountTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.social.CommonAddictionDTO;
+			import com.gazuntite.input.utils.QIConstants;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.ToolTipEvent;
+			
+			private var _Type:ArrayCollection	 = new ArrayCollection();
+			private var _Amount:ArrayCollection	 = new ArrayCollection();
+			
+			private var _listTypes:ArrayCollection;
+			
+			private var _commonDTO:CommonAddictionDTO;
+			
+			[Bindable] public var enableOnset:Boolean = true;
+			[Bindable] public var enableEndDatet:Boolean = false;
+			
+			[Bindable]
+			public function get commonDTO():CommonAddictionDTO
+			{
+				return _commonDTO;
+			}
+			
+			public function set commonDTO(value:CommonAddictionDTO):void
+			{
+				_commonDTO = value;
+				
+				id_types.selectedItem = null;
+				id_TypeCmbo.selectedItem = null;
+				id_AmountCmbo.selectedItem = null;
+				
+				if(value)
+				{
+					id_types.selectedItem =  listTypes.getItemAt(commonDTO.AddictionStatusID - 1);
+					
+					if(commonDTO.TypeID > 0)
+						for each (var type:SocialHistoryMediumTypeDTO in Type) 
+					{
+						if(type.ID == commonDTO.TypeID)
+						{
+							id_TypeCmbo.selectedItem = type;
+							break;
+						}
+					}
+					
+					if(commonDTO.AmountID > 0)
+						for each (var amount:SocialHistoryUsageAmountTypeDTO in Amount) 
+					{
+						if(amount.ID == commonDTO.AmountID)
+						{
+							id_AmountCmbo.selectedItem = amount;
+							break;
+						}
+					}
+					
+					if (commonDTO.addictionName == QIConstants.SOCIAL_TOBACCO_MODULE_NAME)
+					{
+						if(commonDTO.AddictionStatusID == 4 || commonDTO.AddictionStatusID == 6)
+						{
+							enableOnset = false;
+							id_Onset.text = '';
+						}
+						else
+							enableOnset = true;
+						
+						if(commonDTO.AddictionStatusID == 3 )
+							enableEndDatet = true;
+						else
+						{
+							enableEndDatet = false;
+							id_EndDate.text = '';
+						}
+					}
+					else if (commonDTO.addictionName == QIConstants.SOCIAL_ALCOHOL_MODULE_NAME)
+					{
+						if(commonDTO.AddictionStatusID == 2 )
+							enableEndDatet = true;
+						else
+						{
+							enableEndDatet = false;
+							id_EndDate.text = '';
+						}
+					}
+					else if (commonDTO.addictionName == QIConstants.SOCIAL_DRUGS_MODULE_NAME)
+					{
+						if(commonDTO.AddictionStatusID == 2 )
+							enableEndDatet = true;
+						else
+						{
+							enableEndDatet = false;
+							id_EndDate.text = '';
+						}
+					}
+				}
+			}
+			
+			[Bindable]
+			public function get listTypes():ArrayCollection
+			{
+				return _listTypes;
+			}
+
+			public function set listTypes(value:ArrayCollection):void
+			{
+				_listTypes = value;
+			}
+
+			
+
+			[Bindable]
+			public function get Amount():ArrayCollection
+			{
+				return _Amount;
+			}
+			
+			public function set Amount(value:ArrayCollection):void
+			{
+				_Amount = value;
+			}
+			
+			[Bindable]
+			public function get Type():ArrayCollection
+			{
+				return _Type;
+			}
+			
+			public function set Type(value:ArrayCollection):void
+			{
+				_Type = value;
+			}
+			
+			protected function id_EndDate_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_EndDate.toolTip = id_EndDate.text && id_EndDate.text.length? id_EndDate.text : 'End Date';
+			}
+			
+			protected function id_Onset_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_Onset.toolTip = id_Onset.text && id_Onset.text.length ? id_Onset.text : 'OnSet';
+			}
+			
+			public function clearForm():void
+			{
+				id_types.selectedIndex = -1;
+				id_Onset.selectedItem = null;
+				id_Onset.text = "";
+				id_Onset.selectedDate = null;
+				id_EndDate.text = "";				
+				id_EndDate.selectedItem = null;				
+				id_EndDate.selectedDate = null;
+				id_AmountCmbo.selectedItem = null;
+				id_AmountCmbo.text = "";
+				
+				id_TypeCmbo.selectedItem = null;
+				id_TypeCmbo.text = "";
+				
+				id_educated.selected = false;
+			}
+
+		]]>
+	</fx:Script>
+	<s:HGroup width="100%">
+		<s:VGroup width="50%">			
+			
+			<s:DropDownList id="id_types"									
+							width="100%" height="25" 
+							tabIndex="0"
+							labelField="Name" 
+							toolTip="{id_types.selectedItem.Name}"
+							click="id_types.openDropDown()"
+							prompt="Smoking Status"
+							dataProvider="{listTypes}" 
+							itemRenderer="com.gazuntite.input.view.inputsections.history.comprehensive.social.SocialDropDownListIR"
+							skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+							/>
+			
+			<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" 
+								  click="id_Onset.open()" enabled="{enableOnset}">
+			<components:LabelDateField id="id_Onset" 
+									   horizontalCenter="0" verticalCenter="0" 
+									   prompt="Onset" width="100%" height="25" text="{commonDTO.onset}"
+									   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+									   selectableRange="{{rangeEnd : new Date()}}" 
+									   IsEditAllow="false" editable="false" 
+									   styleName="coverDateField"
+									   />
+			</s:SkinnableContainer>
+			<s:SkinnableContainer  width="100%" skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" 
+									  click="id_EndDate.open()" enabled="{enableEndDatet}">
+			<components:LabelDateField id="id_EndDate" 									   
+									   horizontalCenter="0" verticalCenter="0" 									   
+									   prompt="End Date" width="100%" height="25" text="{commonDTO.EndDate}"
+									   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+									   selectableRange="{{rangeEnd : new Date()}}" 
+									   IsEditAllow="false" editable="false"
+									   styleName="coverDateField"
+									   />
+			</s:SkinnableContainer>
+		</s:VGroup>
+		<s:VGroup width="50%">			
+			<autoComplete:AutoComplete id="id_AmountCmbo" 
+						width="100%"  height="25" prompt="Amount" dataProvider="{Amount}"
+						labelField="Name" skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+						toolTip="{id_AmountCmbo.selectedItem ? id_AmountCmbo.selectedItem.Name : 'Amount'}"	/>	
+			<autoComplete:AutoComplete id="id_TypeCmbo"
+						width="100%"  height="25" prompt="Type" dataProvider="{Type}"
+						labelField="Name" skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+						toolTip="{id_TypeCmbo.selectedItem ? id_TypeCmbo.selectedItem.Name : 'Type'}" />
+			<s:HGroup width="100%" verticalAlign="bottom" height="25" paddingTop="10">
+				<s:CheckBox id="id_educated"
+							height="25"
+							selected="{commonDTO.isCounseled}"
+							skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack" tabIndex="6"
+							useHandCursor="true" buttonMode="true" toolTip="Counseled" label="Counseled"
+							/>
+			</s:HGroup>
+		</s:VGroup>			
+	</s:HGroup>	
+</s:VGroup>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" xmlns:component="com.gazuntite.view.patient.component.*"
+					  creationComplete="cc()" xmlns:components="com.gazuntite.components.*" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:skins="com.gazuntite.input.view.skins.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.immunization.ImmunizationDTO;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.input.event.visit.pmh.immunization.ManagePatientImmunizationEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.view.event.ImmunizationDeleteEvent;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import spark.events.DropDownEvent;
+			
+			[Bindable]	
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			[Bindable]	
+			private var viewModel:PatientInputHistoryImmunizationViewModel = PatientInputHistoryImmunizationViewModel.getInstance();
+			
+			private function cc():void
+			{
+				addEventListener(ImmunizationDeleteEvent.IMMUNIZATION_DELETE_EVENT, immunizationDeleteHandler, false, 0, true);
+			}
+			
+			private function immunizationDeleteHandler(event:ImmunizationDeleteEvent):void
+			{
+				if (!event.dto)
+					return;
+				
+				var immDTO:ImmunizationDTO;
+				
+				if (event.dto is ImmunizationDTO)
+					immDTO = event.dto as ImmunizationDTO;
+				
+				if (!immDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					immDTO.IsDeleted = true;
+					immDTO.IsDirty = true;
+					
+					onManagePatientImmunizationEvent();
+				});
+			}
+			
+			private function onManagePatientImmunizationEvent():void
+			{
+				viewModel.managePatientImmunization();
+			}
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				//uiSortDropdown.dropDown.x = uiSortDropdown.x + 24 ; //add container left padding, should convert to global if we really want perfect
+				SortDataList();
+			}
+			
+			protected function on_gotoNextSectionEventHandler(event:Event):void
+			{
+				//dispatchEvent(new SelectSection(SelectSection.SelectTabEvent,'id_InputPhysicalMain'));
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.immunizationDTOList && model.immunizationDTOList.length)
+				{
+					switch (uiSortDropdown.selectedIndex)
+					{
+						case 0:
+							model.immunizationDTOList = UtilityFunctions.SortArrayCollection(model.immunizationDTOList,'serialNumber',true,false);
+							break;
+						case 1: 
+							model.immunizationDTOList = UtilityFunctions.SortArrayCollection(model.immunizationDTOList,'immunizationTypeName',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropdown)
+						uiSortDropdown.selectedIndex = 0;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.immunizationDTOList" destination="DataList_changeHandler" />
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingBottom="10"/>
+	</s:layout>
+	<skins:PatientSubViewTitleBar width="100%" PrevSectionLabel="Chronic Medication" NextSectionLabel=""
+								  label="Immunization" 
+								  NavItems="{NavItems}"
+								  maxSectionCounter="4" sectionNumber="4" showHistoryPart="true"
+								  MainSectionLabel="History"
+								  dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}"
+								  gotoNextSectionEvent="on_gotoNextSectionEventHandler(event)"
+								  />
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}"
+												dictationNoteDataProvider="{model.immunizationDictationNoteHistoryDTOList}"/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+				</s:layout>
+				<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+				<s:DropDownList id="uiSortDropdown"
+								skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+								selectedIndex="0"
+								open="onSortDropdownOpen(event)"
+								>
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Recently Added" />
+							<fx:Object label="Immunization Name" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:Spacer width="100%" />
+			</s:SkinnableContainer>
+			<s:List id="uiInboxList"
+					width="100%" height="100%" allowMultipleSelection="true"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false"
+					dataProvider="{model.immunizationDTOList}"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.immunization.ImmunInputListItemRenderer"/>
+			
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

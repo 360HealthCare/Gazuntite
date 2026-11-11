@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  skinClass="com.gazuntite.skins.controls.container.PatientDictationNoteViewSkin"
+					  visible="{viewModel.visible}"
+					  includeInLayout="{viewModel.visible}" xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			[Bindable] public var SectionLevelNote:String = '';
+			[Bindable] public var isSectionLevel:Boolean;
+			
+			[Bindable] public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			
+			private var _RecordLevelDictationID:String = "00000000-0000-0000-0000-000000000000";
+			private var _SectionLevelDictationID:String = "00000000-0000-0000-0000-000000000000";
+			
+			//M:11Nov2013
+			[Bindable]
+			public function get RecordLevelDictationID():String
+			{
+				return this._RecordLevelDictationID;
+			}
+			
+			public function set RecordLevelDictationID(value:String):void
+			{
+				this._RecordLevelDictationID = value;
+			}
+			
+			[Bindable]
+			public function get SectionLevelDictationID():String
+			{
+				return this._SectionLevelDictationID;
+			}
+			
+			public function set SectionLevelDictationID(value:String):void
+			{
+				this._SectionLevelDictationID = value;
+			}
+			
+			private var _isEditable:Boolean = false;
+			
+			[Bindable]
+			public function get IsDictaionEditMode():Boolean
+			{
+				return _isEditable;
+			}			
+			
+			public function set IsDictaionEditMode(value:Boolean):void
+			{
+				_isEditable = value;				
+			}
+			
+			protected function id_tab_clickHandler(event:MouseEvent):void
+			{
+				if(id_tab.selected)
+					id_SectionLevel.uiDictationContainer.SetPlayButtonMode();
+				else
+					id_RecordLevel.uiDictationContainer.SetPlayButtonMode();
+			}
+			//TA - Reset Section Level Dictation Control on Patint Close & on New patient Load
+			public function resetToDefault():void
+			{
+				//Reset GUID
+				if(SectionLevelDictationID) 
+					SectionLevelDictationID = DictationConstants.GUID_FORMAT;
+				if(RecordLevelDictationID) 
+					RecordLevelDictationID = DictationConstants.GUID_FORMAT;
+				//Reset Notes
+				if(SectionLevelNote)
+					SectionLevelNote = '';
+				if(RecordLevelNote)
+					RecordLevelNote = '';
+				
+				if(id_SectionLevel)
+					id_SectionLevel.resetToDefault();
+				
+				if(id_RecordLevel)
+					id_RecordLevel.resetToDefault();
+				if(id_tab.selected)
+					id_tab.selected = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle" paddingRight="5"/>
+	</s:layout>
+	
+	<components:LabelViewStack id="uiViewStack"  
+							   width="100%" height="100%" borderVisible="false" backgroundAlpha="0"
+							   selectedIndex="{id_tab.selected? 0 : 1 }" >
+		<s:ArrayList>
+			<dictation:PatientDictationNoteView  id="id_SectionLevel" 
+												 name="Section" isSectionLevel="{isSectionLevel}"
+												 width="100%" minHeight="47" height="100%"
+												 viewModel="{viewModel}" note="@{SectionLevelNote}"
+												 DictationID="@{SectionLevelDictationID}" IsDictaionEditMode="true"
+												 skinClass="com.gazuntite.skins.controls.container.TransparentBGSkin"
+												 />
+			<dictation:PatientDictationNoteView  id="id_RecordLevel"
+												 name="Record" height="100%"
+												 width="100%" minHeight="47" isSectionLevel="{isSectionLevel}"												 
+												 viewModel="{viewModel}" note="@{RecordLevelNote}" ShowSaveButton="false"
+												 DictationID="@{RecordLevelDictationID}" IsDictaionEditMode="true"
+												 skinClass="com.gazuntite.skins.controls.container.TransparentBGSkin"
+												 />
+		</s:ArrayList>
+	</components:LabelViewStack>
+	
+	<s:ToggleButton id="id_tab"
+					buttonMode="true"
+					height="25" width="86"
+					skinClass="com.gazuntite.skins.controls.toggleButtonSkin.RecordSectionToggleButtonSkin" 
+					click="id_tab_clickHandler(event)"
+					/>
+</s:SkinnableContainer>

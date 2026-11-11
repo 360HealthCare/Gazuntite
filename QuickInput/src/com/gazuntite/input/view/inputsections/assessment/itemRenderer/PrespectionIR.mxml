@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false"
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var inEditMode:Boolean = false;
+			[Bindable]
+			public var model:Object;
+			
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				model = value;
+				
+				if (model.hasOwnProperty("inEditMode"))
+				{
+					inEditMode = model.inEditMode;
+					showGlow();
+				}
+			}
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			protected function toggleEditView(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				
+				inEditMode = !inEditMode;
+				showGlow();
+				
+				if (model.hasOwnProperty("inEditMode"))
+				{
+					model.inEditMode = inEditMode;
+				}
+			}
+			
+			protected function NewRecordbtn(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private function showGlow():void
+			{
+				if (inEditMode)
+				{
+					
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="35" skinClass="com.gazuntite.skins.controls.list.GeneralListItemSkin" >
+		
+		<s:HGroup left="0" width="100%" top="0" bottom="0"
+				  horizontalAlign="left"
+				  verticalAlign="middle"
+				  paddingLeft="8" paddingRight="8"
+				  gap="4"
+				  buttonMode="true" toolTip="Open/Close Details"
+				  click="toggleEditView(event)"
+				  >
+			<s:Label text="{model.serialNumber+ '. ' + data.Drug}" width="100%" toolTip="{data.Drug}" fontFamily="CalibriCFF"
+					 fontSize="14"/>
+			<s:Spacer width="100%"/>
+			<s:Image click="NewRecordbtn(event)"   
+					 buttonMode="true" useHandCursor="true" toolTip="Remove"
+					 source="@Embed('assets/images/new.png')" />
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:BorderContainer width="{id_Header.width - 10}" height="50" includeInLayout="{inEditMode}" visible="{inEditMode}" borderColor="#CECAB3" backgroundColor="#DBD9C3" borderWeight="1" skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin">
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="3" paddingLeft="10" paddingRight="10" paddingTop="4" gap="5"/>
+		</s:layout>
+		
+		<s:VGroup width="100%" height="100%">
+			<s:Label text="{data.Drug}" fontFamily="CalibriCFF" />
+			<s:Label text="{data.Dose}" fontFamily="CalibriCFF" />
+		</s:VGroup>
+		<s:VGroup width="100%" height="100%" toolTip="{data.Sig +' '+ data.Quantity}">
+			<s:Label text="{data.Sig}" fontFamily="CalibriCFF" />
+			<s:Label text="{data.Quantity}" fontFamily="CalibriCFF" />
+		</s:VGroup>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

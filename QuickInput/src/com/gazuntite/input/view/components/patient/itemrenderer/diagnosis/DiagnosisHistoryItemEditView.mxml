@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc(event)"
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.common.dto.assessment.diagnosis.ICDCodeDTO;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.view.inputsections.assessment.diagnosis.PatientInputAssessmentDiagnosisEvent;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var arrAssociateTypes:ArrayCollection = new ArrayCollection(['Previous Visit', 'N/A']);
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	public var labelWidth:Number = 100;
+			[Bindable]	public var isFormDierty:Boolean = false;
+			
+			private var _diagnosisDTO:DiagnosisDTO;
+			private var toolTipChanged:Boolean;
+			
+			[Bindable]
+			public function get diagnosisDTO():DiagnosisDTO
+			{
+				return _diagnosisDTO;
+			}
+			
+			public function set diagnosisDTO(value:DiagnosisDTO):void
+			{
+				_diagnosisDTO = value;
+			}
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER || event.keyCode == Keyboard.DOWN || event.keyCode == Keyboard.UP)
+					return;
+				
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var ev:PatientInputAssessmentDiagnosisEvent = new PatientInputAssessmentDiagnosisEvent(
+					PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_ITEM_EDIT_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				
+				dispatchEvent(ev);
+				
+				toolTipChanged = true;
+				invalidateProperties();
+			}
+			
+			private function changeRequiredFieldIcons(comboBox:AutoComplete):void
+			{
+				if (comboBox.selectedIndex >= 0)
+				{
+					img_IcdCode.source = QIConstants.IMG_GREEN;
+					img_Diagnosis.source = QIConstants.IMG_GREEN;
+				}
+				else
+				{
+					img_IcdCode.source = QIConstants.IMG_RED;
+					img_Diagnosis.source = QIConstants.IMG_RED;
+				}
+			}
+			
+			private function addClickHandler():void
+			{
+				if (isInvalid())
+					return;
+				
+				if (!diagnosisDTO)
+					return;
+				
+				if (id_AssociateVisitsCmbo.selectedItem == 'Previous Visit')
+				{
+					if(id_VisitDatesCombo.selectedIndex >= 0)
+					{
+						diagnosisDTO.VisitID 						= id_VisitDatesCombo.selectedItem.VisitID;
+						diagnosisDTO.VisitDate 						= UtilityFunctions.toDate(id_VisitDatesCombo.selectedItem.VisitDate);
+					}
+					else
+					{
+						diagnosisDTO.VisitID 						= diagnosisDTO.VisitID;
+						diagnosisDTO.VisitDate 						= diagnosisDTO.VisitDate;
+					}
+					diagnosisDTO.AssociateType 					= 'Previous Visit';
+				}
+				else if (id_AssociateVisitsCmbo.selectedItem == 'N/A')
+				{
+					diagnosisDTO.VisitID						= 0;
+					diagnosisDTO.IsNA 							= true;
+					diagnosisDTO.AssociateType 					= 'N/A';
+				}
+				else
+				{
+					diagnosisDTO.AssociateType 					= 'This Visit';
+				}
+				
+				diagnosisDTO.IsDirty 							= true;
+				diagnosisDTO.OnSet 								= id_OnSet.text;
+				
+				if(isFormDierty)
+					diagnosisDTO.IcdDto 						= id_IcdCodeCmbo.selectedItem as ICDCodeDTO;
+				else
+					diagnosisDTO.IcdDto							= diagnosisDTO.IcdDto;
+				
+				diagnosisDTO.IsChronic 							= id_Chronic.selected;
+				//		diagnosisDTO.IsActive = id_Active.selected;
+				
+				diagnosisDTO.ModifiedBy 						= model.LoggedInUserId;
+				diagnosisDTO.ModifiedAt 						= new Date();
+				diagnosisDTO.DictationID 						= id_dictationNoteView.DictationID;
+				//		if (diagnosisDTO.showActiveField)
+				//			diagnosisDTO.ResolvedDate = id_ResolvedDate.text;
+				
+				// For Associated Visit
+				if ((id_AssociateVisitsCmbo.selectedItem == 'Previous Visit') || (id_AssociateVisitsCmbo.selectedItem == 'N/A' && id_VisitDatesCombo.selectedIndex != -1))
+				{
+					Alert.show("Are you sure you want to save this record?",	"Confirmation Required!", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+					{
+						if( event.detail == Alert.YES )
+						{
+							onManagePatientDiagnosisEvent(diagnosisDTO);
+						}
+						else if( event.detail == Alert.NO )
+						{
+							return;
+						}
+					});
+				}
+				else
+				{
+					onManagePatientDiagnosisEvent(diagnosisDTO); 
+				}
+			}
+			
+			private function onManagePatientDiagnosisEvent(diagnosisDTO:DiagnosisDTO):void
+			{
+				var ev:PatientInputAssessmentDiagnosisEvent 	= new PatientInputAssessmentDiagnosisEvent(PatientInputAssessmentDiagnosisEvent.PATIENT_INPUT_DIAGNOSIS_EDIT_EVENT, true);
+				ev.diagnosisDTO 								= diagnosisDTO;
+				ev.AssociateType								= 'Other';
+				dispatchEvent(ev);
+				dispatchEvent( new Event( 'saveStatus', true ) );
+			}
+			
+			private function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (id_AssociateVisitsCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Associated Visit Type\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_AssociateVisitsCmbo;
+				}
+				
+				if (id_AssociateVisitsCmbo.selectedItem == 'Previous Visit' && id_VisitDatesCombo.prompt == "Previous Visits")
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select visit date\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_VisitDatesCombo;
+				}
+				
+				if (id_OnSet.text.length < 1)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select OnSet Date\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_OnSet;
+				}
+				
+				if (isInvalidICDCode())
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select ICD Code\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_IcdCodeCmbo;
+				}
+				
+				if (isInvalidDiagnosis())
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Diagnosis\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_DiagnosisCmbo;
+				}
+				/*	
+				if (diagnosisDTO.showActiveField && !id_Chronic.selected)
+				{
+				if (!ValidationUtils.isValidDateText(id_ResolvedDate.text))
+				{
+				isNotValid = true;
+				
+				errorStr += "Please select Resolved Date\n";
+				
+				if (!toSetFocus)
+				toSetFocus = id_ResolvedDate;
+				}
+				}
+				*/
+				if (errorStr.length > 0)
+					Alert.show(errorStr, "Required Field", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				
+				return isNotValid;
+			}
+			
+			private function isInvalidICDCode():Boolean
+			{
+				var isNotValid:Boolean = false;
+				if (id_IcdCodeCmbo.selectedIndex < 0 && isFormDierty)
+				{
+					if (!id_IcdCodeCmbo.selectedItem)
+					{
+						isNotValid = true;
+					}
+					else
+					{
+						var icdCode:ICDCodeDTO = id_IcdCodeCmbo.selectedItem as ICDCodeDTO;
+						
+						if (!icdCode)
+						{
+							isNotValid = true;
+						}
+					}
+				}
+				else if(!isFormDierty)
+				{
+					if(id_IcdCodeCmbo.text.length == 0)
+						isNotValid = true;
+				}
+				
+				return isNotValid;
+			}
+			
+			private function isInvalidDiagnosis():Boolean
+			{
+				var isNotValid:Boolean = false;
+				
+				if (id_DiagnosisCmbo.selectedIndex < 0 && isFormDierty)
+				{
+					if (!id_DiagnosisCmbo.selectedItem)
+					{
+						isNotValid = true;
+					}
+					else
+					{
+						var diagnosis:ICDCodeDTO = id_DiagnosisCmbo.selectedItem as ICDCodeDTO;
+						
+						if (!diagnosis)
+						{
+							isNotValid = true;
+						}
+					}
+				}
+				else if(!isFormDierty)
+				{
+					if(id_DiagnosisCmbo.text.length == 0)
+						isNotValid = true;
+				}
+				
+				return isNotValid;
+			}
+			/*
+			private function activeChangeHandler(event:Event):void
+			{
+			if (!id_Active.selected)
+			{
+			Alert.show("Are you sure want to resolve diagnosis?", "Confirmation", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, 
+			function(event:CloseEvent):void
+			{
+			switch (event.detail)
+			{
+			case Alert.NO:
+			{
+			id_Active.selected = true;
+			
+			break;
+			}
+			
+			default:
+			{
+			break;
+			}
+			}
+			});
+			}
+			}
+			*/
+			private function getFormattedVisitDate(value:DiagnosisDTO):String
+			{
+				if (!value)
+					return "";
+				
+				var formattedDate:String = "";
+				
+				formattedDate = UtilityFunctions.FormatDate(value.VisitDate, 'MM/DD/YYYY');
+				
+				return formattedDate;
+			}
+			
+			protected function id_IcdCodeCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_IcdCodeCmbo.selectedIndex >= 0 && id_IcdCodeCmbo.selectedItem != null)
+				{
+					img_IcdCode.source	= QIConstants.IMG_GREEN;
+					id_DiagnosisCmbo.selectedItem = model.icdCodeDTOList.getItemAt(id_IcdCodeCmbo.selectedIndex);
+					isFormDierty = true;
+				}
+				if(id_DiagnosisCmbo.selectedIndex >= 0 && id_DiagnosisCmbo.selectedItem != null)
+				{
+					img_Diagnosis.source	= QIConstants.IMG_GREEN;
+					id_IcdCodeCmbo.selectedItem = model.icdCodeDTOList.getItemAt(id_DiagnosisCmbo.selectedIndex);
+					img_IcdCode.source	= QIConstants.IMG_GREEN;
+					isFormDierty = true;
+				}
+			}
+			protected function id_IcdCodeCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_IcdCodeCmbo.text.length <= 2)
+				{
+					img_IcdCode.source = QIConstants.IMG_RED;
+					isFormDierty = true;
+				}
+			}
+			protected function id_DiagnosisCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_DiagnosisCmbo.selectedIndex >= 0 || id_DiagnosisCmbo.selectedItem != null)
+				{
+					img_Diagnosis.source	= QIConstants.IMG_GREEN;
+					isFormDierty = true;
+				}
+			}
+			protected function id_DiagnosisCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_DiagnosisCmbo.text.length <= 2)
+				{
+					img_Diagnosis.source = QIConstants.IMG_RED;
+					isFormDierty = true;
+				}
+			}
+			// TA - hide whole view of notes & dictation 
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (viewModel.inDictationMode)
+						viewModel.inDictationMode = false;
+					
+					if (viewModel.inNoteMode)
+						viewModel.inNoteMode = false;
+					viewModel.visible = false;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5" horizontalAlign="right"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" gap="15">
+		<s:HGroup width="50%" height="100%" verticalAlign="middle">
+			<s:HGroup width="50%" height="100%" verticalAlign="middle">
+				<s:BitmapImage id="img_Associated" source="{id_AssociateVisitsCmbo.selectedIndex >= 0 ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+				<s:DropDownList id="id_AssociateVisitsCmbo" tabIndex="0"
+								width="100%" height="24" 
+								dataProvider="{arrAssociateTypes}" prompt="Select Associated Visit"
+								skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+								itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.immunization.ImmunizationIR"
+								click="id_AssociateVisitsCmbo.openDropDown()"
+								/>
+			</s:HGroup>
+			<s:Spacer width="11" />
+			<s:DropDownList id="id_VisitDatesCombo" tabIndex="1"
+							enabled="{id_AssociateVisitsCmbo.selectedItem == 'Previous Visit' ? true : false}"
+							width="50%" height="24" 
+							dataProvider="{model.unSignedVisitDates}" prompt="Previous Visits"
+							click="id_VisitDatesCombo.openDropDown()" labelField="VisitDateLbl" 
+							itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.VisitDateComboIR"
+							skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+							/>
+		</s:HGroup>
+		<s:HGroup width="50%" height="100%" verticalAlign="middle">
+			<s:BitmapImage id="img_OnSet" source="{id_OnSet.text.length ? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+			<s:SkinnableContainer  width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" >
+				<components:LabelDateField id="id_OnSet"  tabIndex="2"
+										   width="100%"  prompt="OnSet" toolTip="OnSet" 
+										   yearNavigationEnabled="true" maxYear="{new Date().getFullYear()}" minYear="1901"
+										   selectableRange="{{rangeEnd : new Date()}}"
+										   IsEditAllow="false" editable="false"
+										   styleName="coverDateField"
+										   />
+			</s:SkinnableContainer>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" gap="16" height="25">
+		<s:HGroup width="50%" height="25" verticalAlign="middle">
+			<s:BitmapImage id="img_IcdCode" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_IcdCodeCmbo"  tabIndex="3"
+									   width="100%" height="25" prompt="Select ICD Code" toolTip="ICD Code" labelField="IcdCodeName"
+									   dataProvider="{model.icdCodeDTOList}"
+									   keyUp="comboKeyUpHandler(event)" 
+									   selectedItemChange="id_IcdCodeCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_IcdCodeCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" height="100%" verticalAlign="middle">
+			<s:BitmapImage id="img_Diagnosis" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_DiagnosisCmbo"  tabIndex="4"
+									   width="100%" height="100%" prompt="Select Diagnosis" toolTip="Diagnosis"
+									   dataProvider="{model.icdCodeDTOList}" labelField="IcdCodeDescription"
+									   keyUp="comboKeyUpHandler(event)" 
+									   selectedItemChange="id_IcdCodeCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_DiagnosisCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   />
+			<s:ToggleButton id="id_Chronic" buttonMode="true" tabIndex="5"
+							skinClass="com.gazuntite.input.view.skins.YesNoToggleButtonSkin"
+							toolTip="{id_Chronic.selected ? 'Yes' : 'No'}"/>
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+	<s:HGroup width="100%" horizontalAlign="right" paddingRight="8">
+		<s:ToggleButton id="id_btnDictation"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						skinClass="{ (diagnosisDTO.DictationID &amp;&amp; diagnosisDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+		
+		<s:ToggleButton id="id_btnNote"
+						click="onDictationNoteButtonsClick()"
+						selected="@{viewModel.inNoteMode}"
+						toolTip="Record Level Notes"
+						skinClass="{diagnosisDTO.Note.length ? NotesRedButtonSkin : com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin}"
+						/>
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin" 
+				  toolTip="Save"  click="addClickHandler()"
+				  right="0" verticalCenter="0"
+				  tabIndex="5"
+				  />
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView id="id_dictationNoteView" width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{diagnosisDTO.Note}" note="@{diagnosisDTO.Note}"	
+										 isSaveButtonVisible="false" DictationID="{diagnosisDTO.DictationID}" IsDictaionEditMode="{true}" ShowSaveButton="false"/>
+	
+</s:SkinnableContainer>

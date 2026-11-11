@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="122" height="26">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect x="0.5" y="1.5" width="109" height="24" alpha="1" radiusX="0"
+			visible.disabledAndSelected="false"
+			visible.downAndSelected="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:stroke>
+			<s:SolidColorStroke caps="round" color="#545454" joints="miter" miterLimit="3" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#81A1FC" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#81A1FC" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect includeIn="disabledAndSelected,downAndSelected,overAndSelected,upAndSelected" x="0" y="0" width="122" height="25" radiusX="0">
+		<s:fill>
+			<s:LinearGradient rotation="0">
+				<s:GradientEntry alpha="1.0" ratio="1" color="#81A1FC"/>
+				<s:GradientEntry alpha="1.0" ratio="1" color="#81A1FC"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="180" blurX="2" blurY="2" color="#000000"
+								distance="2" hideObject="false" inner="false" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:RichText id="labelDisplay" x="9" y="7" width="65" color="#000000" fontFamily="Calibri" fontSize="12" tabStops="S0" fontWeight="bold"
+				showTruncationTip="true" maxDisplayedLines="1"/>
+</s:Skin>

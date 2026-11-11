@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.ListOnlySelectionEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.formatters.DateFormatter;
+			import mx.utils.ObjectUtil;
+			
+			//[Bindable]
+			//public var model : DMAppModelLocator = DMAppModelLocator.getInstance();
+			//dataProvider="{model.documentSectionTypeDTOListLinear}"
+			
+			private var m_acDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return m_acDataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				m_acDataProvider = value;
+			}
+			
+			/* protected function labeldatefield1_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+			if(id_FromDate.selectedDate && id_ToDate.selectedDate)
+			{
+			var result:int = comapreDates(id_FromDate.selectedDate, id_ToDate.selectedDate)
+			
+			if(result == 1)
+			Alert.show("'From' date is always before 'To' Date", 'Invalid Date');
+			
+			}
+			} */
+			
+			protected function id_btnSearch_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function OK_clickHandler(event:MouseEvent):void
+			{
+				if(id_FromDate.selectedDate && id_ToDate.selectedDate)
+				{
+					var result:int = comapreDates(id_FromDate.selectedDate, id_ToDate.selectedDate)
+					
+					if(result == 1)
+					{
+						Alert.show("'From' date is always before 'To' Date", 'Invalid Date');
+						return;
+					}
+				}
+				
+				var df:DateFormatter 			= new DateFormatter();
+				df.formatString 				= "MM-DD-YYYY";
+				
+				var e:ListOnlySelectionEvent	= new ListOnlySelectionEvent(); 
+				
+				e.selection 					= id_TypesCmbo.selectedItem;
+				e.from 							= df.format( id_FromDate.text );
+				e.to 							= df.format( id_ToDate.text );
+				
+				dispatchEvent( e );
+				
+				removePopup();
+			}
+			
+			
+			protected function Cancel_clickHandler(event:MouseEvent):void
+			{
+				removePopup();
+			}
+			
+			private function comapreDates(date1:Date, date2:Date):int
+			{
+				var ret:int = ObjectUtil.dateCompare(date1, date2);
+				
+				if (ret == 0)//if the strat date are equal to end date
+				{
+					return 0;//true;
+				}else if( ret == -1)//if the first date is before the second date
+				{
+					return -1;// false;
+				} 
+				else // 1 - if the first date is after the second date
+				{
+					return 1;//true;
+				}
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.popUpSkins.listonlyPopupSkin" width="100%"
+						  maxWidth="296">
+		
+		<s:layout>
+			<s:VerticalLayout paddingLeft="12" paddingRight="12"  paddingBottom="10"  paddingTop="3"  gap="15"/>
+		</s:layout>
+		<s:HGroup horizontalAlign="right" verticalAlign="middle"  width="100%">
+			
+			<s:Button buttonMode="true" id="id_CloseBtn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.whiteCloseButton"  
+					  click="Cancel_clickHandler(event)"
+					  toolTip="Close"  height="16" width="16"/>
+		</s:HGroup>
+		<components:LabelComboBox id="id_TypesCmbo" labelField="SectionName" dataProvider="{DataProvider}" width="262" fontFamily="Calibri" fontSize="11" height="24" prompt="Select Field" />
+		<s:HGroup width="100%"  textAlign="left" verticalAlign="middle" paddingLeft="5">
+			<s:Label text="Date range" verticalAlign="middle" textAlign="center" fontFamily="Calibri" fontSize="11" height="20"  />
+			<components:LabelDateField id="id_FromDate" width="100" prompt="From" fontFamily="calibri" fontSize="11"	 />
+			<components:LabelDateField id="id_ToDate"  width="100" prompt="To"  selectableRange="{{rangeEnd:new Date()}}"	 fontFamily="calibri" fontSize="11"	 />
+			
+		</s:HGroup>
+		
+		<!--<s:HGroup width="100%">
+		<components:LabelTextInput id="id_SearchTextInput" width="100%" skinClass="com.zigron.common.view.skins.TI_search"  />
+		<s:Button id="id_btnSearch" click="id_btnSearch_clickHandler(event)"  skinClass="com.zigron.common.view.skins.BtnSearch" buttonMode="true" />
+		</s:HGroup>-->
+		
+		<s:HGroup width="100%" gap="10" horizontalAlign="center">
+			
+			<s:Button label="Apply" click="OK_clickHandler(event)"  toolTip="Apply"   skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.ListBtn" buttonMode="true" />
+			<s:Button label="Cancel" click="Cancel_clickHandler(event)"  toolTip="Cancel"  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.ListBtn" buttonMode="true"/>
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	
+</components:PopupGroup>

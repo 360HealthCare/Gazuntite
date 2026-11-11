@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:appController="com.gazuntite.provider.services.email.appController.*" 
+				   xmlns:viewItemrenderer="com.gazuntite.provider.services.email.view.ItemRenderer"
+				   xmlns:components="com.gazuntite.controls.extended.components.*"
+				   xmlns:emailview="com.gazuntite.provider.services.email.view.emailview.*"
+				   xmlns:providerSearchview="com.gazuntite.provider.search.services.provider.view.*" 
+				   creationComplete="cc(event)"
+				   borderColor="#000000" borderWeight="1" cornerRadius="3"
+				   >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Metadata>
+		[Event(name="close", type="mx.events.CloseEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.controls.extended.components.PopupWindow;
+			import com.gazuntite.provider.services.common.model.CommunicationViewModel;
+			import com.gazuntite.provider.services.email.dto.EmailDTO;
+			import com.gazuntite.provider.services.email.event.DeleteEmailEvent;
+			import com.gazuntite.provider.services.email.event.EmailOptionEvent;
+			import com.gazuntite.provider.services.email.event.GetEmailEvent;
+			import com.gazuntite.provider.services.email.event.GetSentEmailEvent;
+			import com.gazuntite.provider.services.email.event.ViewEmailEvent;
+			import com.gazuntite.provider.services.email.model.EmailModelLocator;
+			import com.gazuntite.provider.services.email.util.EmailConstant;
+			import com.gazuntite.provider.services.email.view.emailview.ComposeMailView;
+			import com.gazuntite.provider.services.email.view.emailview.EmailOptionpoup;
+			import com.gazuntite.provider.services.email.view.emailview.ReadEmailView;
+			import com.gazuntite.provider.services.email.view.event.ReadEmailEvent;
+			import com.gazuntite.provider.services.email.view.event.RefreshInboxPanel;
+			import com.gazuntite.provider.services.email.view.event.ReplyEmailEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ListCollectionView;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.logging.ILogger;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.TextOperationEvent;
+			
+			//			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model: EmailModelLocator = EmailModelLocator.getInstance();
+			
+			[Bindable]
+			private var viewModel:CommunicationViewModel = CommunicationViewModel.getInstance();
+			
+			
+			private var IsPageChanged:Boolean = false;
+			private var currentPage:int;
+			private var totalPages:int;
+			private var _IsResponse:Boolean =false;
+			
+			private var _emailAddress:String;
+			private var _userID:int;
+			private var _emailID:int;
+			private var _emailCounter:String;
+			
+			[Bindable]
+			public function get emailCounter():String
+			{
+				return _emailCounter;
+			}
+			
+			public function set emailCounter(value:String):void
+			{
+				_emailCounter = value;
+			}
+			
+			
+			[Bindable]
+			public function get emailID():int
+			{
+				return _emailID;
+			}
+			
+			public function set emailID(value:int):void
+			{
+				_emailID = value;
+			}
+			
+			
+			public var callBackDeleteEmail			: Function;
+			
+			protected function CloseHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new CloseEvent(CloseEvent.CLOSE) );
+			}
+			
+			public function get IsResponse():Boolean
+			{
+				return _IsResponse;
+			}
+			
+			public function set IsResponse(value:Boolean):void
+			{
+				if(value != false)
+					callReadEmail();
+				
+			}
+			private function callReadEmail():void
+			{
+				var objReadEmail:ReadEmailView =new ReadEmailView();
+				PopUpManager.addPopUp(objReadEmail,this,true);
+			}
+			/*
+			private function sendToServer( userId:int, clinicBranchId:int, stationId:int,totalPages:int,currentPage:int ):void
+			{
+			var emailEvent : GetEmailEvent = new GetEmailEvent(userId,clinicBranchId,stationId,totalPages,currentPage,EnableNavigateCallBack);
+			CairngormEventDispatcher.getInstance().dispatchEvent(emailEvent);
+			}
+			*/
+			protected function EmailInbox_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function button5_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			/*
+			protected function btnNext_clickHandler(event:MouseEvent):void
+			{
+			
+			sendToServer(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,model.totalPage,EmailConstant.CURRENTPAGE +1);
+			//sendToServer(597,1,1,model.totalPage,EmailConstant.CURRENTPAGE +1);
+			}
+			
+			
+			protected function btnPrvious_clickHandler(event:MouseEvent):void
+			{
+			//sendToServer(597,1,1,model.totalPage,EmailConstant.CURRENTPAGE -1);
+			sendToServer(597,1,1,model.totalPage,EmailConstant.CURRENTPAGE -1);
+			}
+			
+			
+			protected function btnGotoFirstRecord_clickHandler(event:MouseEvent):void
+			{
+			//model.currentPage =1;
+			sendToServer(597,1,1,model.totalPage,EmailConstant.CURRENTPAGE=1);
+			}
+			
+			
+			protected function btnGotoLastRecord_clickHandler(event:MouseEvent):void
+			{
+			//model.currentPage = model.totalPage;
+			sendToServer(597,1,1,model.totalPage,EmailConstant.CURRENTPAGE = model.totalPage);
+			}
+			
+			
+			protected function btnRefresh_clickHandler(event:MouseEvent):void
+			{
+			var currentPage:int =1,totalPages:int =1;
+			//	EnableNavigationButtons(currentPage,totalPages);
+			if(model.IsInbox)
+			btnInbox_clickHandler(event);
+			else if(!model.IsInbox)
+			btnSentItem_clickHandler(event);
+			}
+			
+			*/
+			protected function btnInbox_clickHandler(event:MouseEvent):void
+			{
+				emailOption.text = 'INBOX';
+				resetButtons();
+				btnInbox.selected 	= true ;
+				id_Views.selectedIndex = 0;
+				btnDelete.enabled = true;
+				id_MailInbox.visible=true;
+				model.IsInbox=true;
+				//EmailID = id_mailBox.gird.selectedItem.EmailID ;
+				/*id_MainContainer.visible=true;
+				id_SenderorRecieverName.headerText = "From";
+				GetInboxData();
+				event.stopImmediatePropagation();*/
+				
+				ShowEmailCount(true);
+				
+				//				id_MailInbox.id_SenderorRecieverName.headerText="From";
+				var emailEvent : GetEmailEvent = new GetEmailEvent(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,10,1,model.IsInbox,id_MailInbox.EnableNavigateCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(emailEvent);
+			}
+			
+			public function resetButtons():void
+			{
+				btnInbox.selected 		= false ;
+				btnComposeMail.selected = false ;
+				btnSentItem.selected 	= false ;
+				btnDelete.enabled		= false ;
+				
+			}
+			
+			private function GetInboxData():void
+			{
+				model.IsInbox = true;
+				//	sendToServer(597,1,1,10,1);//model.totalPage,model.currentPage);
+				
+				IsPageChanged= true;
+				//model.m_oEmailResultList.EmailAll
+				
+				//	EnableNavigationButtons(1,1);
+			}
+			
+			protected function btnComposeMail_clickHandler(event:MouseEvent):void
+			{	
+				emailOption.text = 'COMPOSE';
+				resetButtons();
+				btnComposeMail.selected 	= true ;
+				btnDelete.enabled 			= false ;
+				id_Views.selectedIndex 		= 1;
+				if(id_SendMail != null)
+				{
+					id_SendMail.visible=true;
+					id_SendMail.id_email.text = EmailAddress;
+					id_SendMail.id_AttachmentGrid.visible=false;
+					id_SendMail.id_AttachmentGrid.includeInLayout = false;
+					id_SendMail.fileAttachmentArray.removeAll();
+					id_SendMail.isUploadComplete =false;
+				}
+				ShowEmailCount(false);
+				
+				
+				/*var objSendMail:SendMailView =new SendMailView();
+				//id_MainContainer.percentWidth =100;
+				//id_MainContainer.addElementAt(objSendMail,0);
+				
+				id_MainContainer.visible=false;
+				
+				
+				PopUpManager.addPopUp(objSendMail,id_MainContainer,false);
+				
+				PopUpManager.removePopUp(this);*/
+			}
+			
+			public  function GetEmailInboxValuesCallBack(val:* = null):void
+			{
+				
+			}
+			
+			protected function btnDelete_clickHandler(event:Event):void
+			{ 
+				//	dgEmailInbox.selectedItems[][]
+				
+				var SelectedItems:ArrayCollection = new ArrayCollection();
+				
+				for each (var item:EmailDTO in  id_MailInbox.uiInboxList.dataProvider)
+				{
+					if(item.isSelected)
+						SelectedItems.addItem(item);
+				}
+				
+				if(SelectedItems.length > 0)
+				{
+					var emailID:String = "";
+					
+					for (var i:int = 0; i < SelectedItems.length; i++)
+					{
+						emailID	+= SelectedItems[i].EmailID+"^";					
+					}
+					
+					if(emailID.length > 0)
+					{
+						emailID=emailID.substring(0,emailID.length-1);
+						///////////// Change USer ID later On
+						var emailDeleteEvent : DeleteEmailEvent = new DeleteEmailEvent(emailID,model.loggedInUserId,GetEmailValuesCallBack);
+						CairngormEventDispatcher.getInstance().dispatchEvent(emailDeleteEvent);
+					}
+					else
+						Alert.show("Select any Email to Delete.","Email Sending Error" ,4,this);
+				}
+				else
+					Alert.show("No Email to Delete.","Email Sending Error" ,4,this);
+			}
+			
+			public  function GetEmailValuesCallBack(val:* = null):void
+			{
+				
+				if(model.IsInbox)
+				{
+					GetInboxData();
+					//					id_MailInbox.id_SenderorRecieverName.headerText="From";
+					var emailEvent : GetEmailEvent = new GetEmailEvent(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,10,model.currentPage,model.IsInbox,id_MailInbox.EnableNavigateCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent(emailEvent);
+					
+				}
+				else if(!model.IsInbox)
+				{
+					
+					id_MailInbox.visible=true;
+					//					id_MailInbox.id_SenderorRecieverName.headerText="To";
+					var emailSentEvent : GetSentEmailEvent = new GetSentEmailEvent(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,10,model.currentPage,model.IsInbox,id_MailInbox.EnableNavigateCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent(emailSentEvent);
+				}
+				//btnSentItem_clickHandler(event);
+			}
+			
+			protected function btnSentItem_clickHandler(event:MouseEvent):void
+			{
+				emailOption.text		= 'SENT';
+				resetButtons();
+				btnSentItem.selected 	= true ;
+				id_Views.selectedIndex 	= 0;
+				btnDelete.enabled 		= true;
+				id_MailInbox.visible	= true;
+				//	id_SenderorRecieverName.headerText = "To";
+				//	var userId:int, clinicBranchId:int, stationId:int,totalPages:int,currentPage:int ;
+				//				id_MailInbox.id_SenderorRecieverName.headerText="To";
+				var emailSentEvent : GetSentEmailEvent = new GetSentEmailEvent(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,10,1,model.IsInbox,id_MailInbox.EnableNavigateCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(emailSentEvent);
+				model.IsInbox = false;
+				
+				ShowEmailCount(true);
+				
+				//id_MailInbox.dgEmailInbox.dataProvider="{model.m_oEmailResultList.EmailAll}";
+			}
+			
+			/*
+			public function  EnableNavigationButtons(currentPage:int, totalPages:int ):void //currentPage:int, totalPages:int ):void
+			{
+			currentPage = EmailConstant.CURRENTPAGE;
+			btnGotoFirstRecord.enabled = currentPage != 1;
+			btnGotoLastRecord.enabled 		= currentPage != totalPages;
+			btnNext.enabled 		=  currentPage != totalPages;
+			btnPrevious.enabled 	=  currentPage != 1;
+			}
+			
+			
+			
+			
+			protected function checkbox1_clickHandler(event:MouseEvent):void
+			{
+			if(chkHeader.selected)
+			{
+			var allRows:int =	 model.m_oEmailResultList.EmailAll.length;
+			
+			for (var i:int = 0; i < allRows; i++)
+			{
+			if (chkHeader.selected == true)
+			{
+			trace ("Checked is true");
+			
+			//	dgEmailInbox.columns[4]=true;
+			//model.m_oEmailResultList.EmailAll[i].
+			//gridData[i].checked = true;
+			}
+			else
+			{
+			trace ("Checked is false");
+			//	dgEmailInbox.columns[4]=false;
+			//	gridData[i].checked = false;
+			}
+			}
+			}
+			
+			}
+			
+			protected function CheckUncheckAll():void
+			{
+			var allRows:int =	 model.m_oEmailResultList.EmailAll.length;
+			
+			for (var i:int = 0; i < allRows; i++)
+			{
+			if (chkHeader.selected == true)
+			{
+			trace ("Checked is true");
+			//		ListCollectionView(dataGrid.dataProvider).getItemAt(requiredRow)[data_field] = newValue;
+			//var data_field:String = dgViewPreview.columns[6].dataField
+			ListCollectionView(dgEmailInbox.dataProvider).getItemAt(i)["isSelected"]=true;
+			//dgEmailInbox.columns[4]=true;
+			//model.m_oEmailResultList.EmailAll[i].
+			//gridData[i].checked = true;
+			}
+			else
+			{
+			trace ("Checked is false");
+			ListCollectionView(dgEmailInbox.dataProvider).getItemAt(i)["isSelected"]=false;
+			//	gridData[i].checked = false;
+			}
+			}
+			dgEmailInbox.dataProvider = model.m_oEmailResultList.EmailAll;
+			}
+			
+			public  function EnableNavigateCallBack(val:* = null):void
+			{
+			
+			EnableNavigationButtons(model.currentPage,model.totalPage);
+			}
+			
+			protected function windowedapplication1_clickHandler(event:MouseEvent):void
+			{
+			// TODO Auto-generated method stub
+			}
+			
+			
+			protected function dgEmailInbox_itemDoubleClickHandler(event:ListEvent):void
+			{
+			var objReadEmail:ReadEmailView =new ReadEmailView();
+			objReadEmail.emailID=event.itemRenderer.data.UserId;
+			PopUpManager.addPopUp(objReadEmail,this,true);
+			}
+			
+			
+			protected function dgEmailInbox_itemClickHandler(event:ListEvent):void
+			{
+			
+			}
+			
+			*/
+			protected function cc(event:FlexEvent):void
+			{
+				model.IsInbox 			= true;
+				id_Views.selectedIndex	= 1;
+				btnComposeMail.selected 		= true ;
+				
+				//	sendToServer(597,1,1,10,1);
+				//event.stopImmediatePropagation();
+				//IsPageChanged= true;
+				//model.m_oEmailResultList.EmailAll
+				
+				//	EnableNavigationButtons(1,1);
+				
+				//		id_MailInbox.dgEmailInbox.addEventListener(MouseEvent.DOUBLE_CLICK, dgEmailInbox_itemDoubleClickHandler);
+				
+				
+			}
+			
+			
+			private function ShowEmailCount(isLabelVisible:Boolean):void
+			{
+				id_EmailCount.visible = false;//isLabelVisible;
+			}
+			
+			protected function id_MailInbox_LoadEmailEventHandler(event:ReadEmailEvent):void
+			{
+				ShowEmailCount(false);
+				id_Views.selectedIndex=2;
+				
+				if(id_ReadMail != null)
+				{
+					//if(model.IsInbox)
+					//todo ??
+					//						id_ReadMail.btnReply.label = "Reply";
+					//else
+					//todo ??
+					//						id_ReadMail.btnReply.label = "Forward";
+					
+					id_ReadMail.visible=true;
+					//todo ??
+					//				id_ReadMail.emailID= event.emailID;
+					//todo ??
+					//				id_ReadMail.sendToServer();
+					
+				}
+				//id_Views.selectedIndex=2;
+				//id_ReadMail.emailID= event.emailID;
+			}
+			
+			
+			
+			protected function id_ReadMail_ReplyEmailEventHandler(event:ReplyEmailEvent):void
+			{
+				ShowEmailCount(false);
+				id_Views.selectedIndex=1;
+				if(id_SendMail != null)
+				{
+					if(model.IsInbox)
+					{
+						//id_SendMail.id_email.text = event.from;
+						EmailAddress = event.from;
+						//id_SendMail.EmailAddress = event.from;
+						userID = event.userId;
+						id_SendMail.senderID = event.userId;
+						id_SendMail.id_subject.text = "Re: "+ event.subject;
+						id_SendMail.id_message.text = event.message;
+						id_SendMail.fileAttachmentArray.removeAll();
+						id_SendMail.id_AttachmentGrid.visible = false;
+						id_SendMail.id_AttachmentGrid.includeInLayout = false;
+						btnComposeMail.selected = true;
+						btnInbox.selected = false;
+						id_SendMail.isReply = true;
+						
+					}
+					else
+					{
+						id_SendMail.id_email.text = event.from;
+						id_SendMail.id_subject.text = "Forward: "+ event.subject;
+						id_SendMail.id_message.text = event.message;
+						
+						id_SendMail.fileAttachmentArray = event.attachment;
+						id_SendMail.id_AttachmentGrid.dataProvider = null;
+						id_SendMail.id_AttachmentGrid.dataProvider = id_SendMail.fileAttachmentArray;
+						//if(id_SendMail.fileAttachmentArray.length > 0)
+						if(event.attachment.length > 0)
+						{
+							id_SendMail.id_AttachmentGrid.visible = true;
+							id_SendMail.id_AttachmentGrid.includeInLayout = false;
+							
+						}
+						else
+						{
+							id_SendMail.id_AttachmentGrid.visible         = false;
+							id_SendMail.id_AttachmentGrid.includeInLayout = false;
+						}
+						btnComposeMail.selected = true;
+						btnSentItem.selected = false;
+						id_SendMail.isReply = false;
+					}
+				}
+				
+				
+				//id_SendMail.id_subject.text ="Re: "+ model.subject;
+				//id_SendMail.id_message.text = "\r\n\r\n"+" On "+ model.mailSentAt+ ", "+ model.from +" wrote: \r\n"+model.message ;
+			}
+			
+			
+			
+			protected function id_SendMail_RefreshEmailEventHandler(event:RefreshInboxPanel):void
+			{
+				if(id_MailInbox !=null)
+				{
+					
+				}
+				id_Views.selectedIndex=0;
+				emailOption.text = 'Inbox';
+				btnComposeMail.selected = false;
+				if(model.IsInbox)
+				{
+					btnInbox.selected = true;
+					btnSentItem.selected = false;
+				}
+				else
+				{
+					btnSentItem.selected = true;
+					btnInbox.selected = false;
+				}
+				emailCounter = EmailConstant.FIRSTRECORD +'-'+ EmailConstant.LASTRECORD +' of '+ EmailConstant.TOTALEMAILS;
+			}
+			
+			[Bindable]
+			public function get EmailAddress():String
+			{
+				return _emailAddress;
+			}
+			
+			public function set EmailAddress(value:String):void
+			{
+				_emailAddress = value;
+				//
+				btnComposeMail.selected = true;
+				btnInbox.selected = false;
+				//
+			}
+			[Bindable]
+			public function get userID():int
+			{
+				return _userID;
+			}
+			
+			public function set userID(value:int):void
+			{
+				_userID = value;
+			}
+			
+			
+			
+			protected function id_ReadMail_RefreshEmailEventHandler(event:RefreshInboxPanel):void
+			{
+				if(id_MailInbox !=null)
+				{
+					
+				}
+				id_Views.selectedIndex=0;
+				emailCounter = EmailConstant.FIRSTRECORD +'-'+ EmailConstant.LASTRECORD +' of '+ EmailConstant.TOTALEMAILS;
+				ShowEmailCount(true);
+			}
+			
+			
+			protected function id_SendMail_clickHandler(event:MouseEvent):void
+			{
+				if(id_SendMail != null)
+				{
+					id_SendMail.EmailAddress= EmailAddress;
+					id_SendMail.userID=userID;
+					id_SendMail.senderID=model.loggedInUserId; 
+					id_SendMail.stationdID=model.loggedInUserSelectedStationID;
+					id_SendMail.branchID=model.loggedInUserSelectedBranchId;
+				}
+				ShowEmailCount(false);
+			}
+			
+			
+			private var comOptionpoup:EmailOptionpoup
+			protected function showComOptionpoup(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != comOptionpoup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				comOptionpoup = new EmailOptionpoup();
+				comOptionpoup.ShowPopup( this );
+				comOptionpoup.dataProvider = id_Views;
+				comOptionpoup.addEventListener(EmailOptionEvent.EMAIL_OPTION_CHANGE, function(optionevent:EmailOptionEvent):void 
+				{ 
+					emailOption.text=optionevent.content;
+					emailOption.text=emailOption.text.toUpperCase();
+					trace(optionevent);//comOptionpoup
+					//					logger.debug( "ComOptionpoup view changed " );
+				});
+				comOptionpoup.addEventListener("emailClosePopup", 
+					function(closeevent:Event):void 
+					{ 
+						removeAllPopups();
+						viewModel.emailMenuShown = false;
+					} );
+				
+				var pt:Point = popButton.localToGlobal(new Point(event.localX, event.localY));
+				//				var pt:Point = new Point(event.localX, event.localY);
+				
+				comOptionpoup.move( pt.x - comOptionpoup.width + popButton.width + 115, pt.y + popButton.height-12);
+				//				comOptionpoup.move( pt.x - comOptionpoup.width , pt.y );
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			public function removeAllPopups():void
+			{
+				if( comOptionpoup && comOptionpoup.isPopUp )
+				{
+					comOptionpoup.removePopup();
+					comOptionpoup = null;
+				}
+			}
+			// true in communication View and false in Patient View
+			private var _showHeader:Boolean = true;
+			
+			[Bindable]
+			public function get showHeader():Boolean
+			{
+				return _showHeader;
+			}
+			
+			public function set showHeader(value:Boolean):void
+			{
+				_showHeader = value;
+			}
+			
+			public function loadMailData():void
+			{
+				/* var emailEvent : GetEmailEvent = new GetEmailEvent(model.loggedInUserId,model.loggedInUserSelectedBranchId,model.loggedInUserSelectedStationID,10,1,model.IsInbox,id_MailInbox.EnableNavigateCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(emailEvent); */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!--<s:VGroup width="670" height="339" verticalAlign="middle" y="0" x="0">-->
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="0" paddingRight="0" gap="-30" paddingTop="0" paddingBottom="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer  styleName="gradientGreyExtendedHeaderBGContainerSkin"  width="100%" visible="{showHeader}" includeInLayout="{showHeader}">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle"  paddingLeft="5" paddingRight="5"/>
+		</s:layout>
+		<s:ToggleButton skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin2"
+						toolTip="More Options" id="popButton"
+						click="showComOptionpoup(event)"
+						useHandCursor="true" buttonMode="true"  
+						selected="@{viewModel.emailMenuShown}"
+						visible="false"
+						includeInLayout="false"
+						/>
+		<s:Label id="emailOption" styleName="emailOption" text="COMPOSE"/>
+		<s:Spacer width="100%" />
+		<s:ToggleButton  label="Compose" 
+						 skinClass="com.gazuntite.skins.controls.toggleButtonSkin.communication.ComposeTBSkin"
+						 buttonMode="true" toolTip="Compose" id="btnComposeMail" name="btnComposeMail" click="btnComposeMail_clickHandler(event)" styleName="communicationHeaderToggleButtonSkin"  />
+		<s:ToggleButton label="Inbox" 
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.communication.InboxTBSkin"
+						buttonMode="true" toolTip="Inbox" id="btnInbox" name="bntInbox" click="btnInbox_clickHandler(event)"  styleName="communicationHeaderToggleButtonSkin"/>
+		<s:ToggleButton label="Sent Items" id="btnSentItem"  
+						skinClass="com.gazuntite.skins.controls.toggleButtonSkin.communication.OutboxTBSkin"
+						buttonMode="true" toolTip="Sent Items" name="btnSentItem" click="btnSentItem_clickHandler(event)" styleName="communicationHeaderToggleButtonSkin" />
+		<s:Button label="Delete" visible="false" includeInLayout="false" id="btnDelete" width="82" height="25" buttonMode="true" toolTip="Delete" name="btnDelete" click="btnDelete_clickHandler(event)" styleName="communicationButtonSkin" />
+		<s:Label paddingRight="4" id="id_EmailCount" text="{emailCounter}" fontFamily="Calibri Bold" visible="false" includeInLayout="false"/>
+	</s:SkinnableContainer>
+	
+	<!--<s:BorderContainer width="100%" borderColor="red" >-->
+	
+	
+	<mx:ViewStack id="id_Views" width="100%" height="100%">
+		<s:NavigatorContent id="Inbox" width="100%" height="100%">
+			<emailview:MailInboxView id="id_MailInbox" width="100%" height="100%" deleteEmailEvent="btnDelete_clickHandler(event)"
+									 LoadEmailEvent="id_MailInbox_LoadEmailEventHandler(event)"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent id="Compose"  width="100%" height="100%">
+			<emailview:ComposeMailView id="id_SendMail" width="100%" height="100%" showNav="{showHeader}" RefreshEmailEvent="id_SendMail_RefreshEmailEventHandler(event)" EmailAddress="{EmailAddress}" userID="{userID}" senderID="{model.loggedInUserId}" stationdID="{model.loggedInUserSelectedStationID}" branchID="{model.loggedInUserSelectedBranchId}" click="id_SendMail_clickHandler(event)"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent id="Sent">
+			
+			<emailview:ReadEmailView id="id_ReadMail"   width="100%" height="100%" />
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	
+	<!--</s:BorderContainer>-->
+</s:BorderContainer>

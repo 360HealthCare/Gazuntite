@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   xmlns:emailview="com.gazuntite.provider.services.email.view.emailview.*" 
+				   >
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.binding.utils.BindingUtils;
+			import mx.core.UIComponent;
+			
+			import spark.components.Button;
+			private var viewUpdated:Boolean = false;
+			private var _inputViews:Array;
+
+			public function get inputViews():Array
+			{
+				return _inputViews;
+			}
+
+			public function set inputViews(value:Array):void
+			{
+				_inputViews = value;
+				viewUpdated = true;
+				invalidateProperties();
+			}
+
+			private var curView:FlipViewContainer;
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				if (viewUpdated)
+				{
+					viewUpdated = false;
+					if (inputViews!=null)
+					{
+						uiViewContainer.removeAllElements();
+						uiButtonBar.removeAllElements();
+						for each (var view:FlipViewContainer in inputViews)
+						{
+							uiViewContainer.addElement(view);
+							view.percentHeight = 100;
+							BindingUtils.bindProperty(view,"width", uiViewContainer, "width");
+							
+							var btn:Button = new Button();
+							btn.label = view.menuLabel;
+							uiButtonBar.addElement(btn);
+							btn.addEventListener(MouseEvent.CLICK, onMenuItemClick);
+						}
+						curView = inputViews[0] as FlipViewContainer;
+						uiViewContainer.invalidateDisplayList();
+					}
+				}
+			}
+
+			
+			protected function onMenuItemClick(event:MouseEvent):void
+			{
+				var btn:Button = event.currentTarget as Button;
+				curView = null;
+				for each (var view:FlipViewContainer in inputViews)
+				{
+					if (view.menuLabel == btn.label)
+					{
+						curView = view;
+						break;
+					}
+				}
+				if(curView!=null)
+				{
+					uiSlidePath.valueTo =curView.x;
+					uiSlide.play();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Power id="powerEasing"
+				 exponent="4"
+				 easeInFraction="0.8"
+				 />
+		<s:Animate id="uiSlide" target="{uiViewContainer}" duration="500" easer="{powerEasing}">
+			<s:SimpleMotionPath id="uiSlidePath" property="horizontalScrollPosition"/>
+		</s:Animate>
+		<s:Rotate3D id="uiFlip" angleYFrom="180" angleYTo="360" autoCenterTransform="true" focalLength="1000" duration="500"/>
+	</fx:Declarations>
+	<s:HGroup id="uiViewContainer" width="100%" top="0" bottom="{uiButtonBar.height+4}" clipAndEnableScrolling="true"/>
+	<s:HGroup id="uiButtonBar" width="100%" horizontalAlign="center" bottom="0"/>
+</s:Group>

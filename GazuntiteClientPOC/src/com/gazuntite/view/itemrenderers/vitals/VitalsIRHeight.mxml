@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				width="100%" 
+				height="100%"
+				minHeight="40" 
+				contentBackgroundAlpha="0">
+	
+	<s:layout>
+		<s:HorizontalLayout paddingBottom="5"
+							paddingRight="10"
+							paddingTop="5"
+							paddingLeft="10"/>
+	</s:layout>
+	
+	
+	
+	
+	<s:HGroup width="100%">
+		<s:Label text="{itemIndex + 1}" styleName="itemNumber"/>
+		
+		<s:VGroup width="100%">
+			<s:Label fontWeight="bold" text="Height: {data.height}"/>
+			<s:Label fontSize="9" text="Weight: {data.weight}"/>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:Label fontSize="9" text="Temp: {data.temp}"/>
+			<s:Label fontSize="9" text="Pulse: {data.pulse}"/>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:Label fontSize="9" text="Resp: {data.resp}"/>
+			<s:Label fontSize="9" text="Oxygen: {data.o2}"/>			
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:Label fontSize="9" text="Si-stol: {data.bp}"/>
+			<s:Label fontSize="9" text="Di-stol: {data.bp2}"/>
+		</s:VGroup>
+		
+		
+	</s:HGroup>
+	
+	
+	
+	<s:Line height="100%">
+		<s:stroke>
+			<s:SolidColorStroke color="0xe5e4e4" weight="2"/>
+		</s:stroke>
+	</s:Line>
+	
+	<s:Image source="assets/list_notesBtn.png"/>
+	<s:Image source="assets/list_dictationBtn.png"/>
+	
+	
+	
+</s:ItemRenderer>

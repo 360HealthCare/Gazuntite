@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			 xmlns:s="library://ns.adobe.com/flex/spark" 
+			 alpha.disabled="0.5" blendMode="normal"
+			 >
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("com.gazuntite.controls.extended.components.CollapsiblePanel")]
+		]]>
+	</fx:Metadata> 
+	
+	<fx:Script>
+		<![CDATA[
+			protected function titleBarGroup_mouseOverHandler(event:MouseEvent):void
+			{
+				/* 	id_rect.fill = id_overcolor; */
+			}
+			
+			protected function titleBarGroup_mouseOutHandler(event:MouseEvent):void
+			{
+				/* id_rect.fill = id_downcolor; */
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<s:Power id="collapseEaser" easeInFraction="1" />
+		<s:Power id="uncollapseEaser" easeInFraction="0" />
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="normalWithControlBar" />
+		<s:State name="collapsed" />
+		<s:State name="disabled" />
+		<s:State name="disabledWithControlBar" />
+	</s:states>
+	
+	<fx:Declarations>
+		<s:LinearGradient  id="id_downcolor" rotation="90">
+			<s:GradientEntry alpha="1.0" color="#D3D3D3" ratio="0"/>
+			<s:GradientEntry alpha="1.0" color="#A1A1A1" ratio="1"/>
+		</s:LinearGradient>
+		<!--<s:LinearGradient id="id_downcolor"  rotation="90">
+		<s:GradientEntry alpha="1" color="#999999" ratio="0"/>
+		<s:GradientEntry alpha="1.0" color="#999999" ratio="1"/>
+		</s:LinearGradient>-->
+		
+		<s:LinearGradient id="id_overcolor"  rotation="90">
+			<s:GradientEntry alpha="1.0" color="#AFD1FF" ratio="0"/>
+			<s:GradientEntry alpha="1.0" color="#6593D5" ratio="1"/>
+		</s:LinearGradient>
+		
+		<s:LinearGradient id="id_outcolor"  rotation="90">
+			<s:GradientEntry alpha="1" color="0x999999" ratio="0"/>
+			<s:GradientEntry alpha="1.0" color="0x999999" ratio="1"/>
+		</s:LinearGradient>
+	</fx:Declarations>
+	
+	<s:transitions>
+		<s:Transition fromState="normal" toState="collapsed">
+			<s:Sequence>
+				<s:Fade target="{contentGroup}" duration="250" />
+				<s:Parallel targets="{[titleBarGroup, this]}" >
+					<s:Rotate target="{titleBarGroup}" duration="250" />
+					<s:Resize target="{this}" duration="250" easer="{collapseEaser}" />
+				</s:Parallel>
+			</s:Sequence>
+		</s:Transition>
+		<s:Transition fromState="collapsed" toState="normal">
+			<s:Sequence>
+				<s:Parallel targets="{[titleBarGroup, this]}" >
+					<s:Rotate target="{titleBarGroup}" duration="250" />
+					<s:Resize target="{this}" duration="250" easer="{uncollapseEaser}" />
+				</s:Parallel>
+				<s:Fade target="{contentGroup}" duration="250" />
+			</s:Sequence>
+		</s:Transition>
+	</s:transitions>
+	
+	
+	<s:Rect id="background"  alpha="1"  height="0"  left="1" right="1" top="1"  bottom="1" >
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#6B7E89" distance="2" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<!--
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+		-->
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0.49019607843137253"/>
+				<s:GradientEntry alpha="1.0" color="#E0E0E0" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- title bar (not a skin part) -->
+	<s:Group id="titleBarGroup" 
+			 left="0" top="0" right="0" bottom="0" buttonMode="true" useHandCursor="true" 
+			 maxHeight="22" rotation.collapsed="0" click="hostComponent.collapsed = !hostComponent.collapsed"
+			 mouseOut="titleBarGroup_mouseOutHandler(event)"
+			 mouseOver="titleBarGroup_mouseOverHandler(event)"	
+			 >
+		<s:Rect left="0" right="0" top="0" bottom="0" >
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#7B8A96" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#7B8A96" ratio="0.5254901960784314"/>
+					<s:GradientEntry alpha="1.0" color="#6D7C88" ratio="0.5294117647058824"/>
+					<s:GradientEntry alpha="1.0" color="#6D7C88" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		
+		
+		<!-- layer 4: title bar highlight -->
+		<s:Rect left="1" right="1" top="1" height="20" alpha="0">
+			<s:stroke>
+				<s:LinearGradientStroke rotation="90" weight="1">
+					<s:GradientEntry color="0xEAEAEA" />
+					<s:GradientEntry color="0xD9D9D9" />
+				</s:LinearGradientStroke>
+			</s:stroke>
+		</s:Rect>
+		
+		<s:Label id="titleDisplay" 
+				 lineBreak="explicit" typographicCase.normal = "uppercase"
+				 left="10" right="30" top="2" height="20"
+				 verticalAlign="middle" fontFamily="Calibri Bold" color="#FFFFFF">
+		</s:Label>
+		
+		<!--
+		<s:ToggleButton id="collapseExpandButton"  buttonMode="true" useHandCursor="true"  styleName="greyExpandButtonSkin"  width="19" height="16" 
+		toolTip="{collapseExpandButton.selected ? 'Expand' : 'Collapse '}" selected=" {hostComponent.collapsed}"
+		right="10" />
+		-->
+	</s:Group>
+	
+	<s:Group id="contentGroup" 
+			 left="1" right="1" top="22" bottom="1" minWidth="0" minHeight="0" 
+			 visible.collapsed="false" excludeFrom="collapsed">
+	</s:Group>
+	
+</s:SparkSkin>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:view="com.gazuntite.provider.live.services.billing.superBill.view.*"
+		  borderVisible="false" backgroundColor="0xE2E6E9"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.billing.superBill.model.SuperBillModelLocator;
+			
+			[Bindable]
+			public var model:SuperBillModelLocator = SuperBillModelLocator.getInstance();
+			
+			protected function id_WriteOff_focusOutHandler(event:FocusEvent):void
+			{
+				model.WriteOff = Number(id_WriteOff.text);	
+				model.CalculateSuperBill();
+			}
+			
+			protected function id_PriInsurance_focusOutHandler(event:FocusEvent):void
+			{
+				model.PrimaryResponsibility = Number(id_PriInsurance.text);	
+				model.CalculateSuperBill();				
+			}
+			
+			protected function id_SecInsurance_focusOutHandler(event:FocusEvent):void
+			{
+				model.SecondaryResponsibility = Number(id_SecInsurance.text);	
+				model.CalculateSuperBill();	
+				
+			}
+			
+			protected function id_BillingDisallowed_focusOutHandler(event:FocusEvent):void
+			{
+				model.BillingDisallowed = Number(id_BillingDisallowed.text);	
+				model.CalculateSuperBill();					
+			}
+			
+			protected function id_AdditionalPayment_focusOutHandler(event:FocusEvent):void
+			{
+				model.AdditionalPayment = Number(id_AdditionalPayment.text);	
+				model.CalculateSuperBill();	
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:NumberFormatter id="numFormatter" rounding="up" precision="1"/>
+	</fx:Declarations>
+	<s:HGroup width="100%" paddingTop="5" paddingBottom="5">
+		
+		<s:VGroup width="25%" height="100%" horizontalAlign="center">
+			<s:Label width="100%" text="Total Charges" textAlign="center" fontFamily="CalibriCFFBold" fontSize="11"/>
+			<s:TextInput id="id_TotalCharges" 
+						 width="100%" editable="false" text="{model.TotalCharges}"
+						 skinClass="com.gazuntite.skins.controls.textInput.DisableTISkin" toolTip="{'Total Charges: '+ model.TotalCharges}"/>
+			<s:Spacer height="4"/>
+			<s:Label width="100%" text="Pri. Insurance"  textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_PriInsurance"
+						 width="100%"  text="{model.PrimaryResponsibility.toString()}" toolTip="{'Pri. Insurance: '+model.PrimaryResponsibility.toString()}" 
+						 focusOut="id_PriInsurance_focusOutHandler(event)" restrict="[0-9]\." 
+						 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin" height="20"/>
+		</s:VGroup>
+		
+		<s:VGroup width="25%">
+			<s:Label width="100%" text="Co-Pay"  textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_Copay"
+						 width="100%"  editable="false" text="{model.Copay}" skinClass="com.gazuntite.skins.controls.textInput.DisableTISkin"
+						 toolTip="{'Co-Pay: '+ model.Copay}"/>
+			<s:Spacer height="4"/>
+			<s:Label width="100%" text="Sec. Insurance"  textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_SecInsurance"
+						 width="100%" text="{model.SecondaryResponsibility.toString()}"  toolTip="{'Sec. Insurance: '+ model.SecondaryResponsibility.toString()}" height="20"
+						 focusOut="id_SecInsurance_focusOutHandler(event)" restrict="[0-9]\." 
+						 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin"/>
+		</s:VGroup>
+		<s:VGroup width="25%">
+			<s:Label width="100%" text="Mode" textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_Mode"
+						 width="100%"  editable="false" text="{model.ModeOfPayment}" 
+						 toolTip="{'Mode: '+ model.ModeOfPayment}"
+						 skinClass="com.gazuntite.skins.controls.textInput.DisableTISkin"/>
+			<s:Spacer height="4"/>
+			<s:Label width="100%" text="Additional Payment" textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_AdditionalPayment"
+						 width="100%"  text="{model.AdditionalPayment.toString()}"  height="20"
+						 toolTip="{'Additional Payment: ' + model.AdditionalPayment.toString()}"
+						 focusOut="id_AdditionalPayment_focusOutHandler(event)" restrict="[0-9]\."  
+						 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin"/>
+		</s:VGroup>
+		<s:VGroup width="25%">
+			<s:Label width="100%" text="Write Off" textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_WriteOff"
+						 width="100%" text="{model.WriteOff.toString()}" toolTip="{'Write Off: '+ model.WriteOff.toString()}" height="20"
+						 focusOut="id_WriteOff_focusOutHandler(event)" restrict="[0-9]\."
+						 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin" />	
+			<s:Spacer height="4"/>
+			<s:Label width="100%" text="Billing Disallowed" textAlign="center" fontFamily="CalibriCFFBold" fontSize="11" />
+			<s:TextInput id="id_BillingDisallowed"
+						 width="100%"  text="{model.BillingDisallowed.toString()}" toolTip="{'Billing Disallowed: '+ model.BillingDisallowed.toString()}" height="20"
+						 focusOut="id_BillingDisallowed_focusOutHandler(event)" restrict="[0-9]\." 
+						 skinClass="com.gazuntite.skins.controls.textInput.SharpTISkin"/>
+		</s:VGroup>
+				
+		<view:SuperBillPatientBalance width="140" PatientBalance="{numFormatter.format(model.PatientBalance).toString()}"/>
+	</s:HGroup>
+</s:BorderContainer>

@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				rollOverColor="#ffffff"
+				click="itemrenderer1_clickHandler(event)"
+				
+				creationComplete="itemrenderer1_creationCompleteHandler(event)"
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.services.valueObjects.rosPhysical.ROSPhysicalBaseDTO;
+			import com.gazuntite.utils.Constants;
+			import com.gazuntite.utils.QSUtilityFunctions;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.states.OverrideBase;
+			
+			import spark.components.IItemRenderer;
+			import spark.skins.spark.ToggleButtonSkin;
+			
+			/**
+			 * 
+			 * @param 1 string value,selected value 'Yes' or 'No'
+			 * @param 2 string value,section label where clicked
+			 * 
+			 */	
+			public var OptionButtonClickHandler:Function;
+			/**
+			 * 
+			 * @PARAM 1 MOUSE EVENT RELATED TO BUTTON CLICK
+			 * @PARAM 2 STRING VALUE,SECTION lABEL WHERE CLICKED
+			 * 
+			 */	
+			public var ButtonClickHandler:Function;
+			
+			private var m_bHasChange:Boolean;
+			private var m_bWasNClicked:Boolean = false;
+			private var m_oBaseDTO:ROSPhysicalBaseDTO;
+			
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+				trace( "MainCatRenderer::hasChange", label);
+				
+				UpdateChangeIndicator();
+			}
+			
+			[Bindable]
+			public function get BaseDTO():ROSPhysicalBaseDTO
+			{
+				return m_oBaseDTO;
+			}
+			
+			public function set BaseDTO(value:ROSPhysicalBaseDTO):void
+			{
+				m_oBaseDTO = value;
+			}
+
+			
+			public override function set data(value:Object):void
+			{
+				super.data = value;
+				if( value is ROSPhysicalBaseDTO )
+				{
+					BaseDTO = value as ROSPhysicalBaseDTO;
+				}
+				callLater( SelectNButton );
+			}
+			
+
+			protected function UpdateChangeIndicator():void
+			{
+				var mainCatID:int = data.MainCategoryTypeID;
+				var subCatID:int = -1;
+				if( data.SubCategoryTypeID && data.SubCategoryTypeID != 0 )
+					subCatID = data.SubCategoryTypeID
+				
+				if( BaseDTO && QSUtilityFunctions.checkMainCategoryNotesForAbnormal(QSUtilityFunctions.DTOList, mainCatID, subCatID ))
+				{
+					id_R.selected 				= true;
+					id_R.visible 				= true;
+					id_ChangeIndicator.selected	= false;
+					id_ChangeIndicator.visible	= false;
+				}
+				else if( data  )
+				{
+					id_ChangeIndicator.selected	= data.IsDirty;
+					id_ChangeIndicator.visible	= data.IsDirty;
+					id_R.selected 				= false;
+					id_R.visible 				= false;
+				}
+			}
+			
+			protected function buttonbarbutton1_clickHandler(event:MouseEvent):void
+			{
+				if( null != ButtonClickHandler )
+					ButtonClickHandler(event, label);
+			}
+			
+			protected function rbGroup_itemClickHandler(event:Event):void
+			{
+				//selected = true;
+				if( null != OptionButtonClickHandler && event is ItemClickEvent)
+					OptionButtonClickHandler( ( event as ItemClickEvent).item, label);
+				else
+				{
+					//callLater( OnNormal );
+					m_bWasNClicked = true;
+				}
+				
+			}
+			
+			private function OnNormal():void
+			{
+				trace( "OnNormal::hasChange", label);
+				var mainCatID:int = data.MainCategoryTypeID;
+				var subCatID:int = -1;
+				if( data.SubCategoryTypeID && data.SubCategoryTypeID != 0 )
+					subCatID = data.SubCategoryTypeID
+				
+				if( QSUtilityFunctions.checkMainCategoryNotes(QSUtilityFunctions.DTOList, mainCatID, subCatID ) )
+				{
+					Alert.show("This action will clear all notes/dictation in this section, Are you sure you want to clear all notes/dictation?","Clear Notes and Dictation", Alert.YES|Alert.NO, 
+						this, function(event:CloseEvent):void
+						{
+							if( event.detail == Alert.YES)
+							{
+								//QSUtilityFunctions.setPhysicalsDTOMainCategoryToNormal( mainCatID, true, subCatID );
+								QSUtilityFunctions.setMainCategoryToNormal(QSUtilityFunctions.DTOList, mainCatID, true, subCatID );
+								dispatchEvent( new Event("dataIsDirty", true, true) );
+							}
+							else if( event.detail == Alert.NO)
+							{
+								// NO button was clicked, do nothing
+							}
+						});
+				}
+				else
+				{
+					QSUtilityFunctions.setMainCategoryToNormal(QSUtilityFunctions.DTOList, mainCatID, false, subCatID );
+					dispatchEvent( new Event("dataIsDirty", true, true) );
+				}
+			}
+			
+			public function UpdateCheckStatus():void
+			{
+				var mainCatID:int = data.MainCategoryTypeID;
+				var subCatID:int = -1;
+				if( data.SubCategoryTypeID && data.SubCategoryTypeID != 0 )
+					subCatID = data.SubCategoryTypeID
+				if( QSUtilityFunctions.checkMainCategoryNotesForAbnormal(QSUtilityFunctions.DTOList, mainCatID, subCatID ))
+				{
+					this.id_R.selected 				 = true;
+					this.id_R.visible 				 = true;
+					this.id_ChangeIndicator.selected = false;
+					this.id_ChangeIndicator.visible  = false;
+				}
+				else
+				{
+					this.id_ChangeIndicator.selected = true;
+					this.id_ChangeIndicator.visible = true;
+					this.id_R.selected 				= false;
+					this.id_R.visible 				= false;
+				}
+				
+				hasChange = true;
+			}
+			
+			public function set showOptionButtons(value:String):void
+			{
+				id_N.visible 			= false;
+				id_N.includeInLayout 	= false;
+				
+				for( var i:int = 0; i < value.length; i++ )
+				{
+					trace( value.charAt( i ) )
+					switch( value.charAt( i ).toLowerCase() )
+					{
+						case 'n':
+							id_N.visible = true;
+							id_N.includeInLayout = true;
+							break;
+					}
+				}
+			}
+			
+			private function SelectNButton():void
+			{
+				if( m_bWasNClicked )
+				{
+					OnNormal();
+					m_bWasNClicked = false;
+				}	
+				if( data && id_N )
+					id_N.selected =  IsAllChildNormal( data as ROSPhysicalBaseDTO );
+				
+				if( data && id_R.selected )
+					id_R.selected = IsChildHasNote( data as ROSPhysicalBaseDTO );
+				
+			}
+			
+			private function IsAllChildNormal( dto:ROSPhysicalBaseDTO ):Boolean
+			{
+				if( null == dto ) return false;
+				var retVal:Boolean = true;
+				var i:int;
+				for( i = 0; i < dto.children.length; i++ )
+				{
+					var child:ROSPhysicalBaseDTO = dto.children.getItemAt(i) as ROSPhysicalBaseDTO ;
+					
+					if( child.IsNormal == null )
+					{
+						retVal = false;
+						if( ! retVal )
+							break;
+					}
+					
+					retVal = child.IsNormal != Constants.STRING_FALSE ;
+					if( ! retVal )
+						break;
+					
+					if( child.Notes )
+					{
+						retVal = child.Notes.length == 0;
+						if( ! retVal )
+							break;
+					}
+				}
+				
+				return retVal;
+			}
+			
+			private function IsChildDirty( dto:ROSPhysicalBaseDTO ):Boolean
+			{
+				if( null == dto ) return false;
+				if( null == dto.children ) return false;
+				
+				var i:int;
+				for( i = 0; i < dto.children.length; i++ )
+				{
+					var child:ROSPhysicalBaseDTO = dto.children.getItemAt(i) as ROSPhysicalBaseDTO ;
+					if( child.IsDirty )
+						return child.IsDirty;
+					
+					if(child.children)
+					{
+						for( i = 0; i < child.children.length; i++ )
+						{
+							var childj:ROSPhysicalBaseDTO = child.children.getItemAt(i) as ROSPhysicalBaseDTO ;
+							if( childj.IsDirty )
+								return childj.IsDirty;
+						}
+					}
+				}
+				
+				return false;
+			}
+			
+			private function IsChildHasNote( dto:ROSPhysicalBaseDTO ):Boolean
+			{
+				if( null == dto ) return false;
+				var i:int;
+				for( i = 0; i < dto.children.length; i++ )
+				{
+					var child:ROSPhysicalBaseDTO = dto.children.getItemAt(i) as ROSPhysicalBaseDTO ;
+					if( child.Notes && child.Notes.length > 0 )
+					{
+						return true;
+					}
+				}
+				return false;	
+			}
+			
+			protected function id_MainButton_changeHandler(event:Event):void
+			{
+				//
+			}
+			
+			[Bindable]
+			public override function set selected(value:Boolean):void
+			{
+				super.selected = value;
+				callLater( setLabel );
+				callLater( SelectNButton );
+				
+				id_MainButton.selected = true;
+				UpdateChangeIndicator();
+			}
+			
+			private function setLabel():void
+			{
+				if( selected )
+				{
+					id_MainButton.label = (data as ROSPhysicalBaseDTO).label.toUpperCase();
+				}
+				else
+				{
+					id_MainButton.label = UtilityFunctions.TitleCase( (data as ROSPhysicalBaseDTO).label );
+				}
+			}
+			
+
+			protected function itemrenderer1_clickHandler(event:MouseEvent):void
+			{
+				selected = true;
+			}
+
+
+			protected function itemrenderer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if( null == BaseDTO ) return;
+				var mainCatID:int = BaseDTO.MainCategoryTypeID;
+				var SubCatID:int = -1;
+				if( BaseDTO.SubCategoryName != null )
+					SubCatID = BaseDTO.SubCategoryTypeID;
+				
+				if( QSUtilityFunctions.checkMainCategoryNotesForAbnormal(QSUtilityFunctions.DTOList, mainCatID, SubCatID ) )
+				{
+					this.id_R.selected 					= true;
+					this.id_R.visible 					= true;
+					this.id_ChangeIndicator.selected 	= false;
+					this.id_ChangeIndicator.visible 	= false;
+				}
+				else if( BaseDTO && (BaseDTO.IsDirty || IsChildDirty(BaseDTO)))
+				{
+					this.id_ChangeIndicator.selected 	= true;
+					this.id_ChangeIndicator.visible 	= true;
+					this.id_R.selected 					= false;
+					this.id_R.visible 					= false;
+				}
+				
+				if(this.itemIndex == 0)
+				{
+					var me:MouseEvent = new MouseEvent( MouseEvent.CLICK, true );
+					dispatchEvent( me );
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" itemClick="rbGroup_itemClickHandler(event)" />
+	</fx:Declarations>
+	<fx:Binding destination="hasChange" source="BaseDTO.IsDirty"  />
+	<fx:Binding destination="selected" source="id_MainButton.selected" twoWay="true" />
+	
+	<s:HGroup gap="-53" paddingRight="7" >
+		
+		
+		<s:HGroup>
+			<s:ToggleButton id="id_MainButton" label="{label}" click="buttonbarbutton1_clickHandler(event)" change="id_MainButton_changeHandler(event)"
+							toolTip="{label}" skinClass="com.gazuntite.skins.ros.ROStoggleBtn" textAlignLast="left" />
+		</s:HGroup>
+		
+		
+		<s:HGroup width="42" gap="5" horizontalAlign="right" paddingLeft="-50" paddingTop="3">
+			
+			<s:HGroup width="14" horizontalAlign="left">
+				
+				
+				<s:ToggleButton id="id_ChangeIndicator" skinClass="com.gazuntite.skins.ros.changeIndicator"
+								width="14" height="14" includeInLayout="{id_ChangeIndicator.visible}" visible="false"/>
+				<s:RadioButton id="id_R" value="R" visible="false" includeInLayout="{id_R.visible}"
+							   width="14" height="14" skinClass="com.gazuntite.skins.ros.RRedRadioButton"
+							   />
+			</s:HGroup>
+			<s:HGroup>
+				
+				
+				<s:ToggleButton id="id_N" change="rbGroup_itemClickHandler(event)" visible="{!selected}" selected="{data.IsNormal == Constants.STRING_TRUE}" 
+								skinClass="com.gazuntite.skins.ros.QINormalBtn" buttonMode="true" toolTip="All Normal"
+								/>
+			</s:HGroup>
+			
+		</s:HGroup>
+		
+	</s:HGroup>
+	
+</s:ItemRenderer>

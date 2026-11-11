@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						width="490" height="425"
+						title="Summary View" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetPendingRefillsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.PendingRefillResponseEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			private var _securityHeaderXML:XML;
+			private var _insuranceCol:XML;
+			private var _GaxenRefillRequestID:String;
+			private var _sendOnly:Boolean;
+			private var _isChronic:Boolean;
+			private var _SPI:String;
+			public var Status:String;
+			public var Frequency:String;
+			public var DosageCode:String;
+			public var StrengthId:String;
+			public var EncounterId:String;
+			public var QuantityForm:String;
+			public var Route:String;
+			public var isPRN:String;
+			public var visitDate:String; 
+			public var isActive:String;
+			//TA for hide show textinput
+			private var _isApproveChangeCase:Boolean = false;
+			
+			
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			
+			[Bindable]
+			public function get GaxenRefillRequestID():String
+			{
+				return _GaxenRefillRequestID;
+			}
+			
+			public function set GaxenRefillRequestID(value:String):void
+			{
+				_GaxenRefillRequestID = value;
+			}
+			
+			[Bindable]
+			public function get isChronic():Boolean
+			{
+				return _isChronic;
+			}
+			
+			public function set isChronic(value:Boolean):void
+			{
+				_isChronic = value;
+			}
+			
+			[Bindable]
+			public function get sendOnly():Boolean
+			{
+				return _sendOnly;
+			}
+			
+			public function set sendOnly(value:Boolean):void
+			{
+				_sendOnly = value;
+			}
+			
+			[Bindable]
+			public function get insuranceCol():XML
+			{
+				return _insuranceCol;
+			}
+			
+			public function set insuranceCol(value:XML):void
+			{
+				_insuranceCol = value;
+			}
+			
+			[Bindable]
+			public function get SPI():String
+			{
+				return _SPI;
+			}
+			
+			public function set SPI(value:String):void
+			{
+				_SPI = value;
+			}
+			private var _patientID:int;			
+			
+			
+			[Bindable]
+			public function get patientID():int
+			{
+				return _patientID;
+			}
+			
+			public function set patientID(value:int):void
+			{
+				_patientID = value;
+			}
+			[Bindable]
+			public function get isApproveChangeCase():Boolean
+			{
+				return _isApproveChangeCase;
+			}
+			
+			public function set isApproveChangeCase(value:Boolean):void
+			{
+				_isApproveChangeCase = value;
+			}
+			
+			protected function id_cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				closePopup();
+			}
+			public function closePopup():void
+			{
+				this.removePopup();
+			}
+			
+			protected function id_OkBtn_clickHandler(event:MouseEvent):void
+			{
+				if(isApproveChangeCase)
+				{
+					if (id_refillsTxt.text.length == 0)
+					{
+						shakeEffect.play();
+						id_refillsTxt.setFocus();
+						lbl_msg.text = "Please enter refill.";	
+						return;
+					}
+				}
+				var pendingRefill:XML 				= <PendingRefillRes />;
+				pendingRefill.@Status			 	= "1";
+				pendingRefill.@GaxenRefillRequestID	= GaxenRefillRequestID;
+				
+				if(isApproveChangeCase)
+					pendingRefill.@ChangedQuantity 		= id_refillsTxt.text;
+				else
+					pendingRefill.@ChangedQuantity 		= "";
+				
+				pendingRefill.@ReasonofDenial 		= "";
+				pendingRefill.@DenialCodes 			= "";
+				
+				pendingRefill.appendChild(securityHeaderXML);
+				
+				var rpEvent_ : PendingRefillResponseEvent = new PendingRefillResponseEvent(GetRefillResponse);	
+				rpEvent_.data = pendingRefill;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );   
+			}
+			
+			public function GetRefillResponse(response:XML):void
+			{
+				lbl_msg.text = '';
+				closePopup();
+				
+				var rpEvent_ : GetPendingRefillsEvent = new GetPendingRefillsEvent();	
+				rpEvent_.data = securityHeaderXML;
+				CairngormEventDispatcher.getInstance().dispatchEvent( rpEvent_ );
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Sequence id="shakeEffect" >
+			<s:Move duration="50" target="{this}" xFrom="{this.x}" xTo="{this.x - 50}" />
+			<s:Move duration="100" target="{this}" xFrom="{this.x-50}" xTo="{this.x + 100}" />
+			<s:Move duration="50" target="{this}" xFrom="{this.x + 100}" xTo="{this.x }" />
+		</s:Sequence >
+	</fx:Declarations>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="6" paddingTop="4" paddingRight="6" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<s:HGroup width="100%">
+		
+		<s:VGroup width="85%">
+			
+			<s:RichText color="#333333" fontSize="14"  id="richtext15" kerning="off" lineHeight="225%" 
+						text="PATIENT DETAILS" typographicCase="uppercase" whiteSpaceCollapse="preserve" x="0" y="0" fontFamily="Calibri" fontWeight="bold"/>
+			
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="2" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+					<s:HGroup gap="2">						
+						<s:Label id="id_PatientName" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.FirstName}" />
+						<s:Label id="id_PatientLName" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.LastName}" />
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="GID" width="60"/>
+					<s:Label id="id_quivusId" fontFamily="Calibri" color="#333333" text="" />
+				</s:HGroup>
+				<s:HGroup width="100%">	
+					<s:Label fontFamily="Calibri" color="#666666" text="DOB" width="60"/>
+					<s:Label id="id_dob" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.DOB}" />
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Gender" width="60"/>
+					<s:Label id="id_gender" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.Gender}" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60"/>
+					<s:Label id="id_phone" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+					<s:Label id="id_address" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>
+				</s:HGroup>
+				
+			</s:SkinnableContainer>
+			
+			<s:Spacer height="5" />
+			
+			<s:HGroup width="100%">
+				<s:RichText color="#333333" fontSize="14"  kerning="off" lineHeight="225%" 
+							text="PHARMACY DETAILS" typographicCase="uppercase" whiteSpaceCollapse="preserve" x="0" y="0" fontFamily="Calibri" fontWeight="bold"/>
+			</s:HGroup>
+			
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+					<s:Label id="id_PharmacyName" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.StoreName}" />
+				</s:HGroup>
+				<s:HGroup width="100%">						
+					<s:Label fontFamily="Calibri" color="#666666" text="NCPDP ID" width="60"/>
+					<s:Label id="id_NPCDID" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.NCPDPID}" />
+				</s:HGroup>
+				<s:HGroup width="100%">	
+					<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60"/>
+					<s:Label id="id_pharmacyPhone" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.PhonePrimary}" />
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+					<s:Label id="id_pharmacyAddress" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.AddressLine1}" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label fontFamily="Calibri" color="#666666" text="Notes" width="60"/>
+					<s:Label id="id_pharmacyNotes" fontFamily="Calibri" color="#333333" text="" />			
+				</s:HGroup>
+				
+			</s:SkinnableContainer>
+			
+		</s:VGroup>
+		
+		<s:VGroup width="100%" gap="-2">
+			
+			<s:ButtonBar id="id_b1" dataProvider="{viewStack}" skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+				<s:layout>
+					<s:ButtonBarHorizontalLayout gap="2" />
+				</s:layout>
+			</s:ButtonBar>
+			
+			<s:SkinnableContainer  width="100%">
+				<s:layout>	
+					<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+				</s:layout>
+				
+				<mx:ViewStack id="viewStack"  width="100%"  height="100%" top="10" creationPolicy="all">
+					<mx:VBox label="Requested" width="100%" >
+						
+						<s:HGroup width="100%">						
+							<s:Label fontFamily="Calibri" color="#666666" text="Medicine" width="80" />
+							<s:Label text="{model.selectedApproveRefillRequest.DispDrugDescription}" toolTip="{model.selectedApproveRefillRequest.DispDrugDescription}" fontFamily="Calibri" color="#333333" maxWidth="160" maxDisplayedLines="1"/>
+						</s:HGroup>
+						<s:HGroup width="100%">						
+							<s:Label fontFamily="Calibri" color="#666666" text="Strength" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DispDrugDescription}" toolTip="{model.selectedApproveRefillRequest.DispDrugDescription}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>
+						</s:HGroup>
+						<s:HGroup width="100%">	
+							<s:Label fontFamily="Calibri" color="#666666" text="Generic Name" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DispDrugDescription}" toolTip="{model.selectedApproveRefillRequest.DispDrugDescription}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>
+						</s:HGroup>
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="NDC" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DispNDCCODE}" toolTip="{model.selectedApproveRefillRequest.DispNDCCODE}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Dose" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DispDrugDescription}" toolTip="{model.selectedApproveRefillRequest.DispDrugDescription}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Dosage Form" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DispDrugDescription}" toolTip="{model.selectedApproveRefillRequest.DispDrugDescription}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Quantity" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DisQuantity}" toolTip="{model.selectedApproveRefillRequest.DisQuantity}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1" />				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Quantity Form" width="80"/>
+							<s:Label text="" fontFamily="Calibri" color="#333333" maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Frequency" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.frequency}" toolTip="{model.selectedApproveRefillRequest.frequency}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Route" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.Route}" toolTip="{model.selectedApproveRefillRequest.Route}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Duration" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DisDaysSupplied}" toolTip="{model.selectedApproveRefillRequest.DisDaysSupplied}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="# Refills" width="80"/>
+							<s:Label id="id_refills" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.DisRefill}" toolTip="{model.selectedApproveRefillRequest.DisRefill}" maxWidth="160" maxDisplayedLines="1" visible="{!isApproveChangeCase}" includeInLayout="{id_refills.visible}"/>	
+							<components:LabelTextInput id="id_refillsTxt"
+													   restrict="[0-9]" maxChars="2"  required="true" toolTip="Refill"
+													   fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.DisRefill}" width="150" 
+													   visible="{isApproveChangeCase}" includeInLayout="{id_refillsTxt.visible}"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Substitutions" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DisSubstitution}" toolTip="{model.selectedApproveRefillRequest.DisSubstitution}" fontFamily="Calibri" color="#333333" maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Type" width="80"/>
+							<s:Label  fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="Associated Visit" width="80"/>
+							<s:Label id="id_associatedVisit" fontFamily="Calibri" color="#333333" text="" maxWidth="160" maxDisplayedLines="1"/>				
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label fontFamily="Calibri" color="#666666" text="SIG" width="80"/>
+							<s:Label text="{model.selectedApproveRefillRequest.DisDirection}" toolTip="{model.selectedApproveRefillRequest.DisDirection}" fontFamily="Calibri" color="#333333"  maxWidth="160" maxDisplayedLines="1" />				
+						</s:HGroup>
+					</mx:VBox>
+					
+					<mx:VBox label="Original" width="100%" >
+					</mx:VBox>
+					
+				</mx:ViewStack>	
+			</s:SkinnableContainer>
+			
+			<s:HGroup width="100%" horizontalAlign="right" paddingRight="5" gap="5" paddingTop="5">
+				<s:Label id="lbl_msg"  color="#F93D21" />
+				<s:Button id="id_OkBtn"  label="Ok" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Ok" click="id_OkBtn_clickHandler(event)" />
+				<s:Button id="id_cancelBtn" label="Cancel" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Cancel" click="id_cancelBtn_clickHandler(event)" />
+			</s:HGroup>
+		</s:VGroup>
+		
+	</s:HGroup>
+</components:PopupWindow>

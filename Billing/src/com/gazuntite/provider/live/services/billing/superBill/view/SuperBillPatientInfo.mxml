@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup width="100%">
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:Label text="Visit Date:" width="100%" />
+				<s:Label text="02/25/2013" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Primary Plan:" width="100%" />
+				<s:Label text="Sprint" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Sec. Plan:" width="100%" />
+				<s:Label text="N/A" width="100%"/>
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:Label text="Type:" width="100%" />
+				<s:Label text="Visit Date" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Copay:" width="100%" />
+				<s:Label text="Primary Plan" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Copay:" width="100%" />
+				<s:Label text="N/A" width="100%"/>
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup width="100%">
+			<s:HGroup width="100%">
+				<s:Label text="Care Provider:" width="100%" />
+				<s:Label text="Michael MD" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Billable Provider:" width="100%" />
+				<s:Label text="Michael MD" width="100%"/>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:Label text="Referrring Provider:" width="100%" />
+				<s:Label text="Stephen MD" width="100%"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:HGroup>
+	
+</s:VGroup>

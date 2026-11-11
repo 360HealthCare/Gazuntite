@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" width="98%"
+						xmlns:dictation="com.gazuntite.dictation.view.dictation.*"
+						visible="{viewModel.inDictationMode}"
+						includeInLayout="{viewModel.inDictationMode}"
+						creationComplete="cc(event)"
+						show="onShow(event)"
+						>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.dictation.event.LoadDictationByIdEvent;
+			import com.gazuntite.dictation.event.UploadDictationEvent;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.dictation.utils.upload.UploadPostHelper;
+			import com.gazuntite.sound.recorder.SoundPlayer;
+			import com.gazuntite.sound.recorder.SoundRecorder;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import flash.filesystem.File;
+			import flash.filesystem.FileMode;
+			import flash.filesystem.FileStream;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.UIDUtil;
+			
+			public var SessionID:String = "00000000-0000-0000-0000-000000000000";
+			public var CreatedBy:String = "607";
+			
+			//public var ModuleTypeID:int = 0;
+			//public var IsModuleLevel:Boolean = false;
+			
+			/////////// local
+			
+			private var _isEditable:Boolean = false;
+			private var _dictationID:String = "00000000-0000-0000-0000-000000000000";
+			
+			private var player:SoundPlayer;
+			private var recorder:SoundRecorder;
+			
+			[Bindable] public var dictationTooltip:String = "Section Level Dictation";
+			[Bindable] public var viewModel:PatientDictationNoteViewModel;
+			
+			
+			[Bindable] private var elapseTime:String="00:00";
+			[Bindable] private var totalTime:String="00:00";
+			
+			private var playTimer:Timer;
+			private var recordTimer:Timer;
+			private var soundTimerCounter:int = 0;
+			
+			public function get DictationID():String
+			{
+				if(UtilityFunctions.IsNullOrEmpty(_dictationID))
+					_dictationID = DictationConstants.GUID_FORMAT
+				return _dictationID;
+			}
+			
+			[Bindable]
+			public function set DictationID(value:String):void
+			{
+				if(UtilityFunctions.IsNullOrEmpty(value))
+					_dictationID = DictationConstants.GUID_FORMAT;
+				else
+					_dictationID = value;				
+				
+				//SetPlayButtonMode();
+			}
+			
+			public function SetPlayButtonMode():void
+			{
+				if(_isEditable == false)
+				{
+					if(!UtilityFunctions.IsNullOrEmpty(DictationID) && DictationID != DictationConstants.GUID_FORMAT)
+						btnPlay.enabled = true;						
+				}
+				else
+				{
+					btnRecord.visible = true;
+				}				
+			}
+			
+			//M:TODO chk this logic and merge with upper function
+			public function SetPlayButtonMode4ROS():void
+			{
+				if(_isEditable == false)
+				{
+					if(!UtilityFunctions.IsNullOrEmpty(DictationID) && DictationID != DictationConstants.GUID_FORMAT)
+						btnPlay.enabled = true;						
+				}
+				else
+				{
+					btnRecord.visible = true;
+					
+					if(!UtilityFunctions.IsNullOrEmpty(DictationID) && DictationID != DictationConstants.GUID_FORMAT)
+						btnPlay.enabled = true;	
+					else
+						btnPlay.enabled = false;
+				}				
+			}
+			
+			[Bindable]
+			public function get IsEditable():Boolean
+			{
+				return _isEditable;
+			}
+			
+			public function set IsEditable(value:Boolean):void
+			{
+				_isEditable = value;				
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				ctrlVolume.addEventListener("setVolume", vslVolume_changeHandler);
+				
+				player = new SoundPlayer(ctrlVolume.Volume/100);
+				player.addEventListener("playComplete", PlayComplete);				
+			}
+			
+			private function getDictationFile():File
+			{
+				var wavFile:File = File.applicationStorageDirectory;
+				wavFile = wavFile.resolvePath(DictationConstants.DICTATION_FILE_LOCAL_DIR + DictationID + DictationConstants.DICTATION_FILE_TYPE);				
+				return wavFile;
+			}
+			
+			
+			//player related stuff
+			protected function btnPlay_clickHandler(event:MouseEvent):void
+			{
+				if(btnPlay.selected)
+				{
+					//PLAY
+					GetAndPlaySound();
+					btnPlay.label = "Stop Playing";
+					btnPlay.toolTip = "Stop Playing";
+					btnRecord.enabled = false;
+					hslTimer.enabled = true;
+					lblSeprator.visible = true;
+					lblTotalTime.visible = true;
+					ctrlVolume.enabled = true;
+					
+					playTimer = new Timer(1000);
+					playTimer.addEventListener(TimerEvent.TIMER, ShowPlayTimer);
+					
+					lblElapseTime.text = "00:00";
+					hslTimer.value = 0;
+				}
+				else
+				{
+					//STOP PLAYING
+					player.StopPlaying();
+					btnPlay.label = "Play";
+					btnPlay.toolTip = "Play";					
+					btnRecord.enabled = true;					
+					hslTimer.enabled = false;
+					lblSeprator.visible = false;
+					lblTotalTime.visible = false;					
+					ctrlVolume.enabled = false;
+					
+					playTimer.stop();
+					playTimer.removeEventListener(TimerEvent.TIMER, ShowPlayTimer);
+					playTimer = null;
+					soundTimerCounter=0;
+					lblElapseTime.text = "00:00";
+					hslTimer.value = 0;
+				}
+			}
+			
+			private function ShowPlayTimer(event:TimerEvent):void 
+			{	
+				soundTimerCounter++;
+				
+				var recSecond:int =  soundTimerCounter % 60;
+				
+				var recMinute:int =  soundTimerCounter / 60;
+				
+				elapseTime = "0" + recMinute.toString() + ":" + (recSecond <= 9 ? "0" + recSecond.toString() : recSecond.toString());
+				
+				//hslTimer.value = (soundTimerCounter/soundFileLength) *100;
+				hslTimer.value = soundTimerCounter;
+			}
+			
+			private function GetAndPlaySound():void
+			{
+				var e:LoadDictationByIdEvent = new LoadDictationByIdEvent( DictationID, SessionID, PlaySound );
+				CairngormEventDispatcher.getInstance().dispatchEvent( e );
+			}
+			
+			private function PlaySound( sndBytes:ByteArray ):void
+			{	
+				playTimer.start();
+				
+				player.Play(sndBytes);
+				
+				// sound length in sec
+				var soundFileLength:int =  player.SoundFileLength;				
+				var recSecond:int =  soundFileLength % 60;				
+				var recMinute:int =  soundFileLength / 60;
+				
+				if(soundFileLength < 300)				
+					totalTime = "0" + recMinute.toString() + ":" + (recSecond < 9 ? "0" + recSecond.toString() : recSecond.toString());				
+				else
+					totalTime = "05:00";
+				
+				// Adjust Seekbar				
+				hslTimer.maximum = soundFileLength;
+			}
+			
+			private function PlayComplete(event:Event):void
+			{
+				//Alert.show('complete');
+				btnPlay.selected = false;
+				
+				btnPlay.label = "Play";
+				btnPlay.toolTip = "Play";					
+				btnRecord.enabled = true;					
+				hslTimer.enabled = false;
+				lblSeprator.visible = false;
+				lblTotalTime.visible = false;
+				ctrlVolume.enabled = false;				
+				
+				playTimer.stop();
+				playTimer.removeEventListener(TimerEvent.TIMER, ShowPlayTimer);
+				playTimer = null;
+				soundTimerCounter=0;
+				lblElapseTime.text = "00:00";
+				hslTimer.value = 0;
+			}
+			//////////
+			
+			
+			//Record
+			protected function btnRecord_clickHandler(event:MouseEvent):void
+			{
+				if(btnRecord.selected)
+				{
+					//DO RECORDING
+					DictationID = UIDUtil.createUID();
+					
+					recorder = new SoundRecorder(getDictationFile());
+					recorder.addEventListener("saveComplete" , RecordComplete);
+					
+					recorder.StartRecording();
+					btnRecord.label = "Stop Recording";
+					btnRecord.toolTip = "Stop Recording";
+					btnPlay.enabled = false;
+					lblSeprator.visible = false;
+					lblTotalTime.visible = false;
+					hslTimer.enabled = false;
+					recordTimer = new Timer(1000); // 1 sec
+					recordTimer.addEventListener(TimerEvent.TIMER, ShowRecordTimer);
+					
+					recordTimer.start();
+					lblElapseTime.text = "00:00";
+				}
+				else
+				{
+					//STOP RECORDING
+					recorder.StopRecording();
+					btnRecord.label = "Record";
+					btnRecord.toolTip = "Record";					
+					btnPlay.enabled = true;
+					lblSeprator.visible = false;
+					lblTotalTime.visible = false;	
+					
+					recordTimer.stop();
+					recordTimer.removeEventListener(TimerEvent.TIMER, ShowRecordTimer);
+					recordTimer = null;
+					soundTimerCounter=0;
+					lblElapseTime.text = "00:00";
+					
+					recorder = null;
+				}
+			}
+			
+			private function ShowRecordTimer(event:TimerEvent):void 
+			{	
+				soundTimerCounter++;
+				
+				var recSecond:int =  soundTimerCounter % 60;
+				
+				var recMinute:int =  soundTimerCounter / 60;
+				
+				if( recMinute == DictationConstants.MAX_RECORD_TIME )
+				{
+					if( recSecond == 59 )
+					{
+						//STOP RECORDING
+						recorder.StopRecording();
+						btnRecord.label = "Record";
+						btnRecord.toolTip = "Record";					
+						btnPlay.enabled = true;
+						lblSeprator.visible = false;
+						lblTotalTime.visible = false;
+						
+						recordTimer.stop();
+						recordTimer.removeEventListener(TimerEvent.TIMER, ShowRecordTimer);
+						recordTimer = null;
+						soundTimerCounter=0;
+						lblElapseTime.text = "00:00";
+						
+						recorder = null;
+						
+						return;
+					}
+				}				
+				elapseTime = "0" + recMinute.toString() + ":" + (recSecond <= 9 ? "0" + recSecond.toString() : recSecond.toString());
+			}
+			
+			private function RecordComplete(event:Event):void
+			{
+				var stream:FileStream = new FileStream();
+				stream.open(getDictationFile(), FileMode.READ);
+				
+				var sba:ByteArray = new ByteArray();				
+				stream.readBytes(sba, 0, stream.bytesAvailable);				
+				stream.close();
+				
+				
+				sba = UploadPostHelper.getPostData(DictationID, sba);
+				
+				var date:Date = new Date();
+				var recordTimeStamp:String;
+				
+				var dat:int = date.getDate();
+				var mon:int = (date.getMonth()+1);
+				var yr:int  = date.getFullYear();
+				
+				if(dat<10)
+					recordTimeStamp 	= "0"+ dat;
+				else
+					recordTimeStamp 	= dat.toString();
+				
+				if(mon<10)
+					recordTimeStamp		= recordTimeStamp + "0"+ mon;
+				else
+					recordTimeStamp		= recordTimeStamp + mon.toString();
+				
+				recordTimeStamp = recordTimeStamp + yr;
+				
+				var createdAt:String 		= recordTimeStamp;
+				var createdBy:String 		= CreatedBy;				
+				
+				var e:UploadDictationEvent = new UploadDictationEvent(sba, DictationID, SessionID, recordTimeStamp, createdAt, createdBy);
+				CairngormEventDispatcher.getInstance().dispatchEvent( e );
+			}
+			
+			///////////////
+			
+			protected function vslVolume_changeHandler(event:Event):void
+			{
+				player.ChangeVolume(ctrlVolume.Volume/100, hslTimer.value * 1000);
+				
+				soundTimerCounter = hslTimer.value;				
+			}
+			
+			protected function hslTimer_changeHandler(event:Event):void
+			{
+				player.Seek(hslTimer.value * 1000); //M set start time * 1000 to seek
+				soundTimerCounter = hslTimer.value;				
+			}
+			
+			protected function onShow(event:FlexEvent):void
+			{
+				SetPlayButtonMode();
+			}
+			
+			public function resetToDefault():void
+			{
+				if(btnRecord)
+				{
+					btnRecord.toolTip = 'Record';
+					btnRecord.enabled = true;
+					btnRecord.selected = false;
+				}
+				if(btnPlay)
+				{
+					btnPlay.toolTip = 'Play';
+					btnPlay.enabled = false;
+				}
+				if(hslTimer)
+				{
+					hslTimer.enabled = false;
+				}
+				if(lblElapseTime)
+					lblElapseTime.text = '00:00';
+				
+				if(lblTotalTime)
+					lblTotalTime.text = '00:00';
+				
+				/* if(SessionID)
+					SessionID = "00000000-0000-0000-0000-000000000000"; */
+				
+				//DictationID = "00000000-0000-0000-0000-000000000000";
+				
+				if(ctrlVolume)
+				{
+					ctrlVolume.enabled = false;
+					ctrlVolume.resetToDefault();
+				}
+				
+				//M: if recording is running				
+				try
+				{
+					//STOP RECORDING				
+					
+					//lblSeprator.visible = false;
+					//lblTotalTime.visible = false;	
+					
+					recordTimer.stop();
+					recordTimer.removeEventListener(TimerEvent.TIMER, ShowRecordTimer);
+					recordTimer = null;
+					soundTimerCounter=0;
+					lblElapseTime.text = "00:00";
+					
+					recorder.StopRecording();
+					
+					recorder = null;
+				} 
+				catch(error:Error) 
+				{
+					
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:ToggleButton id="btnRecord" 
+					click="btnRecord_clickHandler(event)"
+					buttonMode="true" toolTip="Record" selected="false" visible="false"
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationRecordButtonSkin"
+					/>
+	
+	<s:ToggleButton id="btnPlay" 
+					click="btnPlay_clickHandler(event)"
+					buttonMode="true" toolTip="Play" selected="false" enabled="false"
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationPlayButtonSkin"
+					/>
+	
+	<s:HSlider id="hslTimer" 
+			   width="100%" 
+			   change="hslTimer_changeHandler(event)"
+			   minimum="0" maximum="100" stepSize="1" snapInterval="1" enabled="false" 
+			   skinClass="com.gazuntite.skins.controls.scrollbar.DictationHScrollBarSkin" 
+			   />
+	
+	<s:Label id="lblElapseTime" text="{elapseTime}" paddingTop="2" />	
+	<s:Label id="lblSeprator" text="/" paddingTop="2" />
+	<s:Label id="lblTotalTime" text="{totalTime}" paddingTop="2" />
+	
+	<dictation:DictationVolumeControl id="ctrlVolume" toolTip="Volume"  enabled="false" Volume="60" />
+	
+	<!--<s:VSlider id="vslVolume" minimum="0" maximum="100" value="60" stepSize="20" snapInterval="20" 
+	visible="true" enabled="false" change="vslVolume_changeHandler(event)" height="25"/>-->
+	
+	<s:ToggleButton id="uiDictationLive" selected="@{viewModel.inDictationMode}" 
+					visible="{null != viewModel &amp;&amp; !viewModel.inlineEditing}"
+					includeInLayout="{uiDictationLive.visible}"
+					skinClass="com.gazuntite.skins.controls.button.patient.DictationToggleButtonSkin"
+					buttonMode="true" toolTip="{dictationTooltip}"
+					/>
+</s:SkinnableContainer>

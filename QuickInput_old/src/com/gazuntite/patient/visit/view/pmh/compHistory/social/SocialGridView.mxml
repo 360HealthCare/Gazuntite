@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*" 
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.SocialHistoryDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+			}
+			
+			public function GridRowNumber(oItem:Object, iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_DataGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			protected function getCurrentLabel(obj:Object, dgc:DataGridColumn):String
+			{
+				if( obj.Current == Constants.STRING_YES_UI )
+					return "Present";
+				if( obj.Current == Constants.STRING_NO_UI )
+					return "Past";
+				
+				return "";
+			}
+			
+			private function setOnSet(oItem:Object,iCol:int):String
+			{
+				var str:String = '';
+				
+				if (oItem && oItem.OnSet)
+				{
+					var dateRecieved:Date = new Date(Date.parse(oItem.OnSet));
+					str = formatDateTime.format(dateRecieved);
+					if( str.indexOf('NaN',0) != -1)
+						str = oItem.OnSet;
+				}
+				return str;
+			}
+			
+			private function setEndDate(oItem:Object,iCol:int):String
+			{
+				var str:String = '';
+				
+				if (oItem && oItem.EndDate)
+				{
+					var dateRecieved:Date = new Date(Date.parse(oItem.EndDate));
+					str = formatDateTime.format(dateRecieved);
+					if( str.indexOf('NaN',0) != -1)
+						str = oItem.EndDate;
+				}
+				
+				if(str == '01/01/1901')
+					str = '';
+				return str;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:Button label="Filter" click="button1_clickHandler(event)"  id="id_applyFiler"/><!--visible="false" includeInLayout="false"-->
+	<components:LabelDataGrid id="id_DataGrid" width="100%" useRollOver="false" rowCount="{id_DataGrid.dataProvider.length + 1}" verticalScrollPolicy="on"
+							 visible="{id_DataGrid.dataProvider.length ? true : false }" includeInLayout="{id_DataGrid.dataProvider.length ? true : false }"
+							 maxHeight="150" columnWidths="{[25,'15%','10%','10%','10%','10%','10%','10%','10%',100]}" dataProvider="{model.PreviousSocialHistoryList}" >
+		<components:columns>
+			<mx:DataGridColumn headerText="Sr.#"  labelFunction="GridRowNumber" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" />
+			<mx:DataGridColumn headerText="Social History" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"  dataField="Social"/>
+			<mx:DataGridColumn headerText="Status" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"  dataField="Status" editorDataField="isYes"   >
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor width="100%" height="90%" property="Status" />
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Current" dataField="Current"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="getCurrentLabel" >
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor labelField="MediumName" width="80" height="100%"  /><!--dataProvider="{outerDocument.id_acYesNo}"-->
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Type"   dataField="Type" editorDataField="editorText" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor labelField="MediumName" width="80" height="100%"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Amount" wordWrap="true" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" dataField="Amount" editorDataField="editorText">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor labelField="UsageAmountName" width="80" height="100%"/>
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Educated" dataField="Educated" editorDataField="isYes" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" >
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor width="100%" height="90%" property="IsYesSelected" />
+						
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="OnSet" dataField="OnSet" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="setOnSet"/>
+			<mx:DataGridColumn headerText="End Date" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="EndDate"  labelFunction="setEndDate"  />	
+			<commons:DataGridColumnEx   headerText="" editable="false" itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DeleteRecordRendererCH" /><!--data="{deleteColumnData}"-->
+		</components:columns>
+	</components:LabelDataGrid>
+</s:Group>

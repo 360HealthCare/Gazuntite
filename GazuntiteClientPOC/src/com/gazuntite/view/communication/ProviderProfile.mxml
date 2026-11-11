@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Scroller id="id_Scroller" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" >
+		<s:Group id="id_patientExamArea"  width="100%" height="100%" >
+			<s:layout>
+				<s:VerticalLayout paddingTop="2" horizontalAlign="center" verticalAlign="top" gap="-4" clipAndEnableScrolling="true" />
+			</s:layout>
+			<s:HGroup width="100%" paddingLeft="4" visible="{id_ProfileViews.visible}" includeInLayout="{id_ProfileViews.visible}">		
+				<s:TabBar id="id_mainTanButtons"  dataProvider="{ id_ProfileViews }" 
+						  skinClass="com.adobe.Quivus.view.controls.skins.TabBarSkins.ProfileTabBarSkin" 
+						  top="0" width="100%" />
+			</s:HGroup>
+			
+			<mx:ViewStack id="id_ProfileViews" width="100%" height="100%" backgroundAlpha="0" resizeToContent="true" 
+						  visible="true" includeInLayout="{id_ProfileViews.visible}"  >
+				<s:NavigatorContent backgroundAlpha="0" width="100%" height="100%" label="Basic Information"  >
+					
+					<s:Scroller id="id_BasicScroller" width="100%" height="300" verticalScrollPolicy="off">
+						<s:Group width="100%" height="100%" >
+							<s:layout>
+								<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+							</s:layout>
+							
+							<!--<sections:BasicSection id="id_basicSection" width="100%" EditProfile="basicsection1_EditProfileHandler(event)"
+												   skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"/>
+							<sections:OtherInformationSection id="id_otherInfo" width="100%" skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"/>-->
+						</s:Group>
+					</s:Scroller>
+					
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent width="100%" height="100%" label="Emergency contact" fontFamily="Calibri" >
+					<s:Scroller id="id_EmergencyScroller" width="100%" height="300" verticalScrollPolicy="off">
+						<s:Group width="100%" height="100%" >
+							<s:layout>
+								<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+							</s:layout>
+							
+							<sections:EmergencyContactsSection width="100%"  skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"  />
+						</s:Group>
+						
+					</s:Scroller>
+					
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent width="100%" height="100%" label="Guarantor" fontFamily="Calibri Bold" >
+					<s:Scroller id="id_GuarantorScroller" width="100%" height="300" verticalScrollPolicy="off">
+						<s:Group width="100%" height="100%" >
+							<s:layout>
+								<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+							</s:layout>
+							
+							<sections:GuarantorInfoSection width="100%"   skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin"  />
+						</s:Group>
+					</s:Scroller>
+					
+					
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent width="100%" height="100%" label="Health Hx" >
+					<s:Scroller id="id_HealthHxScroller" width="100%" height="300" verticalScrollPolicy="off">
+						<s:Group width="100%" height="100%" >
+							<s:layout>
+								<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+							</s:layout>
+							
+							<sections:HealthHxSection width="100%"  />
+						</s:Group>
+					</s:Scroller>
+					
+				</s:NavigatorContent>
+				
+				<s:NavigatorContent width="100%" height="100%" label="Insurance" >
+					<s:Scroller id="id_InsuranceScroller" width="100%" height="300" verticalScrollPolicy="off">
+						<s:Group width="100%" height="100%" >
+							<s:layout>
+								<s:VerticalLayout paddingTop="8" paddingLeft="5" paddingRight="3" paddingBottom="3" verticalAlign="top"  />
+							</s:layout>
+							
+							<sections:InsuranceSection id="id_PrimInsurence" width="100%"  
+													   skinClass="com.zigron.controls.extended.skins.CollapsiblePanelSkin" />
+							
+						</s:Group>
+						
+					</s:Scroller>
+					
+				</s:NavigatorContent>
+			</mx:ViewStack>
+			
+			<registeration:userRegistrationForm id="id_ProfileEditor" width="100%" backgroundColor="0xffffff" 
+												visible="false" includeInLayout="{id_ProfileEditor.visible}" /> 
+			
+		</s:Group>
+	</s:Scroller>
+</s:Group>

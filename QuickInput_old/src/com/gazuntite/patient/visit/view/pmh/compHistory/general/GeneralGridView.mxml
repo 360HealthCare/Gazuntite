@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.ch.MedicalHistoryDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Label;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var m_oMedicalHistoryDto:MedicalHistoryDTO;
+			
+			private var _hasViewChanged:Boolean;
+			private var _hasGridChanged:Boolean;
+			
+			private var _miniView:Boolean = true;
+			
+			[Bindable]
+			public function get miniView():Boolean
+			{
+				return _miniView;
+			}
+
+			public function set miniView(value:Boolean):void
+			{
+				_miniView = value;
+			}
+
+			[Bindable]
+			public function get medicalHistoryDto():MedicalHistoryDTO
+			{
+				return m_oMedicalHistoryDto;
+			} 
+			
+			public function set medicalHistoryDto(value:MedicalHistoryDTO):void
+			{
+				m_oMedicalHistoryDto = value;
+			} 
+			
+			public function GridRowNumber(item:Object, iCol:int):String
+			{
+				
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_DataGrid.dataProvider.getItemIndex(item) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+				
+				/* var strRowNum:String = "";
+				
+				/* if (id_DataGrid.dataProvider)
+				{
+					var rowNum:int = medicalHistoryDto.ICDCodeList.getItemIndex( item ) + 1;
+					strRowNum = String(rowNum);
+				} 
+				
+				return strRowNum; */
+			}
+			
+			public function IsActiveLabel(item:Object, iCol:int):String
+			{
+				var lbl:String = QIConstants.STRING_NO_UI;
+				
+				if (item.IsActive)
+				{
+					lbl = QIConstants.STRING_YES_UI;
+				}
+				
+				return lbl;
+			}
+			
+			public function Delete_clickHandler(event:Event):void
+			{
+				 UtilityFunctions.AskMessage("do you want to delete?", function ():void
+				{
+					/* var icd:ICDCodeDTO = id_DataGrid.selectedItem as ICDCodeDTO;
+					medicalHistoryDto.ICDCodeList.removeItemAt( medicalHistoryDto.ICDCodeList.getItemIndex( icd ) );
+					medicalHistoryDto.ICDCodeList.refresh();
+					
+					if( medicalHistoryDto.ICDCodeList.length == 0 )
+						dispatchEvent( new Event("change_Skin", true, true));  */
+				}); 
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				addEventListener( "Delete_Record", Delete_clickHandler );
+			}
+			
+			/* private function getOnSet(item:Object, iCol:int):String
+			{
+				var onSet:String;
+				if(item.Onset)
+				{
+					onSet = item.Onset;
+				}
+				return onSet;
+			} */
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+
+	<mx:DataGrid id="id_DataGrid" width="100%" height="90" useRollOver="false"
+				 rowCount="{id_DataGrid.dataProvider.length + 1}" 
+				 verticalScrollPolicy="on" dataProvider="{model.PreviousGeneralMedicalHistoryList}" >
+		<mx:columns>
+			<mx:DataGridColumn headerText="Sr.#" width="40" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" editable="false" sortable="false"  labelFunction="GridRowNumber"/>
+			<mx:DataGridColumn headerText="ICD Code" dataField="ICDDTO.IcdCodeName"  editable="false" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Description" dataField="ICDDTO.IcdCodeDescription" editable="false" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<!--<mx:DataGridColumn headerText="Onset" labelFunction="getOnSet" dataField="Onset" editable="false" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>-->
+			<!--<mx:DataGridColumn headerText="Status" dataField="IsActive" width="150" editable="false" sortable="false" labelFunction="IsActiveLabel" visible="{!miniView}" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Notes" dataField="Notes" width="150" editable="false" sortable="false" visible="{!miniView}" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>-->
+			<mx:DataGridColumn headerText="" width="85" editable="false" sortable="false" itemRenderer="com.gazuntite.patient.visit.view.pmh.compHistory.renderer.DeleteButtonRenderer" />
+		</mx:columns>
+	</mx:DataGrid>
+	
+</s:Group>

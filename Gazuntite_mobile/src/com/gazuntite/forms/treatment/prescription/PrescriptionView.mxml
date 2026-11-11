@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:controls="com.gazuntite.components.controls.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			protected var _name:String = "";	
+			
+			[Bindable]
+			protected var _NCPDP:String = "";
+			
+			[Bindable]
+			protected var _Phone:String = "";
+			
+			[Bindable]
+			protected var _Address:String = "";
+			
+			
+			[Bindable]
+			public function get Pharmacyname():String
+			{
+				return _name;
+			}
+			
+			public function set Pharmacyname(value:String):void
+			{
+				_name = value;
+			}
+			
+			[Bindable]
+			public function get NCPDP():String
+			{
+				return _NCPDP;
+			}
+			
+			public function set NCPDP(value:String):void
+			{
+				_NCPDP = value;
+			}
+			
+			[Bindable]
+			public function get Phone():String
+			{
+				return _Phone;
+			}
+			
+			public function set Phone(value:String):void
+			{
+				_Phone = value;
+			}
+			
+			[Bindable]
+			public function get Address():String
+			{
+				return _Address;
+			}
+			
+			public function set Address(value:String):void
+			{
+				_Address = value;
+			}
+			
+			protected function ID_pharmacySearch_selectionChangeHandler(event:IndexChangeEvent):void
+			{
+				trace(event.currentTarget.selectedItemText);
+				trace(event.newIndex);
+				var tempObj:Object = ID_pharmacySearch.dataProvider.getItemAt(event.newIndex);
+				_name = tempObj.Name;
+				_Address = tempObj.Address;
+				_NCPDP= tempObj.ncpdpID;
+				_Phone= tempObj.Phone;
+			
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" />
+	</s:layout>
+	
+	<s:HGroup width="100%" height="100%">
+
+		<s:BorderContainer width="60%" height="100%" borderWeight="1">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="left" paddingLeft="4"/>
+			</s:layout>
+			
+			<controls:CalloutLabelText id="ID_pharmacySearch" 
+									   styleName="Title"
+									   labelField="Name" 
+									   buttonLabel="Pharmacy Search :"
+									   required="true" 
+									   width="100%"
+									   selectionChange="ID_pharmacySearch_selectionChangeHandler(event)"
+									   >
+				<controls:dataProvider>
+					<s:ArrayCollection id="ID_PharmacyDetail">
+						<fx:Object Name="Pharmacy 1" ncpdpID="001" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 2" ncpdpID="002" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 3" ncpdpID="003" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 4" ncpdpID="004" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 5" ncpdpID="005" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 6" ncpdpID="006" Phone="ph0012120202" Address="some address" />
+						<fx:Object Name="Pharmacy 7" ncpdpID="007" Phone="ph0012120202" Address="some address" />
+					</s:ArrayCollection>
+				</controls:dataProvider>
+			</controls:CalloutLabelText>
+			
+			<s:HGroup width="100%">
+				<s:RichText id="ID_Name"  text="Name : {_name}" width="55%" />
+				<s:RichText id="ID_ncpdpID" text="NCPDP ID : {_NCPDP}" width="45%" />
+			</s:HGroup>
+			
+			<s:RichText id="ID_Phone"  text="Phone : {_Phone}"
+						width="100%" />
+			<s:RichText id="ID_Address"  height="12%" text="Address : {_Address}"
+						width="100%" />
+			
+		</s:BorderContainer>
+			
+		<s:VGroup width="40%" height="100%" verticalAlign="bottom">
+			
+			<s:TextArea width="100%" height="100%" id="ID_GenerateSIG" skinClass="spark.skins.mobile.TextInputSkin" prompt="Generate SIGs"/>
+			
+		</s:VGroup>
+		
+	</s:HGroup>
+	
+	
+</s:Group>

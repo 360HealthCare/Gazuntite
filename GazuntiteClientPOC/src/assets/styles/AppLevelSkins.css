@@ -1,0 +1,115 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+@font-face
+{
+	src 		:	url("..\fonts\CALIBRI.TTF") ;
+	fontFamily 	: 	CalibriCFF ;
+	embedAsCFF	: 	true ;
+	
+}
+
+
+@font-face
+{
+	src 		:	url("assets\fonts\CALIBRI.TTF") ;
+	fontFamily 	: 	CalibriCFFDateField ;
+	embedAsCFF	: 	 false ;
+	
+}
+@font-face
+{
+	src 		:	url("assets\fonts\CALIBRIB.TTF") ;
+	fontFamily 	: 	CalibriCFFBold ;
+	embedAsCFF	: 	true ;
+	
+}
+
+mx|AdvancedDataGrid
+{ 
+	fontFamily 	: CalibriCFFDateField ;
+	fontSize  	: 12 ;
+}
+.mandatoryDateSkin
+{
+	
+	borderSkin   :ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.dateTextBox");
+	padding-left :8;
+	font-family  :CalibriCFFDateField;
+	font-size 	 : 11;
+}
+
+.optionalDateTextBox
+{
+	font-family  : CalibriCFFDateField;
+	font-size 	 : 11;
+	borderSkin	 : ClassReference("com.adobe.quivus.skins.chrome.textInputSkins.optionalDateTextBox");
+}
+
+mx|DateField:disabled 
+{
+	color : #333333;
+}
+
+
+mx|Slider 
+{
+	labelStyleName : sliderLabelStyle;
+		 
+}
+
+.sliderLabelStyle 
+{
+	fontFamily 		:CalibriCFFDateField;
+	fontSize    	:11 ;
+    color     		:#666666;
+}
+
+mx|DateField
+{
+	text-input-style-name : optionalDateTextBox ;
+}
+
+mx|Alert
+{
+  buttonStyleName		: 	"alertButtonStyle" ;
+  messageStyleName		: 	"alertMessage";
+  backgroundColor		:	#D1D1D1;
+  titleStyleName		: 	"alertTitleBar" ;
+  titleBackgroundSkin	: ClassReference("com.adobe.quivus.skins.chrome.containerSkins.TitleBackground");
+}
+
+
+.alertTitleBar
+{
+	color				: #ffffff;
+}
+.alertButtonStyle
+{
+	letterSpacing		: 0;
+	fontSize			: 11;
+	cornerRadius		: 5;
+	textRollOverColor	: #000000;
+	color				: #ffffff;
+	skin				: ClassReference("com.adobe.quivus.skins.chrome.containerSkins.alertButton");
+	emphasizedSkin		: ClassReference("com.adobe.quivus.skins.chrome.containerSkins.alertButton");
+	
+}
+
+
+.alertMessage {
+	letterSpacing	: 0;
+	fontSize		: 11;
+	fontWeight		: normal;
+	color			: #000000;
+	fontFamily		: CalibriCFFDateField;
+	kerning			: on; 
+	}
+
+
+s|TextInput,s|Label
+{
+	fontFamily : CalibriCFF;
+	fontSize   : 12 ;
+}

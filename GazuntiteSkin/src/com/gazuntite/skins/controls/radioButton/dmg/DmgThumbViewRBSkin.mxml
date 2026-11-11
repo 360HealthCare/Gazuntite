@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="26" height="20">
+	<fx:Metadata>[HostComponent("spark.components.RadioButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:BitmapImage x="5" y="5" smooth="true" source="@Embed('/assets/images/gridview1.png')"
+				   visible.disabled="false"
+				   visible.down="false"
+				   visible.over="false"
+				   visible.up="false"/>
+	<s:Rect x="0" y="0" width="26" height="20" radiusX="2"
+			visible.disabledAndSelected="false"
+			visible.downAndSelected="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#D6D6D6" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FCFCFC" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="0" blurY="0" color="#FFFFFF"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage x="5" y="5" smooth="true" source="@Embed('/assets/images/gridview1.png')"
+				   visible.disabledAndSelected="false"
+				   visible.downAndSelected="false"
+				   visible.overAndSelected="false"
+				   visible.upAndSelected="false">
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#A8A8A8" inner="true"
+						  knockout="false" quality="3" strength="6"/>
+		</s:filters>
+	</s:BitmapImage>
+</s:Skin>

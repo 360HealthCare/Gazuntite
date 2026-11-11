@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="popupgroup1_creationCompleteHandler(event)" >
+	<fx:Metadata>
+		[Event(name="PharmacySelected", type="com.gazuntite.provider.eprescription.services.patient.view.events.PharmacySelectedEvent")] 
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.ManagePatientFavPharmEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.RemoveFavoritePharmaciesEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.FavoritePharmacyEvent;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.PharmacySelectedEvent;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var model:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			
+			public function closeHandler( event:MouseEvent = null ):void
+			{
+				//this.removePopup();
+				var e:CloseEvent = new CloseEvent( "closeSearchBox", true );
+				dispatchEvent( e );
+			}
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+				{
+					closeHandler()
+				});
+				
+				/* addEventListener(FavoritePharmacyEvent.SetPharmacytoFav ,SetPharmacytoFavorit);
+				addEventListener(FavoritePharmacyEvent.SetPharmacytoUnFav ,SetPharmacytoUnFavorit); */
+			}
+			
+			private function SetPharmacytoFavorit():void
+			{
+				if(id_SearchList.selectedItem != null)
+				{
+					var selecedPharmacy:PharmaciesResult = id_SearchList.selectedItem as PharmaciesResult;
+					
+					var pharmacy:XML = <PatientFavouritePharmDTO />;
+					pharmacy.PatientID	= model.PatientID.toString();	
+					pharmacy.NCPDPID 	= selecedPharmacy.NCPDPID;
+					pharmacy.StoreName	= selecedPharmacy.StoreName;
+					pharmacy.Phone		= selecedPharmacy.Phone;
+					pharmacy.Address	= selecedPharmacy.AddressLine1;
+					pharmacy.Notes		= selecedPharmacy.Notes;
+					
+					var managePatientFavPharmEvent: ManagePatientFavPharmEvent = new ManagePatientFavPharmEvent(RefreshPharmacyList);				
+					managePatientFavPharmEvent.data = pharmacy; 				
+					CairngormEventDispatcher.getInstance().dispatchEvent(managePatientFavPharmEvent);		
+				}
+			}
+			
+			private function RefreshPharmacyList(x:XML):void
+			{
+				dispatchEvent( new Event("ReLoadPatientPharmacy",true));
+			}
+			
+			protected function OK_clickHandler(event:MouseEvent):void
+			{
+				/* if(id_SearchList.selectedItem != null)
+				{
+					var ps:PharmacySelectedEvent = new PharmacySelectedEvent(PharmacySelectedEvent.PHARMACY_SELECTED);;
+					ps.selection = id_SearchList.selectedItem;
+					dispatchEvent( ps );
+				}
+				else
+				{
+					dispatchEvent( new Event( "CancelClick", true ) );
+				}
+				id_outValue.text = ''; */
+			}
+			
+			
+			protected function Value_changeHandler(event:Event):void
+			{
+				
+				if( null != id_SearchList.selectedItem )
+				{
+					id_outValue.text = id_SearchList.selectedItem.StoreName; 
+					id_outValue.text += " "+ id_SearchList.selectedItem.Phone; 
+					id_outValue.toolTip = id_outValue.text
+				}
+				//selectedItem = id_SearchList.selectedItem;
+				
+			}
+			
+			protected function id_SearchList_clickHandler(event:MouseEvent):void
+			{
+				if(id_SearchList.selectedItem != null)
+				{
+					var ps:PharmacySelectedEvent = new PharmacySelectedEvent(PharmacySelectedEvent.PHARMACY_SELECTED);;
+					ps.selection = id_SearchList.selectedItem;
+					dispatchEvent( ps );
+				}
+				else
+				{
+					dispatchEvent( new Event( "CancelClick", true ) );
+				}
+				id_outValue.text = '';
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.PatientSearchListSpinnerBG">
+		<s:layout>
+			<s:VerticalLayout gap="3" paddingBottom="3" paddingLeft="5" paddingTop="3" paddingRight="5" />
+		</s:layout>
+		
+		<!--<s:BorderContainer width="100%" height="70" cornerRadius="4" >-->
+			<s:List id="id_SearchList" 
+					width="100%" height="70"   
+					dataProvider="{model.PharmacyListDTO.Pharmacies}" click="id_SearchList_clickHandler(event)"
+					itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.itemRenderers.pharmacySearchIR"
+					skinClass="com.gazuntite.skins.controls.list.InvisibleScrollSkin"
+					change="Value_changeHandler(event)"	borderVisible="false"
+					horizontalScrollPolicy="off"/>
+		<!--</s:BorderContainer>-->
+		
+		<s:Group width="100%" includeInLayout="false" visible="false">
+			<s:Image id="id_favBtn" 
+					 click="SetPharmacytoFavorit()"  source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/starred.png')"
+					 useHandCursor="true" buttonMode="true" verticalCenter="0" left="0" toolTip="Make this Favorite" >
+				<s:filters>
+					<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#BABABA" inner="true"
+								  knockout="false" quality="3" strength="15"/>
+					<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="#000000"
+										distance="1" hideObject="false" inner="true" knockout="false"
+										quality="3" strength="1"/>
+				</s:filters>
+			</s:Image>
+			
+			<s:Label id="id_outValue" text="# of Rec(s)  : {id_SearchList.dataProvider.length}"
+					 color="#FFFFFF" fontFamily="CalibriCFF" fontSize="13"   verticalCenter="0" maxDisplayedLines="1" right="50" left="24"/>
+			<s:Button id="id_OK" 
+					  useHandCursor="true" buttonMode="true" verticalCenter="0" click="OK_clickHandler(event)" 
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"	  right="25" toolTip="Select Pharmacy"/>
+			<s:Button id="id_Cancel" 
+					  buttonMode="true" useHandCursor="true" verticalCenter="0" toolTip="Close Pharmacy Search"   
+					  click="closeHandler(event)" skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"  right="0"/>
+		</s:Group>
+	</s:SkinnableContainer>
+</components:PopupGroup>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:components="com.zigron.controls.extended.components.*"
+						xmlns:itemEditors="com.adobe.Quivus.view.controls.custom.itemEditors.*" 
+						xmlns:diagnosis="com.adobe.Quivus.view.controls.custom.patientExamView.quickInput.assessment.diagnosis.*"
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						xmlns:components1="com.gazuntite.controls.extended.components.*"
+						xmlns:CheckBoxGrid1="com.gazuntite.controls.extended.components.CheckBoxGrid.*"
+						title="Import Chronic Diagnosis" 
+						>
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YY" />
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.PatientDiagnosisDTO;
+			import com.gazuntite.patient.visit.event.assessment.diagnosis.ManagePatientDiagnosisEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _isNA:Boolean;
+			
+			public function get isNA():Boolean
+			{
+				return _isNA;
+			}
+
+			public function set isNA(value:Boolean):void
+			{
+				_isNA = value;
+			}
+
+			public function chronicLabelFunction(oItem:Object, iCol:int):String
+			{
+				var label:String = ""; 
+				if (oItem.hasOwnProperty("IsChronic"))
+				{
+					if (oItem.IsChronic)
+						label = "Yes";
+					else
+						label = "No";
+				}
+				
+				return label;
+			}
+			
+			public function displayOnSetDate(oItem:Object, iCol:int):String
+			{
+				var onSetDate:String = formatDateTime.format(oItem.VisitDate.toString());					
+				
+				return String(onSetDate);
+			}
+			
+			protected function ImportClickHandler(event:MouseEvent):void
+			{
+				var i:int, selection:ArrayCollection = new ArrayCollection( id_DiagnosisGrid.selectedItems );
+				
+				if (selection.length > 0 )
+				{
+					for (i = 0; i < selection.length; i++)
+					{
+						var diagnosisDTO:PatientDiagnosisDTO = selection.getItemAt(i) as PatientDiagnosisDTO;
+						diagnosisDTO.VisitDate = model.DiagnosisAssociatedVisit.VisitDate;//datetostring(Tahir)
+						diagnosisDTO.VisitID = model.DiagnosisAssociatedVisit.ID;
+						
+						//Tahir Alvi 7 June, 2012- set diagnosis ID 0 - Records which are added by Import Diagnosis feature not shown in VB grid (newly added record replace the previous one)
+						diagnosisDTO.DiagnosisId = '0';
+						diagnosisDTO.IsDirty = true;
+						diagnosisDTO.IsNA = isNA;
+						
+						model.patientDiagnosisDTOListByPatientId.addItem(diagnosisDTO);
+					}
+					
+					if (model.patientDiagnosisDTOListByPatientId)
+					{
+						var mpdEvent:ManagePatientDiagnosisEvent = new ManagePatientDiagnosisEvent();
+						CairngormEventDispatcher.getInstance().dispatchEvent( mpdEvent );
+					}
+					
+					closeClickHandler(event);
+				}
+				else
+				{
+					Alert.show("please select record to import.");
+				}
+			}
+			
+			private function closeClickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new CloseEvent(CloseEvent.CLOSE, true));
+			}
+			
+			private function doesRecordExistInGrid(diagnosisDTO:PatientDiagnosisDTO):Boolean
+			{
+				if (!diagnosisDTO)
+					return true; //if diagnosisDTO is null then return true so that it does add null record in grid
+				
+				if (!model.patientDiagnosisDTOListByPatientId)
+					return false;
+				
+				for (var i:int = 0; i < model.patientDiagnosisDTOListByPatientId.length; i++)
+				{
+					var recordInGrid:PatientDiagnosisDTO = model.patientDiagnosisDTOListByPatientId[i];
+					
+					if (recordInGrid && recordInGrid.IcdDto && diagnosisDTO.IcdDto)
+					{
+						if (diagnosisDTO.IcdDto.IcdCodeName == recordInGrid.IcdDto.IcdCodeName)
+							return true;
+					}
+				}
+				
+				return false;
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup id="gridView" width="100%" visible="{(id_DiagnosisGrid.dataProvider.length > 0)? true : false}" includeInLayout="{gridView.visible}">
+	
+		<CheckBoxGrid1:CheckBoxDataGrid id="id_DiagnosisGrid" editable="false"
+									   rowCount="{id_DiagnosisGrid.dataProvider.length + 1}"
+									   width="100%" verticalScrollPolicy="on"
+									   dataProvider="{model.patientDiagnosisDTOAllChronicListByPatientId}"
+									   draggableColumns="false" 
+									   useRollOver="false"
+									   allowMultipleSelection="true"
+									   maxHeight="150" >
+			<CheckBoxGrid1:columns>
+				<mx:DataGridColumn rendererIsEditor="true" sortable="false" 
+								   wordWrap="true"
+								   itemRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxRenderer" 
+								   headerRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxHeaderRenderer" 
+								   editorDataField="selected"/>
+				<mx:DataGridColumn headerText="On Set" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="OnSet" editorDataField="selectedDate" labelFunction="displayOnSetDate"/>
+				<mx:DataGridColumn headerText="ICD Code"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="ICDCode.IcdCodeName"/>
+				<mx:DataGridColumn headerText="Diagnosis"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" dataField="ICDCode.IcdCodeDescription"/>
+				<mx:DataGridColumn headerText="Chronic" dataField="IsChronic"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="chronicLabelFunction"/>
+				
+			</CheckBoxGrid1:columns>
+		</CheckBoxGrid1:CheckBoxDataGrid>
+	
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="middle" paddingBottom="5">
+			<s:Button id="id_btnImport" label="Import" buttonMode="true" toolTip="Import selected" click="ImportClickHandler(event)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+			<s:Button id="id_btnClose" label="Cancel" buttonMode="true" toolTip="Close" click="closeClickHandler(event)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+		</s:HGroup>
+	</s:VGroup>
+</components1:PopupWindow>

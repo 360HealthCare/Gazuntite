@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+			 alpha.disabledStates="0" blendMode="normal" height="100%"
+			 >
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("spark.components.TextInput")]
+		]]>
+	</fx:Metadata> 
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private static const focusExclusions:Array = ["textDisplay"];
+			
+			override public function get focusSkinExclusions():Array { return focusExclusions;};
+			
+			protected function textDisplay_clickHandler(event:FocusEvent):void
+			{
+				if(bg)
+					bg.alpha = 1;
+			}
+			
+			protected function textDisplay_focusOutHandler(event:FocusEvent):void
+			{
+				if(bg)
+					bg.alpha = 0;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="disabled" stateGroups="disabledStates"/>
+		<s:State name="normalWithPrompt"/>
+		<s:State name="disabledWithPrompt" stateGroups="disabledStates"/>
+	</s:states>
+	
+	<s:Rect id="bg" height="100%" radiusX="3" width="100%" x="0" y="0" alpha="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#BDC0C9" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<!-- text -->
+	<s:RichEditableText id="textDisplay"
+						verticalAlign="middle"
+						widthInChars="10"
+						left="4" right="4" top="1" bottom="1" 
+						focusIn="textDisplay_clickHandler(event)"
+						focusOut="textDisplay_focusOutHandler(event)"
+						fontFamily="CalibriCFF"  
+						fontSize="13"
+						backgroundAlpha="0" 
+						/>
+	
+	<!--- Defines the Label that is used for prompt text. The includeInLayout property is false so the prompt text does not affect measurement. -->
+	<s:Label id="promptDisplay" 
+			 left="0" right="4" top="1" bottom="1" 
+			 maxDisplayedLines="1"
+			 mouseEnabled="false"
+			 mouseChildren="false"
+			 verticalAlign="middle" 
+			 includeIn="normalWithPrompt,disabledWithPrompt" 
+			 fontStyle="normal"
+			 fontFamily="CalibriCFF"  
+			 fontSize="12"
+			 color="0x000000"
+			 />
+<!--			 includeInLayout="false"-->
+	
+</s:SparkSkin>

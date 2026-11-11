@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:views="com.gazuntite.provider.live.services.scheduler.view.views.*"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 height="250"  width="100%" 
+		 initialize="init()" 
+		 creationComplete="creComp()" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllProviderByClinicBranchIdEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadAllStationsByClinicIdEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.LoadClinicRoomByStationIdSCEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			private var stationCounter:int = 0;
+			
+			// ********** initlize method *********
+			private function init():void
+			{
+				//if(model.ClinicRoomList != null)
+				//model.ClinicRoomList.removeAll();
+				
+			}
+			private function creComp():void
+			{
+				//loadAllProviders();
+				//getRoomsList();
+				//loadAllStationsByClinicId();
+			}
+			private function loadAllStationsByClinicId():void
+			{
+				var LASCIdEvent:LoadAllStationsByClinicIdEvent  = new LoadAllStationsByClinicIdEvent(LASCIdEvent_callBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LASCIdEvent);
+			}
+			private function LASCIdEvent_callBack():void
+			{
+				if(model.ClinicRoomList == null)
+					model.ClinicRoomList = new ArrayCollection();
+				else
+					model.ClinicRoomList.removeAll();
+				
+				getRoomsList();
+			}
+			//*********** Get rooms list *********************************
+			private function getRoomsList():void
+			{
+				if(model.StaticData.StationsByClinicIDList != null)
+				{
+					if(model.StaticData.StationsByClinicIDList.length >0)
+					{
+						if(stationCounter >= model.StaticData.StationsByClinicIDList.length)
+							return;
+						
+						var CREvent:LoadClinicRoomByStationIdSCEvent = new LoadClinicRoomByStationIdSCEvent(model.StaticData.StationsByClinicIDList[stationCounter].ID, getRoomsList_callback);
+						CairngormEventDispatcher.getInstance().dispatchEvent(CREvent);
+						stationCounter ++;
+					}
+					else
+					{
+						return;
+					}
+				}
+			}
+			//************* rome list call back handler
+			private function getRoomsList_callback ():void
+			{
+				if(stationCounter < model.StaticData.StationsByClinicIDList.length)
+					getRoomsList();// call again for next station
+				else
+					return;
+			}
+			//********* load all providers *******************
+			private function loadAllProviders():void
+			{
+				var LAPCIdEvent:LoadAllProviderByClinicBranchIdEvent            = new LoadAllProviderByClinicBranchIdEvent(model.loggedInUserSelectedBranchId, model.loggedInUserSelectedStationId, true);
+				CairngormEventDispatcher.getInstance().dispatchEvent(LAPCIdEvent);
+				cursorManager.setBusyCursor();
+			}
+			//*********** Refresh View on tab Change********************************
+			protected function viewStack_changeHandler(event:IndexChangeEvent):void
+			{
+				switch(viewStack.selectedIndex)
+				{
+					case 0:
+						//scView.creComp();
+						break;
+					case 1:
+						//appView.creComp();
+						break;
+					case 2:
+						//searchView.creComp();
+						break;
+					case 3:
+						//reqView.creComp();
+						break;
+					default:
+						break;
+				}
+			}
+			
+			[Bindable] public var bgColor:String = '0xFFFFFF';
+		]]>
+	</fx:Script>
+	
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		.schedularButonBar
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonBarSkins.blackButtonBar"); 
+		}
+		.blackTitleBGContainerSkin3
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.containerSkins.blackTitleBGContainer");
+		}
+		.whiteArrButtonSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.arrowButtonSkins.whiteButton");
+		}
+		.greyButtonBarSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonBarSkins.greyButtonBar");
+		}
+		.blackTitleGreyBGContainerSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.containerSkins.blackTitleGreyBGContainer");
+		}
+		.popupCloseButtonSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.popupCloseButton");
+		}
+		.orangeSearchButtonSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.orangeSearchButton");
+		}
+		.blackButtonSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.blackButton");
+		}
+		.updateInfoButtonSkin
+		{
+			skinClass : ClassReference("com.adobe.gazuntite.skins.chrome.buttonSkins.updateInfoButton");
+		}
+	</fx:Style>
+	
+	<s:BorderContainer width="100%" height="100%"  backgroundColor="{bgColor}" borderVisible="false" borderAlpha="0">
+		<s:layout>
+			<s:VerticalLayout paddingTop="4" paddingBottom="4" paddingLeft="4" paddingRight="4" gap="-2" />				
+		</s:layout>
+		
+		<s:Group width="100%">
+			<s:ButtonBar dataProvider="{viewStack}" left="5"   
+						 buttonMode="true" useHandCursor="true"
+						 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+				<s:layout>
+					<s:ButtonBarHorizontalLayout gap="3" />
+				</s:layout>
+			</s:ButtonBar>
+		</s:Group>
+		
+		<s:BorderContainer height="100%" width="100%"  borderColor="0x000000" borderWeight="3">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="right" />
+			</s:layout>
+			
+			<components:LabelViewStack id="viewStack"
+									   width="100%" height="100%" change="viewStack_changeHandler(event)" creationPolicy="all">
+				<s:ArrayList>
+					<s:NavigatorContent label="{'Schedule'+' '+ '('+model.totalRecords_AllApp.toString()+')'}" height="100%" width="100%" toolTip="Schedule" >
+						<views:ScheduleView id="scView" width="100%" height="100%"/>
+					</s:NavigatorContent>
+					<s:NavigatorContent label="Create an Appointment" height="100%" width="100%" toolTip="Create an Appointment" >
+						<views:AppointmentView id="appView" width="100%" height="100%"/>
+					</s:NavigatorContent>
+					<s:NavigatorContent label="{'Search'+' '+ '('+model.totalRecords_SearchApp.toString()+')'}" height="100%" width="100%" toolTip="Search" >
+						<views:SearchView id="searchView" width="100%" height="100%"/>
+					</s:NavigatorContent>
+					<s:NavigatorContent label="{'Pending Requests' +' '+ '('+model.totalRecords_PendReq.toString()+')'}" height="100%" width="100%" toolTip="Pending Requests" >
+						<views:RequestView id="reqView" width="100%" height="100%"/>
+					</s:NavigatorContent>
+					
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</s:Group>

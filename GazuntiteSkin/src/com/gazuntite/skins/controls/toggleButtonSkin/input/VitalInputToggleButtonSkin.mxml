@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkButtonSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark" 
+                   xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+                   minWidth="21" minHeight="31" 
+                   alpha.disabledStates="0.5">
+    <fx:Script>
+		<![CDATA[
+			import flashx.textLayout.elements.TextFlow;
+			
+			import spark.utils.TextFlowUtil;
+			[Bindable]
+			public var labelText:String;
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
+			{
+				var lb:String = hostComponent.label;
+				var title:String = lb;
+				var unit:String = "";
+				var i:Number = lb.indexOf('(');
+				if (i>=0)
+				{
+					title = lb.substring(0,i);
+					unit = lb.substring(i, lb.length);
+				}
+				
+				var new_lbel:String = "<span fontWeight='bold'>"+title+"</span> "+unit;
+				if (labelText!=new_lbel)
+				{
+					labelText = new_lbel;
+				}
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+		]]>
+	</fx:Script>
+    <!-- host component -->
+    <fx:Metadata>
+        [HostComponent("spark.components.ToggleButton")]
+    </fx:Metadata>
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" stateGroups="overStates" />
+        <s:State name="down" stateGroups="downStates" />
+        <s:State name="disabled" stateGroups="disabledStates" />
+        <s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+        <s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+        <s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+        <s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+    </s:states>
+    
+
+	
+	<s:Rect left="0" right="1" top="1" bottom="1" radiusX="3">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#767C80" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#454A4E" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1.0" color="#2A2F33" ratio="0.47843137254901963"/>
+				<s:GradientEntry alpha="1.0" color="#2A2F33" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="10" blurY="10" color="#51585C" inner="true"
+						  knockout="false" quality="3" strength="2"/>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="3" blurY="3"
+								color="#000000" distance="2" hideObject="false"
+								inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+
+	<s:Rect left="0" right="1" top="1" bottom="1" radiusX="3" includeIn="overStates, selectedStates">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#A1A1A1" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#777777" ratio="0.3215686274509804"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+
+	<s:RichText textFlow="{TextFlowUtil.importFromString(labelText)}"
+             textAlign="left"
+             verticalAlign="middle"
+             maxDisplayedLines="1"
+			 color="#FFFFFF" fontFamily="Calibri"
+			 fontSize="14"
+             verticalCenter="1"
+             left="8" right="20" top="2" bottom="2">
+    </s:RichText>
+	<s:Group right="8" verticalCenter="0">
+		<s:Rect x="0" y="0" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="#000000"
+									distance="3" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="0" y="4" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="#000000"
+									distance="3" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:Rect x="0" y="8" width="12" height="1">
+			<s:fill>
+				<s:SolidColor color="#FFFFFF"/>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="3" blurY="3" color="#000000"
+									distance="3" hideObject="false" inner="false" knockout="false"
+									quality="3" strength="1"/>
+			</s:filters>
+		</s:Rect>
+	</s:Group>   
+</s:SparkButtonSkin>

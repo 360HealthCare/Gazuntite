@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:diseaseManagement="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.*" 
+		 xmlns:diabetesGuideLine="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.diabetesGuideLine.*" 
+		 xmlns:components1="com.gazuntite.components.*" xmlns:components2="com.gazuntite.common.view.components.*" 
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			protected function diabetesguidelineinputform1_CloseInputFormHandler(event:Event):void
+			{
+				uiViewStack.selectedIndex = 0;
+				ResetInputForm();
+			}
+			
+			private function ResetInputForm():void
+			{
+				// preform all inputForm reset operation here.
+			}
+			
+			protected function id_addGuideLineBtn_clickHandler(event:MouseEvent):void
+			{
+				uiViewStack.selectedIndex = 1;
+				LoadDataForInputForm();
+			}
+			
+			public function LoadDataForInputForm():void
+			{
+				// preform all inputForm Data inizilizing operation here.
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false">
+		<s:ArrayList>
+			<s:Group width="100%" height="100%">
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.dmg.DMGArrangeByBgSkin" width="100%" height="30" >
+					<s:Button id="id_addGuideLineBtn" 
+							  label="Add" toolTip="Add" right="5" verticalCenter="0" click="id_addGuideLineBtn_clickHandler(event)"
+							  skinClass="com.gazuntite.skins.controls.button.AddButtonSkin" useHandCursor="true" buttonMode="true"/>
+				</s:SkinnableContainer>
+				
+				<components2:PleaseSelectUpView label="Click on the add button to setup guideline" horizontalCenter="0" verticalCenter="0" width="60%" />
+			</s:Group>
+			
+			<diabetesGuideLine:DiabetesGuidelineInputForm width="100%" height="100%" CloseInputForm="diabetesguidelineinputform1_CloseInputFormHandler(event)" />
+			
+		</s:ArrayList>
+	</components:LabelViewStack>
+</s:Group>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryAddictionTypeDTO;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryMediumTypeDTO;
+			import com.gazuntite.patient.visit.dto.ch.SocialHistoryUsageAmountTypeDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.IList;
+			import mx.events.CalendarLayoutChangeEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var m_oMediumList:IList;
+			private var m_oUsageList:IList;
+			
+			private var _Type:ArrayCollection	 = new ArrayCollection();
+			private var _Ammount:ArrayCollection	 = new ArrayCollection();
+			
+			
+			
+			[Bindable]
+			public function get Ammount():ArrayCollection
+			{
+				return _Ammount;
+			}
+			
+			public function set Ammount(value:ArrayCollection):void
+			{
+				_Ammount = value;
+			}
+			
+			[Bindable]
+			public function get Type():ArrayCollection
+			{
+				return _Type;
+			}
+			
+			public function set Type(value:ArrayCollection):void
+			{
+				_Type = value;
+			}
+			
+			[Bindable]
+			public function get UsageList():IList
+			{
+				return m_oUsageList;
+			}
+			
+			public function set UsageList(value:IList):void
+			{
+				m_oUsageList = value;
+			}
+			
+			[Bindable]
+			public function get MediumList():IList
+			{
+				return m_oMediumList;
+			}
+			
+			public function set MediumList(value:IList):void
+			{
+				m_oMediumList = value;
+			}
+			
+			public function selectType( typeId:int ):void
+			{
+				if( null == MediumList ) return;
+				
+				Type.removeAll();
+				
+				for(var i:int = 0; i < MediumList.length; i ++ )
+				{
+					var dto:SocialHistoryMediumTypeDTO= MediumList.getItemAt( i ) as SocialHistoryMediumTypeDTO;
+					if( dto.Addication == typeId )
+					{
+						Type.addItem(dto);
+						/* id_TypeCmbo.selectedIndex = i;
+						return; */
+					}
+				}   
+			}
+			
+			public function selectUsageAmount( UsageAmountId:int ):void
+			{
+				if( null == UsageList ) return;
+				
+				Ammount.removeAll();
+				
+				for(var i:int = 0; i < UsageList.length; i ++ )
+				{
+					var dto:SocialHistoryUsageAmountTypeDTO = UsageList.getItemAt( i ) as SocialHistoryUsageAmountTypeDTO;
+					if( dto.AddictionID == UsageAmountId )
+					{
+						Ammount.addItem(dto);
+						/* id_AmountCmbo.selectedIndex = i;
+						return; */
+					}
+				} 
+			}
+			
+			protected function id_Type_changeHandler(event:IndexChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function id_Amount_changeHandler(event:IndexChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function id_Onset_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			
+			protected function id_EndDate_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<family:DetailViewHeader id="id_header" width="100%" height="23" />
+	
+	<s:SkinnableContainer height="100%" width="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIInnerFormBGSkin" >
+		
+		<s:layout>
+			<s:VerticalLayout gap="2" paddingLeft="5" paddingBottom="5" paddingTop="5" />
+		</s:layout>
+		
+		<s:HGroup verticalAlign="middle" horizontalAlign="left" gap="0">
+			
+			<s:HGroup gap="0">
+				<s:ToggleButton id="id_PastBtn" buttonMode="true" useHandCursor="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerPastBtnSkin"  toolTip="Past"  />
+				<s:ToggleButton id="id_PresentBtn" buttonMode="true" useHandCursor="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIFormPresentBtnSkin"  toolTip="Present"/>
+			</s:HGroup>
+			
+			<s:HGroup gap="-1" verticalAlign="middle" >
+				<s:Label text="Educated" fontFamily="Calibri" fontSize="10" />
+				<s:HGroup gap="0">				
+					<s:ToggleButton id="id_Yes" buttonMode="true" useHandCursor="true" toolTip="Yes" label="Yes" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton"  />
+					<s:ToggleButton id="id_No" buttonMode="true" useHandCursor="true" toolTip="No" label="No" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.NRadioButton" />
+				</s:HGroup>
+			</s:HGroup>
+			
+		</s:HGroup>
+		<s:HGroup width="100%" paddingRight="4">
+			<components:LabelComboBox id="id_TypeCmbo" width="100%" prompt="Type" dataProvider="{Type}"
+									  labelField="Name" change="id_Type_changeHandler(event)"
+									  />
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%" paddingRight="4">
+			<components:LabelComboBox id="id_AmountCmbo" width="100%"  prompt="Amount" dataProvider="{Ammount}"
+									  labelField="Name" change="id_Amount_changeHandler(event)"
+									  />
+			
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%" paddingRight="4">
+			<components:LabelDateField id="id_OnsetDate" prompt="OnSet" width="85"
+									   change="id_Onset_changeHandler(event)" toolTip="Start Date" yearNavigationEnabled="true"
+									   selectableRange="{{rangeEnd:new Date()}}" maxYear="{new Date().getFullYear()}" minYear="1901"
+									   IsEditAllow="true"/>
+			<components:LabelDateField id="id_EndDate" prompt="End Date" width="85" 
+									   maxYear="{new Date().getFullYear()}" selectableRange="{{rangeEnd:new Date()}}" minYear="1901"
+									   change="id_EndDate_changeHandler(event)" IsEditAllow="true"
+									   visible="false" yearNavigationEnabled="true" toolTip="End Date" fontSize="11"/>
+		</s:HGroup>
+	</s:SkinnableContainer>
+</s:Group>

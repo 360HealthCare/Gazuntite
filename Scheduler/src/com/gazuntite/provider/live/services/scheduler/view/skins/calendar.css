@@ -1,0 +1,51 @@
+@namespace mx "library://ns.adobe.com/flex/mx";
+.Timeline {
+   calendarLabelWidth: 150;
+   calendarRowHeight: 200;
+}
+
+.CalendarEvent {
+   headerHeight: 16;
+   cornerRadius: 8;
+   borderThickness: 2;
+}
+
+.DayChrome {
+	backgroundColor: #AAAAAA;
+	backgroundAlpha: 0;
+	contentBackgroundAlpha: 0;
+}
+
+.ThisMonth {
+	backgroundColor: #AAAAAA;
+	backgroundAlpha: 0;
+	contentBackgroundAlpha: 0;
+}
+
+.NotThisMonth {
+	backgroundColor: #EEEEEE;
+	backgroundAlpha: 0;
+	contentBackgroundAlpha: 0;
+}
+
+.tab
+{
+	background-color: #8888C9;
+	font-weight: normal;
+	color: #A0521C;
+	text-roll-over-color: #A0521C;
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #000000;
+}
+
+/*.selectedTab
+{
+	background-color: #8888C9;
+	font-weight: normal;
+	color: #A0521C;
+	text-roll-over-color: #A0521C;
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #000000;
+}*/

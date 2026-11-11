@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:search="com.gazuntite.components.search.*"
+		 
+		 >
+	
+	<fx:Metadata>
+		[Event(name="searchTypeChange", type="com.gazuntite.components.search.SearchDropDownEvent")]
+		[Event(name="startSearch", type="com.gazuntite.components.search.SearchDropDownEvent")]
+		[Event(name="searchResultSelectionChange", type="com.gazuntite.components.search.SearchDropDownEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			private var ac_DataProvider:ArrayCollection;
+			private var ir_IconLabelRenderer:IFactory;
+			private var ir_ResultRenderer:IFactory;
+			private var ms_PromptFieldName:String = "label";
+			
+			/* [Bindable]
+			private var isSearchListShow:Boolean = false; */
+			private var _ShowResultAsPopup:Boolean = false; 
+			
+			public function get ShowResultAsPopup():Boolean
+			{
+				return _ShowResultAsPopup;
+			}
+			
+			public function set ShowResultAsPopup(value:Boolean):void
+			{
+				_ShowResultAsPopup = value;
+			}
+			
+			
+			[Bindable]
+			public function get PromptFieldName():String
+			{
+				return ms_PromptFieldName;
+			}
+			
+			public function set PromptFieldName(value:String):void
+			{
+				ms_PromptFieldName = value;
+			}
+			
+			[Bindable]
+			public function get ResultRenderer():IFactory
+			{
+				return ir_ResultRenderer;
+			}
+			
+			public function set ResultRenderer(value:IFactory):void
+			{
+				ir_ResultRenderer = value;
+			}
+			
+			[Bindable]
+			public function get IconLabelRenderer():IFactory
+			{
+				return ir_IconLabelRenderer;
+			}
+			
+			public function set IconLabelRenderer(value:IFactory):void
+			{
+				ir_IconLabelRenderer = value;
+			}
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return ac_DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				ac_DataProvider = value;
+			}
+			
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				var object:* = DataProvider.getItemAt(event.newIndex);
+				id_textInput.prompt = object[PromptFieldName];
+				
+				var e:SearchDropDownEvent = new SearchDropDownEvent( SearchDropDownEvent.SEARCH_TYPE_CHANGE);
+				e.searchTypePrompt = object[PromptFieldName];
+				e.searchTypeIndex = event.newIndex;
+				
+				dispatchEvent( e );
+				
+				
+			}
+			
+			protected function searchType_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+			// -------- Key Up handler of Search textinput---------------------------
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					var idx:int = id_searchType.selectedIndex;
+					var object:* = DataProvider.getItemAt(idx);
+					
+					var e:SearchDropDownEvent = new SearchDropDownEvent( SearchDropDownEvent.Start_SEARCH);
+					e.searchTypePrompt = object[PromptFieldName];
+					e.searchTypeIndex = idx;
+					
+					e.SearchQuery = id_textInput.text;
+					
+					dispatchEvent( e );
+					
+				}
+			}
+			
+			// -- Change handler of Textinput  ------------------------------------------
+			protected function textInput_changeHandler(event:TextOperationEvent):void
+			{
+				
+			}
+			
+			//----- Clear Display list of recent search result ----------------------
+			public function clearSearchResults(event:Event = null):void
+			{
+				if( id_SearchListView && id_SearchListView.visible )
+				{
+					id_textInput.text		= '';
+					showList( false );
+					//isSearchListShow = false;
+				}
+			}
+			
+			/**
+			 * ArrayCollection containing result collection to show as Result list <br />
+			 * Result list is rendered using ResultRenderer ItemRenderer
+			 */	
+			public function ShowResult(value:ArrayCollection):void
+			{
+				id_SearchListView.DataProvider = value;
+				showList( true );
+			}
+			
+			private function showList(value:Boolean):void
+			{
+				id_SearchListView.visible = value;
+				
+				if( _ShowResultAsPopup && value && false == id_SearchListView.isPopUp)
+				{
+					var pos:Point = new Point(id_textInput.x, id_textInput.y);
+					
+					removeElement(id_SearchListView);
+					id_SearchListView.ShowPopup( this );
+					
+					var pt:Point = localToGlobal(pos);
+					id_SearchListView.move( pt.x - 30, pt.y + this.height ); 
+					
+					id_SearchListView.width = this.width;
+					
+					FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+					{
+						if( _ShowResultAsPopup && true == id_SearchListView.isPopUp)
+						{
+							removePop();
+						}
+					});
+				}
+				else if( false == value && true == id_SearchListView.isPopUp)
+				{
+					removePop();
+				}
+				/* else if( _ShowResultAsPopup && id_SearchListView.isPopUp )
+				{
+					removePop();
+				} */
+				
+			}
+			
+			private function removePop():void
+			{
+				id_SearchListView.removePopup();
+				id_SearchListView.visible = false
+				addElement(id_SearchListView);
+			}
+			
+			protected function searchType_creationCompleteHandler(event:FlexEvent):void
+			{
+				if( null == IconLabelRenderer )
+				{
+					IconLabelRenderer = new ClassFactory(DefaultIconLabelRenderer);
+				}
+				
+			}
+			
+			//------ on item selection actual click on loded results after search ---------------------------
+			private function OnItemClick(event:Event):void
+			{
+				try
+				{
+					if(id_SearchListView.id_SearchList.selectedItem)
+					{
+						var ps:SearchDropDownEvent = new SearchDropDownEvent(SearchDropDownEvent.SEARCH_RESULT_SELECTION_CHANGE);;
+						ps.SelectedItem = id_SearchListView.id_SearchList.selectedItem;
+						ps.SelectedIndex = id_SearchListView.id_SearchList.selectedIndex;
+						dispatchEvent( ps );
+						
+						clearSearchResults();
+					}
+				}
+				catch(e:Error)
+				{
+					trace("ERROR --> SearchDropDownEvent :: OnItemClick", e );
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:VerticalLayout gap="-2" />
+	</s:layout>
+	<s:SkinnableContainer id="id_Main" width="100%" height="29"  skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin">
+		<!--<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectionBg" width="35" height="28" left="0" 
+		visible="{!id_SearchListView.visible}" includeInLayout="{!id_SearchListView.visible}"/>
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectedBg" width="35" height="28" left="0" 
+		visible="{id_SearchListView.visible}" includeInLayout="{id_SearchListView.visible}"/>
+		-->
+		<s:Group left="3" verticalCenter="0" height="100%">
+			<s:DropDownList id="id_searchType" width="1" height="1"
+							change="searchType_changeHandler(event)"
+							click="searchType_clickHandler(event)"
+							creationComplete="searchType_creationCompleteHandler(event)"
+							dataProvider="{DataProvider}" 
+							itemRenderer="{IconLabelRenderer}" labelField="PromptFieldName"
+							requireSelection="true" selectedIndex="0"
+							skinClass="com.gazuntite.components.search.DefaultSearchDropDownSkin"
+							top="7"/>
+			<s:Image left="-2" source="@Embed('assets/RasterizedItems.png')"
+					 click="id_image_clickHandler(event)" useHandCursor="true" buttonMode="true" />
+			<s:Image id="id_image"   buttonMode="true"
+					 click="id_image_clickHandler(event)" source="{id_searchType.selectedItem.icon}"
+					 toolTip="More Options" useHandCursor="true" verticalCenter="0"/>
+		</s:Group>
+		
+		<components:LabelTextInput id="id_textInput" 
+								   borderVisible="false" borderAlpha="0" height="100%"
+								   focusAlpha="0" left="30" right="21" verticalCenter="0" fontSize="15"
+								   prompt="Search" restrict="[A-Z a-z , . / \- 0-9]" 
+								   keyUp="textInput_keyUpHandler(event)"
+								   change="textInput_changeHandler(event)" fontFamily="CalibriCFF"
+								   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin" 
+								   toolTip="Search  {id_searchType.selectedItem[PromptFieldName]}"/>
+	</s:SkinnableContainer>
+	
+	<search:SearchResultView id="id_SearchListView" width="100%" 
+							 ResultSelectionChange="OnItemClick(event)"
+							 CloseSearchBox="clearSearchResults(event)"
+							 ResultRenderer="{ResultRenderer}"
+							 visible="false" includeInLayout="{id_SearchListView.visible}" 
+							 />
+</s:Group>

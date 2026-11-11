@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.gazuntite.webRTC.manager.OpenTokWebViewManager"/>
+    <classEntry path="com.gazuntite.webRTC.events.VideoCallRejectEvent"/>
+    <classEntry path="com.gazuntite.webRTC.events.GetOutgoingVideoChatSessionEvent"/>
+    <classEntry path="com.gazuntite.webRTC.events.VideoCallAcceptCallEvent"/>
+    <classEntry path="com.gazuntite.webRTC.events.VideoCallNotificationEvent"/>
+    <classEntry path="com.gazuntite.webRTC.events.GetIncomingVideoChatSessionEvent"/>
+    <classEntry path="com.gazuntite.webRTC.command.GetOutgoingVideoChatSessionCommand"/>
+    <classEntry path="com.gazuntite.webRTC.command.GetIncomingVideoChatSessionCommand"/>
+    <classEntry path="com.gazuntite.webRTC.command.VideoCallNotificationCommand"/>
+    <classEntry path="com.gazuntite.webRTC.command.VideoCallRejectCommand"/>
+    <classEntry path="com.gazuntite.webRTC.command.VideoCallAcceptCommand"/>
+    <classEntry path="com.gazuntite.webRTC.delegate.VideoCallAcceptDelegate"/>
+    <classEntry path="com.gazuntite.webRTC.delegate.GetOutgoingVideoChatSessionDelegate"/>
+    <classEntry path="com.gazuntite.webRTC.delegate.VideoCallNotificationDelegate"/>
+    <classEntry path="com.gazuntite.webRTC.delegate.GetIncomingVideoChatSessionDelegate"/>
+    <classEntry path="com.gazuntite.webRTC.delegate.VideoCallRejectDelegate"/>
+    <classEntry path="com.gazuntite.webRTC.webRTCcontroller.WebRTCcontroller"/>
+    <classEntry path="com.gazuntite.webRTC.util.WebRTCConstants"/>
+    <classEntry path="com.gazuntite.webRTC.model.WebRTCModel"/>
+    <classEntry path="com.gazuntite.webRTC.view.event.IncomingCallViewEvent"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

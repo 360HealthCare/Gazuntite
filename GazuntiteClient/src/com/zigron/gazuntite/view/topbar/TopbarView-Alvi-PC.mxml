@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  creationComplete="cc(event)" xmlns:status="com.zigron.gazuntite.view.topbar.provider.status.*" xmlns:topbar="com.zigron.gazuntite.view.topbar.*" xmlns:components="com.gazuntite.controls.extended.components.*"
+					  >
+	<fx:Metadata>
+		[Event(name="logoClick", type="flash.events.Event")]
+		[Event(name="userImageClick", type="flash.events.Event")]
+		[Event(name="signOut", type="flash.events.Event")]
+		[Event(name="rapidAccessClick", type="flash.events.Event")]
+		[Event(name="communicationClick", type="flash.events.Event")]
+		[Event(name="webSearchClick", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.utils.AppUtils;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.input.view.viewmodel.PatientInputViewModel;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.utils.ChromeUtil;
+			import com.zigron.gazuntite.view.common.AlertHelper;
+			import com.zigron.gazuntite.view.event.LogoutViewEvent;
+			import com.zigron.gazuntite.view.topbar.provider.AddressViewPopup;
+			import com.zigron.gazuntite.view.topbar.provider.StatusViewPopup;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]
+			private var showDebugBorders:Boolean = false;
+			
+			[Bindable]
+			public var tempimage:String ='iVBORw0KGgoAAAANSUhEUgAAADUAAAA7CAIAAABUjlVXAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1QkVEMzBBRjRCNzcxMUUyQkY0RUUyRTEzNjI0RDA2RSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1QkVEMzBCMDRCNzcxMUUyQkY0RUUyRTEzNjI0RDA2RSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjVCRUQzMEFENEI3NzExRTJCRjRFRTJFMTM2MjREMDZFIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjVCRUQzMEFFNEI3NzExRTJCRjRFRTJFMTM2MjREMDZFIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+i5vqgQAAFJFJREFUeNp0WlmM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' ;
+			
+			private var addressView:AddressViewPopup;
+			private var statusView:StatusViewPopup;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if(id_tBtnAddressBook.selected)	
+						id_tBtnAddressBook.selected = false;
+				});
+			}
+			
+			public function changeToopTip():void
+			{
+				if(id_restore.toolTip=='Restore')
+				{
+					id_restore.toolTip='Maximize';
+				}
+				else if(id_restore.toolTip=='Maximize')
+				{
+					
+					id_restore.toolTip='Restore';
+				}
+			}
+			
+			protected function id_close_clickHandler():void
+			{
+				var modified_views:ArrayCollection = PatientInputViewModel.getInstance().getDirtyViewList();
+				if (modified_views.length>0)
+				{
+					var msg:String = "The following views contain unsaved data:";
+					for each (var view_name:String in modified_views)
+					{
+						msg += "\n  "+view_name;
+					}
+					msg += "\nThe unsaved data will be lost. Do you want to continue?";
+					AlertHelper.showContinueQuestion(confirmedClose, msg);
+				}
+				else
+				{
+					UtilityFunctions.AskMessage(  "Do you really want to exit 'Gazuntite Online Clinic'", function():void
+					{
+						confirmedClose();
+					});
+				}
+			}
+			protected function confirmedClose():void
+			{
+				dispatchEvent(new LogoutViewEvent(true));
+				
+				/* var logoutevent:LogoutEvent = new LogoutEvent(function ():void{
+					ChromeUtil.closeWindow();
+					
+				});
+				CairngormEventDispatcher.getInstance().dispatchEvent(logoutevent); */
+			}
+			
+			protected function OnSignOut(event:Event):void
+			{
+				removeAllPopups();
+				UtilityFunctions.AskMessage(  "Do you really want to Signout from 'Gazuntite Online Clinic' ?", function():void
+				{
+					dispatchEvent(new LogoutViewEvent(false));
+					
+					id_RapidAccess.selected = false;
+					id_Communication.selected = false;
+					id_WebSearch.selected = false;
+
+					id_LogoButton.selected 		 = false;
+					id_ProfileBtn.selected 		 = false;
+					
+					dispatchEvent( new Event('CloseAllOpenPanel',true));
+				});
+				
+				id_tBtnAddressBook.selected = false;
+			}
+			
+			protected function id_LogoButton_clickHandler(event:MouseEvent):void
+			{
+				unselectAllExcept( event.currentTarget as IVisualElement);
+				
+				var lc:Event = new Event( "logoClick", true, false );
+				dispatchEvent( lc );
+			}
+			
+			
+			protected function showDoctorsAddress(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != addressView;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					event.currentTarget.selected = false;
+					return;
+				}
+				
+				addressView = new AddressViewPopup();
+				addressView.ShowPopup( this );
+				addressView.addEventListener("signOut", OnSignOut);
+				addressView.addEventListener("closePopup", function(event:Event):void { removeAllPopups() } );
+				
+				event.currentTarget.selected = true;
+				
+				//addressView.minWidth = 245;
+				//addressView.percentWidth = 100;
+				addressView.width =  id_AcContainer.width;
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				addressView.move( pt.x - (addressView.width ) + 20 , pt.y + event.currentTarget.height  + 5); 
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function signout_clickHandler(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != statusView;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				statusView = new StatusViewPopup();
+				statusView.ShowPopup( this );
+				statusView.addEventListener("signOut", OnSignOut);
+				statusView.addEventListener("closePopup", function(event:Event):void { removeAllPopups(); });
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				
+				statusView.move( pt.x - (statusView.width - event.currentTarget.width + 4), pt.y + event.currentTarget.height + 2 );
+				
+			}
+			
+			public function removeAllPopups():void
+			{
+				if( addressView && addressView.isPopUp )
+				{
+					addressView.removePopup();
+					addressView.removeEventListener("signOut", OnSignOut);
+					addressView = null;
+				}
+				
+				if( statusView && statusView.isPopUp )
+				{
+					statusView.removePopup();
+					statusView.removeEventListener("signOut", OnSignOut);
+					statusView = null;
+				}
+			}
+			
+			/* protected function tabBar_changeHandler(event:Event):void
+			{
+			id_RapidAccess.selected 	= false;
+			id_Communication.selected 	= false;
+			id_WebSearch.selected 		= false;
+			
+			//event.currentTarget.selected = ! event.currentTarget.selected; // select the current button
+			
+			var topbarAction:String = event.currentTarget.name + "Click";
+			var tbe:Event = new Event( topbarAction, true, false );
+			//--------------------------------------------------------------------------------------------------------------------------------------------------------------------- just stop call for time being
+			if('communicationClick' == topbarAction)
+			return;
+			
+			dispatchEvent( tbe );
+			} */
+			
+			protected function id_RapidAccess_changeHandler(event:MouseEvent):void
+			{
+				unselectAllExcept( event.currentTarget as IVisualElement);
+				
+				var topbarAction:String = event.currentTarget.name + "Click";
+				var tbe:Event = new Event( topbarAction, true, false );
+				dispatchEvent( tbe );
+			}
+			
+			protected function id_Communication_changeHandler(event:MouseEvent):void
+			{
+				unselectAllExcept( event.currentTarget as IVisualElement);
+				
+				
+				var topbarAction:String = event.currentTarget.name + "Click";
+				var tbe:Event = new Event( topbarAction, true, false );
+				dispatchEvent( tbe );
+			}
+			protected function id_WebSearch_clickHandler(event:MouseEvent):void
+			{
+				unselectAllExcept( event.currentTarget as IVisualElement);
+				
+				var topbarAction:String = event.currentTarget.name + "Click";
+				var tbe:Event = new Event( topbarAction, true, false );
+				dispatchEvent( tbe );
+				//event.currentTarget.x = -20;
+			}
+			
+			
+			protected function UserImage_clickHandler(event:MouseEvent):void
+			{
+				unselectAllExcept( event.currentTarget as IVisualElement);
+				
+				var lc:Event = new Event( "userImageClick", true, false );
+				dispatchEvent( lc );
+			}
+			
+			
+			private function unselectAllExcept(element:IVisualElement):void
+			{
+				if(element is ToggleButton && (element as ToggleButton).selected )
+				{
+					id_LogoButton.selected 		= id_LogoButton 	== element;
+					id_RapidAccess.selected 	= id_RapidAccess	== element;
+					id_Communication.selected 	= id_Communication 	== element;
+					id_WebSearch.selected 		= id_WebSearch 		== element;
+					id_ProfileBtn.selected 		= id_ProfileBtn 	== element;
+				}
+			}
+			
+			protected function id_AcContainer_clickHandler(event:MouseEvent):void
+			{
+				id_tBtnAddressBook.dispatchEvent( new MouseEvent(MouseEvent.CLICK));
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				//AppUtils.getByteArray(model.userImageData)
+			}
+			
+			private function GetUserImage(imageData:String):ByteArray
+			{
+				if(null != imageData && imageData.length)
+					return AppUtils.getByteArray(model.userImageData);
+				
+				return AppUtils.getByteArray(tempimage);
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:BorderContainer id="id_TopbarContainer"
+					   borderAlpha="{showDebugBorders?1:0}" backgroundAlpha="{showDebugBorders?1:0}" 
+					   borderVisible="{showDebugBorders}" borderColor="0xff0000" width="100%" height="100%" >
+		<s:layout>
+			<s:HorizontalLayout paddingRight="3" />
+		</s:layout>
+		
+		<s:ToggleButton id="id_LogoButton" 
+						click="id_LogoButton_clickHandler(event)"
+						skinClass="com.gazuntite.skins.LogoButtonSkin" toolTip="Gazuntite Products and Services" 
+						useHandCursor="true" buttonMode="true" width="146"/>
+		
+		<s:VGroup width="100%" height="100%" verticalAlign="top" horizontalAlign="center" gap="2">
+			
+			<s:SkinnableContainer id="id_AcContainer" minWidth="200" width="33%" height="24"
+								  skinClass="com.gazuntite.skins.controls.container.blackBGSkin" >
+				<s:Label id="actionBarTitle"
+						 text="{model.LoggedInUserDTO.FullName.toUpperCase()}" textAlign="center"
+						 styleName="drName" toolTip="{model.LoggedInProvider.FullName.toUpperCase()}"
+						 verticalCenter="0" width="190" maxWidth="190" maxDisplayedLines="1"  click="id_AcContainer_clickHandler(event)"/>
+				
+				<s:ToggleButton id="id_tBtnAddressBook"
+								skinClass="com.gazuntite.skins.controls.button.MoreOptionToggleButtonSkin"
+								right="2" verticalCenter="0"
+								click="showDoctorsAddress(event)" toolTip="More Options"
+								useHandCursor="true" buttonMode="true"  />
+				
+			</s:SkinnableContainer>
+			
+			<s:Label text="{model.LoggedInProvider.UserSelectedClinicBranchDTO.UserSelectedStation.label}" styleName="gazuntiteTitleSmall"/>
+			
+			<s:HGroup  paddingTop="0" horizontalAlign="center" verticalAlign="top" >
+				<s:ToggleButton id="id_RapidAccess" 
+								name="rapidAccess" 
+								skinClass="com.gazuntite.skins.controls.button.RapidAccessButtonSkin" 
+								click="id_RapidAccess_changeHandler(event)"
+								toolTip="Rapid Access" useHandCursor="true" buttonMode="true"/>
+				<s:ToggleButton id="id_Communication" 
+								name="communication" 
+								skinClass="com.gazuntite.skins.controls.button.CommunictionButtonSkin" 
+								click="id_Communication_changeHandler(event)"
+								toolTip="Communication" useHandCursor="true" buttonMode="true"/>
+				<s:ToggleButton id="id_WebSearch" 
+								name="webSearch" 
+								skinClass="com.gazuntite.skins.controls.button.WebSearchButtonSkin" 
+								click="id_WebSearch_clickHandler(event)"
+								toolTip="Web Search" useHandCursor="true" buttonMode="true"/>
+			</s:HGroup>
+			
+			<!--<s:ButtonBar id="id_tabBar"
+			skinClass="com.zigron.gazuntite.skins.controls.button.bar.TopbarButtonBarSkin"
+			labelField="label"
+			change="id_tabBar_changeHandler()" >
+			<s:dataProvider>
+			<s:ArrayCollection>
+			<fx:Object label="rapidAccess" />
+			<fx:Object label="communication"   />
+			<fx:Object label="webSearch"   />
+			</s:ArrayCollection>
+			</s:dataProvider>
+			</s:ButtonBar>-->
+		</s:VGroup>
+		
+		<s:HGroup  height="100%" horizontalAlign="right" gap="3" verticalAlign="top">
+			<!--<s:ToggleButton id="id_ProfileBtn" click="UserImage_clickHandler(event)"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.UserThumbSkin"
+							toolTip="User Profile" useHandCursor="true" buttonMode="true"
+							/>-->
+			<!--<s:image id="id_ProfileBtn" click="UserImage_clickHandler(event)"
+					 skinClass="com.gazuntite.skins.controls.toggleButtonSkin.UserThumbSkin"
+					 toolTip="User Profile" useHandCursor="true" buttonMode="true"
+					 source="{AppUtils.getByteArray(model.userImageData)}" />-->
+			
+			<components:ImageButton id="id_ProfileBtn" click="UserImage_clickHandler(event)" height="66" width="61"
+								skinClass="com.gazuntite.controls.skins.UserThumbSkin"
+								toolTip="User Profile" useHandCursor="true" buttonMode="true" Source="{GetUserImage(model.userImageData)}" />
+			
+			<s:VGroup  horizontalAlign="left" height="100%"  width="100%" gap="15" >	
+				<s:HGroup id="id_windowControlButtons" gap="2" horizontalAlign="right" paddingTop="2">
+					<s:Button id="id_min" height="15" width="16" useHandCursor="true" buttonMode="true" 
+							  skinClass="com.gazuntite.skins.controls.button.MiniButtonSkin" 
+							  click="ChromeUtil.minimizeWindow()" toolTip="Minimize"/>
+					
+					<s:Button id="id_restore" height="15" width="16" skinClass="com.gazuntite.skins.controls.button.restoreButton" visible="false" includeInLayout="false"
+							  click="ChromeUtil.toggleMaximizeWindow(); changeToopTip()" toolTip="Maximize" useHandCursor="true" buttonMode="true"/>					
+					
+					<s:Button id="id_close" height="15" width="16" skinClass="com.gazuntite.skins.controls.button.CloseButtonSkin"
+							  click="id_close_clickHandler()" toolTip="Close" useHandCursor="true" buttonMode="true"/>
+					
+				</s:HGroup>
+				
+				<status:StatusIconView 	id="id_btnSignOut" click="signout_clickHandler(event)" />
+			</s:VGroup>
+		</s:HGroup>
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

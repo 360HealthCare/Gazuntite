@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer  xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		width="100%" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="com.zigron.controls.extended.components.*" xmlns:model="com.adobe.Quivus.model.*" creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			import com.zigron.common.util.ValidationUtils;
+			
+			import flashx.textLayout.events.SelectionEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var model:SharedModel = new SharedModel();
+			
+			private var _PatientLanguageId:int=0;
+
+			[Bindable]
+			public function get PatientLanguageId():int
+			{
+				return _PatientLanguageId;
+			}
+
+			public function set PatientLanguageId(value:int):void
+			{
+				_PatientLanguageId = value;
+			}
+
+			public function resetFields():void
+			{
+				if (id_Language)
+					id_Language.selectedIndex = -1;
+				
+				if (id_AbilityMode)
+					id_AbilityMode.selectedIndex = -1;
+				
+				if (id_Country)
+					id_Country.selectedIndex = -1;
+				
+				if (id_PrefLang)
+					id_PrefLang.selected = false;
+			}
+			
+			public function getLanguageDetails():Object
+			{
+				var result:Object = new Object();
+				
+				if (id_Language && id_Language.selectedItem)
+					result["language"] = id_Language.selectedItem ;//as LanguageTypeDTO;
+				
+				if(PatientLanguageId){
+					if(result)
+						result["PatientLanguageId"] = PatientLanguageId;
+				}
+				
+				if (id_AbilityMode && id_AbilityMode.selectedItem)
+					result["abilityMode"] = id_AbilityMode.selectedItem ;//as LanguageAbilityModeDTO;
+				
+				if (id_Country && id_Country.selectedItem)
+					result["country"] = id_Country.selectedItem;
+				
+				if (id_PrefLang){
+					if(id_PrefLang.selected)
+						result["isPreferred"] = "Yes"//Constants.STRING_YES_UI;
+					else if(!id_PrefLang.selected)
+						result["isPreferred"] = "No"//Constants.STRING_NO_UI;
+				}
+				return result;
+			}
+			
+			public function isInValid():Object
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				
+				if (id_Language.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Language))
+				{
+					isNotValid = true;
+					errorStr += "Select valid language.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_Language;
+				}
+				
+				if (id_Country.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_Country))
+				{
+					isNotValid = true;
+					errorStr += "Select valid country.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_Country;
+				}
+				
+				if (id_AbilityMode.selectedIndex != -1 && !ValidationUtils.isValidValueSelected(id_AbilityMode))
+				{
+					isNotValid = true;
+					errorStr += "Select valid ability mode.\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_AbilityMode;
+				}
+				
+				var result:Object = {"isNotValid":isNotValid, "errorStr": errorStr, "toSetFocus": toSetFocus};
+				
+				return result;
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				if (id_Language.selectedIndex != -1 || id_Country.selectedIndex != -1)
+					return true;
+				
+				return false;
+			}
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_Language.tabIndex=tabIndex;
+				id_Country.tabIndex=tabIndex+1;
+				id_AbilityMode.tabIndex=tabIndex+3;
+				id_PrefLang.tabIndex=tabIndex+4;
+			}
+			
+			protected function comboChangeIndicator(event:IndexChangeEvent):void 
+			{
+				if(id_Language.selectedIndex != -1 || id_AbilityMode.selectedIndex != -1 || id_Country.selectedIndex != -1)
+				{
+					haschange= true;
+				}else
+				{
+					haschange= false;
+				}
+			}
+			
+			private var _haschange:Boolean;
+			[Bindable]
+			public function get haschange():Boolean
+			{
+				return _haschange;
+			}
+			
+			public function set haschange(value:Boolean):void
+			{
+				_haschange = value;
+			}
+			
+			protected function id_PrefLang_changeHandler(event:Event):void
+			{
+				if(id_PrefLang.selected)
+					haschange= true;
+				else
+					haschange= false;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:HorizontalLayout gap="3"/>
+	</s:layout>
+	<s:VGroup width="55%" gap="1">
+		<components:LabelComboBox id="id_Language" prompt="Language" width="100%" minWidth="150" autoWidth="false" toolTip="Select tooltip"
+								  dataProvider="{model.registrationStaticDataDTO.LanguageTypes}" labelField="LanguageName" change="comboChangeIndicator(event)" />
+		<components:LabelComboBox id="id_AbilityMode" prompt="Ability mode" width="100%" labelField="LangaugeAbilityModeDescription"  autoWidth="false"
+								  dataProvider="{model.registrationStaticDataDTO.LanguageAbilityModeDTOList}" toolTip="Select ability" change="comboChangeIndicator(event)"/>
+		
+	</s:VGroup>
+	<s:VGroup width="46%" gap="1">
+		<components:LabelComboBox id="id_Country" prompt="Country" width="100%"  autoWidth="false"
+								  dataProvider="{model.addressBookStaticDataDTO.AllCountryList}" change="comboChangeIndicator(event)"
+								  labelField="CountryName" toolTip="Select country"/>
+		
+		<s:HGroup width="80%" >
+			<s:CheckBox id="id_PrefLang" label="Preferred Language" color="#333333" fontFamily="Calibri" fontSize="11" toolTip="Select for preferred language" change="id_PrefLang_changeHandler(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:SkinnableContainer>

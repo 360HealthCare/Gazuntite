@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008" xmlns:lib="assets.graphics.*" xmlns:fc="http://ns.adobe.com/flashcatalyst/2009">
+	<fx:Metadata>[HostComponent("spark.components.CheckBox")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect height="14" radiusX="2" width="14" x="0.5" y="0.5">
+		<s:fill>
+			<s:LinearGradient rotation="270">
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2C2C2C" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="2" blurY="2" color="#FFFFFF" distance="0" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="1" blurY="1" color="#666666" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#313031" joints="miter" miterLimit="4" weight="1"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Path data="M 3.156 5.171 L 0 6.829 C 0 6.829 3.584 8.594 4.654 10.734 C 4.702 10.83 9.415 4.315 11.796 4.555 C 11.822 4.558 11.822 1.265 11.849 0.009 C 11.851 -0.045 10.218 -0.607 4.654 7.471 C 4.593 7.559 3.156 5.171 3.156 5.171 Z" height="9" width="8.849" winding="nonZero" x="3" y="3" visible.up="false" visible.over="false" visible.down="false" visible.disabled="false">
+		<s:fill>
+			<s:SolidColor color="#FFFFFF"/>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="270" blurX="2" blurY="2" color="#333333" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+</s:Skin>

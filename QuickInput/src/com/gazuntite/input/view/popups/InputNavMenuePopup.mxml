@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="cc(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.view.inputsections.physical.PatientInputPhysicalViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.components.NavigatorContent;
+			
+			[Bindable]
+			public var viewModel:PatientInputPhysicalViewModel = PatientInputPhysicalViewModel.getInstance();
+			[Bindable]
+			public var ShowChildrenList:Boolean = true;
+			
+			[Bindable]
+			public var NavMainTitle:String;
+			
+			private var m_acDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return m_acDataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				m_acDataProvider = value;
+				NavMainTitle = value.getItemAt( 0 ).NavMainTitle;
+			}
+			
+			public function setSelection(idx:int):void
+			{
+				id_mainTabsList.selectedIndex = idx;
+				
+				if( ShowChildrenList )
+				{
+					var pItem:Object = DataProvider.getItemAt( idx )
+					if( 0 == pItem.children.length )
+					{
+						pItem.selectTabFunc(idx, pItem);
+					}
+					
+					id_childTabsList.dataProvider = pItem.children;
+					
+					var i:int = 0;
+					for( i=0; i < pItem.children.length; i++ )
+					{
+						var itm:Object = pItem.children.getItemAt( i );
+						if( itm.label == viewModel.selectedViewLabel )
+						{
+							id_childTabsList.selectedIndex = i;
+							break;
+						}
+					}
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				if( ShowChildrenList )
+					id_container.percentWidth = 100;
+			}
+			
+			protected function id_mainTabsList_clickHandler(event:MouseEvent):void
+			{
+				if( null != id_mainTabsList.selectedItem)
+				{
+					if(  ShowChildrenList )
+					{
+						id_mainTabsList.selectedItem.selectTabFunc(id_mainTabsList.selectedIndex, id_mainTabsList.selectedItem);
+						id_childTabsList.dataProvider = id_mainTabsList.selectedItem.children;
+					}
+					else
+					{
+						viewModel.selectedViewLabel = id_mainTabsList.selectedItem.label;
+						removePopup();
+					}
+				}
+			}
+			
+			protected function id_childTabsList_clickHandler(event:MouseEvent):void
+			{
+				if( null != id_childTabsList.selectedItem )
+				{
+					viewModel.selectedViewLabel = id_childTabsList.selectedItem.label;
+					removePopup();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.input.InputNavMenuePopupSkin">
+		<s:layout>
+			<s:HorizontalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="0"/>
+		</s:layout>
+		
+		<s:BorderContainer id="id_container" width="82" height="100%" borderVisible="false" backgroundColor="0xE8E8E8">
+			<s:layout>
+				<s:HorizontalLayout paddingBottom="5" paddingLeft="0" paddingRight="0" paddingTop="0" gap="0"/>
+			</s:layout>
+			
+			<s:VGroup width="100%" visible="{!ShowChildrenList}" includeInLayout="{!ShowChildrenList}" gap="0">
+				<s:ToggleButton label="History" width="82" enabled="{NavMainTitle == 'History'}" selected="{NavMainTitle == 'History'}" 
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SectionNavTBSkin" buttonMode="true"/>
+				<s:ToggleButton label="Physical" width="82" enabled="{NavMainTitle == 'Physical'}" selected="{NavMainTitle == 'Physical'}" 
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SectionNavTBSkin" buttonMode="true" />
+				<s:ToggleButton label="Assessment" width="82" enabled="{NavMainTitle == 'Assessment'}" selected="{NavMainTitle == 'Assessment'}" 
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.SectionNavTBSkin" buttonMode="true" />
+			</s:VGroup>
+			
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:List id="id_mainTabsList"
+					width="100%" height="100%" 
+					contentBackgroundAlpha="0"
+					dataProvider="{DataProvider}" click="id_mainTabsList_clickHandler(event)" 
+					borderVisible="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					itemRenderer="com.gazuntite.input.view.popups.mainListRenderer"
+					/>
+		</s:BorderContainer>
+		
+		<s:Line height="100%" >
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+		</s:Line>
+		
+		<s:BorderContainer width="100%" height="100%" borderVisible="false" backgroundColor="#E8E8E8"
+						   visible="{ShowChildrenList}" includeInLayout="{ShowChildrenList}"
+						   >
+			<s:List id="id_childTabsList" 
+					width="100%" height="100%" click="id_childTabsList_clickHandler(event)"
+					contentBackgroundAlpha="0"
+					borderVisible="false" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					itemRenderer="com.gazuntite.input.view.popups.subListRenderer"/>
+		</s:BorderContainer>
+		
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

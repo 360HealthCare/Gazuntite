@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="group1_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			private var m_sVisitDateLable:String;
+			
+			private var m_sHideSaveButton:Boolean = false;
+			
+			[Bindable]
+			public function get VisitDateLable():String
+			{
+				return m_sVisitDateLable;
+			}
+			
+			public function set VisitDateLable(value:String):void
+			{
+				m_sVisitDateLable = value;
+			}
+			
+			[Bindable]
+			public function get HideSaveButton():Boolean
+			{
+				return m_sHideSaveButton;
+			}
+			
+			public function set HideSaveButton(value:Boolean):void
+			{
+				if (value != m_sHideSaveButton)
+					m_sHideSaveButton = value;
+			}
+
+			protected function id_subject_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_subject.setFocus();				
+			}
+
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_subject.tabIndex = tabIndex;
+				id_message.tabIndex = tabIndex+1;
+				id_SaveBtn.tabIndex = tabIndex+2;
+				id_ClearBtn.tabIndex = tabIndex+3; 
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!--<s:SkinnableContainer width="100%" skinClass="com.adobe.Quivus.view.controls.skins.notesBodySkin">-->
+	
+	<!--<s:BorderContainer width="100%" height="100%" borderAlpha="0" backgroundAlpha="1" backgroundColor="#ffffff">-->
+		<s:SkinnableContainer height="100" width="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.notesPanelOrangeBodySkin">
+			
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+		</s:layout>
+		<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="left"  >
+			<s:Label color="#444444" text="Subject" width="40" textAlign="right" fontFamily="Calibri" />
+			<s:TextInput id="id_subject" width="100%" fontFamily="Calibri" maxChars="100" creationComplete="id_subject_creationCompleteHandler(event)"
+						 tabIndex="{tabIndex + 3}" />
+			<s:Label id="id_VisitDateLbl" text="{VisitDateLable}" fontSize="10" fontFamily="Calibri" color="#000000" />
+			<s:Button id="id_SaveBtn" width="23" height="23" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesSaveBtn"  tabIndex="{tabIndex + 6}"
+					  buttonMode="true" useHandCursor="true" toolTip="Save Notes" visible="{!HideSaveButton}"/>
+			
+		</s:HGroup>
+		<s:VGroup gap="4" width="100%" height="100%" horizontalAlign="right">
+				
+			<s:TextArea id="id_message" width="100%" height="100%" fontFamily="Calibri" maxChars="500"  tabIndex="{tabIndex + 4}"
+						/>
+			<s:HGroup width="100%" horizontalAlign="right" paddingTop="-3">				
+				<s:Button id="id_ClearBtn" label="C" right="2" bottom="2" click="{id_message.text = ''}"  tabIndex="{tabIndex + 5}"
+						  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.ClearBtn" buttonMode="true" useHandCursor="true" toolTip="Clear"/>
+			</s:HGroup>
+		</s:VGroup>
+<!--	</s:BorderContainer>-->
+		</s:SkinnableContainer>
+	
+</s:Group>

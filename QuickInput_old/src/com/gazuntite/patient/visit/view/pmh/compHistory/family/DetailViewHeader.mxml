@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:comprehensiveHistory="com.adobe.gazuntite.view.controls.custom.patientExamView.quickInput.comprehensiveHistory.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.events.FlexEvent;
+			protected function spinerlist1_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+			}
+			
+			
+			
+			protected function id_SpinerList_creationCompleteHandler(event:FlexEvent):void
+			{
+				//"com.adobe.Quivus.view.controls.skins.buttonSkins.QIHistoryInternalHeader_prevBtn"
+				
+				/* id_SpinerList.id_minBtn.setStyle("skinClass", QIHistoryHeaderInternal_prevBtn);			
+				id_SpinerList.id_MaxBtn.setStyle("skinClass", QIHistoryHeaderInternal_nextBtn); */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.headerSkin" width="100%" height="25">
+		
+		<!--<s:BorderContainer id="id_header" width="100%" height="17" backgroundColor="#666666" backgroundAlpha="1" >-->
+		<s:layout>
+			<s:HorizontalLayout gap="0" horizontalAlign="left" />
+		</s:layout>
+		
+		<s:HGroup height="25" verticalAlign="middle" width="100%" minWidth="120" horizontalAlign="center" paddingLeft="5">
+			<components1:SpinerList id="id_SpinerList" height="15" width="110" click="spinerlist1_clickHandler(event)" creationComplete="id_SpinerList_creationCompleteHandler(event)" />
+		</s:HGroup>
+		
+		<s:HGroup width="57" height="100%" horizontalAlign="right" paddingRight="5" gap="1">
+			
+			<s:Rect height="25" width="1">
+				<s:fill>
+					<s:SolidColor color="#333333"/>
+				</s:fill>
+				<s:filters>
+					<s:DropShadowFilter alpha="0.4" angle="0" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+				</s:filters>
+			</s:Rect>
+			<s:Button id="id_NotesBtn" label="Notes" width="23" height="23" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerNotes"  
+					  buttonMode="true" useHandCursor="true" toolTip="Write Notes"/> 
+			<s:Rect height="25" width="1">
+				<s:fill>
+					<s:SolidColor color="#333333"/>
+				</s:fill>
+				<s:filters>
+					<s:DropShadowFilter alpha="0.4" angle="0" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+				</s:filters>
+			</s:Rect>
+			
+			<s:Button id="id_VoiceBtn" label="mic" width="23" height="23" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerMicBtn"   
+					  buttonMode="true" useHandCursor="true" toolTip="Record Dictation"/>
+		</s:HGroup>
+		<!--</s:BorderContainer>-->
+	</s:SkinnableContainer>
+	
+</s:Group>

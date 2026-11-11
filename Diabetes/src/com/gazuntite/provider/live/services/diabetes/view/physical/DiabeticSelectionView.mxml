@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   borderVisible="false" cornerRadius="3"
+				   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabeticSelectionEvent;
+			
+			protected function ButtonClick_handler(event:MouseEvent):void
+			{
+				var eve:DiabeticSelectionEvent;
+				
+				switch(event.currentTarget.id)
+				{
+					case 'id_feet':
+					{
+						eve = new DiabeticSelectionEvent(DiabeticSelectionEvent.FOOT_CLICKED,true);
+						break;
+					}
+					case 'id_Eye':
+					{
+						eve = new DiabeticSelectionEvent(DiabeticSelectionEvent.EYE_CLICKED,true);
+						break;
+					}
+					case 'id_Lung':
+					{
+						eve = new DiabeticSelectionEvent(DiabeticSelectionEvent.LUNG_CLICKED,true);
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+				
+				dispatchEvent(eve);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="right" gap="6" paddingRight="5" paddingTop="5" paddingBottom="5" paddingLeft="5"/>
+	</s:layout>
+	
+	
+	<s:HGroup width="100%" height="100%" horizontalAlign="center" gap="10" verticalAlign="middle">
+		<s:Button id="id_feet" 
+				  toolTip="Feet" click="ButtonClick_handler(event)" useHandCursor="true" buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.input.FootButtonSkin"/>
+		<s:Button id="id_Eye" 
+				  toolTip="Eye"  click="ButtonClick_handler(event)" useHandCursor="true" buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.input.EyeButtonSkin"/>
+		<s:Button id="id_Lung" 
+				  toolTip="Lungs"  click="ButtonClick_handler(event)" useHandCursor="true" buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.input.LungsButtonSkin"/>
+	</s:HGroup>
+	
+	<!--<s:Button id="id_nextButton" 
+			  toolTip="Next" skinClass="com.gazuntite.skins.controls.button.NextButtonSkin"
+			  useHandCursor="true" buttonMode="true"/>-->
+</s:BorderContainer>

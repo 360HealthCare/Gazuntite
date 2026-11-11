@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.zigron.controls.extended.components.*" 
+		 xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.patient.visit.dto.DiseaseTypeDTO;
+			import com.gazuntite.patient.visit.dto.FamilyHistroyDTO;
+			import com.gazuntite.patient.visit.dto.RelationshipTypeDTO;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIConstants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			
+			import spark.events.IndexChangeEvent;
+			
+			
+			[Bindable]
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+
+			private var searchTerm:String;//Search term for the records
+			private var isActive:String;
+			[Bindable]
+			private var relation_name:String = "";
+			private var relation_id:int ;
+			private var icd_code:String = "";
+			private var icd_description:String = "";
+			public var selectedIcdCodeDTO:FamilyHistroyDTO;
+			
+			public function isGetEdited():Boolean
+			{
+				 var edited:Boolean = false;
+				
+				 if((id_ICDCode.selectedItem) || (id_TypeOfDisease.textInput.text.length > 3))
+				{
+					edited = true; 
+					
+					selectedIcdCodeDTO				 		= new FamilyHistroyDTO();
+					selectedIcdCodeDTO.IcdCodeName			= icd_code;
+					selectedIcdCodeDTO.IcdCodeDescription	= icd_description;
+					selectedIcdCodeDTO.ReletionshipType.ID 	= relation_id;
+					selectedIcdCodeDTO.ReletionshipType.Name = relation_name;
+					//selectedIcdCodeDTO.IsActive 			= isActive;
+					
+					if( UtilityFunctions.IsNullOrEmpty( selectedIcdCodeDTO.DictationID ) )
+						selectedIcdCodeDTO.DictationID 			= Constants.GUID_FORMAT;
+				}  
+				
+				//hasViewChanged = (_hasGridChanged)? _hasGridChanged : edited;
+				
+				return edited; 
+			}
+			
+			
+
+
+			protected function id_Relation_changeHandler(event:IndexChangeEvent):void
+			{
+				  if( id_Relation.selectedItem && id_Relation.selectedIndex >= 0 )
+				{
+					relation_id 	= (id_Relation.selectedItem as RelationshipTypeDTO).ID
+					relation_name 	= ( id_Relation.selectedItem as RelationshipTypeDTO).Name;
+				}
+				else
+				{
+					relation_id 	= undefined;
+					relation_name 	= "";
+				}
+			}
+			
+			public function selectRelationship( relationId:int ):void
+			{
+				/* var col:ArrayCollection = model.registrationStaticDataDTO.RelationshipTypes;
+				var i:int;
+				for( i = 0; i < col.length; i ++ )
+				{
+					var dto:RelationshipTypeDTO = col.getItemAt( i ) as RelationshipTypeDTO;
+					if( dto.RelationshipId == relationId )
+					{
+						id_Relation.selectedIndex = i;
+						return;
+					}
+				}   */
+			}
+			
+			public function selectDisease( DiseaseID:int , componentId:String):void
+			{
+				 var col:ArrayCollection ;
+				if(componentId == "id_HeartDisease")
+					col = model.heartDiseaseDiseaseTypesDTOList;
+				
+				if(componentId == "id_Hypertension")
+					col = model.hypertensionDiseaseTypesDTOList;
+				
+				if(componentId == "id_Diabetes")
+					col = model.diabetesDiseaseTypesDTOList;
+				
+				if(componentId == "id_Cancer")
+					col = model.cancerDiseaseTypesDTOList;
+				
+				if(componentId == "id_Other")
+					col = model.otherDiseaseTypesDTOList;
+				
+				if( col )
+				{
+					var i:int;
+					for( i = 0; i < col.length; i ++ )
+					{
+						var dto:DiseaseTypeDTO = col.getItemAt( i ) as DiseaseTypeDTO;
+						if( dto.DiseaseTypeID == DiseaseID )
+						{
+							id_TypeOfDisease.selectedIndex = i;
+							return;
+						}
+					}
+				}
+				else
+				{
+					trace( "QI::CH::family::DetailsView: selectDisease() ... model.heartDiseaseDiseaseTypesDTOList is null" )
+				}  
+			}
+			
+			////////////////////////////////////////////////////////////////////
+			
+			private function icdCodeChangeHandler_keyUp():void
+			{
+				searchTerm = id_ICDCode.textInput.text;
+				if(searchTerm.length >=3)
+				{
+					/* id_TypeOfDisease.textInput.text = '';
+					id_TypeOfDisease.selectedIndex = -1; 
+					
+					var icdEvent : LoadDiagnosisICDCodeEvent = new LoadDiagnosisICDCodeEvent( searchTerm, null);
+					CairngormEventDispatcher.getInstance().dispatchEvent( icdEvent );
+					 */
+				}
+				
+			}
+			
+			protected function id_Description_changeHandler(event:IndexChangeEvent):void
+			{
+				//if(id_TypeOfDisease.textInput.text.length > 3 )
+				 if(id_TypeOfDisease.selectedIndex >= 0 )
+				{
+					if( id_TypeOfDisease.selectedIndex >= 0 )
+					{
+						var sel:DiseaseTypeDTO = id_TypeOfDisease.selectedItem as DiseaseTypeDTO;
+						icd_description		= sel.Description;
+						icd_code			= sel.DiseaseTypeCode.toString();
+						
+						id_ICDCode.selectedIndex = id_TypeOfDisease.selectedIndex; 
+					}
+					else
+					{
+						icd_description		= id_TypeOfDisease.textInput.text
+					}
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				} 
+			}
+			
+			private function icdDescriptionChangeHandler_keyUp():void
+			{
+				searchTerm = id_TypeOfDisease.textInput.text;
+				if(searchTerm.length > 150)
+					return;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				if(searchTerm.length >=3)
+				{
+					icd_description = searchTerm;
+					
+					if( id_TypeOfDisease.selectedItem && id_TypeOfDisease.selectedIndex >= 0)
+					{
+						 var item:DiseaseTypeDTO 		= id_TypeOfDisease.selectedItem;
+						icd_code 						= item.DiseaseTypeCode;
+						icd_description					= item.Description;
+						id_ICDCode.selectedIndex		= id_TypeOfDisease.selectedIndex; 
+					}
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				} 
+			}
+			
+			protected function id_ICDCode_changeHandler(event:IndexChangeEvent):void
+			{
+				 if( id_ICDCode.selectedIndex >= 0  )
+				{ 
+					var item:DiseaseTypeDTO 		= id_ICDCode.selectedItem;
+					icd_code 						= item.DiseaseTypeCode;
+					icd_description					= item.Description;
+					id_TypeOfDisease.selectedIndex 	= id_ICDCode.selectedIndex;
+					 
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				} 
+			}
+			
+			protected function rbGroup_changeHandler(event:Event):void
+			{
+				var value:String = event.currentTarget.selectedValue.toString();
+				isActive = value;// == Constants.STRING_YES_UI;
+				
+				dispatchEvent( new Event("ICD_Change", true, true ) );
+			}
+			
+			public function resetFields():void
+			{
+				//selectedIcdCodeDTO 			= null;
+				
+				icd_code					= "";
+				icd_description				= "";
+				relation_id					= undefined;
+				relation_name				= "";
+				isActive					= '';
+				
+				id_ActiveYes.selected		= false;
+				id_ActiveNo.selected		= false;
+				searchTerm						= '';
+				id_TypeOfDisease.textInput.text = '';
+				id_ICDCode.textInput.text 		= '';
+				
+				
+				//id_TypeOfDisease.prompt			= "";
+				
+				
+				id_ICDCode.selectedIndex		= -1;
+				id_TypeOfDisease.selectedIndex	= -1;
+				id_Relation.selectedIndex		= -1;
+				
+				id_TypeOfDisease.invalidateDisplayList();
+				id_TypeOfDisease.invalidateSize();
+				id_TypeOfDisease.invalidateLayering();
+				id_ICDCode.invalidateDisplayList();
+				id_Relation.invalidateDisplayList();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="rbGroup" change="rbGroup_changeHandler(event)" />
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="-2" />
+	</s:layout>
+	
+	<family:DetailViewHeader id="id_header" width="100%" height="23" />
+	
+	<s:SkinnableContainer height="100%" width="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIInnerFormBGSkin" >
+		
+		<s:layout>
+			<s:VerticalLayout paddingLeft="5" paddingBottom="10" paddingTop="10" />
+		</s:layout>
+	
+	
+	<s:HGroup gap="0" visible="false" includeInLayout="false">
+		<s:ToggleButton id="id_PastBtn" buttonMode="true" useHandCursor="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIInnerPastBtnSkin"  />
+		<s:ToggleButton id="id_PresentBtn" buttonMode="true" useHandCursor="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QIFormPresentBtnSkin" />
+	</s:HGroup>
+	
+		<s:HGroup width="100%">
+			
+			<components1:LabelComboBox id="id_Relation" width="50%" prompt="Relation" dataProvider="{model.RelationShipTypeList}"
+									  labelField="Name" change="id_Relation_changeHandler(event)"
+									  />
+			
+			<components1:LabelComboBox id="id_ICDCode" prompt="ICD Code" width="50%" dataProvider="{id_TypeOfDisease.dataProvider}"
+									  keyUp="icdCodeChangeHandler_keyUp()"  labelField="DiseaseTypeCode"
+									  change="id_ICDCode_changeHandler(event)" useHandCursor="true" buttonMode="true"
+									  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationSkin" 
+									  tabIndex="3" />
+			
+		</s:HGroup>
+		
+		<components1:LabelComboBox id="id_TypeOfDisease" prompt="Disease" width="100%" 
+								  keyUp="icdDescriptionChangeHandler_keyUp()" 
+								  change="id_Description_changeHandler(event)" useHandCursor="true" buttonMode="true" 
+								  labelField="Description"
+								  skinClass="com.gazuntite.controls.extended.skins.comboBoxRegisterationSkin"  
+								  tabIndex="4"/>
+	
+		<s:HGroup gap="0" verticalAlign="middle" visible="false">
+			<s:Label id="id_ActiveLbl" text="Active" fontFamily="Calibri" color="#ffffff"/>
+			<s:RadioButton id="id_ActiveYes" value="{QIConstants.STRING_YES_UI}" groupName="rbGroup" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.YRadioButton" tabIndex="4" toolTip="Yes" buttonMode="true"/>
+			<s:RadioButton id="id_ActiveNo" value="{QIConstants.STRING_NO_UI}" groupName="rbGroup" skinClass="com.adobe.gazuntite.skins.chrome.radioButtonSkins.NRadioButton" toolTip="No" buttonMode="true"/>
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+</s:Group>

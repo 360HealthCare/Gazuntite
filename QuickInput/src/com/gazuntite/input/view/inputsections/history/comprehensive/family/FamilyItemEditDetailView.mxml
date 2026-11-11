@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 currentState="noData" xmlns:component="com.gazuntite.view.patient.component.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+		 xmlns:skins="com.gazuntite.input.view.skins.*" 
+		 xmlns:components1="com.gazuntite.common.view.components.*" 
+		 xmlns:dictation="com.gazuntite.dictation.view.dictation.*" 
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.pmh.compHistory.DiseaseTypeDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.FamilyHistoryDTO;
+			import com.gazuntite.common.dto.pmh.compHistory.RelationshipTypeDTO;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.event.visit.pmh.comphistory.DeleteComprehensiveModuleDatabyPatientIDEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.LoadFamilyHistoryByPatientIdEvent;
+			import com.gazuntite.input.event.visit.pmh.comphistory.ManagePatientFamilyHistoryEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel() ;
+			
+			private var isToMoveNext:Boolean = false;
+			
+			private var _setState:int;
+			
+			public function get setTabState():int
+			{
+				return _setState;
+			}
+			
+			[Bindable]
+			public var isTabSelected:Boolean = false;
+			
+			public function set setTabState(value:int):void
+			{
+				_setState = value;
+				if(id_noteDictation && id_btnNote  && id_btnDictation)
+				{
+					id_btnNote.selected = false;
+					id_btnDictation.selected = false;
+					
+					onDictationNoteButtonsClick();
+					
+					id_noteDictation.note = "";
+					id_noteDictation.noteTooltip = "";
+				}
+				model.isDirtyCompFamilyView = true;
+				switch(value)
+				{
+					case 1:
+					{
+						currentState = "form";
+						id_Relation.setFocus();
+						break;
+					}
+					case 2:
+					{
+						currentState = "none";
+						break;
+					}
+						
+					default:
+					{
+						model.isDirtyCompFamilyView = false;
+						currentState = "default";
+						break;
+					}
+				}
+			}
+			
+			private var _familyHistoryDTO:FamilyHistoryDTO;
+			
+			[Bindable]
+			public function get familyHistoryDTO():FamilyHistoryDTO
+			{
+				return _familyHistoryDTO;
+			}
+			
+			public function set familyHistoryDTO(value:FamilyHistoryDTO):void
+			{
+				_familyHistoryDTO = value;
+			}
+			
+			[Bindable]
+			private var relation_name:String = "";
+			private var relation_id:int ;
+			private var icd_code:String = "";
+			private var icd_description:String = "";
+			
+			protected function id_Relation_changeHandler(event:IndexChangeEvent):void
+			{
+				if( id_Relation.selectedItem )
+				{
+					relation_id 	= (id_Relation.selectedItem as RelationshipTypeDTO).ID
+					relation_name 	= ( id_Relation.selectedItem as RelationshipTypeDTO).Name;
+				}
+				else
+				{
+					relation_id 	= undefined;
+					relation_name 	= "";
+				}
+			}
+			
+			private function ICDCodeloadResult(icdCodeList:ArrayCollection):void
+			{
+				model.icdCodeDTOList = icdCodeList;
+			}
+			
+			private var searchTerm:String;
+			private function icdDescriptionChangeHandler_keyUp():void
+			{
+				searchTerm = id_TypeOfDisease.text;
+				if(searchTerm.length > 150)
+					return;
+				//if value exceeds 3 characters then search Icd Code and map the Icd Code.
+				if(searchTerm.length >=3)
+				{
+					icd_description = searchTerm;
+					
+					if( id_TypeOfDisease.selectedItem)
+					{
+						var item:DiseaseTypeDTO 		= id_TypeOfDisease.selectedItem as DiseaseTypeDTO;
+						icd_code 						= item.DiseaseTypeCode;
+						icd_description					= item.Description;
+						id_ICDCode.selectedItem			= item; 
+					}
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				} 
+			} 
+			
+			protected function handleSave(event:MouseEvent):void
+			{	
+				if( ! familyHistoryDTO)
+				{
+					Alert.show("Please select a categry.","Information!",4, FlexGlobals.topLevelApplication.mainContainer);
+					return;	
+				}
+				if(currentState == 'none')
+					saveNone();
+				else
+					saveForm();
+			}
+			
+			private function saveNone():void
+			{
+				var duplicate:Boolean = false;
+				var isOtherThanNone:Boolean = false;
+				for each (var hdto:FamilyHistoryDTO in model.PreviousFamilyHistoryList) 
+				{
+					if(familyHistoryDTO.FamilyHistoryType.ID == hdto.FamilyHistoryType.ID && !hdto.IsPresent)
+					{
+						duplicate = true;
+						break;
+					}
+					
+					if(familyHistoryDTO.FamilyHistoryType.ID == hdto.FamilyHistoryType.ID && hdto.IsPresent)
+					{
+						isOtherThanNone = true;
+						break;
+					}
+				}
+				
+				
+				if(duplicate)
+				{
+					Alert.show("A " + (familyHistoryDTO.FamilyHistoryType.Name == "HeartDisease"? "Heart Disease":familyHistoryDTO.FamilyHistoryType.Name) + " record with None as status already exists.","Information!",4, FlexGlobals.topLevelApplication.mainContainer);
+					return;					
+				}
+				
+				if(isOtherThanNone)
+				{
+					var strAlertMessage:String = "Do you want to delete " + (familyHistoryDTO.FamilyHistoryType.Name == "HeartDisease"? "Heart Disease":familyHistoryDTO.FamilyHistoryType.Name) +"\nhistory?";
+					Alert.show(strAlertMessage,"Confirmation  Required!", Alert.YES|Alert.NO, 
+						FlexGlobals.topLevelApplication.mainContainer, function(event:CloseEvent):void
+						{
+							if ( event.detail == Alert.YES)
+							{		
+								familyHistoryDTO.FamilyHistoryNote 		= "";							
+								familyHistoryDTO.IsPresent 				= false;
+								familyHistoryDTO.IsNA 					= true;
+								familyHistoryDTO.IsDirty 				= true;
+								familyHistoryDTO.PatientID 				= model.patientDTO.ID;
+								familyHistoryDTO.VisitDate 				= model.VisitDate;
+								familyHistoryDTO.VisitID 				= model.VisitID;
+								familyHistoryDTO.IsYesSelected 			= "false";
+								familyHistoryDTO.DiseaseType.Description 	= '';
+								
+								if(null != model.FamilyHistoryList)
+									model.FamilyHistoryList.removeAll();
+								else
+									model.FamilyHistoryList = new ArrayCollection();
+								
+								model.FamilyHistoryList.addItem(familyHistoryDTO);
+								
+								var delEve:DeleteComprehensiveModuleDatabyPatientIDEvent = new DeleteComprehensiveModuleDatabyPatientIDEvent(model.patientDTO.ID, 2, familyHistoryDTO.FamilyHistoryType.ID, model.LoggedInUserSelectedBranchId,saveFamilyHistory); 
+								CairngormEventDispatcher.getInstance().dispatchEvent( delEve );														
+							}						
+						});
+				}
+				else
+				{
+					familyHistoryDTO.FamilyHistoryNote 		= "";							
+					familyHistoryDTO.IsNA 					= true;
+					familyHistoryDTO.IsPresent 				= false;
+					familyHistoryDTO.IsDirty 				= true;
+					familyHistoryDTO.PatientID 				= model.patientDTO.ID;
+					familyHistoryDTO.VisitDate 				= model.VisitDate;
+					familyHistoryDTO.VisitID 				= model.VisitID;
+					familyHistoryDTO.IsYesSelected 			= "false";
+					familyHistoryDTO.DiseaseType.Description 		= '';
+					
+					if(null != model.FamilyHistoryList)
+						model.FamilyHistoryList.removeAll();
+					else
+						model.FamilyHistoryList = new ArrayCollection();
+					
+					model.FamilyHistoryList.addItem(familyHistoryDTO);
+					
+					saveFamilyHistory();
+				}
+			}
+			
+			private function checkDuplicate():Boolean
+			{
+				var duplicate:Boolean = false;
+				for each (var hdto:FamilyHistoryDTO in model.PreviousFamilyHistoryList) 
+				{
+					if(familyHistoryDTO.FamilyHistoryType.ID == hdto.FamilyHistoryType.ID 
+						&& hdto.ReletionshipType.ID == id_Relation.selectedItem? (id_Relation.selectedItem as RelationshipTypeDTO).ID : hdto.ReletionshipType.ID
+						&& (id_ICDCode.selectedItem &&  hdto.DiseaseType.DiseaseTypeCode == (id_ICDCode.selectedItem as DiseaseTypeDTO).DiseaseTypeCode) )
+					{
+						duplicate = true;
+						break;
+					}
+				}
+				
+				return duplicate;
+			}
+			
+			private function saveForm():void
+			{
+				
+				/* if(!id_Relation.selectedItem && !UtilityFunctions.IsNullOrEmpty(id_Relation.text))
+				{				
+				Alert.show("Please select proper Relation.","Required field", 
+				Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+				function( event:CloseEvent):void
+				{
+				if( event.detail == Alert.OK )
+				{
+				id_Relation.setFocus();
+				}
+				});
+				return;		
+				}
+				if(!id_Relation.selectedItem)
+				{				
+				Alert.show("Please select Relation.","Required field", 
+				Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+				function( event:CloseEvent):void
+				{
+				if( event.detail == Alert.OK )
+				{
+				id_Relation.setFocus();
+				}
+				});
+				return;		
+				} */
+				
+				if(!id_ICDCode.selectedItem && !UtilityFunctions.IsNullOrEmpty(id_ICDCode.text))
+				{				
+					Alert.show("Please select proper ICD or set empty.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_ICDCode.setFocus();
+							}
+						});
+					return;		
+				}
+				if(id_ICDCode.selectedItem && !id_TypeOfDisease.selectedItem && !UtilityFunctions.IsNullOrEmpty(id_TypeOfDisease.text))
+				{				
+					Alert.show("ICD and Disease do not match.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_ICDCode.setFocus();
+							}
+						});
+					return;		
+				}
+				if(!id_ICDCode.selectedItem && id_TypeOfDisease.selectedItem )
+				{				
+					Alert.show("Please select proper Disease for selected ICD.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_ICDCode.setFocus();
+							}
+						});
+					return;		
+				}
+				
+				if(UtilityFunctions.IsNullOrEmpty(id_TypeOfDisease.text))
+				{				
+					Alert.show("Please select ICD or enter Disease.","Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{
+								id_ICDCode.setFocus();
+							}
+						});
+					return;		
+				}
+				
+				if(checkDuplicate())
+				{
+					Alert.show("This record already exist in " + (familyHistoryDTO.FamilyHistoryType.Name == "HeartDisease"? "Heart Disease":familyHistoryDTO.FamilyHistoryType.Name) + " history" ,"Required field", 
+						Alert.OK, FlexGlobals.topLevelApplication.mainContainer, 
+						function( event:CloseEvent):void
+						{
+							if( event.detail == Alert.OK )
+							{								
+								id_Relation.setFocus();
+							}
+						});
+					return;	
+				}
+				
+				if (id_Relation.selectedItem )
+				{
+					familyHistoryDTO.ReletionshipType = id_Relation.selectedItem as RelationshipTypeDTO;
+				}
+				
+				familyHistoryDTO.IsNA 					= false;
+				familyHistoryDTO.IsDirty 				= true;
+				familyHistoryDTO.PatientID 				= model.patientDTO.ID;
+				familyHistoryDTO.VisitDate 				= model.VisitDate;
+				familyHistoryDTO.VisitID 				= model.VisitID;
+				familyHistoryDTO.IsYesSelected 			= "true";
+				familyHistoryDTO.IsPresent 				= true;
+				
+				var diseaseType:DiseaseTypeDTO = id_ICDCode.selectedItem as DiseaseTypeDTO;
+				
+				if (!diseaseType)
+				{
+					diseaseType = new DiseaseTypeDTO();
+					diseaseType.Description = id_TypeOfDisease.text;
+					diseaseType.DiseaseTypeCode = "0";
+				}
+				
+				familyHistoryDTO.DiseaseType.Description = diseaseType.Description;
+				familyHistoryDTO.IcdCodeName = diseaseType.DiseaseTypeCode;
+				familyHistoryDTO.DiseaseType.DiseaseTypeID = diseaseType.DiseaseTypeID;
+				
+				familyHistoryDTO.Note = familyHistoryDTO.FamilyHistoryNote;
+				
+				if (null != model.FamilyHistoryList)
+					model.FamilyHistoryList.removeAll();
+				else
+					model.FamilyHistoryList = new ArrayCollection();
+				
+				model.FamilyHistoryList.addItem(familyHistoryDTO);
+				
+				saveFamilyHistory();
+			}
+			
+			private function saveFamilyHistory():void
+			{
+				var familyHistoryRecord:FamilyHistoryDTO = new FamilyHistoryDTO();
+				if( null != model.FamilyHistoryList && model.FamilyHistoryList.length)
+				{
+					familyHistoryRecord = model.FamilyHistoryList.getItemAt(0) as FamilyHistoryDTO;
+				}
+				var evt:ManagePatientFamilyHistoryEvent = new ManagePatientFamilyHistoryEvent( model.patientDTO.ID, model.LoggedInUserSelectedBranchId, familyHistoryRecord, clearFamilyHistory );
+				CairngormEventDispatcher.getInstance().dispatchEvent( evt );
+			}
+			public function clearFamilyHistory(isFromLocal:Boolean = true):void
+			{	
+				if(!isFromLocal && id_ICDCode == null) return;
+				
+				if(id_ICDCode)
+				{
+					id_ICDCode.selectedItem 		= null;
+					id_ICDCode.text 				= "";
+					id_TypeOfDisease.selectedItem 	= null;
+					id_TypeOfDisease.text 			= "";
+					id_Relation.selectedItem 		= null;
+					id_Relation.text 				= "";
+					
+					id_noteDictation.note = "";
+					id_noteDictation.noteTooltip = "";
+					familyHistoryDTO.FamilyHistoryNote 		= "";
+				}
+				if(isFromLocal)
+				{					
+					setCurrentState("form");
+					loadFamilyHistory();
+				}
+				
+				//update skins for icons....
+				dispatchEvent(new Event("clearNotesEvent",true, true ));
+				
+				//update controls
+				dispatchEvent( new Event("data_added", true, true) );
+				
+				
+			}
+			private function loadFamilyHistory():void
+			{
+				if(isToMoveNext)
+					dispatchEvent( new SelectSection( SelectSection.SelectInnerTabEvent,'Social'));
+				
+				var isNoneRecord:Boolean = false;
+				var noneRecord:FamilyHistoryDTO = null;
+				for each (var hdto:FamilyHistoryDTO in model.PreviousFamilyHistoryList) 
+				{
+					if(familyHistoryDTO.FamilyHistoryType.ID == hdto.FamilyHistoryType.ID && !hdto.IsPresent)
+					{
+						noneRecord = hdto;
+						isNoneRecord = true;
+						break;
+					}
+				}
+				if(isNoneRecord )
+				{				
+					noneRecord.IsDeleted = true;
+					noneRecord.ModifiedBy = model.LoggedInUserId;
+					noneRecord.ModifiedAt = new Date();
+					
+					var evt:ManagePatientFamilyHistoryEvent = new ManagePatientFamilyHistoryEvent( model.patientDTO.ID, model.LoggedInUserSelectedBranchId, noneRecord, loadFamilyHistoryAfterDeleteNone );
+					CairngormEventDispatcher.getInstance().dispatchEvent( evt );			
+				}
+				else
+				{
+					var ll:LoadFamilyHistoryByPatientIdEvent = new LoadFamilyHistoryByPatientIdEvent( );
+					CairngormEventDispatcher.getInstance().dispatchEvent( ll );
+				}
+				
+				var categoryTypeID:int = 0;
+				switch(familyHistoryDTO.FamilyHistoryType.Name)
+				{
+					
+					case QIConstants.FAMILY_HEART_DISEASE_MODULE_NAME:
+					{
+						categoryTypeID = 1;
+						break;
+					}
+					case QIConstants.FAMILY_HYPERTENSION_MODULE_NAME:
+					{
+						categoryTypeID = 2;
+						break;
+					}
+					case QIConstants.FAMILY_DIABETES_MODULE_NAME:
+					{
+						categoryTypeID = 3;
+						break;
+					}
+					case QIConstants.FAMILY_CANCER_MODULE_NAME:
+					{
+						categoryTypeID = 4;
+						break;
+					}
+					case QIConstants.FAMILY_OTHER_MODULE_NAME:
+					{
+						categoryTypeID = 5;
+						break;
+					}
+				}
+				
+				var switchEvent:GeneralEvent = new GeneralEvent("switchHXFamilyCategory", true);
+				switchEvent.value = categoryTypeID;
+				dispatchEvent(switchEvent);
+			}
+			private function loadFamilyHistoryAfterDeleteNone():void
+			{
+				var ll:LoadFamilyHistoryByPatientIdEvent = new LoadFamilyHistoryByPatientIdEvent( );
+				CairngormEventDispatcher.getInstance().dispatchEvent( ll );
+			}		
+			
+			protected function id_Relation_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if( id_Relation.selectedItem )
+				{
+					relation_id 	= (id_Relation.selectedItem as RelationshipTypeDTO).ID
+					relation_name 	= ( id_Relation.selectedItem as RelationshipTypeDTO).Name;
+				}
+				else
+				{
+					relation_id 	= undefined;
+					relation_name 	= "";
+				}
+			}
+			
+			protected function id_ICDCode_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_ICDCode.selectedItem)
+				{ 
+					img_ICD.source = QIConstants.IMG_GREEN;
+					var item:DiseaseTypeDTO 		= id_ICDCode.selectedItem as DiseaseTypeDTO;
+					icd_code 						= item.DiseaseTypeCode;
+					icd_description					= item.Description;
+					id_TypeOfDisease.selectedItem 	= item;
+					
+					dispatchEvent( new Event("ICD_Change", true, true ) );
+				}
+			}
+			
+			protected function id_TypeOfDisease_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_TypeOfDisease.selectedItem)
+				{
+					img_description.source = QIConstants.IMG_GREEN;
+					if( id_TypeOfDisease.selectedItem )
+					{
+						var sel:DiseaseTypeDTO 		= id_TypeOfDisease.selectedItem as DiseaseTypeDTO;
+						icd_description				= sel.Description;
+						icd_code					= sel.DiseaseTypeCode.toString();
+						id_ICDCode.selectedItem 	= sel; 
+						
+						dispatchEvent( new Event("ICD_Change", true, true ) );
+					}
+					else
+					{
+						icd_description		= id_TypeOfDisease.text
+					}
+				}
+					
+			}
+			
+			protected function onDictationNoteButtonsClick():void
+			{
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (dictationNoteViewModel.inDictationMode)
+						dictationNoteViewModel.inDictationMode = false;
+					
+					if (dictationNoteViewModel.inNoteMode)
+						dictationNoteViewModel.inNoteMode = false;
+					dictationNoteViewModel.visible = false;
+				}
+			}
+			
+			protected function textClearedHandler(event:Event):void
+			{
+				img_ICD.source = QIConstants.IMG_RED;
+				img_description.source = QIConstants.IMG_RED;
+				id_ICDCode.selectedItem = null;
+				id_ICDCode.text = "";
+				id_TypeOfDisease.selectedItem = null;				
+				id_TypeOfDisease.text = "";				
+			}
+			
+			protected function combokeyDownHandler(event:KeyboardEvent):void
+			{
+				var cmb:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if((cmb.id == "id_ICDCode" && StringUtil.trim(id_ICDCode.text).length == 0) || (cmb.id == "id_TypeOfDisease" && StringUtil.trim(id_TypeOfDisease.text).length == 0) )
+				{
+					img_ICD.source = QIConstants.IMG_RED;
+					img_description.source = QIConstants.IMG_RED;
+					id_ICDCode.selectedItem = null;
+					id_ICDCode.text = "";
+					id_TypeOfDisease.selectedItem = null;				
+					id_TypeOfDisease.text = "";	
+				}
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				dictationNoteViewModel.inlineEditing = true;
+				
+				FlexGlobals.topLevelApplication.addEventListener("HXFamilySave", function(event:GeneralEvent):void
+				{
+					isToMoveNext = event.value;
+					handleSave(null);
+				});
+			}
+			
+			protected function id_save_clickHandler(event:MouseEvent):void
+			{
+				isToMoveNext = false;
+				handleSave(null);
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="right" paddingTop="4" paddingRight="4" gap="0" paddingLeft="4" />
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="default"/>		
+		<s:State name="none"/>
+		<s:State name="form"/>	
+	</s:states>
+	
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"
+			  includeIn="default" includeInLayout="{isTabSelected}" visible="{isTabSelected}"
+			  >		
+		<s:Group width="100%">			
+			<components1:PleaseSelectView label="Select an option" horizontalCenter="0" verticalCenter="0" width="90%"/>		
+		</s:Group>
+	</s:VGroup>
+	<s:VGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="right"
+			  paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"
+			  includeIn="none"
+			  >
+		<s:BorderContainer width="100%" height="100%" cornerRadius="3" backgroundColor="0xD0DEF6"  borderColor="#5A5A5A" borderWeight="1">
+			<s:Label  text="None" fontSize="18" fontWeight="bold" fontFamily="CalibriCFFBold" horizontalCenter="0" verticalCenter="0"/>
+		</s:BorderContainer>
+	</s:VGroup>
+	
+	<s:VGroup width="100%" paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="0"  includeIn="form" >		
+		<s:HGroup width="100%"  >
+			<s:VGroup width="50%">
+				<s:HGroup width="100%" verticalAlign="middle">					
+					<s:Spacer width="11"/>
+					<autoComplete:AutoComplete id="id_Relation" 
+											   width="100%" height="25" labelField="Name" 
+											   toolTip="{id_Relation.selectedItem ? id_Relation.selectedItem.Name : 'Relation'}" 
+											   prompt="Relation" dataProvider="{model.RelationShipTypeList}"
+											   selectedItemChange="id_Relation_selectedItemChangeHandler(event)"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   />
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:BitmapImage id="img_description" source="{QIConstants.IMG_RED}"/>
+					<autoComplete:AutoComplete id="id_TypeOfDisease" 
+											   width="100%" height="25" labelField="Description"
+											   toolTip="{id_TypeOfDisease.selectedItem ? id_TypeOfDisease.selectedItem.Description : 'Disease'}"
+											   prompt="Disease" dataProvider="{model.heartDiseaseDiseaseTypesDTOList}"
+											   keyUp="icdDescriptionChangeHandler_keyUp()" 
+											   selectedItemChange="id_TypeOfDisease_selectedItemChangeHandler(event)"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   tabIndex="4"
+											   textCleared="textClearedHandler(event)"
+											   keyDown="combokeyDownHandler(event)"
+											   />
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="50%">
+				<s:HGroup width="100%" verticalAlign="middle">	
+					<s:BitmapImage id="img_ICD" source="{QIConstants.IMG_RED}"/>
+					<autoComplete:AutoComplete id="id_ICDCode" 
+											   width="100%" height="25" labelField="DiseaseTypeCode"
+											   toolTip="{id_ICDCode.selectedItem ? id_ICDCode.selectedItem.DiseaseTypeCode : 'ICD'}"
+											   prompt="ICD" dataProvider="{id_TypeOfDisease.dataProvider}"
+											   selectedItemChange="id_ICDCode_selectedItemChangeHandler(event)"
+											   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+											   tabIndex="3"
+											   textCleared="textClearedHandler(event)"
+											   keyDown="combokeyDownHandler(event)"
+											   />
+				</s:HGroup>
+			</s:VGroup>				  
+		</s:HGroup>		
+	</s:VGroup>
+	<s:HGroup width="100%" height="100%" includeIn="form" />		
+	<s:HGroup width="100%" horizontalAlign="right" excludeFrom="default" verticalAlign="bottom"  paddingBottom="4">
+		<s:ToggleButton id="id_btnDictation"
+						visible="{(currentState == 'form')}"
+						click="onDictationNoteButtonsClick()"
+						selected="@{dictationNoteViewModel.inDictationMode}"
+						toolTip="Record Level Dictation" tabIndex="12"
+						skinClass="{familyHistoryDTO.DictationID &amp;&amp; familyHistoryDTO.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+						/>
+		
+		<s:ToggleButton id="id_btnNote" 
+						visible="{(currentState == 'form')}"
+						click="onDictationNoteButtonsClick()"
+						selected="@{dictationNoteViewModel.inNoteMode}"
+						toolTip="Record Level Notes" tabIndex="13"
+						skinClass="{familyHistoryDTO.FamilyHistoryNote.length ?NotesRedButtonSkin :WriteNoteButtonSkin}"
+						/>
+		<s:Group width="26">			
+			<s:Button buttonMode="true" id="id_save"
+					  skinClass="com.gazuntite.skins.controls.button.SaveButtonPlusSkin" 
+					  toolTip="Save"  click="id_save_clickHandler(event)"
+					  right="0" verticalCenter="0"
+					  tabIndex="14"
+					  />
+		</s:Group>
+	</s:HGroup>
+	<dictation:PatientDictationNoteView id="id_noteDictation" width="100%" minHeight="47" viewModel="{dictationNoteViewModel}" 
+										IsDictaionEditMode="true" DictationID="@{familyHistoryDTO.DictationID}"
+										noteTooltip="{familyHistoryDTO.FamilyHistoryNote}" note="@{familyHistoryDTO.FamilyHistoryNote}" ShowSaveButton="false"/>
+</s:Group>

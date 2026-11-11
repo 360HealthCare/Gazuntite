@@ -1,0 +1,7 @@
+<Results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" PageNumber="1" FirstRecordNumber="1" LastRecordNumber="200" TotalRecord="3">
+<Patients>
+<Patient IsDeleted="false" IsDirty="false" UserID="32560" ID="32478" FirstName="SAMI" LastName="BOURGUIBA" MiddleName="" QuivusID="Qa-030643" DOB="1966-11-28T00:00:00" IsAuthorized="false" IsEmailIdAvailable="false" IsSnailIdAvailable="false" IsSMSNoAvalable="false" IsChatIdAvailable="false" IsPhoneNoAvailable="false" SSN="413-89-7677" GenderId="1" Gender="Male" CreatedAt="0001-01-01T00:00:00" RecGuid="ac69a229-2537-4b30-b71c-c5139da02080"/>
+<Patient IsDeleted="false" IsDirty="false" UserID="43122" ID="43019" FirstName="Sami" LastName="Test" MiddleName="" QuivusID="Qa-040885" DOB="2011-12-02T00:00:00" IsAuthorized="false" IsEmailIdAvailable="false" IsSnailIdAvailable="false" IsSMSNoAvalable="false" IsChatIdAvailable="false" IsPhoneNoAvailable="false" SSN="1234567890" GenderId="1" Gender="Male" CreatedAt="0001-01-01T00:00:00" RecGuid="5d75b07d-be16-43e2-b514-137800a63783"/>
+<Patient IsDeleted="false" IsDirty="false" UserID="48485" ID="48367" FirstName="Sami" LastName="Test14May" MiddleName="" QuivusID="Qa-043745" DOB="2012-05-01T00:00:00" IsAuthorized="false" IsEmailIdAvailable="true" IsSnailIdAvailable="false" IsSMSNoAvalable="false" IsChatIdAvailable="false" IsPhoneNoAvailable="false" SSN="1234" GenderId="1" Gender="Male" CreatedAt="0001-01-01T00:00:00" RecGuid="001d5521-f86b-491e-8fbb-725d65b73458"/>
+</Patients>
+</Results>

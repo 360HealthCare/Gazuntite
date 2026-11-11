@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG"
+					  implements="mx.managers.IFocusManagerComponent"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBG;
+			import com.adobe.gazuntite.skins.chrome.containerSkins.VitalsNumericStepperBGActive;
+			import mx.managers.IFocusManagerComponent;
+			
+			import mx.events.FlexEvent;
+			private var _label : String ;
+			
+			[Bindable]
+			private var _values:Array = [] /*of Numbers*/;
+			private var _valuesChanged:Boolean;
+			
+			private var _stepSizes:Array = [] /*of Numbers*/;
+			private var _stepSizesChanged:Boolean;
+			
+			private var _maxValues:Array = [] /*of Numbers*/;
+			private var _maxValuesChanged:Boolean;
+			
+			private var _selected:Boolean;
+			private var _selectedChanged:Boolean;
+			
+			private var _hasViewChanged:Boolean;
+			
+			public function get stepSizes():Array
+			{
+				return _stepSizes;
+			}
+			
+			public function set stepSizes(value:Array/*of Numbers*/):void
+			{
+				_stepSizes = value;
+				_stepSizesChanged = true;
+				
+				invalidateProperties();
+			}
+			
+			public function set selected(value:Boolean):void
+			{
+				_selected = value;
+				_selectedChanged = true;
+				
+				invalidateProperties();
+			}
+			
+			public function set maxValues(value:Array /*of Numbers*/):void
+			{
+				_maxValues = value;
+				_maxValuesChanged = true;
+				
+				invalidateProperties();
+			}
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			
+			public function get values():Array /*of Numbers*/
+			{
+				return _values;
+			}
+			
+			public function set values(value:Array /*of Numbers*/):void
+			{
+				_values = value;
+				_valuesChanged = true;
+				
+				if (id_numericStipper)
+				{
+					if (_valuesChanged && _values && _values.length)
+					{
+						_valuesChanged = false;
+						
+						id_numericStipper.value = _values[0];
+						
+						/* if (_values.length > 1)
+							secondNumericStepper.value = _values[1];
+							
+						else
+							secondNumericStepper.value = _values[0]; */
+					}
+				}
+				else
+					invalidateProperties();
+			}
+			
+			[Bindable]
+			public function get label():String
+			{
+				return _label;
+			}
+
+			public function set label(value:String):void
+			{
+				_label = value;
+			}
+			
+			private function commitValues(curTar:NumericStepper):void
+			{
+				if (!_values)
+					_values = [];
+				
+				if (curTar == id_numericStipper)
+				{
+					_values[0] = curTar.value;
+					dispatchEvent(new FlexEvent(FlexEvent.VALUE_COMMIT));
+				}
+					
+				/* else if(curTar == secondNumericStepper)
+				{
+					if (_values && _values.length > 1)
+					{
+						_values[1] = curTar.value;
+						dispatchEvent(new FlexEvent(FlexEvent.VALUE_COMMIT));
+					}
+				} */
+				
+				if (id_numericStipper.value != 0 /*  || secondNumericStepper.value != 0 */)
+					hasViewChanged = true;
+				else
+					hasViewChanged = false;
+			}
+			
+			public function reset(setFirst:Boolean = true, setSecond:Boolean = true):void
+			{
+				if (setFirst && id_numericStipper)
+				{
+					id_numericStipper.value = 0;
+					focusManager.setFocus(id_numericStipper);
+				}
+				
+				/* if (setSecond && secondNumericStepper)
+				{
+					secondNumericStepper.value = 0;
+					
+					if (!setFirst)
+						//secondNumericStepper.setFocus();
+						focusManager.setFocus(secondNumericStepper);
+				} */
+			}
+			
+			private function valueCommitHandler(event:FlexEvent):void
+			{
+				var curTar:NumericStepper = NumericStepper(event.currentTarget);
+				commitValues(curTar);
+			}
+			
+			
+			private function valueChangeHandler(event:Event):void
+			{
+				var curTar:NumericStepper = NumericStepper(event.currentTarget);
+				commitValues(curTar);
+			}
+			
+			
+			
+			private function stepperKeyUpHandler():void
+			{
+				if (id_numericStipper.textDisplay.text.length && id_numericStipper.textDisplay.text != "0")
+					hasViewChanged = true;
+					
+				/* else if (secondNumericStepper.textDisplay.text.length && secondNumericStepper.textDisplay.text != "0")
+					hasViewChanged = true; */
+					
+				else
+					hasViewChanged = false;
+				
+			}
+			
+			protected function labelField_mouseDownHandler(event:FocusEvent):void
+			{
+				this.setStyle("skinClass", VitalsNumericStepperBGActive);
+				labelField.setStyle("color", 0x000000);
+			}
+			
+			protected function labelField_mouseOutHandler(event:FocusEvent):void
+			{
+				this.setStyle("skinClass", VitalsNumericStepperBG);
+				labelField.setStyle("color", 0x9B9C9C);
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+				
+				var relatedObj:NumericStepper = NumericStepper(event.currentTarget);
+				
+				event.relatedObject = relatedObj;
+				
+				dispatchEvent(event);
+				/* if(secondNumericStepper.visible && doubleModeOn){
+					focusManager.setFocus(secondNumericStepper);
+				} */
+			}
+			
+			
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				
+				
+				if (id_numericStipper)
+				{
+					if (_stepSizesChanged && _stepSizes && _stepSizes.length)
+					{
+						_stepSizesChanged = false;
+						
+						id_numericStipper.stepSize = _stepSizes[0];
+						
+						/* if (_stepSizes.length > 1)
+							secondNumericStepper.stepSize = _stepSizes[1];
+							
+						else
+							secondNumericStepper.stepSize = _stepSizes[0]; */
+					}
+					
+					if (_valuesChanged && _values && _values.length)
+					{
+						_valuesChanged = false;
+						
+						id_numericStipper.value = _values[0];
+						
+						/* if (_values.length > 1)
+							secondNumericStepper.value = _values[1];
+							
+						else
+							secondNumericStepper.value = _values[0]; */
+					}
+					
+					if (_maxValuesChanged && _maxValues && _maxValues.length)
+					{
+						_maxValuesChanged = false;
+						
+						id_numericStipper.maximum = _maxValues[0];
+						
+					/* 	if (_maxValues.length > 1)
+							secondNumericStepper.maximum = _maxValues[1];
+						else
+							secondNumericStepper.maximum = _maxValues[0]; */
+					}
+				}
+				
+			}
+
+			private function parseFirstNumericStepperValue(value:String):Number
+			{
+				var val:Number = parseFloat(value);
+				
+				if (!_values)
+					_values = [];
+				
+				val = (isNaN(val))? 0 : val;
+				
+				_values[0] = val;
+				
+				return val;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="2" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	</s:layout>
+	
+	<s:Label id="labelField" text="{label}" width="100%" fontFamily="Calibri" fontSize="11" textAlign="center" color="#9B9C9C"/>
+	<s:NumericStepper id="id_numericStipper" width="100%" skinClass="com.gazuntite.controls.extended.skins.LabelNumericStepperSkin2"
+					  valueParseFunction="parseFirstNumericStepperValue"
+					  valueCommit="valueCommitHandler(event)" change="valueChangeHandler(event)" maximum="999"
+					  keyUp="stepperKeyUpHandler()" focusIn= "labelField_mouseDownHandler(event)" focusOut="labelField_mouseOutHandler(event)" 
+					  focusEnabled="true" focusRect="true" focusAlpha="1"  tabEnabled="true" tabChildren="true"/>
+	
+</s:SkinnableContainer>

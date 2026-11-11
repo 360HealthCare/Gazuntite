@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="15" height="15">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:Rect x="0" y="0" width="15" height="15">
+		<s:fill>
+			<s:SolidColor alpha="0.01" color="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	
+	<s:Rect x="0" y="1" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="5" y="1" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="10" y="1" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="0" y="6" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="5" y="6" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="10" y="6" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="0" y="11" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="5" y="11" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect x="10" y="11" width="3" height="3">
+		<s:fill>
+			<s:SolidColor color="#7A7A7A"
+						  color.down="#FFFFFF"
+						  color.over="#FFFFFF"/>
+		</s:fill>
+	</s:Rect>
+</s:Skin>

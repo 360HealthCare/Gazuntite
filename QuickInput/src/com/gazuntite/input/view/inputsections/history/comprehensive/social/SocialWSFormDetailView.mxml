@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:dictation="com.gazuntite.components.dictation.*" 
+		  xmlns:dictation1="com.gazuntite.dictation.view.dictation.*"
+		  gap="-2" xmlns:components="com.gazuntite.controls.extended.components.*" 
+		  creationComplete="vgroup1_creationCompleteHandler(event)" 
+		  xmlns:social="com.gazuntite.input.view.inputsections.history.comprehensive.social.*"
+		  >
+		  
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.social.PatientWorkStatusDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.NotesRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ToolTipEvent;
+			
+			public const TAB_STUDENT:String = "TAB_STUDENT";
+			public const TAB_EMPLOYED:String = "TAB_EMPLOYED";
+			public const TAB_UNEMPLOYED:String = "TAB_UNEMPLOYED";
+			
+			[Bindable]
+			public var WorkStatusDTO:PatientWorkStatusDTO;
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel() ;
+			
+			[Bindable]
+			public var Note:String = "";
+			
+			[Bindable]
+			public var tabSelected:String = TAB_STUDENT;
+			
+			public function expandNoteView():void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				dictationNoteViewModel.visible = true;
+			}
+			public function collapseNoteView():void
+			{
+				dictationNoteViewModel.inNoteMode = false;
+				dictationNoteViewModel.visible = false;
+			}
+			
+			[Bindable]
+			public var showDictaionNoteButttons:Boolean = true;
+			
+			protected function onDictationNoteButtonsClick2():void
+			{
+				dictationNoteViewModel.inNoteMode = true;
+				return;
+			}
+			protected function onDictationNoteButtonsClick():void
+			{
+				dictationNoteViewModel.inDictationMode = true;
+				return;
+				if (!id_btnDictation.selected && !id_btnNote.selected)
+				{
+					if (dictationNoteViewModel.inDictationMode)
+						dictationNoteViewModel.inDictationMode = false;
+					
+					if (dictationNoteViewModel.inNoteMode)
+						dictationNoteViewModel.inNoteMode = false;
+					dictationNoteViewModel.visible = false;
+				}
+			}
+			
+			protected function id_date_toolTipShowHandler(event:ToolTipEvent):void
+			{
+				id_date.toolTip = id_date.text.length || id_date.value  || id_date.selectedDate ? id_date.text : 'Date';
+			}
+			
+			protected function vgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				dictationNoteViewModel.inlineEditing = true;
+			}
+			
+			protected function id_partFullTime_changeHandler(event:Event):void
+			{
+				WorkStatusDTO.isWorkStatusEmployedFullTime = !id_partFullTime.selected;
+				
+			}
+			
+			protected function id_date_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+				if(id_date.selectedDate)
+					WorkStatusDTO.WorkStatusUnEmployedDate = UtilityFunctions.FormatDate(id_date.selectedDate,"MM/DD/YYYY");
+				else if(id_date.text.length)
+					WorkStatusDTO.WorkStatusUnEmployedDate = id_date.text;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup width="100%" >
+		<s:ToggleButton id="id_partFullTime" 
+						visible="{tabSelected == TAB_EMPLOYED}"
+						includeInLayout="{tabSelected == TAB_EMPLOYED}"
+						selected="{!WorkStatusDTO.isWorkStatusEmployedFullTime}"
+						change="id_partFullTime_changeHandler(event)"
+						skinClass="com.gazuntite.input.view.skins.FullTimePartTimButtonSkin"
+						toolTip="{id_partFullTime.selected ? 'Part Time' : 'Full time'}"/>	
+		<s:SkinnableContainer width="100%" 
+							  includeInLayout="{tabSelected == TAB_UNEMPLOYED}"
+							  skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" 
+							  click="id_date.open()">
+		<components:LabelDateField id="id_date" 
+								   visible="{tabSelected == TAB_UNEMPLOYED}"
+								   prompt="Date" width="100%" height="21" 
+								   yearNavigationEnabled="true"  maxYear="{new Date().getFullYear()}" minYear="1901"
+								   selectableRange="{{rangeEnd : new Date()}}" 
+								   IsEditAllow="false" editable="false" 
+								   toolTipStart="id_date_toolTipShowHandler(event)" 
+								   text="{WorkStatusDTO.WorkStatusUnEmployedDate}"
+								   change="id_date_changeHandler(event)"
+								   styleName="coverDateField"
+								   />
+		</s:SkinnableContainer>
+		<s:HGroup width="100%" horizontalAlign="right"  verticalAlign="bottom"  height="100%"   paddingRight="8">
+			<s:ToggleButton id="id_btnDictation"
+							visible="{showDictaionNoteButttons}"
+							click="onDictationNoteButtonsClick()"
+							selected="@{dictationNoteViewModel.inDictationMode}"
+							toolTip="Record Level Dictation" tabIndex="0"
+							skinClass="{WorkStatusDTO.DictationID &amp;&amp; WorkStatusDTO.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+							/>
+			
+			<s:ToggleButton id="id_btnNote" 
+							visible="{showDictaionNoteButttons}"
+							click="onDictationNoteButtonsClick2()"
+							selected="@{dictationNoteViewModel.inNoteMode}"
+							toolTip="Record Level Notes" tabIndex="1"
+							skinClass="{Note.length ?NotesRedButtonSkin :WriteNoteButtonSkin}"
+							/>
+			
+		</s:HGroup>
+	</s:HGroup>
+	<social:SocialMaritalDictationNoteView id="id_noteDictation" width="100%" minHeight="47" viewModel="{dictationNoteViewModel}" IsDictaionEditMode="true"
+										 noteTooltip="{Note}" note="@{Note}" ShowSaveButton="false" DictationID="@{WorkStatusDTO.DictationID}"
+										 />
+	
+</s:VGroup>
+

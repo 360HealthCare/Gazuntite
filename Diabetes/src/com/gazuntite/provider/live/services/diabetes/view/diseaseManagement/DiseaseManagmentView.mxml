@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:diseaseManagement="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.*"
+				   xmlns:components="com.gazuntite.controls.extended.components.*"
+				   xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*" 
+				   xmlns:diabetesGuideLine="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.diabetesGuideLine.*"
+				   creationComplete="cc(event)" 
+				   backgroundColor="0xFFFFFF" borderVisible="false"
+				   >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import spark.events.DropDownEvent;
+			
+			private var _ListDataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+			
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				
+			}
+			
+			protected function id_list_creationCompleteHandler(event:FlexEvent):void
+			{
+				ListDataProvider = new ArrayCollection();
+				
+				ListDataProvider.source = [
+					
+					{serialNumber:1, Guideline:'Guideline', Age:'15 yrs - 20yrs',  Gender:"Male", Type:"Diabetes Mellitus" , Status:'Married' }, 
+					{serialNumber:2, Guideline:'Guideline', Age:'25 yrs - 30yrs',  Gender:"Female", Type:"Diabetes Mellitus" , Status:'Widow' }, 
+					{serialNumber:3, Guideline:'Guideline', Age:'35 yrs - 45yrs',  Gender:"Female", Type:"Diabetes Mellitus" , Status:'Single' }, 
+					{serialNumber:4, Guideline:'Guideline', Age:'25 yrs - 30yrs',  Gender:"Female", Type:"Diabetes Mellitus" , Status:'Widow' }, 
+					{serialNumber:5, Guideline:'Guideline', Age:'25 yrs - 30yrs',  Gender:"Male", Type:"Diabetes Mellitus" , Status:'Single' }, 
+					{serialNumber:6, Guideline:'Guideline', Age:'20 yrs - 30yrs',  Gender:"Male", Type:"Diabetes Mellitus" , Status:'Married' }, 
+					{serialNumber:7, Guideline:'Guideline', Age:'25 yrs - 30yrs',  Gender:"Female", Type:"Diabetes Mellitus" , Status:'Single' }, 
+					{serialNumber:8, Guideline:'Guideline', Age:'31 yrs - 45yrs',  Gender:"Male", Type:"Diabetes Mellitus" , Status:'Widow' }, 
+					{serialNumber:9, Guideline:'Guideline', Age:'25 yrs - 30yrs',  Gender:"Female", Type:"Diabetes Mellitus" , Status:'Married' } 
+				];
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="25" skinClass="com.gazuntite.skins.controls.container.dmg.DMGSearchPatientBgSkin" >
+		<s:RichText x="8" verticalCenter="0" color="#000000" fontFamily="CalibriCFFBold" fontSize="16" tabStops="S0 S50 S100" text="GUIDELINE SETUP"/>
+		<s:Button useHandCursor="true" buttonMode="true" skinClass="com.gazuntite.skins.controls.button.FlipViewButtonSkin" toolTip="Flip" right="5" verticalCenter="0"/>
+	</s:SkinnableContainer>
+	
+	<s:Spacer height="4" />
+	
+	<s:VGroup width="100%" height="100%" gap="-4">
+		<s:Group width="100%" >
+			<s:ButtonBar dataProvider="{uiViewStack}" labelField="name" 
+						 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar"
+						 left="8" width="80%">
+				<s:layout>
+					<s:ButtonBarHorizontalLayout gap="2" />
+				</s:layout>
+			</s:ButtonBar>
+		</s:Group>
+		
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="2">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="right" paddingLeft="2" paddingRight="2"/>
+			</s:layout>
+			<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false">
+				<s:ArrayList>
+					<diabetesGuideLine:DiabetesGuideLine name="Diabetes GuideLine" width="100%" height="100%" />
+					<diseaseManagement:PediatricsGuidelineView name="Pediatrics Guideline" width="100%" height="100%" />
+					<diseaseManagement:CancerGuidelineView  name="Cancer Guideline" width="100%" height="100%" />
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+	</s:VGroup>
+	
+	<s:Spacer height="3" />
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:Label text="Arrange By:" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="15" />
+			<s:DropDownList id="DropdownDiseaseManagement"
+							skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+							selectedIndex="0"
+							open="onSortDropdownOpen(event)"
+							toolTip="Arrange By">
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="Recently Added" />
+						<fx:Object label="Exam Type" />
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:DropDownList>
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:SkinnableContainer width="100%" height="27"
+						  skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">
+			<s:Label width="5%" text="Sr.#" fontFamily="Calibri" fontWeight="bold"  fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="16%" text="Guideline" fontFamily="Calibri" fontWeight="bold" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="16%" text="Age" fontFamily="Calibri" fontWeight="bold"  fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="7%" text="Gender" fontFamily="Calibri" fontWeight="bold"  fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="16%" text="Type" fontFamily="Calibri" fontWeight="bold"  fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="15%" text="Marital Status" fontFamily="Calibri" fontWeight="bold"  fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+			<buttonSkins:buttonNavSeparator width="1%" height="100%"/>
+			<s:Label width="7%" text="Action" fontFamily="Calibri" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:List id="id_list"
+			width="100%" height="100%"
+			horizontalScrollPolicy="off" verticalScrollPolicy="auto"
+			creationComplete="id_list_creationCompleteHandler(event)"
+			dataProvider="{ListDataProvider}"
+			skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleFullScrollSkin"
+			itemRenderer="com.gazuntite.provider.live.services.diabetes.view.ItemRenderer.DiseaseManagementListIR"
+			/>
+	
+</s:BorderContainer>

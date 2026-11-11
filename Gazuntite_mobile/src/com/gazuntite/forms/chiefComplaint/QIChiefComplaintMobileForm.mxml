@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%"
+		 xmlns:ipeControls="qs.ipeControls.*" 
+		 xmlns:controls="com.gazuntite.components.controls.*"
+		 creationComplete="init(event)" 
+		 xmlns:forms="com.gazuntite.forms.*" 
+		 xmlns:chiefComplaint="com.gazuntite.forms.chiefComplaint.*">
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function addSaveRecord(event:SaveFormDataEvent):void
+			{
+				trace("bubbling saved record");
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout 
+			horizontalAlign="center"/>
+	</s:layout>
+	
+	<chiefComplaint:ChiefComplaintMobileFormBase id="imfb"
+											 width="100%"
+											 isEditForm="false"
+											 saveFormData="addSaveRecord(event)" 
+											 buttonLabel="Add Record" />
+	
+</s:Group>

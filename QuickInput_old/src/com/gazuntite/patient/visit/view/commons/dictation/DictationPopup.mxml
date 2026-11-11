@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   creationComplete="popupgroup1_creationCompleteHandler(event)" 
+					    width="100%" xmlns:components1="com.gazuntite.controls.extended.components.*" 
+					   >
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.LoggingUtil;
+			import com.gazuntite.common.util.upload.UploadPostHelper;
+			import com.gazuntite.common.util.xml.XmlUtils;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.XMLFileReaderWriter;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.noteflight.standingwave3.elements.AudioDescriptor;
+			import com.noteflight.standingwave3.formats.WaveFile;
+			import com.noteflight.standingwave3.performance.AudioPerformer;
+			import com.noteflight.standingwave3.performance.ListPerformance;
+			
+			import flash.filesystem.File;
+			import flash.filesystem.FileMode;
+			import flash.filesystem.FileStream;
+			
+			import fr.kikko.lab.ShineMP3Encoder;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			import mx.logging.Log;
+			import mx.logging.LogEventLevel;
+			import mx.logging.targets.TraceTarget;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.Base64Encoder;
+			import mx.utils.UIDUtil;
+			
+			import org.bytearray.micrecorder.MicRecorder;
+			import org.bytearray.micrecorder.encoder.WaveEncoder;
+			import org.bytearray.micrecorder.events.RecordingEvent;
+			
+			
+			private var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			// volume in the final WAV file will be downsampled to 50%
+			private var volume:Number = .9;
+			// we create the WAV encoder to be used by MicRecorder
+			private var wavEncoder:WaveEncoder = new WaveEncoder( volume );
+			
+			// we create the MicRecorder object which does the job
+			private var recorder:MicRecorder = new MicRecorder( wavEncoder );
+			
+			//private var SERVER_URL:String = "http://localhost:54001/Default.aspx";
+			private var mp3Encoder:ShineMP3Encoder;
+			
+			private var innerTimer:Timer = new Timer(10,0);
+			private var framesPerChunk:uint = 8192;
+			
+			private var myWavData:ByteArray = new ByteArray();
+			private var myWavFile:ByteArray = new ByteArray();
+			
+			private var file:File;	
+			
+			/*[Bindable]
+			private var newFileName:String ; */
+			
+			[Bindable]
+			private var newFilePath:String ;
+			
+			private var fileReferenceList:FileReferenceList;
+			
+			[Bindable]
+			private var soundBytes:ByteArray = new ByteArray();
+			
+			private var audio:SoundChannel = new SoundChannel();
+			
+			private var mySound:Sound;
+			
+			private var recordTimer:Timer;	
+			
+			private var playTimer:Timer;
+			
+			private var soundTimerCounter:int = 0;
+			
+			//M public var soundURL:URLRequest = new URLRequest("http://localhost:8089/test.mp3");
+			
+			private var m_sHeadingLable:String;
+			
+			private var m_sDictationID:String;
+			private var m_sModuleID:String;
+			
+			private var _isPopUpShown:Boolean;
+			
+			protected var SyncFile:XMLFileReaderWriter;
+			//private var m_fileNameToPlay:String;
+			
+			/* public function get FileNameToPlay():String
+			{
+				return m_sDictationID;
+			}
+			
+			public function set FileNameToPlay(value:String):void
+			{
+				m_sDictationID = value;
+			}	 */		
+			
+
+			public function get ModuleID():String
+			{
+				return m_sModuleID;
+			}
+			
+			public function set ModuleID(value:String):void
+			{
+				m_sModuleID = value;
+			}
+			
+			public function get DictationID():String
+			{
+				trace("get DictationID " + m_sDictationID);
+				
+				return m_sDictationID;
+			}
+			
+			public function set DictationID(value:String):void
+			{
+				trace("set DictationID " + value);
+				
+				m_sDictationID = value;
+			}
+			
+			[Bindable]
+			public function get HeadingLable():String
+			{
+				return m_sHeadingLable;
+			}
+			
+			public function set HeadingLable(value:String):void
+			{
+				m_sHeadingLable = value;
+			}
+			
+			public function get isPopUpShown():Boolean
+			{
+				return _isPopUpShown;
+			}
+			
+			public function set isPopUpShown(value:Boolean):void
+			{
+				_isPopUpShown = value;
+			}
+
+			override public function ShowPopup(parent:DisplayObject):void
+			{
+				super.ShowPopup(parent);
+				
+				_isPopUpShown = true;
+			}
+			
+			override public function removePopup():void
+			{
+				trace("REMOVE CALLED");
+				if( recStop_btn.enabled )
+				{
+					//UtilityFunctions.AskMessage( "Do you want to stop recording and close?", close );
+					recStop_btn.enabled = false;			
+				}
+				else
+				{
+					close();
+				}
+				
+			}
+			
+			private function close():void
+			{
+				super.removePopup();
+				
+				_isPopUpShown = false;
+				
+				//Tahir Alvi - 22 oct 2011
+				playStop_btn.dispatchEvent(new MouseEvent(MouseEvent.CLICK, true, false))
+			}
+			
+			public function hide():void
+			{
+				removePopup();
+			}
+			
+			private function init():void
+			{
+				//M temp
+				//m_sDictationID = "test";
+				
+				rec_btn.enabled = true;
+				recStop_btn.enabled = false;
+				
+				if(m_sDictationID != null && m_sDictationID != "" && m_sDictationID != Constants.GUID_FORMAT)
+				{
+					play_btn.enabled = true;
+					
+					//M TEMP TODO
+					rec_btn.enabled = false;
+				}
+				else
+				{
+					play_btn.enabled = false;
+				}
+				
+				playStop_btn.enabled = false;
+				
+				recorder.addEventListener(RecordingEvent.RECORDING, onRecording);
+				recorder.addEventListener(Event.COMPLETE, onRecordComplete);
+				
+				rec_btn.addEventListener(MouseEvent.CLICK, startRecord);
+				recStop_btn.addEventListener(MouseEvent.CLICK, doRecStop);
+				
+				play_btn.addEventListener(MouseEvent.CLICK, doPlay);				
+				playStop_btn.addEventListener(MouseEvent.CLICK, doPlayStop);
+				
+				playTimer = new Timer(1000);
+				playTimer.addEventListener(TimerEvent.TIMER, showSoundProgressBar);
+				
+				recordTimer = new Timer(1000);
+				recordTimer.addEventListener(TimerEvent.TIMER, showRecordProgressBar);
+				
+				micLevelBar.width = 0;				
+				soundProgressBar.width = 0;
+			}
+			
+			private function doUpload(e:Event):void
+			{
+				//saveToServer();
+			}
+			
+			private function startRecord(e:Event):void
+			{
+				soundTimerCounter = 0;
+				
+				recordTimer.start();				
+				recorder.record();
+				
+				rec_btn.enabled = false;
+				recStop_btn.enabled = true;				
+				play_btn.enabled = false;
+				playStop_btn.enabled = false;
+			}
+			
+			private function doRecStop(e:Event):void
+			{
+				soundTimerCounter = 0;
+				
+				recordTimer.stop();
+				recorder.stop();
+				
+				rec_btn.enabled = false;
+				recStop_btn.enabled = false;				
+				play_btn.enabled = true;
+				playStop_btn.enabled = false;
+			}
+			
+			private function showRecordProgressBar(event:TimerEvent):void 
+			{	
+				soundTimerCounter++;
+				
+				var recSecond:int =  soundTimerCounter % 60;
+				
+				var recMinute:int =  soundTimerCounter / 60;
+				
+				//var recHours:int =  soundTimerCounter / (60 * 60 * 60);
+				if( recMinute == 9 )
+				{
+					id_maxTimmerWarning.visible 		= true;
+					id_maxTimmerWarning.includeInLayout = true;
+					
+					if( recSecond == 59 )
+					{
+						doRecStop(event);
+						return;
+					}
+				}
+				
+				recordingTimer.text = recMinute + " : " + recSecond;
+				
+				var num:Number = recorder.microphone.activityLevel;
+				
+				micLevelBar.width = num * 1.28;
+				
+			}
+			
+			private function showSoundProgressBar(event:TimerEvent):void 
+			{	
+				soundTimerCounter++;
+				
+				var recSecond:int =  soundTimerCounter % 60;
+				
+				var recMinute:int =  soundTimerCounter / 60;
+				
+				var num:int  =  recSecond * 1000; //convert to milliseconds
+				
+				trace("num "+ num);
+				
+				trace("WIDTH " + soundProgressBar.width);
+				
+				trace("mySound.length "+ mySound.length);
+				
+				//trace("mySound.length "+ mySound.length);
+				
+				//trace("mySound.bytesLoaded "+ mySound.bytesLoaded);
+				
+				//trace("mySound.bytesTotal "+ mySound.bytesTotal);
+				
+				if(num >= mySound.length)
+				{
+					playTimer.stop();
+					
+					soundTimerCounter = 0;
+					
+					rec_btn.enabled = false;
+					recStop_btn.enabled = false;				
+					play_btn.enabled = true;
+					playStop_btn.enabled = false;
+					
+					soundProgressBar.width = 128;
+				}
+				else
+				{
+					recordingTimer.text = recMinute + " : " + recSecond;				
+					soundProgressBar.width = (num / mySound.length) * 100 * 1.28 ; //scale to width of process bar
+				}				
+			}
+			
+			private function doPlayStop(e:Event):void
+			{
+				if(	playTimer)
+				{
+					playTimer.stop();	
+				}
+				
+				audio.stop();
+				if(mySound)
+				{
+				mySound.removeEventListener(Event.COMPLETE, loaded);
+				}
+				mySound = null;
+				
+				soundTimerCounter = 0;
+				
+				rec_btn.enabled = false;
+				recStop_btn.enabled = false;				
+				play_btn.enabled = true;
+				playStop_btn.enabled = false;
+			}
+			
+				
+			
+			private function doPlay(event:Event):void
+			{	
+				try
+				{
+					trace("FILE TO PLAY " + m_sDictationID);
+					
+					soundTimerCounter = 0;
+					
+					var sessionID:String = model.LoggedInUserSessionID;				
+					
+					var urlRequest:URLRequest = new URLRequest();
+					var temp:File = File.applicationStorageDirectory.resolvePath(Constants.DICTATION_FOLDER_NAME+"/"+m_sDictationID+".mp3");
+					
+					if(temp!=null && temp.exists)
+					{
+						urlRequest.url = temp.nativePath;
+					}
+					else
+					{
+						urlRequest.url = Constants.DICTATION_SERVER_URL + "GetDictationFile/"+m_sDictationID+"/"+sessionID;
+						
+						urlRequest.method = URLRequestMethod.GET;
+					}
+					
+					mySound = new Sound();
+					mySound.load(urlRequest);
+					mySound.addEventListener(Event.COMPLETE, loaded);
+				}
+				catch(err:Error)
+				{
+					trace(err.errorID, err.name, err.message, "\n", err.getStackTrace() );
+				}
+			}
+			
+			private function loaded(event:Event):void
+			{
+				mySound.addEventListener(SampleDataEvent.SAMPLE_DATA, processSound);
+				audio = mySound.play();
+				
+				playTimer.start();
+				
+				rec_btn.enabled = false;
+				recStop_btn.enabled = false;				
+				play_btn.enabled = false;
+				playStop_btn.enabled = true;
+			}
+			
+			private function processSound(event:SampleDataEvent):void
+			{
+				var bytes:ByteArray = new ByteArray();
+				mySound.extract(bytes, 4096);
+				event.data.writeBytes(upOctave(bytes));
+			}
+			
+			private function upOctave(bytes:ByteArray):ByteArray
+			{
+				var returnBytes:ByteArray = new ByteArray();
+				bytes.position = 0;
+				while(bytes.bytesAvailable > 0)
+				{
+					returnBytes.writeFloat(bytes.readFloat());
+					returnBytes.writeFloat(bytes.readFloat());
+					if (bytes.bytesAvailable > 0)
+					{
+						bytes.position += 8;
+					}
+					
+					//myProgressBar.width = (bytes.position/bytes.length) * 100 * 2.5;					
+					trace("WIDTH = " + (bytes.position/bytes.length));
+				}
+				return returnBytes;
+			}
+			
+			
+			private function onRecording(event:RecordingEvent):void
+			{
+				//trace ( event.time );
+			}
+			
+			private function onRecordComplete(event:Event):void
+			{
+				m_sDictationID = UIDUtil.createUID();
+				
+				//newFileName = DictationID;
+				
+				var src = WaveFile.createSample(recorder.output) // this is fine
+				
+				// I think im not clearing out the old audio properly here somehow...
+				var sequence:ListPerformance = new ListPerformance();
+				sequence.addSourceAt(0, src);
+				var ap:AudioPerformer = new AudioPerformer(sequence, new AudioDescriptor());
+				
+				model.dictationUploadInProcessCount++;
+				trace("DICTATION COUNT -- " + model.dictationUploadInProcessCount);
+				
+				renderWav(ap, true);
+			}
+			
+			private function playbackSampleHandler(event:SampleDataEvent):void
+			{
+				soundBytes.position = 0;
+				
+				for (var i:int = 0; i < 8192 && soundBytes.bytesAvailable > 0; i++)
+				{
+					var sample:Number = soundBytes.readFloat();
+					event.data.writeFloat(sample);
+					event.data.writeFloat(sample);
+				}
+			}
+			
+			private function renderWav(src:AudioPerformer, convertToMp3:Boolean = false):void
+			{	
+				innerTimer.addEventListener(TimerEvent.TIMER, handleRenderTimer)
+				innerTimer.start();
+				
+				function handleRenderTimer(e:TimerEvent):void
+				{
+					src.getSample(framesPerChunk).writeWavBytes(myWavData);
+					
+					var m:Number = Math.min(src.frameCount, src.position + framesPerChunk);
+					var n:Number = Math.max(0, m - src.position);
+					
+					//M myProgressBar.width = n;
+					
+					if (n == 0)
+					{	
+						if (src.position > 0)
+							finishRender()
+						else
+							trace("cancel rendering")
+					} 
+					else
+					{
+						//statustxt.text = "rendering audio: "+ Math.floor(src.position * 100 / src.frameCount) + "%";
+					}
+				}
+				
+				function finishRender():void
+				{
+					innerTimer.stop()
+					
+					WaveFile.writeBytesToWavFile(myWavFile, myWavData, 44100, 2, 16)
+					
+					if (!convertToMp3)
+					{
+						//wavbtn.enabled = true;
+					} 
+					else 
+					{
+						makeIntoMp3()
+					}
+				}
+			}
+			
+			private function makeIntoMp3():void
+			{	
+				myWavFile.position = 0;
+				mp3Encoder = new ShineMP3Encoder(myWavFile);
+				mp3Encoder.addEventListener(Event.COMPLETE, mp3EncodeComplete);
+				//mp3Encoder.addEventListener(ProgressEvent.PROGRESS, mp3EncodeProgress);
+				//mp3Encoder.addEventListener(ErrorEvent.ERROR, mp3EncodeError);
+				mp3Encoder.start();
+			}
+			
+			private function mp3EncodeComplete(e: Event) : void 
+			{
+				// WRITE ID3 TAGS
+				var sba:ByteArray = mp3Encoder.mp3Data;
+				sba.position =  sba.length - 128
+				sba.writeMultiByte("TAG", "iso-8859-1");
+				sba.writeMultiByte("Gazuntite Dictation " + String.fromCharCode(0), "iso-8859-1");	// Title
+				sba.writeMultiByte("Gazuntite " + String.fromCharCode(0), "iso-8859-1");	// Artist			
+				sba.writeMultiByte("Dictation "+String.fromCharCode(0), "iso-8859-1");	// Album		
+				sba.writeMultiByte("2010 " + String.fromCharCode(0), "iso-8859-1");		// Year
+				sba.writeMultiByte("www.quivus.com " + String.fromCharCode(0), "iso-8859-1");// comments
+				sba.writeByte(57);																		
+				
+				saveFile(sba);			
+			}
+			
+			private function saveFile(sba:ByteArray):void
+			{
+				trace("SAVING DICTATION FILE ......");
+				
+				var fileName:String = m_sDictationID;
+				
+				//var filePath:String = File.applicationStorageDirectory.resolvePath(Constants.DICTATION_FOLDER_NAME+"/"+fileName+".wav");
+				file = File.applicationStorageDirectory.resolvePath(Constants.DICTATION_FOLDER_NAME+"/"+fileName+".mp3");
+				var filePath:String =file.nativePath;
+				//newFileName = fileName;
+				newFilePath = filePath;
+				
+				//FileNameToPlay = newFileName;
+				
+				file = File.applicationStorageDirectory.resolvePath(Constants.DICTATION_FOLDER_NAME+"/"+fileName+".mp3");
+				
+				var stream:FileStream = new FileStream();
+				stream.open(file, FileMode.WRITE);
+				
+				stream.writeBytes(sba, 0, sba.length);
+				stream.close(); 
+				
+				trace("SAVED DICTATION FILE NAME::"+ m_sDictationID);
+				
+				saveToServer(sba);
+			}
+			
+			private function saveToServer(sba:ByteArray):void
+			{
+				trace("SAVING DICTATION FILE TO SERVER ......");
+				var date:Date = new Date();
+				var recordTimeStamp:String;
+				
+				var dat:int = date.getDate();
+				var mon:int = (date.getMonth()+1);
+				var yr:int  = date.getFullYear();
+				
+				if(dat<10)
+					recordTimeStamp 	= "0"+ dat;
+				else
+					recordTimeStamp 	= dat.toString();
+				
+				if(mon<10)
+					recordTimeStamp		= recordTimeStamp + "0"+ mon;
+				else
+					recordTimeStamp		= recordTimeStamp + mon.toString();
+				
+				recordTimeStamp = recordTimeStamp + yr;
+				//var recordTimeStamp:String 	= date.getDate()+""+(date.getMonth()+1)+""+date.getFullYear();//new Date().toString();
+				var sessionID:String		= model.LoggedInUserSessionID;
+				var createdAt:String 		= recordTimeStamp;//date.getDate()+""+(date.getMonth()+1)+""+date.getFullYear();//new Date().toString();
+				var createdBy:int 			= model.LoggedInUserId;
+				
+				/* var urlRequest:URLRequest 	= new URLRequest();
+				urlRequest.url 				= Constants.DICTATION_SERVER_URL + "UploadDictationFile/"+newFileName+"/"+recordTimeStamp+"/"+sessionID+"/"+createdAt+"/"+createdBy;
+				urlRequest.method 			= URLRequestMethod.POST;
+			
+				
+				file = File.applicationStorageDirectory.resolvePath(Constants.DICTATION_FOLDER_NAME+"/"+newFileName+".wav");
+				
+				
+				
+				try {
+										
+					file.upload(urlRequest);
+				} catch (err:*) {
+					Alert.show(err.getStackTrace())	;
+				} */
+				var uploadPath:String = Constants.DICTATION_SERVER_URL + "UploadDictationFile/"+m_sDictationID+"/"+recordTimeStamp+"/"+sessionID+"/"+createdAt+"/"+createdBy;			
+				
+				
+				
+				var urlRequest:URLRequest = new URLRequest();
+				urlRequest.url = uploadPath;
+				//urlRequest.contentType = 'multipart/form-data; boundary=' + UploadPostHelper.getBoundary();
+				urlRequest.method = URLRequestMethod.POST;
+				urlRequest.contentType = "application/octet-stream";
+				urlRequest.data = UploadPostHelper.getPostData(m_sDictationID, sba);
+				urlRequest.requestHeaders.push( new URLRequestHeader( 'Cache-Control', 'no-cache' ) );
+				urlRequest.requestHeaders.push( new URLRequestHeader( 'AllowWriteStreamBuffering', 'false' ) );
+				urlRequest.requestHeaders.push( new URLRequestHeader( 'SendChunked', 'true' ) );
+				
+				var urlLoader:URLLoader = new URLLoader();
+				urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+				
+				urlLoader.addEventListener(Event.COMPLETE, onUploadingComplete);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onUploadingError);
+				urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadingError);
+				
+				urlLoader.load(urlRequest);
+ 
+				model.dictationUploadInProcessCount--;
+				
+				trace("DICTATION COUNT -- " + model.dictationUploadInProcessCount);
+				
+				trace("FILE SENT TO SERVER ......");
+				if( Log.isDebug() )
+					logger.debug( "saveToServer--> FILE SENT TO SERVER @ " + urlRequest.url );
+				
+				writeSyncInfo( file.name, file.nativePath, m_sDictationID, recordTimeStamp, sessionID, createdAt, createdBy );
+			}
+			
+			protected function onUploadingComplete(event:Event):void
+			{
+				//file uploaded sucessfull/completed no need to keep sync info
+				removeSyncInfo( file.name );
+			}
+			
+			protected function onUploadingError(event:IOErrorEvent):void
+			{
+				logger.error( "dictation file upload failed. " + file.nativePath +"<br> Error Report : <br>" + event.toString() );
+				model.dictationUploadInProcessCount--;
+				//Error while uploading				
+				//Alert.show(event.toString());
+			}
+			
+			protected function popupgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				SyncFile = new XMLFileReaderWriter("appSync/dictation.xml");
+				SyncFile.read();
+				if( null == SyncFile.content )
+				{
+					SyncFile.content = new XML(  "<dictations/>" );
+					SyncFile.write();
+				}
+				
+				init();
+			}
+			
+			public function resultFunction(res:ResultEvent):void
+			{
+				Alert.show("result \n"+res.toString());
+			}
+			
+			public function faultFunction(res:FaultEvent):void
+			{
+				Alert.show("fault \n"+res.toString());
+			}
+			
+			
+			private function writeSyncInfo(fileName:String, nativePath:String, dictationID:String, recordTimeStamp:String, sessionID:String, createdAt:String, createdBy:int ):void
+			{
+				var xdictation:XML 				= XmlUtils.getNodeByTagName( "dictation" );
+				xdictation.@['name'] 			= fileName;
+				xdictation.@['nativePath'] 		= nativePath;
+				xdictation.@['ID'] 				= dictationID;
+				xdictation.@['recordTimeStamp'] = recordTimeStamp;
+				xdictation.@['sessionID'] 		= sessionID;
+				xdictation.@['createdAt'] 		= createdAt;
+				xdictation.@['createdBy'] 		= createdBy;
+				
+				SyncFile.append( xdictation);
+				SyncFile.write();
+			}
+			
+			private function removeSyncInfo(fileName:String):void
+			{
+				delete SyncFile.content.dictation.( @['name'] == fileName )[0];
+				SyncFile.write();
+			}
+			
+			
+		
+		]]>
+	</fx:Script>
+	
+	
+	<s:SkinnableContainer width="250" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.DictationPopupSkin" >
+		<s:layout>
+			<s:VerticalLayout gap="5" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="10" />
+			
+		</s:layout>
+		<s:HGroup width="100%" horizontalAlign="right" paddingRight="8" paddingTop="2">
+			<s:Button id="id_closeBtn" click="removePopup()" width="19" height="21" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.QICrossButtonSkin" 
+					  toolTip="Close" useHandCursor="true" buttonMode="true"/>
+		</s:HGroup>			
+		
+		<s:HGroup width="100%" paddingLeft="5" verticalAlign="top" paddingTop="10">
+			<s:HGroup  gap="1"> 
+				
+				<s:Button id="rec_btn" toolTip="Record" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.DictationRecordBtn"/>
+				<s:Button id="recStop_btn" enabled="false" toolTip="Stop" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.DictationStopBtn"/>
+				<s:Button id="play_btn" toolTip="Play" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.DictationPlayBtn"/>
+				<s:Button id="playStop_btn" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.DictationPauseBtn"/>
+			</s:HGroup>
+			
+			
+			<s:VGroup verticalAlign="middle" horizontalAlign="left" width="100%" paddingLeft="5">
+				
+				<s:Group width="100%">
+					
+					<s:Rect alpha="0.8" height="16" id = "myProgressBarFrame" radiusX="3" minWidth="50" width="130">
+						<s:fill>
+							<s:LinearGradient rotation="270">
+								<s:GradientEntry alpha="1.0" color="#444444" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#292929" ratio="0.5411764705882353"/>
+								<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.5450980392156862"/>
+								<s:GradientEntry alpha="1.0" color="#565656" ratio="1"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:filters>
+							<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+							<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#CCCCCC" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+						</s:filters>
+					</s:Rect>	
+					
+					
+					<s:Rect height="12" id="soundProgressBar" radiusX="2" width="{myProgressBarFrame.width - 5}" x="2" y="2" maxWidth="130">
+						<s:fill>
+							<s:LinearGradient rotation="270" id="myProgressBarFill">
+								<s:GradientEntry alpha="1.0" color="#C4FFFF" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#3B8C96" ratio="0.5333333333333333"/>
+								<s:GradientEntry alpha="1.0" color="#6FC9FF" ratio="0.5450980392156862"/>
+								<s:GradientEntry alpha="1.0" color="#C4FFFF" ratio="1"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:filters>
+							<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="0" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+						</s:filters>
+					</s:Rect>
+					<s:Rect height="12" id="micLevelBar" radiusX="2" width="{myProgressBarFrame.width - 5}" x="2" y="2" maxWidth="130">
+						<s:fill>
+							<s:LinearGradient rotation="270" id="myProgressBarFill1">
+								<s:GradientEntry alpha="1.0" color="#C4FFFF" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#3B8C96" ratio="0.5333333333333333"/>
+								<s:GradientEntry alpha="1.0" color="#6FC9FF" ratio="0.5450980392156862"/>
+								<s:GradientEntry alpha="1.0" color="#C4FFFF" ratio="1"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:filters>
+							<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="0x000000" distance="0" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+						</s:filters>
+					</s:Rect>
+					<!--<s:Rect x="2" y="2" width="175" height="5" id = "micLevelBar">
+					<s:fill>
+					<s:SolidColor color="0x666666" id="myProgressBarFill1"/>
+					</s:fill>
+					</s:Rect>-->
+				</s:Group>
+				<s:HGroup width="100%">
+					
+					<s:HGroup horizontalAlign="left" verticalAlign="middle">
+						<s:Label color="#595959" fontFamily="Calibri" text="00:00" textAlign="center" id="recordingTimer" fontSize="11"/>
+					</s:HGroup>
+					<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle">
+						<s:Label color="#595959" fontFamily="Calibri" text="10 Mins Max" fontSize="11"/>
+						<s:Label id="id_maxTimmerWarning" color="#595959" fontFamily="Calibri" text="( less than a minute left )" visible="false" includeInLayout="false" fontSize="11"/>
+					</s:HGroup>
+				</s:HGroup>
+			</s:VGroup>	
+			
+			
+			
+		</s:HGroup>	
+		
+		
+	</s:SkinnableContainer>
+
+</components1:PopupGroup>

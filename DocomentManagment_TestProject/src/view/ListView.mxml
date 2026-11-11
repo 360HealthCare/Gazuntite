@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import modelDto.ListViewObjectsDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.collections.Sort;
+			import spark.collections.SortField;
+			
+			public var dataProvider:ArrayCollection;
+			public var ListdataProvider:ArrayCollection = new ArrayCollection();
+			
+			public var mappingCollection:ArrayCollection = new ArrayCollection();
+			
+			public var GroupedCollection:ArrayCollection = new ArrayCollection();
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			public function GroupNumber(GroupName:String):int
+			{
+				
+				// item index will be the Group id .
+				var index:int = mappingCollection.getItemIndex(GroupName);
+				
+				if(index == -1)
+				{
+					mappingCollection.addItem(GroupName);
+					index = mappingCollection.getItemIndex(GroupName);
+				}
+				
+				return index;
+			}
+			protected function id_byCommonprob_clickHandler(event:MouseEvent):void
+			{
+				// commonProp is the Heading name
+				
+				if(null != dataProvider)
+				{
+					mappingCollection = new ArrayCollection();
+					
+					for each (var x:Object in dataProvider)
+					{
+						var groupid:int = GroupNumber(x.commonProp);
+						x.groupID = groupid;
+						
+						GroupedCollection.addItem(x);
+					}
+					
+					//sort GroupedCollection on base of groupID
+					GroupedCollection = sort(GroupedCollection,'groupID',true);
+					
+					var GroupHeading:String = '';
+					var Dto:ListViewObjectsDTO;
+					
+					for each (var obj:Object in GroupedCollection)
+					{	
+						if(obj.commonProp != GroupHeading) // new group arrived.
+						{
+							if(Dto != null)
+								ListdataProvider.addItem(Dto);
+							
+							Dto = new ListViewObjectsDTO();
+							GroupHeading =  obj.commonProp ;
+							Dto.Heading = GroupHeading;
+							Dto.DTOCollection.addItem(obj);
+						}
+						else								// old data is here.
+						{
+							Dto.DTOCollection.addItem(obj);
+						}
+						
+					}
+					ListdataProvider.addItem(Dto);
+				}
+				
+			}
+			
+			public static function sort(arrayCollection:ArrayCollection, sortBy:String, numericSort:Boolean):ArrayCollection { 
+				var dataSortField:SortField        = new SortField(); 
+				dataSortField.name                = sortBy; 
+				dataSortField.numeric            = numericSort; 
+				
+				var dataSort:Sort    = new Sort(); 
+				dataSort.fields        = [dataSortField]; 
+				
+				/* Set the ArrayCollection object's sort property to our 
+				custom sort, and refresh the ArrayCollection. */ 
+				
+				dataSortField.descending = true
+				arrayCollection.sort = dataSort; 
+				arrayCollection.refresh(); 
+				
+				/* Return the collection */ 
+				return arrayCollection; 
+			} 
+			
+			protected function id_byCommonprob2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout >
+		<s:VerticalLayout />
+	</s:layout>
+	
+	<s:HGroup width="100%" >
+		<s:Button id="id_byCommonprob" label="CommonPROB" click="id_byCommonprob_clickHandler(event)"/>
+		<s:Button id="id_byCommonprob2" label="CommonPROB2" click="id_byCommonprob2_clickHandler(event)"/>
+	</s:HGroup>
+	
+	<s:List id="id_DocomentDetailList" width="100%" height="100%"
+			itemRenderer="itemrenender.GroupingIR"
+			dataProvider="{ListdataProvider}"
+			/>
+</s:Group>

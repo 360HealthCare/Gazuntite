@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin name="CustomButtonBarButtonSkin"
+			 xmlns:fx="http://ns.adobe.com/mxml/2009"
+			 xmlns:s="library://ns.adobe.com/flex/spark"
+			 width="40" height="30"
+			 alpha.disabledStates="0.5"
+			 creationComplete="sparkskin1_creationCompleteHandler(event)"
+			 >
+	<!-- states -->
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" stateGroups="overStates" />
+		<s:State name="down" stateGroups="downStates" />
+		<s:State name="disabled" stateGroups="disabledStates" />
+		<s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+		<s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+		<s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+		<s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+	</s:states>
+	
+	<!-- host component -->
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("spark.components.ButtonBarButton")]
+		]]>
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import spark.components.ButtonBar;
+			import spark.components.ButtonBarButton;
+			
+			
+			[Embed(source="assets/images/email1.png")]
+			private var emailCalss:Class;
+			
+			[Embed(source="assets/images/sms1.png")]
+			private var smsCalss:Class;
+			
+			[Embed(source="assets/images/recentpatientseen.png")]
+			private var recentpatientseenCalss:Class;
+			
+			[Embed(source="assets/images/video1.png")]
+			private var videoCalss:Class;
+			
+			[Embed(source="assets/images/dictationImg.png")]
+			private var dictationClass:Class;
+			
+			[Embed(source="assets/images/notesImg.png")]
+			private var notesClass:Class;
+			
+			[Embed(source="assets/images/SummaryView.png")]
+			private var summaryClass:Class;
+			
+			[Embed(source="assets/images/EncounterList.png")]
+			private var encounterClass:Class;
+			
+			[Embed(source="assets/images/Document_History.png")]
+			private var documentClass:Class;
+			
+			protected function gr_creationComplete(evt:FlexEvent):void 
+			{
+				/* var dataObj:Object = hostComponent.data;
+				img.source = dataObj.icon;
+				hostComponent.toolTip = dataObj.label;
+				if(!dataObj.enabled)
+					this.removeEventListener(MouseEvent.CLICK, onRemoveClick); */
+			}
+			
+			private function onRemoveClick(event:MouseEvent):void
+			{
+				// do nothing
+			}
+			/* Define the skin elements that should not be colorized. 
+			For toggle button, the graphics are colorized but the label is not. */
+			static private const exclusions:Array = [];
+			
+			override public function get colorizeExclusions():Array {return exclusions;}
+			
+			protected function sparkskin1_creationCompleteHandler(event:FlexEvent):void
+			{
+				switch(hostComponent.label)
+				{
+					case "Email":
+						img.source 				= emailCalss;
+						break;
+					case "SMS":
+						img.source 				= smsCalss;
+						break;
+					case "Video":
+						img.source 				= videoCalss;
+						break;
+					case "Recent Patient":
+						img.source 				= recentpatientseenCalss;
+						break;
+					case "Dictation":
+						img.source 				= dictationClass;
+						break;
+					case "Notes":
+						img.source 				= notesClass;
+						break;
+					case "Summary":
+						img.source 				= summaryClass;
+						break;
+					case "Encounter":
+						img.source 				= encounterClass;
+						break;
+					case "Document":
+						img.source 				= documentClass;
+						break;
+				}
+				
+				hostComponent.toolTip 	= hostComponent.label;
+				enabled = hostComponent.enabled;
+				/* labelDisplay.toolTip  	= hostComponent.label ;
+				labelDisplay.text  		= hostComponent.label */
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Rect horizontalCenter="0" y="0" width="30" height="30" radiusX="5"
+			visible.down="false"
+			visible.downAndSelected="false"
+			visible.over="false"
+			visible.overAndSelected="false"
+			visible.upAndSelected="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:Rect includeIn="disabledAndSelected,down,downAndSelected,over,overAndSelected,up,upAndSelected"
+			horizontalCenter="0" y="0" width="30" height="30" radiusX="5"
+			visible.disabledAndSelected="false"
+			visible.up="false">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#511607" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#D58674" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Rect>
+	
+	<s:BitmapImage horizontalCenter="0" y="0" smooth="true"
+				   source="@Embed('/assets/images/smallbutton_transparentbg.png')"
+				   visible.down="false"
+				   visible.downAndSelected="false"
+				   alpha.overAndSelected="0.75">
+	</s:BitmapImage>
+		
+	<!-- layer 8: icon -->
+	<s:Graphic id="gr"
+			   creationComplete="gr_creationComplete(event);"
+			   horizontalCenter="0" verticalCenter="0">
+		<s:BitmapImage id="img" />
+	</s:Graphic>
+	
+	<s:Path includeIn="upAndSelected,disabledAndSelected,downAndSelected,overAndSelected" width="15"
+			height="8" data="M 22.59 19.57 L 0.01 19.57 11.30 0.01 Z "
+			y="26" horizontalCenter="0">
+		<s:fill>
+			<s:SolidColor color="#656565"/>
+		</s:fill>
+	</s:Path>
+	
+</s:SparkSkin>

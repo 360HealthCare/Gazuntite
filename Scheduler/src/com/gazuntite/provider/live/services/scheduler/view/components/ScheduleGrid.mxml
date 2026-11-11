@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" 
+		  initialize="init()" gap="0" xmlns:components="com.gazuntite.controls.extended.components.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.dto.AppointmentDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.ManageAppointmentEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.event.ActionEvent;
+			import com.gazuntite.provider.live.services.scheduler.view.event.RefreshScheduleAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.view.util.SchedularUtils;
+			
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			//********** VARS & CONST **************************************
+			[Bindable] 
+			public var arrAppointments:ArrayCollection;
+			private var m_sdayInfo:String;
+			private var isOpend:Boolean = false;
+			private var roomInPopup:RoomInPopup;
+			private var scUtils:SchedularUtils;
+			private var date:Date;
+			
+			//*********** initlize method ********************
+			protected function init():void
+			{
+				arrAppointments = new ArrayCollection();
+				addEventListener('OpenRoomInViewEvent', OpenRoomInView);
+				scUtils = new SchedularUtils();
+				date 	= new Date();
+			}
+			//******** set visibile of grids if any appoint found on that day ****************
+			public function setVisibiltyGrid_handler():void
+			{
+				if(arrAppointments.length <= 0)
+				{
+					dgAppointments.visible = false;
+					dgAppointments.includeInLayout = false;
+				}
+				else
+				{
+					dgAppointments.visible = true;
+					dgAppointments.includeInLayout = true;
+				}
+			}
+			//********* label Function for Appointment Date ****************
+			public function getAppoinmentDate(item:Object,column:DataGridColumn):String
+			{
+				return item.StartTime +' '+ item.EndTime
+			}
+			//********* label Function for Appointment Status **********************
+			public function getAppoinmentStatus(item:Object, column:DataGridColumn):String
+			{
+				var str:String;
+				if(item.Room.Title.length > 0)
+				{
+					if(item.Action.Name == 'BeingSeen')
+					{
+						str = item.Action.Name +' ('+ item.Room.Title+')';
+					}
+					else
+					{
+						str = item.Action.Name;
+					}
+				}
+				else
+				{
+					//TA - Comment as per req...........
+					/* 
+					if(item.Action.Name == 'Confirmed')
+					{
+					str = item.StatusName 
+					}
+					else
+					{
+					str = item.Action.Name; 
+					} 
+					*/
+					str = item.Action.Name; 
+				}
+				return str;
+			}
+			//*********** Collap and expand handler of grid header ********************************
+			protected function collaps_clickHandler():void
+			{
+				if(arrAppointments.length > 0)
+				{
+					if(!isOpend)
+					{
+						dgAppointments.visible = true;
+						dgAppointments.includeInLayout = true;
+						bg_header.toolTip = 'Click to Collap';
+						isOpend = true;
+					}
+					else
+					{
+						dgAppointments.visible = false;
+						dgAppointments.includeInLayout = false;
+						bg_header.toolTip = 'Click to Expand';
+						isOpend = false;
+					}
+				}
+			}
+			
+			// ********************** GETTER & SETTERRS *******************************************
+			public function get dayInfo():String
+			{
+				return m_sdayInfo;
+			}
+			
+			public function set dayInfo(value:String):void
+			{
+				lblDay.text = value;
+				m_sdayInfo = value;
+			}
+			//****************** open Rom popup ********************
+			private function OpenRoomInView(event:Event):void
+			{
+				roomInPopup = PopUpManager.createPopUp(this, RoomInPopup,true) as RoomInPopup;
+				PopUpManager.centerPopUp(roomInPopup);
+				roomInPopup.addEventListener('hideRoomInPopupEvent', onRemoveRoomInPopup);
+			}
+			private function onRemoveRoomInPopup(event:Event):void
+			{
+				roomInPopup.removeEventListener('hideRoomInPopupEvent', onRemoveRoomInPopup);
+				PopUpManager.removePopUp(roomInPopup);
+				
+				onAssignRoomIn(); // assign room in to the grid record
+			}
+			private function onAssignRoomIn():void
+			{
+				var appointmentDTO:AppointmentDTO 					= new AppointmentDTO();
+				var obj:Object										= new Object();
+				obj 												= scUtils.getNextAction(model.SelectedAppointmentDTO.Action.Name);
+				model.SelectedAppointmentDTO.ModifiedAt 			= dateFormatter.format(date.toDateString())+'T'+time.format(date);
+				model.SelectedAppointmentDTO.ModifiedBy 			= model.loggedInUserProviderId.toString();
+				model.SelectedAppointmentDTO.Action.ID				= obj.ID;
+				model.SelectedAppointmentDTO.Action.Name			= obj.Name;
+				model.SelectedAppointmentDTO.Action.NextAction		= obj.NextAction;
+				model.SelectedAppointmentDTO.Room.ID 			    = model.SelectedRoomDTO.ID;
+				model.SelectedAppointmentDTO.Room.Station 		    = model.SelectedRoomDTO.Station;
+				model.SelectedAppointmentDTO.Room.Title 			= model.SelectedRoomDTO.Title;
+				
+				var appointmentXML:XML = appointmentDTO.ToXML(model.SelectedAppointmentDTO);
+				manageAppointment(appointmentXML, int(model.SelectedAppointmentDTO.UserID));
+			}
+			//************ manage appointment*****************************
+			private function manageAppointment(appXML:XML, userID:int):void
+			{
+				var MAPPEvent:ManageAppointmentEvent = new ManageAppointmentEvent(appXML, model.loggedInUserProviderId, userID , refreshAppointments );
+				CairngormEventDispatcher.getInstance().dispatchEvent(MAPPEvent);
+				CursorManager.setBusyCursor();
+			}
+			// Refresh appointment schedule
+			private function refreshAppointments(val:* = null):void
+			{
+				dispatchEvent(new RefreshScheduleAppointmentsEvent('refreshScheduleAppointments'));
+			} 
+				
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="EEEE, MMMM DD, YYYY" />
+		<mx:DateFormatter id="dfTime" formatString="H:NN:SS A" />
+		<mx:DateFormatter id="dateFormatter" formatString="YYYY-MM-DD"/>
+		<mx:DateFormatter id="time" formatString="HH:MM:SS"/>
+	</fx:Declarations>
+	
+	<s:BorderContainer id="bg_header"
+					   width="100%" height="25"  styleName="whitishGreyHeaderBGContainerSkin" 
+					   click="collaps_clickHandler()" useHandCursor="true" buttonMode="true">
+		<s:Label id="lblDay"
+				 left="5" verticalCenter="0" verticalAlign="middle" textAlign="left" fontFamily="Calibri" fontSize="12" color="#5D2409"/>
+		<s:Label right="50" verticalCenter="0" text="Total Appointments: "/>
+		<s:Label id="lblTotal" 
+				 text="{arrAppointments.length}" right="5" verticalCenter="0"  width="40" verticalAlign="middle" 
+				 textAlign="left" fontFamily="Calibri" fontSize="14" fontWeight="bold" color="#9E1818"/>
+	</s:BorderContainer>
+	
+	<components:LabelDataGrid id="dgAppointments" 
+							  width="100%"  dataProvider="{arrAppointments}" 
+							  rowCount="{dgAppointments.dataProvider.length +1}" 
+							  verticalScrollBarStyleName="VScrollBar"
+							  visible="{arrAppointments.length >0 ? true:false}" 
+							  includeInLayout="{arrAppointments.length >0 ? true:false}"
+							  columnWidths="{['20%','20%','15%','20%','10%','15%']}" > 
+		<components:columns>
+			<mx:DataGridColumn headerText="Patient Name" dataField="Patient.PatientName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Provider"     dataField="ProviderName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Time"         labelFunction="getAppoinmentDate" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Location"     dataField="StationName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Status"       labelFunction="getAppoinmentStatus" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Action"       dataField="NextAction" headerRenderer="mx.controls.Label" wordWrap="true"
+							   itemRenderer="com.gazuntite.provider.live.services.scheduler.view.itemrenderer.ActionButtonRenderer" />
+		</components:columns>
+	</components:LabelDataGrid>
+	
+</s:VGroup>

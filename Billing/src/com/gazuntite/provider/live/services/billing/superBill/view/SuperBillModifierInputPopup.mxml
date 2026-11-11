@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   creationComplete="cc(event)"
+					   mouseDownOutside="onMouseDownOutside(event)"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.FlexMouseEvent;
+						
+			private var _selectedItem:Object;
+			
+			[Bindable]
+			public function get selectedItem():Object
+			{
+				return _selectedItem;
+			}
+			
+			public function set selectedItem(value:Object):void
+			{
+				_selectedItem = value;
+			}
+			
+			
+			private var _ShowInput:Boolean = true;
+			
+			[Bindable]
+			public function get ShowInput():Boolean
+			{
+				return _ShowInput;
+			}
+			
+			public function set ShowInput(value:Boolean):void
+			{
+				_ShowInput = value;
+			}
+			
+			private var _ShowPRN:Boolean = false;
+			
+			[Bindable]
+			public function get ShowPRN():Boolean
+			{
+				return _ShowPRN;
+			}
+			
+			public function set ShowPRN(value:Boolean):void
+			{
+				_ShowPRN = value;
+			}
+			
+			private var _DataProvider:ArrayCollection;
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return _DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				_DataProvider = value;
+			}
+			
+			private var _labelFeild:String;
+			
+			[Bindable]
+			public function get labelFeild():String
+			{
+				return _labelFeild;
+			}
+			
+			public function set labelFeild(value:String):void
+			{
+				_labelFeild = value;
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+					}
+				});
+								
+				// TODO Auto-generated method stub
+				if(null != selectedItem)
+				{
+					
+					id_list.selectedItem = selectedItem;
+					
+				}
+				
+				if( null != selectedItem)
+				{
+					Value_changeHandler();
+				}
+				
+			}
+			
+			protected function OK_clickHandler(event:MouseEvent):void
+			{
+				if(ValidateSelection())
+				{
+					
+					dispatchEvent( new Event( "OkClick", true ) );
+					
+					removePopup();
+				}
+			}
+			
+			private function ValidateSelection():Boolean
+			{
+				if(id_list.selectedIndex == -1 )
+				{
+					id_list.setFocus();
+					return false;
+				}
+												
+				return true;
+			}
+			
+			protected function Cancel_clickHandler(event:MouseEvent):void
+			{
+				
+				dispatchEvent( new Event( "CancelClick", true ) );
+				removePopup();
+			}
+			
+			protected function Value_changeHandler():void
+			{
+				selectedItem = id_list.selectedItem;
+				
+				if(ValidateSelection())
+				{
+					
+					dispatchEvent( new Event( "OkClick", true ) );
+					
+					removePopup();
+				}
+				
+				/* id_outValue.text = "";
+				id_outValue.toolTip = id_outValue.text;
+				
+				if( null != id_list.selectedItem )
+				{
+					id_outValue.text = id_list.selectedItem[labelFeild];
+					id_outValue.toolTip = id_outValue.text;
+				}
+				
+				
+				selectedItem = id_list.selectedItem; */
+				
+			}
+			
+			protected function onMouseDownOutside(event:FlexMouseEvent):void
+			{
+				dispatchEvent( new Event( "CancelClick", true ) );
+				removePopup();
+			}
+			
+			protected function id_list_valueCommitHandler(event:FlexEvent):void
+			{
+				if(ValidateSelection())
+				{
+					
+					dispatchEvent( new Event( "OkClick", true ) );
+					
+					removePopup();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupSkin" >
+		<s:layout>
+			<s:VerticalLayout paddingBottom="4" paddingTop="5" paddingLeft="5" paddingRight="5" gap="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer  skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupInnerSkin">
+			<s:HGroup width="100%" height="100%"  verticalAlign="middle" horizontalAlign="left" paddingLeft="3" paddingRight="3" gap="2">
+				
+				<s:List id="id_list" 
+						width="100%" height="100%" change="Value_changeHandler()"
+						left="3" right="3" top="3" bottom="3"
+						horizontalScrollPolicy="off"
+						maxHeight="55" borderVisible="false" 
+						dataProvider="{DataProvider}" labelField="{labelFeild}" 
+						skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+						itemRenderer="com.gazuntite.provider.live.services.billing.superBill.view.itemRenderer.ModifierListItemRenderer"/>
+				
+			</s:HGroup>
+		</s:SkinnableContainer>
+		
+		<s:Group width="100%">
+			<s:Label id="id_outValue" fontFamily="CalibriCFF" color="#FFFFFF" fontSize="14" verticalCenter="0" maxDisplayedLines="1"  left="0" width="100%"/>
+			
+			<s:Button id="id_OK" click="OK_clickHandler(event)" visible="false" includeInLayout="false"
+					  useHandCursor="true" buttonMode="true" verticalCenter="0" toolTip="Select"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerSeletedButton"	right="23"/>
+			<s:Button id="id_Cancel" click="Cancel_clickHandler(event)" 
+					  buttonMode="true" useHandCursor="true" verticalCenter="0" toolTip="Close"
+					  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"  right="0"/>
+		</s:Group>
+		
+	</s:SkinnableContainer>
+	
+	
+</components:PopupGroup>
+

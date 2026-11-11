@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:immunization="com.gazuntite.patient.visit.view.pmh.immunization.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			
+			protected function id_ImmunizationBodyView_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				id_ImmunizationBodyView.id_nextBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					AllowMoveToNextPanel ( dispactchSelectSectionEvent );
+				});
+				
+			}
+			protected function id_noteIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_dictationIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			
+			private function dispactchSelectSectionEvent():void
+			{
+				dispatchEvent( new SelectSection('nextSection','id_ImmunizationPanel', true, true) )
+				//dispatchEvent( new Event('SelectSection',true,true));
+			}
+			
+			
+			public function AllowMoveToNextPanel( callBack:Function ):void
+			{
+				if( id_ImmunizationBodyView.id_Add.enableAll )
+				{
+					UtilityFunctions.AskMessage( "There are changes in the form, do you still want to leave form in current state?", function ():void
+					{
+						callBack(); 
+					}); 
+				}
+				else
+				{
+					callBack();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		<s:SkinnableContainer id="sc_immunization" width="100%" 
+							  > <!--visible="{model.securityProxyObject.PatientExam.QuickInput.PMH.Immunization.IsViewAllowed}" includeInLayout="{sc_immunization.visible}"-->
+			<s:layout>
+				<s:VerticalLayout  verticalAlign="top" gap="0" paddingRight="3" /> <!--horizontalAlign="{isSlideOut? 'right':'center'}"
+				paddingTop="{isSlideOut? -2:0}" paddingLeft="{isSlideOut? 1:1}"-->
+			</s:layout>		
+			
+			<!--<notes:QISectionLevelNotesDictation id="id_notesDictation" width="100%" -->
+			
+			<immunization:ImmunizationBodyContent id="id_ImmunizationBodyView" width="100%" height="100%" creationComplete="id_ImmunizationBodyView_creationCompleteHandler(event)" />
+			<s:HGroup width="100%">					
+				<s:HGroup id="id_IndicatorGrp" width="100%" horizontalAlign="left" >
+					<s:Button id="id_noteIndicator" label="Notes" visible="false" 
+							  click="id_noteIndicator_clickHandler(event)" toolTip="View Notes" 
+							  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesIndicatorBtnSkin" /><!-- includeInLayout="{id_noteIndicator.visible}"-->
+					<s:Button id="id_dictationIndicator" label="Dictation" visible="false" 
+							  click="id_dictationIndicator_clickHandler(event)" toolTip="Play Dictation" 
+							  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.dictationIndicatorBtnSkin"/> <!--includeInLayout="{id_dictationIndicator.visible}"-->
+				</s:HGroup>
+				<s:Group id="id_spacer" width="100%" height="2" />					
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+</s:Group>

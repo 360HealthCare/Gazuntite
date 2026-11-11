@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:presprection="com.gazuntite.input.view.inputsections.assessment.treatment.presprection.*"
+					  xmlns:procedure="com.gazuntite.input.view.inputsections.assessment.treatment.procedure.*"
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  xmlns:components1="com.gazuntite.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc()" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.assessment.treatment.procedure.PatientInputAssessmentProcedureEvent;
+			import com.gazuntite.input.view.inputsections.assessment.treatment.procedure.PatientInputAssessmentProcedureViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			[Bindable]	
+			public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			private var procedureViewModel:PatientInputAssessmentProcedureViewModel = PatientInputAssessmentProcedureViewModel.getInstance();
+			
+			[Bindable]
+			private var viewModel:PatientInputAssessmentTreatmentViewModel = PatientInputAssessmentTreatmentViewModel.getInstance();
+			
+			[Bindable]
+			private var notesDTO:ModuleNoteDTO;
+			
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			private function cc():void
+			{
+				addEventListener(PatientInputAssessmentProcedureEvent.PATIENT_INPUT_PROCEDURE_ITEM_KEY_UP_EVENT, 
+					patientInputProcedureItemKeyUpHandler, false, 0, true);
+				
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+			}
+			
+			private function patientInputProcedureItemKeyUpHandler(event:PatientInputAssessmentProcedureEvent):void
+			{
+				if (!event.searchString)
+					return;
+				
+				if (event.searchString.length < 2 || event.searchString.length > 10)
+					return;
+				
+				if (event.searchString.length % 2 == 0)
+					return;
+				
+				procedureViewModel.loadMedicalCPTCodeForInputView(event.searchString, event.searchType);
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				if( null == notesDTO )
+					notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.TREATMENT_MODULE_NAME);
+				
+				notesDTO.Note = id_DictationNote.note;
+				
+				var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( notesDTO, QIConstants.TREATMENT_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+				CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed")
+			}
+			
+			public function ClearTreatmentInputView():void
+			{
+				if(Prescription)
+				Prescription.ClearPresprectionFormView();
+				
+				if(Procedure)
+				Procedure.clearForm();
+				
+				model.procedureDTOList.removeAll();
+				
+				notesDTO = null;
+				
+				if( null != id_DictationNote )
+				{
+					id_DictationNote.note = "";
+					id_DictationNote.resetToDefault();
+				}
+			}
+			
+			protected function Prescription_creationCompleteHandler(event:FlexEvent):void
+			{
+				Prescription.addEventListener(SelectSection.SelectInnerTabEvent,function():void
+				{
+					uiViewStack.selectedIndex = 1;
+				});
+			}
+			
+			protected function Procedure_creationCompleteHandler(event:FlexEvent):void
+			{
+				Procedure.addEventListener(SelectSection.SelectInnerTabEvent,function():void{
+					
+					dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Plan'));
+					
+				});
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="1" paddingBottom="5"/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" label="TREATMENT"  maxSectionCounter="3"  sectionNumber="2" showInputPart="true"
+								  PrevSectionLabel="Diagnosis"
+								  NextSectionLabel="Plan"
+								  NavItems="{NavItems}"
+								  MainSectionLabel="Assessment"
+									  dictationNoteViewModel="{viewModel.dictationNoteViewModel}"/>
+	<dictation2:PatientDictationNoteView id="id_DictationNote" width="100%" minHeight="47" viewModel="{viewModel.dictationNoteViewModel}"
+										  isSectionLevel="true" note="@{notesDTO.Note}"/>
+	
+	<s:VGroup width="100%" height="100%" gap="-5" paddingTop="10" paddingLeft="2" paddingRight="2" horizontalAlign="center">
+		<s:ButtonBar dataProvider="{uiViewStack}" labelField="id" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="3">
+			<s:layout>
+				<s:VerticalLayout  horizontalAlign="center" verticalAlign="top" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="2"/>
+			</s:layout>
+			<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false"
+									   selectedIndex="@{viewModel.treatmentInputTabSelectedIdx}">
+				<s:ArrayList>
+					<presprection:PresprectionInputView id="Prescription" width="100%" height="100%" creationComplete="Prescription_creationCompleteHandler(event)"/>
+					<procedure:ProcedureInputView id="Procedure" width="100%" height="100%" creationComplete="Procedure_creationCompleteHandler(event)"/>
+				</s:ArrayList>
+			</components:LabelViewStack>
+		</s:BorderContainer>
+	</s:VGroup>
+	
+</s:SkinnableContainer>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  skinClass="com.gazuntite.skins.ActionBarSkin"
+					  width="100%" 
+					  height="35" 
+					  height.down="100%"
+					  creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.AssessmentView;
+			import com.gazuntite.components.BlankViewForTesting;
+			import com.gazuntite.components.PatientHistoryView;
+			import com.gazuntite.components.PhysicalView;
+			import com.gazuntite.skins.TabBarSkin;
+			
+			import mx.containers.ViewStack;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.TabBar;
+			
+			[Bindable]
+			protected var _labelText:String;
+			
+			[Bindable]
+			protected var open:Boolean = false;
+			
+			protected var vs:ViewStack;
+			protected var tabBar:TabBar;
+			
+			public function get labelText():String
+			{
+				return _labelText;
+			}
+			
+			public function set labelText(value:String):void
+			{
+				_labelText = value;
+			}
+			
+			// fill the entire coverflow
+			protected function createSubviews():void
+			{
+				switch(_labelText)
+				{
+					case "Quick Input":
+						// create new subviews for QI
+						vs.addChild(new PatientHistoryView());
+						vs.addChild(new PhysicalView());
+						vs.addChild(new AssessmentView());
+						break;
+					case "View Background":
+						vs.addChild(new BlankViewForTesting());
+						break;
+					case "Gazuntite Live Provider Service":
+						//vs.addChild(new LiveProviderServiceView());
+						//removeElement(tabBar);
+						//tabBar = null;
+						break;
+				}
+			}
+			
+			protected function checkState():void
+			{
+				if(open == true)
+				{
+					open = false;
+					this.currentState = "normal";
+					
+					// release memory by getting rid of child views
+					//vs.removeAllElements();
+					
+					//vs.removeAllChildren();
+					
+					removeElement(vs);
+					
+					if(tabBar != null)
+					{
+						removeElement(tabBar);
+					}
+					
+					
+				}else
+				{
+					open = true;
+					this.currentState = "down";
+					
+					vs = new ViewStack();
+					vs.percentHeight = 100;
+					vs.percentWidth = 100;
+					vs.y = 0;
+					addElement(vs);
+					
+					tabBar = new TabBar();
+					tabBar.setStyle("skinClass",com.gazuntite.skins.TabBarSkin);
+					tabBar.x = 20;
+					tabBar.y = 10;
+					tabBar.dataProvider = vs;
+					addElement(tabBar);
+					
+				}
+				
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleOpenEffectEnd(event:EffectEvent):void
+			{
+				// only init child views when needed to save memory and performance
+				createSubviews();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:transitions>
+		<s:Transition fromState="normal" toState="down">
+			<s:Parallel duration="200" effectEnd="handleOpenEffectEnd(event)">
+				<s:Resize target="{this}"/>
+				<s:Move target="{actionBarTitle}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="down" toState="normal">
+			<s:Parallel duration="350">
+				<s:Resize target="{this}"/>
+				<s:Move target="{actionBarTitle}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:layout>
+		<s:BasicLayout />
+	</s:layout>
+	
+	<s:Label id="actionBarTitle"
+			 text="{_labelText}" 
+			 styleName="actionBarTitle"
+			 x.normal="20"
+			 x.down="40"
+			 y="10">
+		
+		<!-- x.down="{(this.width/2) - (actionBarTitle.width / 2)}"  -->
+		
+		<!--<s:filters>
+		<s:DropShadowFilter distance="2"
+		strength=".99"/>
+		</s:filters>-->
+	</s:Label>
+	
+	<!-- Open/close the action bar -->
+	<s:Button click="checkState()"
+			  width="150"
+			  height="40"
+			  alpha="0"
+			  buttonMode="true"
+			  useHandCursor="true"/>
+	
+	<!-- Option buttons on the right side of ActionBar -->	
+	<s:Button skinClass="com.gazuntite.skins.RapidAccessBtnSkin" 
+			  right="65" 
+			  top="4"
+			  buttonMode="true"
+			  useHandCursor="true"
+			  toolTip="Rapid access"/>
+	
+	<s:Button skinClass="com.gazuntite.skins.OptionsBtnSkin" 
+			  right="35" 
+			  top="4"
+			  buttonMode="true"
+			  useHandCursor="true"
+			  toolTip="Other options"/>
+	
+	<s:Button skinClass="com.gazuntite.skins.SlideOutBtnSkin" 
+			  right="5" 
+			  top="4"
+			  buttonMode="true"
+			  useHandCursor="true" 
+			  toolTip="Slide out"/>
+	
+	<!-- Begin main content stack -->
+	<!--<mx:ViewStack id="vs" 
+	width="100%" 
+	height="100%"
+	visible="{open}"
+	y="0"/>
+	
+	<s:TabBar id="tabBar" 
+	skinClass="com.gazuntite.skins.TabBarSkin"
+	x="20"
+	y="10"
+	visible="{open}"
+	dataProvider="{vs}"/>-->
+	
+	
+</s:SkinnableContainer>

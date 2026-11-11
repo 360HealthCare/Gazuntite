@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" 
+				xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				creationComplete="cc(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			
+			import mx.events.FlexEvent;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="30" useHandCursor="true" buttonMode="true">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" />
+		</s:layout>
+		<s:Label width="10%" text="{data.serialNumber}" /><!--paddingLeft="6"-->
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label width="35%" text="{data.ICDCode}" /><!--paddingLeft="6"-->
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		<s:Label width="35%" text="{data.TestName}"/><!-- paddingLeft="6"-->
+		<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+		
+		<s:Group width="20">
+			<s:Button  toolTip="Delete" useHandCursor="true" buttonMode="true"
+					   skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"/>
+		</s:Group>
+		
+		
+	</s:SkinnableContainer>
+	
+</s:ItemRenderer>

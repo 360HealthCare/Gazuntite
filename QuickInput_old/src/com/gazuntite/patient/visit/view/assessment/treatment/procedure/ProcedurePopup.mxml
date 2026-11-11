@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components1:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						xmlns:itemrenderer="com.adobe.gazuntite.view.controls.custom.patientExamView.quickInput.assessment.diagnosis.itemrenderer.*" 
+						xmlns:CheckBoxGrid1="com.gazuntite.controls.extended.components.CheckBoxGrid.*" 
+						xmlns:components1="com.gazuntite.controls.extended.components.*" 
+						cornerRadius="10" 
+						>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.CPTMedicalTypeDTO;
+			import com.gazuntite.patient.visit.dto.ProcedureDTO;
+			import com.gazuntite.patient.visit.event.assessment.treatment.procedure.LoadCPTMedicalTypesEvent;
+			import com.gazuntite.patient.visit.event.assessment.treatment.procedure.ManagePatientProcedureEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.TextOperationEvent;
+			import spark.skins.spark.TitleWindowSkin;
+			
+			
+			
+			[Bindable] public var model : QIModelLocator = QIModelLocator.getInstance();
+			[Bindable] private var searchType:ArrayCollection = new ArrayCollection([{label:"CPT Code"},{label:"Procedure"}]);
+			[Bindable] private var cptList:ArrayCollection;
+			private var val:Boolean = false;
+			private var searchTerm:String;
+			
+			//Search and load recors on basis search term from form
+			public function searchAndLoadLabIn(_searchTerm:String, index:uint):void
+			{
+				id_SearchCombo.selectedIndex = index;
+				id_searchText.text 			 = _searchTerm; 
+				searchTerm = _searchTerm;
+				id_SearchButton.enabled		 = true;
+				searchLabCode();
+			}
+			private function saveInHouseLab(_val:Boolean):void
+			{
+				
+					if(id_DataGrid.selectedItems.length == 0){
+						Alert.show('Please select a record for Save.','No record selected');
+						return;
+					}
+					val = _val;
+					addrecord();
+				
+			}
+			
+			// Add records on the Add & Add and Close Button Click
+			protected function addrecord():void
+			{
+				if(null == model.ProcedureDTOList)
+					model.ProcedureDTOList = new ArrayCollection();
+				
+				for(var i:uint = 0; i< id_DataGrid.selectedItems.length; i++)
+				{
+					var procedureDTO:ProcedureDTO 	= new ProcedureDTO();
+					
+					//procedureDTO.CPTMedicalType 	= id_DataGrid.selectedItems[i].CPTMedicalTypeDTO;
+					
+					procedureDTO.cptmedicalDTO			= id_DataGrid.selectedItems[i].CPTMedicalTypeDTO;
+					
+					procedureDTO.CreatedAt 			= new Date();
+					procedureDTO.CreatedBy 			= model.LoggedInUserId;
+					procedureDTO.DictationID 		= Constants.GUID_FORMAT;
+					procedureDTO.ModifiedAt 		= Constants.NULL_DATE;
+					if( model.VisitDate!=null)
+					{
+						procedureDTO.VisitID 		= model.VisitID;
+						procedureDTO.VisitDate 		= model.VisitDate;
+					}
+					/* else if(model.quickInputDTO		!= null && model.quickInputDTO.Visit!=null)
+					{
+						procedureDTO.VisitID 		= model.quickInputDTO.Visit.VisitId;
+						procedureDTO.VisitDate 		= model.quickInputDTO.Visit.VisitDate;
+					} */
+					procedureDTO.PatientID 			= model.patientID;
+					procedureDTO.IsDirty= true;
+					
+					
+					model.ProcedureDTOList.addItem(procedureDTO);
+				}
+				
+				var ldsdEvent : ManagePatientProcedureEvent = new ManagePatientProcedureEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent( ldsdEvent ); 
+				
+				 if(cptList)
+					cptList.removeAll(); 
+					cptList = null;
+				//If Clicked is Add and Close
+				if(val)
+					removePopup();
+			}
+			
+			private function searchLabCode():void
+			{
+				var cptEvent : LoadCPTMedicalTypesEvent = new LoadCPTMedicalTypesEvent(searchTerm, loadData);
+				CairngormEventDispatcher.getInstance().dispatchEvent( cptEvent );
+			}
+			
+			public function searchLabCodes():void
+			{
+				if(id_searchText.text.length < 3)
+				{
+					id_message.visible 	= true;
+					id_message.text 	= 'Please enter search term before click';
+				}
+				else
+				{
+					if(cptList)
+						cptList.removeAll(); cptList = null;
+					
+					searchTerm = id_searchText.text;
+					searchLabCode();
+				}
+			}
+			
+			public  function loadData(val:* = null):void
+			{
+				if(model.CptMedicalTypeDTOList != null)
+				{
+					if(model.CptMedicalTypeDTOList.length)
+					{
+						if(cptList == null)
+							cptList = new ArrayCollection();
+						
+						for(var i:uint = 0; i < model.CptMedicalTypeDTOList.length; i++)
+						{
+							var obj:Object = new Object();
+							obj.CPTMedicalTypeDTO = model.CptMedicalTypeDTOList[i];
+							
+							if (doesSearchTermMatchedWithLoadedData(obj.CPTMedicalTypeDTO))
+							{
+								if (model.ProcedureDTOList != null && model.ProcedureDTOList.length > 0)
+								{
+									if (hasDuplicateValues( obj.CPTMedicalTypeDTO as CPTMedicalTypeDTO))
+										continue;
+									else
+										cptList.addItem(obj);
+								}
+								else
+								{
+									cptList.addItem(obj);
+								}
+							}
+						}
+					}
+					
+					if (!cptList)
+					{
+						id_message.visible  = true;
+						id_message.text 	= 'No CPT found, try different!';
+						
+						return;
+					}
+					
+					if (!cptList.length)
+					{
+						id_message.visible  = true;
+						id_message.text 	= 'No CPT found, try different!';
+						
+						return;
+					}
+					
+					id_message.visible = false;
+				}
+			}
+			
+			private function doesSearchTermMatchedWithLoadedData(value:CPTMedicalTypeDTO):Boolean
+			{
+				switch(id_SearchCombo.selectedIndex)
+				{
+					case 0:
+						if (value.ProcedureCode.toLocaleLowerCase().indexOf(searchTerm.toLocaleLowerCase()) != -1)
+							return true;
+						
+						return false;
+					
+					case 1:
+						if (value.ProcedureDescription.toLocaleLowerCase().indexOf(searchTerm.toLocaleLowerCase()) != -1)
+							return true;
+						
+						return false;
+					
+					default:
+						
+						return false;
+				}
+			}
+			
+			private function hasDuplicateValues(dto:CPTMedicalTypeDTO):Boolean
+			{
+				for(var j:uint =0; j < model.ProcedureDTOList.length; j++)
+				{
+					var labDTO:ProcedureDTO = model.ProcedureDTOList[j] as ProcedureDTO;
+					
+					if(dto.ProcedureCode == labDTO.cptmedicalDTO.ProcedureCode)
+						return true;
+				} 
+				
+				return false;
+			}
+			
+			private function id_searchText_changeHandler(event:TextOperationEvent):void
+			{
+				id_message.visible 		= false;
+				
+				if(id_searchText.text.length >= 3)
+				{
+					id_SearchButton.enabled = true;
+				}
+				else
+				{
+					id_SearchButton.enabled = false;
+				}
+			}
+			
+			private function resetFields():void
+			{
+				id_SearchCombo.selectedIndex = -1;
+				id_message.visible			 = false;
+				id_searchText.text			 = '';
+				id_SearchButton.enabled		 = false;
+			}
+			
+			//Close this popup
+			public override function removePopup():void
+			{
+				super.removePopup();
+				resetFields();
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<components1:layout>
+		<s:VerticalLayout horizontalAlign="center"/>
+	</components1:layout>
+	
+	<s:HGroup width="95%" height="5%" verticalAlign="middle">
+		<s:DropDownList id="id_SearchCombo" 
+						prompt="Select Type" dataProvider="{searchType}"
+						width="150" skinClass="com.adobe.gazuntite.skins.chrome.comboBoxSkins.DDLSkin" />
+		<s:Group enabled="{id_SearchCombo.selectedIndex != -1 ? true:false}" width="200">
+			<components1:LabelTextInput id="id_searchText"
+									   restrict="0-9 A-Z a-z" maxChars="30" width="200" prompt="Search labIn"
+									   change="id_searchText_changeHandler(event)" left="0" />
+			<s:Button id="id_SearchButton" 
+					  enabled="false" styleName="orangeSearchButtonSkin" width="23"
+					  toolTip="Procedure Search" buttonMode="true"
+					  click="searchLabCodes()" left="176"  top="2" height="{id_searchText.height}"/>
+		</s:Group>
+		<s:Label id="id_message" color="#DE2626"  visible="false"/>
+	</s:HGroup >
+	
+	<CheckBoxGrid1:CheckBoxDataGrid id="id_DataGrid"
+								   width="95%" height="90%"  allowMultipleSelection="true" 
+								   dataProvider="{cptList}"
+								   draggableColumns="false" 
+								   useRollOver="false"
+								   rowCount="{id_DataGrid.dataProvider.length + 1}"
+								   columnWidths="{[40,'30%','65%']}">
+		<CheckBoxGrid1:columns>
+			<mx:DataGridColumn dataField="" 
+							   headerText="" 
+							   rendererIsEditor="true"
+							   sortable="false" 
+							   itemRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxRenderer" 
+							   headerRenderer="com.gazuntite.controls.extended.components.CheckBoxGrid.CheckBoxHeaderRenderer" 
+							   editorDataField="selected"/>
+			<mx:DataGridColumn headerText="CPT" dataField="CPTMedicalTypeDTO.ProcedureCode" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Procedure" dataField="CPTMedicalTypeDTO.ProcedureDescription" sortable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+		</CheckBoxGrid1:columns>
+		
+	</CheckBoxGrid1:CheckBoxDataGrid>
+	
+	<s:HGroup width="95%" horizontalAlign="center" height="5%" verticalAlign="middle" paddingBottom="4">
+		<s:Button buttonMode="true" toolTip="Add procedure and close popup" label="Add  &amp; Close" click="saveInHouseLab(true)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+		<s:Button buttonMode="true" toolTip="Add procedure" label="Add" click="saveInHouseLab(false)" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+		<s:Button buttonMode="true" toolTip="Close popup" label="Cancel" click="removePopup()" skinClass="com.adobe.gazuntite.skins.chrome.titleWindowSkins.TitleWindowButtonSkin"/>
+	</s:HGroup>
+	
+</components1:PopupWindow>

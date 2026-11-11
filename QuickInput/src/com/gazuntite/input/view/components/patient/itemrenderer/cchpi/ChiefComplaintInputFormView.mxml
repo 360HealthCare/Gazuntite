@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.components.*" 
+		 xmlns:dictation="com.gazuntite.components.dictation.*" 
+		 xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*" 
+		 xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.ccHpi.ChiefComplaintHpiDTO;
+			import com.gazuntite.common.dto.physical.ccHpi.HPIDetailsDTO;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.components.CustomSaveAndMoveNextAlert;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.physical.chiefcomplaint.PatientInputPhysicalChiefComplaintEvent;
+			import com.gazuntite.input.view.inputsections.physical.chiefcomplaint.PatientInputPhysicalChiefComplaintViewModel;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	private var labelWidth:int = 100;
+			[Bindable] public var RecordLevelNote:String = '';
+			[Bindable] public var IsViewDirty:Boolean;
+			[Bindable]	 private var viewModel:PatientInputPhysicalChiefComplaintViewModel = PatientInputPhysicalChiefComplaintViewModel.getInstance();
+			private var allowDeleteAndMove:Boolean = false;
+			private var _dictationNoteViewModel:PatientDictationNoteViewModel;
+			
+			//M:11Nov2013
+			[Bindable]	public var RecordLevelDictationID:String;
+			
+			[Bindable]
+			public function get dictationNoteViewModel():PatientDictationNoteViewModel
+			{
+				return _dictationNoteViewModel;
+			}
+			
+			public function set dictationNoteViewModel(value:PatientDictationNoteViewModel):void
+			{
+				_dictationNoteViewModel = value;
+			}
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var ev:PatientInputPhysicalChiefComplaintEvent = new PatientInputPhysicalChiefComplaintEvent(
+					PatientInputPhysicalChiefComplaintEvent.PATIENT_INPUT_CHIEF_COMPLAINT_ITEM_EDIT_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				
+				switch (curTar.id)
+				{
+					case "id_SymptomsCmbo":
+						ev.sectionName = QIConstants.SYMPTOM_MODULE_NAME;
+						break;
+					
+					case "id_DurationCmbo":
+						
+						ev.sectionName = QIConstants.DURATION_MODULE_NAME;
+						
+						break;
+					
+					case "id_LocationCmbo":
+						
+						ev.sectionName = QIConstants.LOCATION_MODULE_NAME;
+						
+						break;
+					
+					case "id_QualityCmbo":
+						
+						ev.sectionName = QIConstants.QUALITY_MODULE_NAME;
+						
+						break;
+					
+					case "id_SeverityCmbo":
+						
+						ev.sectionName = QIConstants.SEVERITY_MODULE_NAME;
+						
+						break;
+					
+					case "id_ContextCmbo":
+						
+						ev.sectionName = QIConstants.CONTEXT_MODULE_NAME;
+						
+						break;
+					
+					case "id_ModifyingFactorsCmbo":
+						
+						ev.sectionName = QIConstants.MODIFYINGFACTORS_MODULE_NAME;
+						
+						break;
+					
+					case "id_ExacerbatingCmbo":
+						
+						ev.sectionName = QIConstants.EXACERBATING_MODULE_NAME;
+						
+						break;
+					
+					case "id_ProgressionCmbo":
+						
+						ev.sectionName = QIConstants.PROGRESSION_MODULE_NAME;
+						
+						break;
+					
+					case "id_RadiationCmbo":
+						
+						ev.sectionName = QIConstants.RADIATION_MODULE_NAME;
+						
+						break;
+				}
+				
+				dispatchEvent(ev);
+			}
+			
+			private function saveCCHPI():void
+			{
+				if (isInvalid())
+					return;
+				
+				var chiefComplaintHpiDTO:ChiefComplaintHpiDTO 	= new ChiefComplaintHpiDTO();
+				
+				chiefComplaintHpiDTO.ChiefComplaint 			= id_ChiefComplaint.text;
+				var hpiDetailsDTO:HPIDetailsDTO 				= new HPIDetailsDTO();
+				
+				hpiDetailsDTO.Symptom 							= id_SymptomsCmbo.text;
+				hpiDetailsDTO.Duration 							= id_DurationCmbo.text;
+				hpiDetailsDTO.Location 							= id_LocationCmbo.text;
+				hpiDetailsDTO.Quality 							= id_QualityCmbo.text;
+				hpiDetailsDTO.Severity 							= id_SeverityCmbo.text;
+				hpiDetailsDTO.Context 							= id_ContextCmbo.text;
+				hpiDetailsDTO.ModifyingFactors 					= id_ModifyingFactorsCmbo.text;
+				hpiDetailsDTO.Exacerbating 						= id_ExacerbatingCmbo.text;
+				hpiDetailsDTO.Progression 						= id_ProgressionCmbo.text;
+				hpiDetailsDTO.Radiation 						= id_RadiationCmbo.text;
+				
+				chiefComplaintHpiDTO.HPIFields 					= hpiDetailsDTO;
+				
+				chiefComplaintHpiDTO.IsDirty 					= true;
+				chiefComplaintHpiDTO.IsRecordEditable 			= true;
+				
+				chiefComplaintHpiDTO.VisitDate 					= model.VisitDate;
+				chiefComplaintHpiDTO.VisitID 					= model.VisitID;
+				
+				chiefComplaintHpiDTO.PatientID 					= model.patientDTO.ID;
+				
+				chiefComplaintHpiDTO.ClinicBranchID 			= model.LoggedInUserSelectedBranchId;
+				
+				chiefComplaintHpiDTO.CreatedAt 					= new Date();
+				chiefComplaintHpiDTO.CreatedBy 					= model.LoggedInUserId;
+				
+				chiefComplaintHpiDTO.ModifiedAt 				= QSConstants.NULL_DATE;
+				chiefComplaintHpiDTO.ModifiedBy 				= 0;
+				
+				chiefComplaintHpiDTO.Note 						= RecordLevelNote; 
+				chiefComplaintHpiDTO.NoteSubject 				= "";
+				
+				//chiefComplaintHpiDTO.DictationID 				= QSConstants.GUID_FORMAT;
+				//M:11Nov2013				
+				chiefComplaintHpiDTO.DictationID 				= RecordLevelDictationID ;
+				trace(chiefComplaintHpiDTO.DictationID );
+				trace(RecordLevelDictationID);
+				
+				var ev:PatientInputPhysicalChiefComplaintEvent = new PatientInputPhysicalChiefComplaintEvent(
+					PatientInputPhysicalChiefComplaintEvent.PATIENT_INPUT_CHIEF_COMPLAINT_ADD_EVENT, true);
+				
+				ev.chiefComplaintHpiDTO 						= chiefComplaintHpiDTO;
+				
+				dispatchEvent(ev);
+				
+				clearForm();
+			}
+			
+			private function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (id_ChiefComplaint.text.length <= 0 )
+				{
+					isNotValid = true;
+					
+					errorStr += "Please enter Chief Complaint\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_ChiefComplaint;
+				}
+				
+				if((id_SymptomsCmbo.selectedIndex < 0 || id_SymptomsCmbo.selectedItem == null) && id_SymptomsCmbo.text.length <= 2)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Symptoms\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_SymptomsCmbo;
+				}
+				
+				if (errorStr.length > 0)
+				{
+					Alert.show(errorStr, "Required Field", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			
+			public function clearForm():void
+			{
+				id_ChiefComplaint.clear();
+				id_SymptomsCmbo.clear();
+				id_DurationCmbo.clear();
+				id_LocationCmbo.clear();
+				id_QualityCmbo.clear();
+				id_SeverityCmbo.clear();
+				id_ContextCmbo.clear();
+				id_ModifyingFactorsCmbo.clear();
+				id_ExacerbatingCmbo.clear();
+				id_ProgressionCmbo.clear();
+				id_RadiationCmbo.clear();
+				img_Symptoms.source							= QIConstants.IMG_RED;
+				img_ChiefComplaint.source 					= QIConstants.IMG_RED;
+				
+				IsViewDirty 								= false;
+				viewModel.dictationNoteViewModel.visible 	= false;
+				RecordLevelNote								= "";
+			}
+			// save & Move next logic ......................
+			protected function Next_buttonClickHandler(event:MouseEvent):void
+			{
+				// old dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Review of System'));
+				if(IsViewDirty)
+				{
+					//QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler );
+					var hideOption:String = CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE ;
+					QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler, null, hideOption );
+				}
+				else
+					MoveToNextPanel();
+			}
+			
+			private function MoveNextHandler(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						SaveAndMoveNext();
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						saveCCHPI();
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						DiscardAndMoveNext();
+						break;
+				}
+			}
+			
+			private function DiscardAndMoveNext():void
+			{
+				clearForm();
+				MoveToNextPanel();
+			}
+			
+			private function SaveAndMoveNext():void
+			{
+				if (isInvalid())
+					return;
+				
+				saveCCHPI();
+				MoveToNextPanel();
+			}
+			
+			private function MoveToNextPanel():void
+			{
+				dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Review of System'));
+			}
+			
+			protected function id_SymptomsCmbo_changeHandler(event:TextOperationEvent):void
+			{
+				if(id_SymptomsCmbo.text.length <= 2)
+					img_Symptoms.source = QIConstants.IMG_RED;
+				else if(id_SymptomsCmbo.text.length > 2)
+					img_Symptoms.source = QIConstants.IMG_GREEN;
+			}
+			
+			protected function id_SymptomsCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_SymptomsCmbo.selectedIndex >= 1 || id_SymptomsCmbo.selectedItem != null)
+					img_Symptoms.source	= QIConstants.IMG_GREEN;
+				else
+					img_Symptoms.source	= QIConstants.IMG_RED;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingTop="4" paddingBottom="4"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" height="25" verticalAlign="middle">
+		<s:BitmapImage id="img_ChiefComplaint" source="{(id_ChiefComplaint.text.length > 0)? QIConstants.IMG_GREEN : QIConstants.IMG_RED}"/>
+		<advancedTextInput:AdvancedTextInput id="id_ChiefComplaint" 
+											 width="100%" prompt="Enter Chief Complaint" toolTip="Chief Complaint" tabIndex="0" maxChars="500"
+											 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+											 />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="17">
+		<s:Label text="History of Present Illness" styleName="patientNameSubTitle" color="#3194BE" />
+	</s:HGroup>
+	
+	<s:HGroup width="100%" gap="8">
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<s:HGroup width="100%" height="25" verticalAlign="middle">
+				<s:BitmapImage id="img_Symptoms" source="{QIConstants.IMG_RED}"/>
+				<autoComplete:AutoComplete id="id_SymptomsCmbo" 
+										   width="100%"  height="25" labelField="DISPLAY_NAME"  
+										   prompt="Select Symptoms" toolTip="Symptoms" tabIndex="1"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.symptomsList}"
+										   keyUp="comboKeyUpHandler(event)"
+										   change="id_SymptomsCmbo_changeHandler(event)"
+										   selectedItemChange="id_SymptomsCmbo_selectedItemChangeHandler(event)"
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16">
+				<autoComplete:AutoComplete id="id_QualityCmbo" 
+										   width="100%" height="25" labelField="DISPLAY_NAME" tabIndex="4"
+										   prompt="Select Quality" toolTip="Quality"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.qualityList}"
+										   keyUp="comboKeyUpHandler(event)"
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16" >
+				<autoComplete:AutoComplete id="id_ModifyingFactorsCmbo" 
+										   width="100%"  height="25" labelField="DISPLAY_NAME" tabIndex="7"
+										   prompt="Select Modifying Factors" toolTip="Modifying Factors"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.modifyingFactorsList}"
+										   keyUp="comboKeyUpHandler(event)"
+										   />
+			</s:HGroup>
+			<s:HGroup width="100%" height="25" verticalAlign="middle" paddingLeft="16" >
+				<autoComplete:AutoComplete id="id_RadiationCmbo"  tabIndex="10"
+										   width="100%" height="25" labelField="DISPLAY_NAME" prompt="Select Radiation" toolTip="Radiation"
+										   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+										   dataProvider="{model.radiationList}"
+										   keyUp="comboKeyUpHandler(event)"
+										   />
+			</s:HGroup>
+		</s:VGroup>
+		
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<autoComplete:AutoComplete id="id_DurationCmbo" 
+									   width="100%" height="25"  labelField="DISPLAY_NAME"   tabIndex="2"
+									   prompt="Select Duration" toolTip="Duration"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.durationList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+			<autoComplete:AutoComplete id="id_SeverityCmbo" 
+									   width="100%" height="25" labelField="DISPLAY_NAME"  tabIndex="5"
+									   prompt="Select Severity" toolTip="Severity"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.severityList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+			<autoComplete:AutoComplete id="id_ExacerbatingCmbo" 
+									   width="100%"  height="25" labelField="DISPLAY_NAME"  tabIndex="8"
+									   prompt="Select Exacerbating" toolTip="Exacerbating"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.exacerbatingList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+		</s:VGroup>
+		
+		<s:VGroup width="33%" height="100%" verticalAlign="top" horizontalAlign="center">
+			<autoComplete:AutoComplete id="id_LocationCmbo"  tabIndex="3"
+									   width="100%" height="25" labelField="DISPLAY_NAME" 
+									   prompt="Select Location" toolTip="Location"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.locationList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+			<autoComplete:AutoComplete id="id_ContextCmbo" 
+									   width="100%"  height="25" labelField="DISPLAY_NAME" tabIndex="6"
+									   prompt="Select Context" toolTip="Context"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.contextList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+			<autoComplete:AutoComplete id="id_ProgressionCmbo" tabIndex="9"
+									   width="100%"  height="25" labelField="DISPLAY_NAME"
+									   prompt="Select Progression" toolTip="Progression"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   dataProvider="{model.progressionList}"
+									   keyUp="comboKeyUpHandler(event)"
+									   />
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right">
+		<s:Button id="save" 
+				  buttonMode="true" useHandCursor="true" tabIndex="16"
+				  toolTip="Save"  skinClass="com.gazuntite.skins.controls.button.SavePlusButtonSkin" 
+				  click="saveCCHPI()"
+				  />
+		<s:Button buttonMode="true"
+				  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+				  label="Next" 
+				  click="Next_buttonClickHandler(event)"
+				  toolTip="Next"/>
+	</s:HGroup>
+	
+</s:Group>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:extended="com.adobe.gazuntite.view.controls.extended.*" 
+						xmlns:components="com.gazuntite.controls.extended.components.*" 
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						xmlns:pharmacySearch="com.gazuntite.provider.eprescription.services.patient.view.pharmacySearch.*" 
+						xmlns:views="com.gazuntite.provider.eprescription.services.patient.view.views.*"
+						title="Pharmacy Search" 
+						width="600" height="425"
+						creationComplete="popupwindow1_creationCompleteHandler(event)"	>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var _pharmacyName:String;
+			private var _ncpdid:String;
+			private var _inSearchPopup:Boolean; 
+			
+			[Bindable]
+			public function get inSearchPopup():Boolean
+			{
+				return _inSearchPopup;
+			}
+			
+			public function set inSearchPopup(value:Boolean):void
+			{
+				_inSearchPopup = value;
+			}
+			
+			[Bindable]
+			public function get pharmacyName():String
+			{
+				return _pharmacyName;
+			}
+
+			public function set pharmacyName(value:String):void
+			{
+				_pharmacyName = value;
+			}
+
+			protected function popupwindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				//id_pharmacySearch.pharmacyname = pharmacyName;
+				
+				//id_pharmacySearch.id
+					
+			}
+			[Bindable]
+			public function get ncpdid():String
+			{
+				return _ncpdid;
+			}
+
+			public function set ncpdid(value:String):void
+			{
+				_ncpdid = value;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<components:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5" paddingLeft="6" paddingTop="4" paddingRight="6" verticalAlign="top" horizontalAlign="center" />
+	</components:layout>
+	
+	<views:Pharmacy id="id_pharmacySearch" width="100%" pharmacyname="{pharmacyName}" npcid="{ncpdid}" inSearchPopup="{inSearchPopup}" />
+	
+</components:PopupWindow>

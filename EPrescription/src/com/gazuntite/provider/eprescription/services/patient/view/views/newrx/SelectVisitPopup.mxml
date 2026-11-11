@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   creationComplete="cc(event)"
+					   width="175" height="18" xmlns:components="com.gazuntite.controls.extended.components.*"
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.visit.CreateVisitCommonEvent;
+			import com.gazuntite.common.event.visit.LoadPatientVisitsEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.provider.eprescription.services.patient.util.EConstants;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			[Bindable]
+			public var visitArray:ArrayCollection = new ArrayCollection();
+			public var patient_ID:String;
+			private var _encounterTypeId:String;
+			private var _templateId:String;
+			private var _userId:String;
+			private var _clinicBranchID:String;
+			private var _userTypeDTO:XML;
+			private var _encounterId:String;
+			public var QIVisitID:String;
+			public var QIVisitDate:String = '';
+			private var _CreateVisitAllowed:Boolean;
+			
+			[Bindable] public var NASelected:Boolean;
+			//************ GETTER && SETTER ******** START *****************************
+			
+			[Bindable]
+			public function get CreateVisitAllowed():Boolean
+			{
+				return _CreateVisitAllowed;
+			}
+			
+			public function set CreateVisitAllowed(value:Boolean):void
+			{
+				_CreateVisitAllowed = value;
+			}
+			
+			public function get encounterId():String
+			{
+				return _encounterId;
+			}
+			
+			public function set encounterId(value:String):void
+			{
+				_encounterId = value;
+			}
+			
+			[Bindable]
+			public function get templateId():String
+			{
+				return _templateId;
+			}
+			
+			public function set templateId(value:String):void
+			{
+				_templateId = value;
+			}
+			[Bindable]
+			public function get encounterTypeId():String
+			{
+				return _encounterTypeId;
+			}
+			
+			public function set encounterTypeId(value:String):void
+			{
+				_encounterTypeId = value;
+			}
+			
+			[Bindable]
+			public function get clinicBranchID():String
+			{
+				return _clinicBranchID;
+			}
+			
+			public function set clinicBranchID(value:String):void
+			{
+				_clinicBranchID = value;
+			}
+			
+			[Bindable]
+			public function get userId():String
+			{
+				return _userId;
+			}
+			
+			public function set userId(value:String):void
+			{
+				_userId = value;
+			}
+			
+			[Bindable]
+			public function get userTypeDTO():XML
+			{
+				return _userTypeDTO;
+			}
+			
+			public function set userTypeDTO(value:XML):void
+			{
+				_userTypeDTO = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+					}
+				});
+				
+			}
+			
+			public function loadSelectedPatientData(selectedPatient:PatientDTO, clinicBranchID:String):void
+			{
+				//Load patient Visits
+				var loadPatientVisitsEvent: LoadPatientVisitsEvent = new LoadPatientVisitsEvent(selectedPatient.ID.toString(), clinicBranchID, VisitsLoaded);				
+				CairngormEventDispatcher.getInstance().dispatchEvent(loadPatientVisitsEvent);
+			}
+			
+			// ----- Visit load call back function ------------------
+			public function VisitsLoaded(response:XML):void
+			{
+				var response:XML = AppUtils.removeDefaultNamespaceFromXML(response);
+				visitArray.removeAll();
+				
+				if(id_associatedVisit.dataProvider)//TA - takle exception on null
+					id_associatedVisit.dataProvider.removeAll();
+				
+				for(var i:uint=0; i<response.Visits.PatientVisitDTO.length(); i++)
+				{
+					var VisitDateLbl:String = AppUtils.formatDate(response.Visits.PatientVisitDTO[i].VisitDate.toString());
+					var VisitDate:String = response.Visits.PatientVisitDTO[i].VisitDate.toString();
+					var VisitID:String = response.Visits.PatientVisitDTO[i].VisitID.toString();
+					var VisitTime:String = AppUtils.formatTime(response.Visits.PatientVisitDTO[i].VisitDate.toString());
+					//trace(VisitDate);
+					visitArray.addItem({VisitDate:VisitDate, VisitID:VisitID, VisitDateLbl:VisitDateLbl ,VisitTimeStamp:VisitTime});
+				}
+				
+				visitArray.addItemAt({VisitDate:'', VisitID:'0', VisitDateLbl:'N/A',VisitTimeStamp:''},0); // add NA
+				visitArray.addItemAt({VisitDate:QIVisitDate, VisitID:QIVisitID, VisitDateLbl:'This Visit',VisitTimeStamp:''},0); // add this visit
+				
+				id_associatedVisit.enabled = visitArray.length == 0 ? false : true;
+				
+				//id_associatedVisit.dataProvider = visitArray;
+				//id_associatedVisit.labelField = "VisitDateLbl";
+			}
+			
+			
+			
+			protected function createVisit_clickHandler(event:MouseEvent):void
+			{
+				var cve: CreateVisitCommonEvent = new CreateVisitCommonEvent(patient_ID, VisitCreated);				
+				cve.data = createVisitXML(); 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(cve);
+			}
+			
+			public function createVisitXML():XML
+			{
+				var visitDTO:XML					= <VisitDTO />;
+				visitDTO.IsDeleted 					= "false";
+				visitDTO.IsDirty 					= "false";
+				visitDTO.AppointmentId 				= "0";
+				visitDTO.IsRecordEditable			= "true";
+				visitDTO.IsValidDataExists			= "false";
+				visitDTO.IsVirtualVisit				= "false";
+				visitDTO.OwnerId 					= "0";
+				visitDTO.PlaceOfServiceTypeID		= "0";
+				
+				visitDTO.RecordStatus				= "";
+				visitDTO.SignedByUserId				= "0";
+				visitDTO.SignedByUserType			= "1";
+				visitDTO.SignedDate					= "2012-01-01T00:00:00";
+				visitDTO.TemplateVisitId			= "0";									
+				
+				
+				visitDTO.PatientId 					= patient_ID; //model.loadedPatientId;
+				visitDTO.TemplateId 				= '1'; //templateId;
+				visitDTO.EncounterTypeId 			= '1'; //encounterTypeId;
+				
+				//visitDTO.CreatedStationID 		= model.userSelectedStationDTO.StationID;
+				
+				//visitDTO.ClinicBranch 			= new ClinicBranchDTO();
+				visitDTO.ClinicBranch.ClinicBranchIdSeq =model.LoggedInUserSelectedBranchId; // clinicBranchID;
+				visitDTO.ClinicBranch.AvgPatientPerDay = 0;
+				visitDTO.UserId 					= userId;				
+				
+				visitDTO.UserType.UserTypeId		= model.LoggedInUserProviderTypeId;
+				
+				visitDTO.VisitStatus				= EConstants.UN_SIGNED_STATUS;
+				visitDTO.ModifiedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.SignedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.CoSignedDate				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.RecGuid 					= EConstants.GUID_FORMAT;
+				visitDTO.DictationID 				= EConstants.GUID_FORMAT;
+				
+				//M new fields addded in DTO
+				//28 Mar 2011
+				visitDTO.CreatedBy 					= userId;
+				visitDTO.ModifiedBy					= userId;
+				visitDTO.VisitDate					= AppUtils.getToday(); 
+				visitDTO.CreatedAt 					= AppUtils.getToday(); //"2012-01-01T00:00:00"; 
+				visitDTO.ModifiedAt 				= AppUtils.getToday();// EConstants.NULL_DATE;		
+				visitDTO.CreatedStationID			= '1';
+				
+				
+				visitDTO.appendChild(userTypeDTO);
+				
+				return visitDTO;
+				
+				
+			}
+			
+			public function VisitCreated(response:XML):void
+			{
+				//trace("visit created ");
+				//trace(response.toXMLString() );
+				encounterId = response;
+				
+				
+				
+				if(encounterId == "0")
+				{
+					var alert:Alert = Alert.show("Unable to create visit", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						
+					});
+					return;
+				}
+				else
+				{
+					dispatchEvent( new Event( "visitCreated", true ) );
+				}
+				
+				//AssignSummary(true, true, encounterId);	// encounterId for New visit
+			}
+			
+			protected function id_associatedVisit_changeHandler(event:IndexChangeEvent):void
+			{
+				dispatchEvent( new Event( "visitSelected", true ) );
+			}
+			
+			
+			protected function id_NARB_changeHandler(event:Event):void
+			{
+				/* if(id_NARB.selected == true)
+					dispatchEvent( new Event( 'NASelected', true ) )
+				else
+					dispatchEvent( new Event( 'NADeSelected', true ) ) */
+			}
+			
+			private var IsDropDownOpen:Boolean;
+			protected function id_associatedVisit_clickHandler(event:MouseEvent):void
+			{
+				if(IsDropDownOpen)
+				{
+					id_associatedVisit.closeDropDown(false);
+					IsDropDownOpen = false;
+				}
+					
+				else
+				{
+					id_associatedVisit.openDropDown();
+					IsDropDownOpen = true;
+				}
+				
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.VisitPopup">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="top" horizontalAlign="center" paddingTop="5" />
+		</s:layout>
+		
+		<s:VGroup width="100%" horizontalAlign="center">
+			<!--<s:Label text="Assign Visit Date" fontFamily="CalibriCFF" fontSize="14" width="100%"/>-->
+			<!--<s:BorderContainer width="100%" cornerRadius="2" borderColor="#747474">-->
+			<s:DropDownList id="id_associatedVisit" 
+							prompt="Associated Visit"    
+							labelField="VisitDateLbl"  width="100%" height="100%"
+							verticalScrollPolicy="auto"
+							skinClass="com.gazuntite.skins.controls.dropdownList.GazuntiteDDListSkin"
+							toolTip="Associated Visit" change="id_associatedVisit_changeHandler(event)" 
+							click="id_associatedVisit_clickHandler(event)"
+							itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.VisitlistIR"
+							verticalCenter="0" 
+							dataProvider="{visitArray}"/><!--itemRenderer="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.VisitlistIR"-->
+			
+			
+			<!--</s:BorderContainer>-->
+		</s:VGroup>
+		
+		<s:Button label="Create New Visit" visible="{CreateVisitAllowed}" includeInLayout="{CreateVisitAllowed}" 
+				  click="createVisit_clickHandler(event)" 
+				  buttonMode="true" useHandCursor="true" width="50%" height="18"
+				  skinClass="com.gazuntite.skins.controls.button.ePrescription.BlackButton" toolTip="Create New Visit"/>
+		
+		<s:CheckBox id="id_NARB" selected="{NASelected}"
+					   label="N/A" toolTip="N/A" buttonMode="true" useHandCursor="true"
+					   skinClass="com.gazuntite.skins.controls.checkbox.CheckboxBlack"
+					   visible="false" includeInLayout="false"
+					   change="id_NARB_changeHandler(event)"/><!--visible="{!CreateVisitAllowed}" includeInLayout="{!CreateVisitAllowed}" -->
+		
+		
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

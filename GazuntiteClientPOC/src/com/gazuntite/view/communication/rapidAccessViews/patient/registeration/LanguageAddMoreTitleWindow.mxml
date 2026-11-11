@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   width="500" height="200"
+			   title="Add more language(s)"
+			   close="titleWindowCloseHandler(event)" xmlns:registeration="com.gazuntite.view.communication.rapidAccessViews.patient.registeration.*" 
+			   >
+	
+	<fx:Metadata>
+		[Event(name="languageAdded", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			protected function id_LanguageAddMore_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_LanguageAddMore.id_Language.required = true;
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+		]]>
+	</fx:Script>
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			private var _isPopUpShown:Boolean = false;
+			
+			private var _languages:ArrayCollection;
+			
+			private function titleWindowCloseHandler(event:CloseEvent):void
+			{
+				hide();
+			}
+			
+			private function onAddButtonClick():void
+			{
+				if (id_LanguageDataGrid.dataProvider && id_LanguageDataGrid.dataProvider.length < 10)
+				{
+					if (id_LanguageAddMore.isGetEdited())
+					{
+						if (!isInValid())
+						{
+							var result:Object = id_LanguageAddMore.getLanguageDetails();
+							
+							_languages.addItem(result);
+							dispatchEvent( new Event( "languageAdded", true, false ) );
+							resetFields();
+							id_LanguageAddMore.id_Language.setFocus();////Alvi - Focus on first field after adding a record
+						}
+					}
+					else
+					{
+						Alert.show("Kindly select at least one language.\n", "", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+						{
+							id_LanguageAddMore.id_Language.setFocus();////Alvi - Focus on first field after adding a record
+						});
+					}
+				}
+				else
+				{
+					Alert.show("you can not enter more then 10 languages.\n", "phone numbers limit error", 4, FlexGlobals.topLevelApplication.mainContainer)
+				}
+			}
+			
+			private function hide():void
+			{
+				_isPopUpShown = false;
+				
+				resetFields();
+				PopUpManager.removePopUp(this);	
+			}
+			
+			private function resetFields():void
+			{
+				if (id_LanguageAddMore)
+				{
+					id_LanguageAddMore.resetFields();
+				}
+				
+				/*if (id_AddPhoneNumberGrid)
+				{
+				id_AddPhoneNumberGrid.dataProvider = null;
+				}*/
+			}
+			
+			private function isInValid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				
+				var result:Object = id_LanguageAddMore.isInValid();
+				
+				if (result.hasOwnProperty("isNotValid") && result.isNotValid)
+				{
+					isNotValid = true;
+					
+					if (result.hasOwnProperty("errorStr") && result.errorStr.length)
+					{
+						errorStr += result.errorStr;
+					}
+					
+					if (result.hasOwnProperty("toSetFocus") && result.toSetFocus)
+					{
+						if (!toSetFocus)
+							toSetFocus = result.toSetFocus;
+					}
+				}
+				
+				if (isNotValid && errorStr.length)
+				{
+					Alert.show(errorStr, "Language information entry alert", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			[Bindable]
+			public function get languages():ArrayCollection
+			{
+				return _languages;
+			}
+			
+			public function set languages(value:ArrayCollection):void
+			{
+				_languages = value;
+			}
+			
+			public function get isPopUpShown():Boolean
+			{
+				return _isPopUpShown;
+			}
+			
+			public function display(parent:DisplayObject, pt:Point = null):void
+			{
+				if (!_isPopUpShown)
+				{
+					_isPopUpShown = true;
+					visible = true;
+					
+					PopUpManager.addPopUp(this, parent);
+					
+					if (pt)
+					{
+						this.x = pt.x - this.width/2;
+						this.y = pt.y;
+					}
+				}
+			}
+			
+			public function clearPopUp():void
+			{
+				if(id_LanguageAddMore != null)
+				{
+					id_LanguageAddMore.resetFields();
+				
+					_languages = null;
+				
+					hide();
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!--<s:layout>
+		<s:VerticalLayout paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+	</s:layout>-->
+
+	<mx:Grid width="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="10">
+		<mx:GridRow width="100%">
+			<mx:GridItem colSpan="2" width="100%">
+				<registeration:LanguageAddMore id="id_LanguageAddMore" width="100%" creationComplete="id_LanguageAddMore_creationCompleteHandler(event)" />
+			</mx:GridItem>
+			<mx:GridItem>
+				<s:Button id="id_Add" label=" Save Languages" toolTip="Save Languages"  buttonMode="true" useHandCursor="true" 
+						  skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn" click="onAddButtonClick()"/>
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow width="100%">
+			<mx:GridItem colSpan="3" width="100%">
+				<mx:DataGrid id="id_LanguageDataGrid" width="100%" sortableColumns="false" 
+							 editable="false" dataProvider="{languages}"  minHeight="50" maxHeight="100"
+							 rowCount="{id_LanguageDataGrid.dataProvider.length}" 
+							 verticalScrollBarStyleName="VScrollBar">
+					<mx:columns>
+						<mx:DataGridColumn headerText="Language" dataField="language.LanguageName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+						<mx:DataGridColumn headerText="Country" dataField="country.CountryName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+						<mx:DataGridColumn headerText="Ability Mode" dataField="abilityMode.LangaugeAbilityModeDescription" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+						<mx:DataGridColumn headerText="Preferred" dataField="isPreferred" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					</mx:columns>
+				</mx:DataGrid>
+			</mx:GridItem>
+		</mx:GridRow>
+	</mx:Grid>
+
+</s:TitleWindow>

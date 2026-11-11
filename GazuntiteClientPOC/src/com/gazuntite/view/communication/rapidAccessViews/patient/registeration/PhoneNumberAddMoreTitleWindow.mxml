@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.zigron.controls.extended.components.*"
+
+		 width="500" height="180" 
+		 
+		 close="titleWindowCloseHandler(event)" 
+		 creationComplete="id_PhoneNumberAddMore_creationCompleteHandler(event)"
+		 title="Add more contacts" xmlns:registeration="com.gazuntite.view.communication.rapidAccessViews.patient.registeration.*" 
+		 
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.common.util.ValidationUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Label;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.states.OverrideBase;
+			
+			private var _isAddPhoneNumberPopUpShown:Boolean = false;
+			
+			[Bindable]
+			private var _phoneNumbers:ArrayCollection;
+			
+			private function titleWindowCloseHandler(event:CloseEvent):void
+			{
+				hide();
+			}
+			
+			private function hide():void
+			{
+				_isAddPhoneNumberPopUpShown = false;
+				
+				resetFields();
+				PopUpManager.removePopUp(this);	
+			}
+			
+			private function onAddButtonClick():void
+			{
+				if (id_AddPhoneNumberGrid.dataProvider && id_AddPhoneNumberGrid.dataProvider.length < 10)
+				{
+					if (!isInValid())
+					{
+						var result:Object = id_PhoneNumberAddMore.getPhoneNumberDetails();
+						_phoneNumbers.addItem(result);
+						resetFields();
+						id_PhoneNumberAddMore.id_TelNumber.setFocus(); ////Alvi - Focus on first field after adding a record
+					}
+				}
+				else
+				{
+					Alert.show("you can not enter more then 10 phone numbers.\n", "phone numbers limit error", 4, FlexGlobals.topLevelApplication.mainContainer)
+				}
+			}
+			
+			private function resetFields():void
+			{
+				if (id_PhoneNumberAddMore)
+				{
+					id_PhoneNumberAddMore.resetFields();
+				}
+				
+				/*if (id_AddPhoneNumberGrid)
+				{
+					id_AddPhoneNumberGrid.dataProvider = null;
+				}*/
+			}
+			
+			private function isInValid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				
+				var result:Object = id_PhoneNumberAddMore.isInValid();
+				
+				if (result.hasOwnProperty("isNotValid") && result.isNotValid)
+				{
+					isNotValid = true;
+					
+					if (result.hasOwnProperty("errorStr") && result.errorStr.length)
+					{
+						errorStr += result.errorStr;
+					}
+					
+					if (result.hasOwnProperty("toSetFocus") && result.toSetFocus)
+					{
+						if (!toSetFocus)
+							toSetFocus = result.toSetFocus;
+					}
+				}
+				
+				if (isNotValid && errorStr.length)
+				{
+					Alert.show(errorStr, "Contact information entry alert", 4, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			
+			public function get phoneNumbers():ArrayCollection
+			{
+				return _phoneNumbers;
+			}
+			
+			public function set phoneNumbers(value:ArrayCollection):void
+			{
+				_phoneNumbers = value;
+			}
+			
+			public function get isAddPhoneNumberPopUpShown():Boolean
+			{
+				return _isAddPhoneNumberPopUpShown;
+			}
+			
+			public function display(parent:DisplayObject, pt:Point = null):void
+			{
+				if (!_isAddPhoneNumberPopUpShown)
+				{
+					_isAddPhoneNumberPopUpShown = true;
+					visible = true;
+					
+					PopUpManager.addPopUp(this, parent);
+					
+					if (pt)
+					{
+						this.x = pt.x - this.width/2;
+						this.y = pt.y;
+					}
+				}
+			}
+			
+			public function clearPopUp():void
+			{
+				id_PhoneNumberAddMore.resetFields();
+				_phoneNumbers = null;
+				
+				hide();
+			}
+			
+			protected function id_PhoneNumberAddMore_creationCompleteHandler(event:FlexEvent):void
+			{
+				//id_PhoneNumberAddMore.id_TelNumber.setFocus() ;
+				id_PhoneNumberAddMore.id_TelNumber.required   = true;
+				id_PhoneNumberAddMore.id_TelNumberKind.required   = true;
+				
+			}
+			private function getPhoneNo(item:Object, column:DataGridColumn):String
+			{
+				var result:String = '';
+				if(item.phoneNumber)
+					result = ValidationUtils.setPhoneNumberMasking(item.phoneNumber);
+				
+				return result;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<s:VGroup horizontalAlign="center" width="100%" paddingRight="5" paddingBottom="5" paddingLeft="5" paddingTop="5">
+		<s:HGroup width="100%" verticalAlign="middle">
+			<registeration:PhoneNumberAddMore id="id_PhoneNumberAddMore" width="80%"  tabIndex="1"/>
+			<s:Button id="add" label=" Save Phone Numbers" skinClass="com.adobe.Quivus.view.controls.skins.buttonSkins.AddMoreTooltipBtn" click="onAddButtonClick()"
+					  useHandCursor="true" buttonMode="true"  toolTip="Save Phone Numbers" tabIndex="4" />
+		</s:HGroup>
+		<mx:DataGrid id="id_AddPhoneNumberGrid" editable="false" minHeight="20" width="100%" rowCount="{id_AddPhoneNumberGrid.dataProvider.length}"
+					 dataProvider="{_phoneNumbers}" verticalScrollBarStyleName="VScrollBar" maxHeight="100" tabIndex="5"
+					 sortableColumns="false">
+			<mx:columns>
+				<mx:DataGridColumn dataField="phoneNumber" labelFunction="getPhoneNo" headerText="Phone number" width="0.5" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				<mx:DataGridColumn dataField="phoneExtension" headerText="Extension" width="0.2" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				<mx:DataGridColumn dataField="phoneNumberKind.NumberTypeName" headerText="Phone type" width="0.3" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</s:VGroup>
+</s:TitleWindow>

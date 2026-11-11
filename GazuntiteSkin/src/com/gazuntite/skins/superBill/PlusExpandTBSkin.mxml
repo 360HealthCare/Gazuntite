@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+		width="18" height="22" fc:manageBounds="false">
+	<fx:Metadata>[HostComponent("spark.components.ToggleButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+	<s:Rect includeIn="up" width="17" height="17" horizontalCenter="0" radiusX="2"
+			verticalCenter="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#676767" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#353535" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#000000" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect includeIn="disabledAndSelected,down,downAndSelected,over,overAndSelected,up,upAndSelected"
+			width="17" height="17" radiusX="2"
+			x.disabledAndSelected="0.5" verticalCenter.disabledAndSelected="0"
+			horizontalCenter.down="0" verticalCenter.down="0"
+			visible.downAndSelected="false" x.downAndSelected="0.5" y.downAndSelected="0.5"
+			height.downAndSelected="29"
+			horizontalCenter.over="0" verticalCenter.over="0"
+			visible.overAndSelected="false" x.overAndSelected="0.5" y.overAndSelected="0.5"
+			height.overAndSelected="29"
+			visible.up="false" x.up="0.5" y.up="0.5"
+			visible.upAndSelected="false" x.upAndSelected="0.5" y.upAndSelected="0.5"
+			height.upAndSelected="29">
+		<s:fill>
+			<s:LinearGradient rotation="90" rotation.over="270">
+				<s:GradientEntry alpha="1.0" color="#64281A" ratio="0"
+								 color.upAndSelected="#E0DDDC"/>
+				<s:GradientEntry alpha="1.0" color="#C68475" ratio="1"
+								 color.upAndSelected="#FFFFFF"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="disabledAndSelected,down,downAndSelected,overAndSelected,up,upAndSelected"
+								alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000"
+								distance="1" hideObject="false" inner="true" knockout="false"
+								quality="3" strength="1"
+								alpha.upAndSelected="0.75" angle.upAndSelected="48.36646066342981"
+								distance.upAndSelected="2"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke weight="1" caps="none" miterLimit="4" joints="miter" color="#CCCCCC" alpha="0.41000000000000003"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect includeIn="down,downAndSelected,overAndSelected,upAndSelected" width="17" height="29"
+			radiusX="2"
+			visible.down="false" x.down="0.5" y.down="0.5"
+			height.downAndSelected="21" horizontalCenter.downAndSelected="0"
+			verticalCenter.downAndSelected="0"
+			height.overAndSelected="21" horizontalCenter.overAndSelected="0"
+			verticalCenter.overAndSelected="0"
+			height.upAndSelected="21" horizontalCenter.upAndSelected="0"
+			verticalCenter.upAndSelected="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#E0DDDC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.75" angle="48.36646066342981" blurX="2" blurY="2"
+								color="0x000000" distance="2" hideObject="false" inner="true"
+								knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke weight="1" caps="none" miterLimit="4" joints="miter" color="#CCCCCC" alpha="0.41000000000000003"/>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect includeIn="disabled" visible="false" x="0.5" y="0.5" width="17" height="17" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke weight="1" caps="none" miterLimit="4" joints="miter" rotation="90">
+				<s:GradientEntry color="#333333" alpha="1.0" ratio="0"/>
+				<s:GradientEntry color="#000000" alpha="1" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect includeIn="disabled,disabledAndSelected" width="17" height="17" radiusX="2"
+			horizontalCenter.disabled="0" verticalCenter.disabled="0"
+			horizontalCenter.disabledAndSelected="0" verticalCenter.disabledAndSelected="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#999999" ratio="0.5254901960784314"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="0.5294117647058824"/>
+				<s:GradientEntry alpha="1.0" color="#666666" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:stroke>
+			<s:LinearGradientStroke weight="1" caps="none" miterLimit="4" joints="miter" rotation="90">
+				<s:GradientEntry color="#333333" alpha="1.0" ratio="0"/>
+				<s:GradientEntry color="#000000" alpha="1" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	<s:Rect width="1" height="9"
+			x.disabled="9" verticalCenter.disabled="0"
+			x.disabledAndSelected="9" verticalCenter.disabledAndSelected="0"
+			x.down="9" verticalCenter.down="0"
+			horizontalCenter.downAndSelected="0" verticalCenter.downAndSelected="0"
+			x.over="9" verticalCenter.over="0"
+			horizontalCenter.overAndSelected="0" verticalCenter.overAndSelected="0"
+			horizontalCenter.up="0" verticalCenter.up="0"
+			horizontalCenter.upAndSelected="0" verticalCenter.upAndSelected="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#EDEDED" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:fill.upAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.upAndSelected>
+		<s:fill.downAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.downAndSelected>
+		<s:fill.overAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.overAndSelected>
+	</s:Rect>
+	<s:Rect width="9" height="1"
+			x.disabled="5" verticalCenter.disabled="0"
+			x.disabledAndSelected="5" verticalCenter.disabledAndSelected="0"
+			x.down="5" verticalCenter.down="0"
+			horizontalCenter.downAndSelected="0" verticalCenter.downAndSelected="0"
+			x.over="5" verticalCenter.over="0"
+			horizontalCenter.overAndSelected="0" verticalCenter.overAndSelected="0"
+			horizontalCenter.up="0" verticalCenter.up="0"
+			x.upAndSelected="5" verticalCenter.upAndSelected="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#EDEDED" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:fill.upAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.upAndSelected>
+		<s:fill.downAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.downAndSelected>
+		<s:fill.overAndSelected>
+			<s:SolidColor color="#000000"/>
+		</s:fill.overAndSelected>
+	</s:Rect>
+</s:Skin>

@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+		  xmlns:components="com.gazuntite.components.*" 
+		  xmlns:pharmacy="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.pharmacy.*" 
+		  xmlns:components1="com.gazuntite.controls.extended.components.*"
+		  creationComplete="cc(event)" 
+		  gap="2" paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.MedRXDTO;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.util.ValidationUtils;
+			import com.gazuntite.controls.events.FlipViewEvent;
+			import com.gazuntite.provider.eprescription.services.patient.dto.MedicineDTO;
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetAddressBookByPartyRegGuidEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin;
+			import com.gazuntite.skins.controls.container.ePrescription.MedicineSelectedbackgroundSkin;
+			import com.gazuntite.skins.controls.image.TemporaryIconSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			
+			[Bindable]	public var newRXDictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			private var selectVisitPopup:SelectVisitPopup;
+			private var _encounterID:String;
+			private var _visitDate:String = '';
+			
+			private var _QIVisitID:String;
+			private var _QIVisitDate:String = '';
+			
+			private var _selectedPatient:PatientDTO;
+			public var selectedPatientAddress:String = '';
+			public var selectedPatientPhone:String = '';
+			private var summary:SummaryPopUp;
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			private var _tempRefrenceNo:String;
+			private var _selectedMedicine:MedicineDTO;
+			
+			private var _openforChronic:Boolean;
+			private var _openforPresprection:Boolean;
+			private var _IsforInput:Boolean;
+			
+			public function get QIVisitDate():String
+			{
+				return _QIVisitDate;
+			}
+
+			public function set QIVisitDate(value:String):void
+			{
+				_QIVisitDate = value;
+				
+				if(value)
+					visitDate = value;
+			}
+
+			public function get QIVisitID():String
+			{
+				return _QIVisitID;
+			}
+
+			public function set QIVisitID(value:String):void
+			{
+				_QIVisitID = value;
+				if(value)
+					encounterID = value;
+			}
+
+			public function get tempRefrenceNo():String
+			{
+				return _tempRefrenceNo;
+			}
+
+			public function set tempRefrenceNo(value:String):void
+			{
+				_tempRefrenceNo = value;
+			}
+
+			[Bindable]
+			public function get openforPresprection():Boolean
+			{
+				return _openforPresprection;
+			}
+			
+			public function set openforPresprection(value:Boolean):void
+			{
+				_openforPresprection = value;
+			}
+			
+			public function get IsforInput():Boolean
+			{
+				return _IsforInput;
+			}
+			
+			[Bindable]
+			public function set IsforInput(value:Boolean):void
+			{
+				_IsforInput = value;
+				
+				if(value)
+					id_forChronic.visible = false;
+				id_forChronic.includeInLayout = false;
+			}
+			
+			[Bindable]
+			public function get openforChronic():Boolean
+			{
+				return _openforChronic;
+			}
+			
+			public function set openforChronic(value:Boolean):void
+			{
+				_openforChronic = value;
+				openforPresprection = !value;
+			}
+			
+			[Bindable]
+			public function get visitDate():String
+			{
+				if(_visitDate == '')
+					return 'N/A'
+				
+				return _visitDate;
+			}
+			
+			public function set visitDate(value:String):void
+			{
+				_visitDate = value;
+				if(value)
+					_visitDate = df.format(_visitDate);
+			}
+			
+			[Bindable]
+			public function get encounterID():String
+			{
+				return _encounterID;
+			}
+			
+			public function set encounterID(value:String):void
+			{
+				_encounterID = value;
+			}
+			
+			[Bindable]
+			public function get selectedPatient():PatientDTO
+			{
+				return _selectedPatient;
+			}
+			
+			public function set selectedPatient(value:PatientDTO):void
+			{
+				
+				if(value != null)
+				{
+					if(id_MedicineInputView.ViewIsDirty())
+					{
+						/* Alert.show("Do you want to clear the form ?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+						{
+							
+							if( event.detail == Alert.YES )
+							{
+								ResetCompleteRXForm();
+							}
+						});	 */
+					}
+					_selectedPatient = value;
+					loadPatientAddressBook();
+					InitializeView();
+				}
+			}
+			
+			[Bindable]
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+			
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				
+				InitializeView();
+				
+			}
+			
+			[Bindable]
+			public function get selectedMedicine():MedicineDTO
+			{
+				return _selectedMedicine;
+			}
+			
+			public function set selectedMedicine(value:MedicineDTO):void
+			{
+				_selectedMedicine = value;
+				
+				value != null ?  dispatchEvent(new Event('ChronicViewDirty',true)) :  dispatchEvent(new Event('ChronicViewCleaned',true));
+					
+				if(value != null)
+				{
+					if(id_MedicineInputView.ViewIsDirty())
+					{
+						Alert.show("Changing medicine will clear medicine data, are you sure you want to change ?",	"Are you sure?", Alert.YES|Alert.NO, FlexGlobals.topLevelApplication.mainContainer, function( event:CloseEvent):void
+						{
+							
+							if( event.detail == Alert.YES )
+							{
+								id_MedicineInputView.ResetFields();
+								id_pharmacyNote.text = '';
+								id_SIG.text = '';
+								//id_pharmacyNote.text = '';
+							}
+						});	
+					}
+					
+				}
+			}
+			
+			public function loadStaticData():void
+			{
+				id_MedicineInputView.loadStaticData();
+			}
+			
+			public function loadPatientAddressBook():void
+			{
+				var patientAddressEvent: GetAddressBookByPartyRegGuidEvent = new GetAddressBookByPartyRegGuidEvent(selectedPatient.RecGuid, function(response:XML):void
+				{
+					//AddressDTOlist = response.AddressDTOlist;
+					for(var i:uint = 0; i<response.AddressDTOlist.length(); i++)
+					{
+						selectedPatientAddress = response.AddressDTOlist.AddressDTO[0].StreetName + ", " + response.AddressDTOlist.AddressDTO[0].CityName + ", " + response.AddressDTOlist.AddressDTO[0].StateName;
+					}
+					
+					if(response.PhoneDTOlist.PhoneDTO[0] != null)
+					{
+						selectedPatientPhone = ValidationUtils.setPhoneNumberMasking(response.PhoneDTOlist.PhoneDTO[0].PhoneNumber);
+					} 
+				});				
+				CairngormEventDispatcher.getInstance().dispatchEvent(patientAddressEvent);
+			}
+			
+			private function InitializeView():void
+			{
+				/* if(id_Prescription != null && selectedPatient != null && id_Prescription.selected && !IsforInput)
+				{
+				id_medicationSelection.visible = false;
+				id_pharmacyView.visible = true;
+				}
+				else if(selectedPatient != null)
+				{ 
+				id_medicationSelection.visible = true;
+				id_pharmacyView.visible = false;
+				}
+				if(selectedPharmacy!= null)
+				{
+				id_medicationSelection.visible = true;
+				} */
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				BindingUtils.bindProperty(this, "selectedPatient", id_PatientSelectionView, "selectedPatient" );
+				BindingUtils.bindProperty(this, "selectedPharmacy", id_pharmacyView, "selectedPharmacy" );
+				BindingUtils.bindProperty(this, "selectedMedicine", id_MedicineSelectionView, "selectedMedicine" );
+				
+				/* id_favPharmacyView.addEventListener("AddPharmacy",onAddPharmacy);
+				id_favPharmacyView.addEventListener("OkClick",onActionBtnClick);
+				id_favPharmacyView.addEventListener("CancelClick",onActionBtnClick); */
+				
+				InitializeView();
+			}
+			
+			public function SetVisitDetails(visitID:String , visitDte:String):void
+			{
+				visitDate = visitDte;
+				encounterID = visitID;
+				
+				QIVisitDate = visitDte;
+				QIVisitID = visitID;
+			}
+			
+			public function OpenForQuickInputChronic(visitID:String , visitDte:String):void
+			{
+				callLater( function ():void
+				{
+					//id_ChronicMedication.selected = true;
+					//id_optionView.visible = false;
+					//id_pharmacyView.visible = false;
+					//id_medicationSelection.visible = true;
+					
+					//SetVisitDetails(visitID,visitDte);
+					/* visitDate = visitDte;
+					encounterID = visitID; */
+				});
+			}
+			public function OpenForQuickInputEpreprection(visitID:String , visitDte:String):void
+			{
+				callLater( function ():void
+				{
+					//id_medicationSelection.visible = selectedPharmacy != null?true:false;
+					//id_Prescription.selected = true;
+					//id_pharmacyView.visible = true;
+					//id_optionView.visible = false;
+					SetVisitDetails(visitID,visitDte);
+				});
+			}
+			
+			private function CheckMedicineInputForm():Boolean
+			{
+				if(selectedMedicine != null || selectedPatient != null || selectedPatientAddress != null || selectedPatientPhone  != null || selectedPharmacy != null)
+				{
+					return true;	
+				}
+				
+				return false;
+			}
+			
+			/*** 
+			 * 
+			 * This function will be Reset Complete RX , provide the feature of Closing of panel
+			 * Author : Moeen Mohsin
+			 * 
+			 *  ***/
+			public function ResetCompleteRXForm():void
+			{
+				ResetRXForm();
+				selectedPatient = null;
+				selectedPharmacy = null;
+				
+				model.patientGaxenID = ''; // this need to be resit  , failing is doing this will assign the medication of newly created patient to the previously loaded patient.
+				id_pharmacyView.id_selectPharmacyVS.selectedIndex = 0;
+			}
+			
+			/*** 
+			 * 
+			 * This function will be Reset RX , provide the feature of reseting the form to add new RXs
+			 * Author : Moeen Mohsin
+			 * 
+			 *  ***/
+			
+			public function ResetRXForm():void
+			{
+				selectedMedicine = null;
+				selectedPatientAddress = null;
+				selectedPatientPhone = null;
+				tempRefrenceNo = '';
+				
+				if(!IsforInput)
+				{
+					encounterID = '';
+					visitDate = '';
+				}
+				id_pharmacyNote.text = '';
+				id_SIG.text = '';
+				
+				id_MedicineInputView.ResetFields();
+				id_MedicineSelectionView.id_selectMedicineVS.selectedIndex = 0;
+				id_pharmacyView.id_selectPharmacyVS.selectedIndex = null != selectedPharmacy ? 1 : 0;
+				
+				
+				//id_pharmacyView.visible =id_Prescription.selected?true:false;
+				//id_PatientSelectionView.visible = true;
+				
+				
+				/* if(id_Prescription.selected) //reset for presprection
+				{
+				//= null != selectedPharmacy ? true : false;
+				}
+				else //reset for Chronic
+				{
+				//id_medicationSelection.visible = true;
+				} */
+			}
+			
+			/* protected function SelectPharmacyClick(event:MouseEvent):void
+			{
+			var getPharmacy: GetPatientPharmEvent = new GetPatientPharmEvent(selectedPatient.ID, pharmaciesLoaded);				
+			CairngormEventDispatcher.getInstance().dispatchEvent(getPharmacy);
+			
+			//id_favPharmacyView.visible = true;
+			} */
+			
+			/* public function pharmaciesLoaded(pharmaciesXML:XML):void
+			{
+			trace("favorite pharmacies loaded");
+			trace(pharmaciesXML.toXMLString());
+			
+			
+			pharmaciesXML = AppUtils.removeDefaultNamespaceFromXML(pharmaciesXML);
+			
+			var favArrayCol:ArrayCollection = new ArrayCollection();
+			
+			for(var i:int=0; i<pharmaciesXML.Pharmacy.length(); i++)
+			{
+			var fp_obj:PharmaciesResult = new PharmaciesResult();
+			fp_obj.FromXML(pharmaciesXML.Pharmacy[i]);
+			favArrayCol.addItem(fp_obj);
+			}
+			id_pharmacyView.id_selectionView.id_favPharmacyView.DataProvider = favArrayCol; 
+			} */
+			
+			/* private function onAddPharmacy(event:Event):void
+			{
+			id_PharmacySelectionView.visible = true;
+			id_favPharmacyView.visible = false;
+			id_SelectPharmacyBtn.visible = false;
+			} */
+			
+			/* private function onActionBtnClick(event:Event):void
+			{
+			if(event.type == "OkClick")
+			{
+			if(null != id_favPharmacyView.id_list.selectedItem)
+			selectedPharmacy = id_favPharmacyView.id_list.selectedItem as PharmaciesResult; 
+			id_PharmacySelectionView.togglePatientSearchView();
+			id_PharmacySelectionView.visible = true;
+			id_favPharmacyView.visible = false;
+			id_SelectPharmacyBtn.visible = false;
+			}
+			else 
+			{
+			id_PharmacySelectionView.visible = false;
+			id_favPharmacyView.visible = false;
+			id_SelectPharmacyBtn.visible = true;
+			}
+			} */
+			
+			protected function send_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("sendData", true) );
+			}
+			
+			protected function add_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event("addData", true) );
+			}
+			
+			protected function visitDate_clickHandler(event:MouseEvent):void
+			{
+				if( selectVisitPopup && selectVisitPopup.isPopUp )
+				{
+					selectVisitPopup.removePopup();
+					return;
+				}
+				selectVisitPopup = new SelectVisitPopup();
+				
+				selectVisitPopup.patient_ID = selectedPatient.ID.toString();
+				selectVisitPopup.userId = model.LoggedInUserId.toString();
+				selectVisitPopup.userId = model.LoggedInUserId.toString();
+				selectVisitPopup.CreateVisitAllowed = !IsforInput;
+				
+				selectVisitPopup.QIVisitDate = QIVisitDate;
+				selectVisitPopup.QIVisitID = QIVisitID;
+				
+				//selectVisitPopup.NASelected = visitDate == 'N/A' ? true : false;
+				
+				
+				selectVisitPopup.ShowPopup( this );
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				selectVisitPopup.move( pt.x  - 150, pt.y + event.currentTarget.height  + 5); 
+				
+				selectVisitPopup.loadSelectedPatientData(selectedPatient, model.LoggedInUserSelectedBranchId.toString());
+				
+				selectVisitPopup.addEventListener("visitSelected", function(event:Event):void
+				{
+					encounterID = selectVisitPopup.id_associatedVisit.selectedItem.VisitID;	
+					visitDate = selectVisitPopup.id_associatedVisit.selectedItem.VisitDate;	
+					
+					model.visitID = encounterID;
+					model.visitDate = visitDate;
+					
+					selectVisitPopup.removePopup();
+				});
+				selectVisitPopup.addEventListener("visitCreated", function(event:Event):void
+				{
+					encounterID = selectVisitPopup.encounterId;	
+					visitDate = AppUtils.getToday();	
+					
+					model.visitID = encounterID;
+					model.visitDate = visitDate;
+					
+					selectVisitPopup.removePopup();
+				});
+				
+				/* selectVisitPopup.addEventListener("NASelected", function(event:Event):void
+				{
+					QIVisitID = encounterID;
+					QIVisitDate = visitDate;
+					
+					encounterID = '0';	
+					visitDate = 'N/A';	
+					
+					model.visitID = '0';
+					model.visitDate ='';
+					
+					selectVisitPopup.removePopup();
+				}); */
+				/* selectVisitPopup.addEventListener("NADeSelected", function(event:Event):void
+				{
+					encounterID = QIVisitID;
+					visitDate = QIVisitDate;
+					
+					model.visitID = encounterID;
+					model.visitDate = visitDate;
+					
+					selectVisitPopup.removePopup();
+				}); */
+			}
+			
+			protected function id_previewBtn_clickHandler(event:MouseEvent):void
+			{
+				if(id_ChronicMedication.selected)
+					dispatchEvent( new Event("sendCMData", true) );
+				else if(id_Prescription.selected)
+					dispatchEvent( new Event("sendData", true) );
+				
+			}
+			
+			protected function id_Prescription_changeHandler(event:Event):void
+			{
+				//IsforInput = id_Prescription.selected;
+				return ;
+				
+				if(id_Prescription.selected)
+				{
+					id_pharmacyView.visible = true;
+					
+					if(selectedPharmacy != null)
+					{
+						id_medicationSelection.visible = true ;
+					}
+					else
+						id_medicationSelection.visible = false ;
+				}
+				
+				id_MedicineInputView.IsCompletlyFilled();
+			}
+			
+			protected function id_ChronicMedication_changeHandler(event:Event):void
+			{
+				
+				openforChronic = id_ChronicMedication.selected;
+				return;
+				
+				if(id_ChronicMedication.selected)
+				{
+					id_pharmacyView.visible = false;
+					id_medicationSelection.visible = true ;
+					
+				}
+				id_MedicineInputView.IsCompletlyFilled();
+			}
+			
+			/* protected function id_summaryClose_clickHandler(event:MouseEvent):void
+			{
+			summary.removePopup();
+			id_SummaryView.selectedIndex = 0;
+			
+			} */
+			
+			private var comOptionpoup:OptionPopUp;
+			protected function uiOptionButton_clickHandler(event:MouseEvent):void
+			{
+				
+				var toggleView:Boolean = null != comOptionpoup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				comOptionpoup = new OptionPopUp();
+				comOptionpoup.ShowPopup( this );
+				
+				comOptionpoup.addEventListener("ClosePopup", function(closeevent:Event):void 
+				{ 
+					removeAllPopups();
+				});
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				
+				comOptionpoup.move( pt.x - comOptionpoup.width + 25, pt.y + 25 ); 
+				
+				event.preventDefault();
+				event.stopImmediatePropagation();
+			}
+			
+			public function removeAllPopups():void
+			{
+				if( comOptionpoup && comOptionpoup.isPopUp )
+				{
+					comOptionpoup.removePopup();
+					comOptionpoup = null;
+					uiOptionButton.selected = false;
+				}
+			}
+			
+			[Bindable]
+			public var PharmNotes:String = '';
+			public function LoadRXMedicationDTO(DTO:MedRXDTO):void
+			{
+				
+				/* selectedPatient = new PatientDTO();
+				selectedPatient.GAXENID = DTO.GaxenPatientID;
+				selectedPatient.FirstName = DTO.FirstName;
+				selectedPatient.LastName = DTO.LastName;
+				selectedPatient.Gender = DTO.Gender;
+				selectedPatient.DOB = DTO.DOB; */
+				
+				
+				selectedPharmacy = new PharmaciesResult();
+				selectedPharmacy.NCPDPID = DTO.NCPDPID;
+				selectedPharmacy.Phone = DTO.PharmPhone;
+				selectedPharmacy.StoreNumber = DTO.PharmName;
+				selectedPharmacy.AddressLine1 = DTO.PharmAddress;
+					
+				tempRefrenceNo = DTO.ReferenceNumber;
+				id_MedicineInputView.loadStaticData()
+				selectedMedicine = new MedicineDTO();
+				selectedMedicine.LoadMedDTO(DTO);
+				
+				id_MedicineInputView.GeneratedSig = DTO.SIG;
+				
+				PharmNotes = DTO.Notes;
+				
+				selectedPatientPhone = DTO.Phone;
+				selectedPatientAddress = DTO.Address;
+				
+				id_MedicineInputView.LoadMedicineValues(DTO);
+				
+				
+				id_medicationGroup.visible = true;
+				id_medicationGroup.includeInLayout = true;
+				
+				id_PlusButtonBtn.visible = true;
+				id_PlusButtonBtn.includeInLayout = true;
+				
+				
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="df" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	
+	<!--<s:layout>
+	<s:VerticalLayout />
+	</s:layout>
+	-->
+	<s:HGroup id="id_forChronic" width="100%" verticalAlign="top" gap="3" includeInLayout="{id_forChronic.visible}">
+		
+		<newrx:PatientSelectionView  id="id_PatientSelectionView" selectedPatient="{selectedPatient}" width="50%" AllowSearch="{!IsforInput}"/>
+		
+		<pharmacy:PharmacyView id="id_pharmacyView" width="40%" visible="{id_Prescription.selected &amp;&amp; !IsforInput }"  selectedPharmacy="{selectedPharmacy}" enabled="{selectedPatient != null}" selectedPatient="{selectedPatient}"/>
+		
+		<s:VGroup width="125" id="id_optionView" verticalAlign="top" horizontalAlign="right" paddingTop="4">
+			
+			<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle" gap="2">
+				
+				<s:SkinnableContainer width="76" height="20" skinClass="com.gazuntite.skins.controls.container.BlueRadioButtonBG" >
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="middle" gap="0" horizontalAlign="center"/>
+					</s:layout>
+					<s:RadioButton id="id_Prescription" label="P" value="ByPrescription" fontSize="15"
+								   groupName="rbGroup" buttonMode="true" useHandCursor="true" toolTip="Prescription"
+								   skinClass="com.gazuntite.skins.controls.radioButton.RadioButtonRXSkin"
+								   change="id_Prescription_changeHandler(event)" selected="@{openforPresprection}"
+								   /><!-- -->
+					<s:RadioButton id="id_ChronicMedication" label="C" value="ChronicMedication" fontSize="15"
+								   groupName="rbGroup" buttonMode="true" useHandCursor="true" toolTip="Chronic Medication"
+								   skinClass="com.gazuntite.skins.controls.radioButton.RadioButtonChronic"
+								   change="id_ChronicMedication_changeHandler(event)" selected="@{openforChronic}"
+								   /><!---->
+				</s:SkinnableContainer>
+				
+				<s:ToggleButton id="uiOptionButton"
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.OptionToggleButton"
+								buttonMode="true" toolTip="More Options" 
+								click="uiOptionButton_clickHandler(event)"/><!--selected="@{newRXDictationNoteViewModel.visible}"-->
+				<s:Button
+					click="{dispatchEvent(new FlipViewEvent())}"
+					verticalCenter="0" skinClass="com.gazuntite.skins.controls.button.FlipViewButtonSkin"
+					buttonMode="true" useHandCursor="true" toolTip="Flip the View"/>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:HGroup>
+	
+	<s:Scroller width="100%" height="160" horizontalScrollPolicy="off" verticalScrollPolicy="auto" 
+				skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:VGroup width="100%" height="100%" gap="3">
+			
+			<s:SkinnableContainer id="id_medicationSelection" 
+								  skinClass="{id_MedicineSelectionView.id_selectMedicineVS.selectedIndex == 0 ? PatientSearchBackgroundSkin : MedicineSelectedbackgroundSkin}"
+								  width="100%"   
+								  visible="{selectedPatient != null &amp;&amp; (IsforInput)|| (id_Prescription.selected &amp;&amp; selectedPharmacy!= null)||(id_ChronicMedication.selected)}" 
+								  includeInLayout="{id_medicationSelection.visible}"
+								  ><!--visible="{null != selectedPharmacy }" includeInLayout="{id_medicationSelection.visible}"-->
+				<s:layout>
+					<s:HorizontalLayout paddingRight="3" paddingLeft="0" verticalAlign="middle"/>
+				</s:layout>
+				
+				<newrx:MedicineSelectionView id="id_MedicineSelectionView" selectedMedicine="{selectedMedicine}" width="100%" enabled="{selectedPatient != null}"  />
+				
+				<s:HGroup  verticalAlign="middle" height="28" >
+					<s:Label text="Visit Date : " color="#666666" fontFamily="CalibriCFF" fontSize="15"/>
+					<s:Label text="{visitDate}" color="#666666" fontFamily="CalibriCFF" fontSize="15" toolTip="{visitDate}"/>
+					<s:Image id="id_visitBtn" 
+							 click="visitDate_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="Select Visit Date"
+							 source="@Embed('com/gazuntite/provider/eprescription/services/patient/view/assets/images/visitdatecal.png')"/>
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			<s:VGroup width="100%" id="id_medicationGroup" visible="{null != selectedMedicine &amp;&amp; id_MedicineSelectionView.visible}" includeInLayout="{id_medicationGroup.visible}" paddingTop="-4" gap="-1">
+				
+				<newrx:MedicineInputView id="id_MedicineInputView"  width="100%" isChronic="{openforChronic}" />
+				
+				<s:SkinnableContainer width="100%" height="40" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputViewRoundBg">
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="top" paddingBottom="3" paddingLeft="4" paddingRight="4" paddingTop="4" />
+					</s:layout>
+					<s:BorderContainer borderColor="#4987DF" backgroundColor="#4987DF" cornerRadius="3" height="19">
+						<s:Label text="sig" fontFamily="CalibriCFF" fontSize="15" color="0xFFFFFF" horizontalCenter="0" verticalCenter="0" />
+					</s:BorderContainer>
+					<components1:LabelTextArea id="id_SIG" maxChars="140"
+											   width="100%" height="100%" skinClass="com.gazuntite.controls.extended.skins.transparentTextAreaSkin"
+											   text="{id_MedicineInputView.GeneratedSig}" toolTip="{id_MedicineInputView.GeneratedSig}"   
+											   fontFamily="CalibriCFF" fontSize="14" />
+				</s:SkinnableContainer>
+				
+				
+				<s:HGroup width="100%" id="id_addSend" visible="false" includeInLayout="false"><!--visible="{id_MedicineInputView.isComplete}" includeInLayout="{id_addSend.visible}" visible="false" includeInLayout="false"-->
+					<s:Button label="Send" click="send_clickHandler(event)" />
+					<s:Spacer width="100%" />
+					<s:Button label="Add" click="add_clickHandler(event)" />
+				</s:HGroup>
+				
+				<s:Spacer height="5" />
+				
+				<s:HGroup width="100%" height="40" id="id_previewView" horizontalAlign="right"> <!--visible="{id_medicationGroup.visible}" includeInLayout="{id_previewView.visible}"-->
+					<s:BorderContainer width="100%" height="100%" backgroundColor="#FDEF9F" borderColor="#B6B485" cornerRadius="5" includeInLayout="{id_Prescription.selected}" visible="{id_Prescription.selected}">
+						<s:layout>
+							<s:HorizontalLayout verticalAlign="top" paddingBottom="3" paddingLeft="4" paddingRight="4" paddingTop="4"/>
+						</s:layout>
+						
+						<s:BorderContainer borderColor="#4987DF" backgroundColor="#4987DF" cornerRadius="3" height="19" width="85">
+							<s:Label text="pharmacist" fontFamily="CalibriCFF" fontSize="15"  color="#FFFFFF"  horizontalCenter="0" verticalCenter="0" />
+						</s:BorderContainer>
+						
+						<components1:LabelTextArea id="id_pharmacyNote" text="@{PharmNotes}"
+												   width="100%" height="100%" maxChars="210"
+												   skinClass="com.gazuntite.controls.extended.skins.transparentTextAreaSkin"
+												   fontFamily="CalibriCFF" fontSize="14" bottom="0"/>
+					</s:BorderContainer>
+					
+					<s:HGroup height="100%" horizontalAlign="right">
+						<s:Button id="id_previewBtn"  enabled="{(id_MedicineInputView.isFormComplete)  &amp;&amp; id_MedicineSelectionView.id_selectMedicineVS.selectedIndex == 1}" includeInLayout="{id_Prescription.selected}" visible="{id_Prescription.selected}"
+								  click="id_previewBtn_clickHandler(event)" 
+								  buttonMode="true" useHandCursor="true" toolTip="Preview Summary" skinClass="com.gazuntite.skins.controls.button.ePrescription.PreviewButtonSkin"
+								  fontFamily="CalibriCFF" fontSize="14" bottom="0"/>
+						
+						<s:Button id="id_PlusButtonBtn" label="Plus"  
+								  enabled="{(id_MedicineInputView.isFormComplete)  &amp;&amp; id_MedicineSelectionView.id_selectMedicineVS.selectedIndex == 1}" 
+								  click="id_previewBtn_clickHandler(event)" 
+								  includeInLayout="false" visible="false"
+								  buttonMode="true" useHandCursor="true" toolTip="Add Medication"
+								  fontFamily="CalibriCFF" fontSize="14" bottom="0"
+								  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"
+								  /><!-- includeInLayout="{id_ChronicMedication.selected &amp;&amp; !IsforInput}" 
+								  visible="{id_ChronicMedication.selected &amp;&amp; !IsforInput}"-->
+					</s:HGroup>
+				</s:HGroup>
+			</s:VGroup>	
+		</s:VGroup>
+	</s:Scroller>
+	
+</s:VGroup>

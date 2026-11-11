@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Drugs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<Drugs>
+		<Drug DRUG_ID="d04726" DrugName="5-hydroxytryptophan" rownum="1"/>
+		<Drug DRUG_ID="d04376" DrugName="abacavir" rownum="2"/>
+		<Drug DRUG_ID="d05354" DrugName="abacavir-lamiVUDine" rownum="3"/>
+		<Drug DRUG_ID="d04727" DrugName="abacavir/lamiVUDine/zidovudine" rownum="4"/>
+		<Drug DRUG_ID="d05694" DrugName="abatacept" rownum="5"/>
+		<Drug DRUG_ID="d03811" DrugName="abciximab" rownum="6"/>
+		<Drug DRUG_ID="d07766" DrugName="abiraterone" rownum="7"/>
+		<Drug DRUG_ID="d07646" DrugName="abobotulinumtoxinA" rownum="8"/>
+		<Drug DRUG_ID="d04986" DrugName="acamprosate" rownum="9"/>
+		<Drug DRUG_ID="d03846" DrugName="acarbose" rownum="10"/>
+		<Drug DRUG_ID="d00128" DrugName="acebutolol" rownum="11"/>
+		<Drug DRUG_ID="d00049" DrugName="acetaminophen" rownum="12"/>
+		<Drug DRUG_ID="d06833" DrugName="acetaminophen-aspirin" rownum="13"/>
+		<Drug DRUG_ID="d03456" DrugName="acetaminophen-butalbital" rownum="14"/>
+		<Drug DRUG_ID="d03922" DrugName="acetaminophen-caffeine" rownum="15"/>
+		<Drug DRUG_ID="d03296" DrugName="acetaminophen-chlorpheniramine" rownum="16"/>
+		<Drug DRUG_ID="d03423" DrugName="acetaminophen-codeine" rownum="17"/>
+		<Drug DRUG_ID="d03378" DrugName="acetaminophen-dextromethorphan" rownum="18"/>
+		<Drug DRUG_ID="d03445" DrugName="acetaminophen-diphenhydrAMINE" rownum="19"/>
+		<Drug DRUG_ID="d05661" DrugName="acetaminophen-guaiFENesin" rownum="20"/>
+	</Drugs>
+</Drugs>

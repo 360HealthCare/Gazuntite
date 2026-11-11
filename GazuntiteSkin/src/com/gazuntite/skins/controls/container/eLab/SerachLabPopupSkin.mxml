@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin 
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+	alpha.disabled="0.5"
+	width="169" height="153">
+	
+	<fx:Metadata>
+		<![CDATA[ 
+		/** 
+		* @copy spark.skins.spark.ApplicationSkin#hostComponent
+		*/
+		[HostComponent("spark.components.SkinnableContainer")]
+		]]>
+	</fx:Metadata> 
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:Group id="background" 
+			 left="0" right="0" top="0" bottom="0">
+		
+		<s:Rect width="100%" height="100%" radiusX="5" >
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#848484" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#4A4A4A" ratio="0.29411764705882354"/>
+					<s:GradientEntry alpha="1.0" color="#343434" ratio="0.7843137254901961"/>
+					<s:GradientEntry alpha="1.0" color="#161717" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:stroke>
+				<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+					<s:GradientEntry alpha="1.0" color="#666666" ratio="0"/>
+					<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+				</s:LinearGradientStroke>
+			</s:stroke>
+		</s:Rect>
+		
+		<s:Path x="10" y="-8" width="18" height="9" data="M 22.59 19.57 L 0.01 19.57 11.30 0.01 Z " >
+			<s:fill>
+				<s:SolidColor color="0x838383"/>
+			</s:fill>
+		</s:Path>
+		
+		<s:Group x="5" y="16"
+				 width.normal="15">
+			<s:filters>
+				<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#CCCCCC" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			</s:filters>
+			<s:Rect height="1" width="1" x="6.5" y="0.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="0.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="3.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="3.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="6.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="6.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="9.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="9.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="12.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="12.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="0.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="0.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="3.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="3.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="6.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="6.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="9.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="9.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="12.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="12.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="15.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="15.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="18.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="18.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="21.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="21.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="24.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="24.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="27.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="27.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="15.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="15.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="18.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="18.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="21.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="21.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="24.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="24.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="27.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="27.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="30.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="30.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="6.5" y="33.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="9.5" y="33.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="30.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="30.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="0.5" y="33.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+			<s:Rect height="1" width="1" x="3.5" y="33.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#333333" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#FFFFFF"/>
+				</s:fill>
+			</s:Rect>
+		</s:Group>
+		
+	</s:Group>
+	
+	<s:Group id="contentGroup"
+			 left="20" right="5" top="5" bottom="5" minWidth="0"	>
+		<s:layout>
+			<s:BasicLayout/>
+		</s:layout>
+		
+	</s:Group>
+	
+</s:Skin>

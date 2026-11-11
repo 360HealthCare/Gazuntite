@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+					   xmlns:ai="http://ns.adobe.com/ai/2009"
+					   xmlns:flm="http://ns.adobe.com/flame/2008"
+					   xmlns:components="com.gazuntite.controls.extended.components.*"
+					   width="100%" height="100%" 
+					   creationComplete="group1_creationCompleteHandler(event)" 
+					   
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.video.chat.view.event.VideoChatControlEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			private var _callerName:String;
+			
+			[Bindable]
+			public function get callerName():String
+			{
+				return _callerName;
+			}
+			
+			public function set callerName(value:String):void
+			{
+				_callerName = value;
+			}
+			
+			private var _calleeName:String;
+			
+			[Bindable]
+			public function get calleeName():String
+			{
+				return _calleeName;
+			}
+			
+			public function set calleeName(value:String):void
+			{
+				_calleeName = value;
+			}
+			
+			
+			private var timer:Timer;
+			private var index:int;
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				mx.managers.PopUpManager.removePopUp(this);
+				
+				this.dispatchEvent(new VideoChatControlEvent (VideoChatControlEvent.END_VIDEO_CHAT));
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				timer=new Timer(300,0);
+				timer.addEventListener(TimerEvent.TIMER,onTimer);
+				timer.start();
+			}
+			
+			private function onTimer(evnet:TimerEvent):void
+			{
+				anime.x=6.5 + 15*index;
+				index++;
+				if (index>2)
+				{
+					index=0;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group d:userLabel="CallConnect" width="100%" height="100%">
+		<s:Rect height="45" width="100%" bottom="0">
+			<s:filters>
+				<s:DropShadowFilter alpha="1" angle="90" blurX="2" blurY="2" color="#666666" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+			</s:filters>
+			<s:fill>
+				<s:LinearGradient rotation="90">
+					<s:GradientEntry alpha="1.0" color="#989898" ratio="0.00784313725490196"/>
+					<s:GradientEntry alpha="1.0" color="#505050" ratio="0.49019607843137253"/>
+					<s:GradientEntry alpha="1.0" color="#282828" ratio="0.49411764705882355"/>
+					<s:GradientEntry alpha="1.0" color="#282828" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+		</s:Rect>
+		
+		<s:HGroup width="100%" gap="30" horizontalAlign="center" verticalAlign="middle"
+				  verticalCenter="0">
+			<s:VGroup horizontalAlign="center">
+				<s:Group >
+					<s:Rect height="53" radiusX="5" width="54" x="0" y="0">
+						<s:fill>
+							<s:LinearGradient rotation="90">
+								<s:GradientEntry alpha="1.0" color="#94A0B2" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#A6B4C0" ratio="1"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:filters>
+							<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+						</s:filters>
+					</s:Rect>
+					<s:BitmapImage smooth="true" source="@Embed('/assets/picbgtransparent.png')" x="0" y="1"/>
+					<s:BitmapImage smooth="true" source="@Embed('/assets/profilepic02.png')" x="8" y="5"/>
+				</s:Group>
+				<s:RichText ai:aa="2" color="#333333" columnCount="1" fontFamily="Calibri" fontSize="13" id="richtext2" d:id="11" kerning="on" tabStops="S0 S50" text="{callerName}" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="21" y="62" fontWeight="bold"/>
+			</s:VGroup>
+			
+			<s:VGroup horizontalAlign="center" verticalAlign="middle">
+				<s:Group x="152" y="15" width="56">
+					<s:BitmapImage horizontalCenter="0" rotation="90" smooth="true"
+								   source="@Embed('/assets/CallConnectionGif.gif')" transformX="12"
+								   transformY="28" verticalCenter="0"/>
+					
+					
+					<s:Ellipse id="anime" x="6.5" width="10" height="10" verticalCenter="0">
+						<s:stroke>
+							<s:SolidColorStroke color="0x000000" weight="1"/>
+						</s:stroke>
+						<s:fill>
+							<s:RadialGradient>
+								<s:GradientEntry color="0x3194BE" ratio="0" alpha=".5"/>
+							</s:RadialGradient>
+						</s:fill>
+					</s:Ellipse>
+				</s:Group>
+				<s:RichText ai:aa="2" color="#999999" columnCount="1" fontFamily="Calibri" fontSize="16" id="richtext4" d:id="11" kerning="on" tabStops="S0" text="Ringing" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="154" y="43"/>
+			</s:VGroup>
+			
+			<s:VGroup horizontalAlign="center">
+				
+				
+				<s:Group x="269" y="1">
+					<s:Rect height="53" radiusX="5" width="54" x="0" y="0">
+						<s:fill>
+							<s:LinearGradient rotation="90">
+								<s:GradientEntry alpha="1.0" color="#94A0B2" ratio="0"/>
+								<s:GradientEntry alpha="1.0" color="#A6B4C0" ratio="1"/>
+							</s:LinearGradient>
+						</s:fill>
+						<s:filters>
+							<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="2" strength="1"/>
+						</s:filters>
+					</s:Rect>
+					<s:BitmapImage smooth="true" source="@Embed('/assets/picbgtransparent.png')" x="0" y="1"/>
+					<s:BitmapImage smooth="true" source="@Embed('/assets/profilepic02.png')" x="8" y="5"/>
+				</s:Group>
+				<s:RichText ai:aa="2" color="#333333" columnCount="1" fontFamily="Calibri" fontSize="13" id="richtext3" d:id="11" kerning="on" tabStops="S0 S50" text="{calleeName}" d:userLabel="Text" flm:variant="3" whiteSpaceCollapse="preserve" x="251" y="62" fontWeight="bold"/>
+			</s:VGroup>
+		</s:HGroup>
+		
+		
+		<s:Button bottom="12" right="10" label="Button" buttonMode="true"
+				  click="button1_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.button.DisconnectBtnSkin"
+				  toolTip="Disconnect"/>
+		<s:Rect visible="false" x="4.5" y="209.5" width="269" height="25" radiusX="3">
+			<s:stroke>
+				<s:SolidColorStroke caps="none" color="#999999" joints="miter" miterLimit="4" weight="1"/>
+			</s:stroke>
+			<s:fill>
+				<s:LinearGradient rotation="270">
+					<s:GradientEntry alpha="1.0" color="#F7F3F7" ratio="0"/>
+					<s:GradientEntry alpha="1.0" color="#CCCCCC" ratio="1"/>
+				</s:LinearGradient>
+			</s:fill>
+			<s:filters>
+				<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="2" strength="1"/>
+			</s:filters>
+		</s:Rect>
+		<s:RichText id="textDisplay20" d:id="8" d:userLabel="ClinicalUserSearch" visible="false"
+					x="10" y="216" width="137" ai:aa="2" color="#333333" columnCount="1"
+					fontFamily="Calibri" fontSize="12" kerning="on" tabStops="S0 S50 S100"
+					text="Write comments..." flm:variant="2" whiteSpaceCollapse="preserve"/>
+		<s:BitmapImage visible="false" x="168" y="24" smooth="true"
+					   source="@Embed('/assets/CallConnectionGif1.gif')"/>
+		<s:RichText id="richtext5" d:id="11" d:userLabel="Text" left="10" bottom="12" ai:aa="2"
+					color="#E0E0E0" columnCount="1" fontFamily="Calibri" fontSize="14" kerning="on"
+					tabStops="S0 S50" text="00:00:59" flm:variant="3" whiteSpaceCollapse="preserve"/>
+	</s:Group>
+	
+	
+	
+</components:PopupGroup>

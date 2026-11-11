@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:dictation="com.gazuntite.components.dictation.*" 
+		 xmlns:autoComplete="com.gazuntite.components.kapit.autoComplete.*" 
+		 xmlns:advancedTextInput="com.gazuntite.components.kapit.advancedTextInput.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+		 >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.diagnosis.DiagnosisDTO;
+			import com.gazuntite.common.dto.assessment.labOut.LabDTO;
+			import com.gazuntite.common.dto.assessment.labOut.LabOutLIONICLabTestDTO;
+			import com.gazuntite.common.dto.assessment.labOut.LabOutTestTypeDTO;
+			import com.gazuntite.common.dto.baseDTO.GeneralTypeDTO;
+			import com.gazuntite.common.view.components.CustomSaveAndMoveNextAlert;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.components.kapit.autoComplete.event.AutoCompleteEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.inputsections.assessment.plan.PatientInputAssessmentPlanViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]	private var leftLabelWidth:int = 90;
+			
+			[Bindable]	private var rightLabelWidth:int = 120;
+			
+			[Bindable] public var RecordLevelNote:String = '';
+			
+			//M:11Nov2013
+			[Bindable]
+			public var RecordLevelDictationID:String = '';
+			
+			[Bindable]
+			public var IsViewDirty:Boolean;
+			
+			[Bindable]	private var PlanviewModel:PatientInputAssessmentPlanViewModel = PatientInputAssessmentPlanViewModel.getInstance();
+			
+			private var _dictationNoteViewModel:PatientDictationNoteViewModel;
+			
+			[Bindable]
+			public function get dictationNoteViewModel():PatientDictationNoteViewModel
+			{
+				return _dictationNoteViewModel;
+			}
+			
+			public function set dictationNoteViewModel(value:PatientDictationNoteViewModel):void
+			{
+				_dictationNoteViewModel = value;
+			}
+			
+			private function setRequiredIcon(cmbo:AutoComplete, icon:Class):void
+			{
+				switch (cmbo.id)
+				{
+					case "id_TestTypeCmbo":
+						
+						img_TestType.source = icon;
+						break;
+					
+					case "id_OrderMethodCmbo":
+						
+						img_OrderMethod.source = icon;
+						break;
+					
+					case "id_TestNameCmbo":
+						
+						img_TestName.source = icon;
+						break;
+					
+					case "id_TestCodeCmbo":
+						
+						img_TestCode.source = icon;
+						break;
+					
+					case "id_LaboratoryCmbo":
+						
+						img_Laboratory.source = icon;
+						break;
+					
+					default:
+						break;
+				}
+			}
+			
+			private function comboKeyUpHandler(event:KeyboardEvent):void
+			{
+				if(UtilityFunctions.TrimString(id_TestNameCmbo.text).length == 0)
+					img_TestName.source = QIConstants.IMG_RED;
+				
+				if(UtilityFunctions.TrimString(id_TestCodeCmbo.text).length == 0)
+					img_TestCode.source = QIConstants.IMG_RED;
+				
+				if (event.keyCode == Keyboard.ENTER || event.keyCode == Keyboard.UP || event.keyCode == Keyboard.DOWN)
+					return;
+				
+				var curTar:AutoComplete = event.currentTarget as AutoComplete;
+				
+				if (!curTar)
+					return;
+				
+				var testType:GeneralTypeDTO = id_TestTypeCmbo.selectedItem as GeneralTypeDTO;
+				
+				if (!testType)
+					return;
+				
+				var ev:PatientInputAssessmentLabOutEvent = new PatientInputAssessmentLabOutEvent(
+					PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_ITEM_EDIT_KEY_UP_EVENT, true);
+				
+				ev.searchString = curTar.text;
+				ev.testTypeID = testType.ID;
+				
+				if (curTar.id  == "id_TestNameCmbo")
+				{
+					ev.searchType = PatientInputAssessmentLabOutViewModel.LAB_TEST_NAME;
+				}
+				else
+				{
+					ev.searchType = PatientInputAssessmentLabOutViewModel.LAB_TEST_CODE;
+				}
+				
+				dispatchEvent(ev);
+			}
+			
+			private function saveClickHandler():void
+			{
+				if (isInvalid())
+					return;
+				
+				var labDTO:LabDTO 					= new LabDTO();
+				
+				labDTO.LabTestType 					= id_TestTypeCmbo.selectedItem as LabOutTestTypeDTO;
+				labDTO.LabTestOrderMethodType 		= id_OrderMethodCmbo.selectedItem as GeneralTypeDTO;
+				labDTO.LIONICLabTestType 			= id_TestNameCmbo.selectedItem as LabOutLIONICLabTestDTO;
+				labDTO.Description 					= id_Description.text;
+				
+				var diagnosis:DiagnosisDTO 			= id_AssociatedDiagnosisCmbo.selectedItem as DiagnosisDTO;
+				
+				if (diagnosis)
+				{
+					labDTO.PatientDiagnosisID = diagnosis.ID;
+					
+					if (diagnosis.IcdDto)
+					{
+						labDTO.DiagnosisInfo = diagnosis.IcdDto.IcdCodeDescription;
+					}
+				}
+				
+				labDTO.LabTestPriorityType = id_PriorityCmbo.selectedItem as GeneralTypeDTO;
+				labDTO.LabTestSpecimenType = id_SpecimenCmbo.selectedItem as GeneralTypeDTO;
+				labDTO.CollectionDate = id_ColDate.text;
+				labDTO.LabType = id_LaboratoryCmbo.selectedItem as GeneralTypeDTO;
+				
+				labDTO.IsLabIn = false;
+				labDTO.IsFasting = QIConstants.STRING_FALSE;
+				labDTO.UserID = model.LoggedInUserId;
+				labDTO.ClinicBranchID = model.LoggedInUserSelectedBranchId;
+				labDTO.OrderDate = UtilityFunctions.FormatDate(QIConstants.NULL_DATE, "MM-DD-YYYY");
+				labDTO.Onset = UtilityFunctions.FormatDate(QIConstants.NULL_DATE, "MM-DD-YYYY");
+				labDTO.StationID = model.LoggedInUserSelectedStationID;
+				
+				labDTO.VisitDate = model.VisitDate;
+				labDTO.VisitID = model.VisitID;
+				
+				labDTO.PatientID = model.patientDTO.ID;
+				
+				labDTO.CreatedAt = new Date();
+				labDTO.CreatedBy = model.LoggedInUserId;
+				
+				labDTO.ModifiedAt = new Date();
+				labDTO.ModifiedBy = model.LoggedInUserId;
+				
+				labDTO.Note = RecordLevelNote;//dictationNoteView.note;
+				labDTO.NoteSubject = "";
+
+				//labDTO.DictationID = QIConstants.GUID_FORMAT;
+				
+				//M:11Nov2013
+				trace(labDTO.DictationID );
+				trace(RecordLevelDictationID);
+				labDTO.DictationID 			= RecordLevelDictationID ;				
+				
+				labDTO.IsDirty = true;
+				
+				var ev:PatientInputAssessmentLabOutEvent = new PatientInputAssessmentLabOutEvent(
+					PatientInputAssessmentLabOutEvent.PATIENT_INPUT_LAB_OUT_ADD_EVENT, true);
+				
+				ev.labDTO = labDTO;
+				
+				dispatchEvent(ev);
+				
+				clearForm();
+			}
+			
+			private function isInvalid():Boolean
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:Object;
+				
+				if (id_TestTypeCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Test Type\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_TestTypeCmbo;
+				}
+				
+				if (id_OrderMethodCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Order Method\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_OrderMethodCmbo;
+				}
+				
+				if (id_TestNameCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Test Name\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_TestNameCmbo;
+				}
+				
+				if (null == id_TestCodeCmbo.selectedItem)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Test Code\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_TestCodeCmbo;
+				}
+				
+				if (id_PriorityCmbo.selectedItem && id_PriorityCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Priority\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_PriorityCmbo;
+				}
+				
+				if (id_SpecimenCmbo.selectedItem && id_SpecimenCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Specimen\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_SpecimenCmbo;
+				}
+				
+				if (id_LaboratoryCmbo.selectedIndex < 0)
+				{
+					isNotValid = true;
+					
+					errorStr += "Please select Laboratory\n";
+					
+					if (!toSetFocus)
+						toSetFocus = id_LaboratoryCmbo;
+				}
+				
+				if (errorStr.length > 0)
+				{
+					Alert.show(errorStr, "Required Field", Alert.OK, FlexGlobals.topLevelApplication.mainContainer, function():void
+					{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+				}
+				
+				return isNotValid;
+			}
+			// Label function for Associate Diagsnosis
+			public function associatedDiagnosisLabel(oItem:Object):String
+			{
+				var label:String = "";
+				
+				if (oItem && oItem.hasOwnProperty("IcdDto") && oItem.IcdDto )
+				{
+					if (oItem.IcdDto.hasOwnProperty("IcdCodeName"))
+					{
+						label += oItem.IcdDto.IcdCodeName + ", ";
+					}
+					
+					if (oItem.IcdDto.hasOwnProperty("IcdCodeDescription"))
+					{
+						label += oItem.IcdDto.IcdCodeDescription;
+					}
+					
+					label += oItem.IsChronic ? " (Chronic) " : " (Acute) ";
+				}
+				
+				return label;
+			}
+			
+			public function clearForm():void
+			{
+				id_TestTypeCmbo.selectedIndex 				= -1;
+				id_TestTypeCmbo.text 						= "";
+				img_TestType.source 						= QIConstants.IMG_RED; 
+				id_OrderMethodCmbo.selectedIndex 			= -1;
+				id_OrderMethodCmbo.text 					= "";
+				img_OrderMethod.source 						= QIConstants.IMG_RED; 
+				id_TestNameCmbo.selectedIndex 				= -1;
+				id_TestNameCmbo.text 						= "";
+				img_TestName.source 						= QIConstants.IMG_RED; 
+				id_TestCodeCmbo.selectedIndex 				= -1;
+				id_TestCodeCmbo.text 						= "";
+				img_TestCode.source 						= QIConstants.IMG_RED; 
+				id_Description.text 						= "";
+				id_AssociatedDiagnosisCmbo.selectedIndex 	= -1;
+				id_AssociatedDiagnosisCmbo.text 			= "";
+				id_PriorityCmbo.selectedIndex 				= -1;
+				id_PriorityCmbo.text 						= "";
+				id_SpecimenCmbo.selectedIndex 				= -1;
+				id_SpecimenCmbo.text 						= "";
+				id_ColDate.text 							= "";
+				id_LaboratoryCmbo.selectedIndex 			= -1;
+				id_LaboratoryCmbo.text 						= "";
+				img_Laboratory.source 						= QIConstants.IMG_RED; 
+				dictationNoteView.note 						= "";
+				dictationNoteViewModel.inDictationMode 		= false;
+				dictationNoteViewModel.inNoteMode 			= false;
+				
+				IsViewDirty									= false;
+				PlanviewModel.dictationNoteViewModel.visible = false; // just to hide the plan Notes view on the header , Author : Moeen Mohsin
+				
+				RecordLevelNote 							= '';
+			}
+			/*
+			private function comboChangeHandler(event:IndexChangeEvent):void
+			{
+			var curTar:AutoComplete = event.currentTarget as AutoComplete;
+			
+			if (!curTar)
+			return;
+			
+			if (curTar.id == "id_TestNameCmbo")
+			{
+			id_TestCodeCmbo.selectedIndex = curTar.selectedIndex;
+			id_TestCodeCmbo.selectedItem = model.lionicLabTestTypeDTOList.getItemAt(id_TestNameCmbo.selectedIndex);
+			}
+			else
+			{
+			id_TestNameCmbo.selectedIndex = curTar.selectedIndex;
+			}
+			
+			if (curTar.selectedIndex < 0)
+			{
+			id_TestNameCmbo.text = "";
+			id_TestCodeCmbo.text = "";
+			}
+			}
+			*/
+			protected function id_TestTypeCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_TestTypeCmbo.selectedIndex >= 0 || id_TestTypeCmbo.selectedItem != null)
+					img_TestType.source	= QIConstants.IMG_GREEN;
+			}
+			
+			protected function id_TestTypeCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_TestTypeCmbo.text.length <= 2)
+					img_TestType.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_OrderMethodCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_OrderMethodCmbo.selectedIndex >= 0 || id_OrderMethodCmbo.selectedItem != null)
+					img_OrderMethod.source	= QIConstants.IMG_GREEN;
+			}
+			
+			protected function id_OrderMethodCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_OrderMethodCmbo.text.length <= 2)
+					img_OrderMethod.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_TestNameCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_TestNameCmbo.selectedIndex >= 0 || id_TestNameCmbo.selectedItem != null)
+				{
+					img_TestName.source	= QIConstants.IMG_GREEN;
+					if(id_TestNameCmbo.selectedIndex >= 0) 
+					{
+						id_TestCodeCmbo.selectedIndex = id_TestNameCmbo.selectedIndex; //[10/10/2013] Shahid Munir, #4366
+						id_TestCodeCmbo.selectedItem = model.lionicLabTestTypeDTOList.getItemAt(id_TestNameCmbo.selectedIndex);
+					}
+				}
+			}
+			
+			protected function id_TestNameCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_TestNameCmbo.text.length <= 2)
+					img_TestName.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_TestCodeCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_TestCodeCmbo.selectedIndex >= 0 || id_TestCodeCmbo.selectedItem != null)
+				{
+					img_TestCode.source	= QIConstants.IMG_GREEN;
+					if(id_TestCodeCmbo.selectedIndex >= 0)
+					{
+						id_TestNameCmbo.selectedIndex = id_TestCodeCmbo.selectedIndex; //[10/10/2013] Shahid Munir, #4366
+						id_TestNameCmbo.selectedItem = model.lionicLabTestTypeDTOList.getItemAt(id_TestCodeCmbo.selectedIndex);
+					}
+				}
+			}
+			
+			protected function id_TestCodeCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_TestCodeCmbo.text.length <= 2)
+					img_TestCode.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_LaboratoryCmbo_selectedItemChangeHandler(event:AutoCompleteEvent):void
+			{
+				if(id_LaboratoryCmbo.selectedIndex >= 0 || id_LaboratoryCmbo.selectedItem != null)
+					img_Laboratory.source	= QIConstants.IMG_GREEN;
+			}
+			
+			protected function id_LaboratoryCmbo_textClearedHandler(event:Event):void
+			{
+				if(id_LaboratoryCmbo.text.length <= 2)
+					img_Laboratory.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_TestTypeCmbo_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(UtilityFunctions.TrimString(id_TestTypeCmbo.text).length == 0)
+					img_TestType.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_OrderMethodCmbo_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(UtilityFunctions.TrimString(id_OrderMethodCmbo.text).length == 0)
+					img_OrderMethod.source = QIConstants.IMG_RED;
+			}
+			
+			protected function id_LaboratoryCmbo_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(UtilityFunctions.TrimString(id_LaboratoryCmbo.text).length == 0)
+					img_Laboratory.source = QIConstants.IMG_RED;
+			}
+			
+			/* protected function next_clickHandler(event:MouseEvent):void
+			{
+			dispatchEvent(new SelectSection(SelectSection.SelectInnerTabEvent,'Recommendation'));
+			} */
+			
+			protected function next_clickHandler(event:MouseEvent):void
+			{
+				
+				if(IsViewDirty)
+					//UtilityFunctions.AskMessageWithCustomButtonLabels(QIConstants.FormDitry_askMessage,QIConstants.FormDitry_yesMessage,QIConstants.FormDitry_NoMessage,saveClickHandler,null,SaveAndMoveNext,null);
+					QIUtilityFunctions.AskMoveNextAlert( MoveNextHandler );
+				else
+					MoveToNextPanel();
+			}
+			
+			private function MoveNextHandler(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						SaveAndMoveNext();
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						saveClickHandler();
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						DiscardAndMoveNext();
+						break;
+				}
+			}
+			
+			private function DiscardAndMoveNext():void
+			{
+				clearForm();
+				MoveToNextPanel();
+			}
+			
+			private function SaveAndMoveNext():void
+			{
+				if (isInvalid())
+					return;
+				
+				saveClickHandler();
+				MoveToNextPanel();
+			}
+			
+			private function MoveToNextPanel():void
+			{
+				dispatchEvent(new SelectSection(SelectSection.SelectInnerTabEvent,'Recommendation'));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_TestType" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_TestTypeCmbo" 
+									   prompt="Select Test Type" toolTip="Test Type" width="100%"  height="25"
+									   dataProvider="{model.labTestTypeDTOList}" labelField="Name"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   selectedItemChange="id_TestTypeCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_TestTypeCmbo_textClearedHandler(event)"
+									   keyUp="id_TestTypeCmbo_keyUpHandler(event)"
+									   />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_OrderMethod" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_OrderMethodCmbo" 
+									   width="100%" height="25" 
+									   dataProvider="{model.labTestOrderMethodTypeDTOList}" labelField="Name"  
+									   prompt="Select Order Method" toolTip="Order Method"
+									   selectedItemChange="id_OrderMethodCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_OrderMethodCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   keyUp="id_OrderMethodCmbo_keyUpHandler(event)"
+									   />
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_TestName" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_TestNameCmbo" 
+									   width="100%" height="25"   
+									   dataProvider="{model.lionicLabTestTypeDTOList}" labelField="Name"
+									   prompt="Select Test Name" toolTip="Test Name"
+									   keyUp="comboKeyUpHandler(event)"
+									   selectedItemChange="id_TestNameCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_TestNameCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"									   
+									   />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_TestCode" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_TestCodeCmbo" 
+									   width="100%" height="25"  
+									   prompt="Select Test Code" toolTip="Test Code"
+									   dataProvider="{model.lionicLabTestTypeDTOList}" labelField="testNum"
+									   keyUp="comboKeyUpHandler(event)"
+									   selectedItemChange="id_TestCodeCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_TestCodeCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"									  
+									   />
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:Spacer width="11"/>
+			<advancedTextInput:AdvancedTextInput id="id_Description" 
+												 width="100%" 
+												 prompt="Enter Description" toolTip="Description" 
+												 skinClass="com.gazuntite.components.kapit.advancedTextInput.AdvancedTextInputWithClearButtonSkin"
+												 />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:Spacer width="11"/>
+			<autoComplete:AutoComplete id="id_AssociatedDiagnosisCmbo" 
+									   width="100%" height="25"  
+									   prompt="Select Associated Diagnosis" toolTip="Associated Diagnosis"
+									   dataProvider="{model.diagnosisDTOList}" labelFunction="associatedDiagnosisLabel"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:Spacer width="11"/>
+			<autoComplete:AutoComplete id="id_PriorityCmbo" 
+									   width="100%" height="25"  
+									   prompt="Select Priority level" toolTip="Priority"
+									   dataProvider="{model.labPriorityTypeDTOList}" labelField="Name"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"/>
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:Spacer width="11"/>
+			<autoComplete:AutoComplete id="id_SpecimenCmbo" 
+									   width="100%" height="25"  
+									   prompt="Enter Specimen" toolTip="Specimen"
+									   dataProvider="{model.labTestSpecimenTypeDTOList}" labelField="Name"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%">
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:BitmapImage id="img_Laboratory" source="{QIConstants.IMG_RED}"/>
+			<autoComplete:AutoComplete id="id_LaboratoryCmbo" 
+									   width="100%" height="25"  
+									   prompt="Select Laboratory" toolTip="Laboratory"
+									   dataProvider="{model.labTypeDTOList}" labelField="Name"
+									   selectedItemChange="id_LaboratoryCmbo_selectedItemChangeHandler(event)"
+									   textCleared="id_LaboratoryCmbo_textClearedHandler(event)"
+									   skinClass="com.gazuntite.components.kapit.autoComplete.AutoCompleteSearchSkin"
+									   keyUp="id_LaboratoryCmbo_keyUpHandler(event)"
+									   />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" verticalAlign="middle" height="100%">
+			<s:Spacer width="11"/>
+			<s:SkinnableContainer width="50%" skinClass="com.gazuntite.skins.controls.container.input.DateCoverSkin" >
+				<components:LabelDateField id="id_ColDate" 
+										   prompt="Collection Date" toolTip="Collection Date" width="100%"
+										   yearNavigationEnabled="true" maxYear="{new Date().getFullYear()}" minYear="1901"
+										   selectableRange="{{rangeStart : new Date()}}" 
+										   IsEditAllow="false" editable="false"
+										   styleName="coverDateField"
+										   />
+				
+			</s:SkinnableContainer>
+			
+			<s:HGroup width="100%" height="100%" verticalAlign="bottom" horizontalAlign="right">
+				<s:ToggleButton id="dictation" includeInLayout="false" visible="false"
+								toolTip="Dictation" selected="@{dictationNoteViewModel.inDictationMode}"
+								skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+								/>
+				<s:ToggleButton id="note"  includeInLayout="false" visible="false"
+								toolTip="Note" selected="@{dictationNoteViewModel.inNoteMode}"
+								skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+								/>
+				
+				<s:Button id="save" 
+						  toolTip="Save" skinClass="com.gazuntite.skins.controls.button.SavePlusButtonSkin"
+						  click="saveClickHandler()"/>
+				<s:Button id="next" click="next_clickHandler(event)"
+						  buttonMode="true" useHandCursor="true"
+						  toolTip="Next" skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+						  label="Next" />
+			</s:HGroup>
+		</s:HGroup>
+	</s:HGroup>
+	
+	
+	
+	<dictation2:PatientDictationNoteView id="dictationNoteView" width="100%" viewModel="{dictationNoteViewModel}" isSaveButtonVisible="false"/>
+	
+</s:Group>

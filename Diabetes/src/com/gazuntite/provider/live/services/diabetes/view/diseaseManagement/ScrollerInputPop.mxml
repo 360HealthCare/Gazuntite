@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="cc(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.components.ToggleButton;
+			import spark.components.supportClasses.ItemRenderer;
+			
+			private var _DataProvider:ArrayCollection;
+			public var btnRefrence:ToggleButton;
+			
+			private var ir_ResultRenderer:IFactory;
+			
+			
+			[Bindable]
+			public function get ResultRenderer():IFactory
+			{
+				return ir_ResultRenderer;
+			}
+			
+			public function set ResultRenderer(value:IFactory):void
+			{
+				ir_ResultRenderer = value;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						removePopup();
+						btnRefrence.selected = false;
+					}
+				});
+				
+			}
+			
+			
+			[Bindable]
+			public function get DataProvider():ArrayCollection
+			{
+				return _DataProvider;
+			}
+			
+			public function set DataProvider(value:ArrayCollection):void
+			{
+				_DataProvider = value;
+			}
+			
+			private var _labelFeild:String;
+			
+			[Bindable]
+			public function get labelFeild():String
+			{
+				return _labelFeild;
+			}
+			
+			public function set labelFeild(value:String):void
+			{
+				_labelFeild = value;
+			}
+			
+			
+			
+			
+			protected function id_list_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent( new Event( "OkClick", true ) );
+				
+				removePopup();
+				btnRefrence.selected = false;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupSkin" >
+		<s:layout>
+			<s:VerticalLayout paddingBottom="4" paddingTop="5" paddingLeft="5" paddingRight="5" gap="4"/>
+		</s:layout>
+		
+		<s:SkinnableContainer  skinClass="com.gazuntite.skins.controls.container.ePrescription.RxInputPopupInnerSkin">
+			<s:HGroup width="100%" height="100%"  verticalAlign="middle" horizontalAlign="left" paddingLeft="3" paddingRight="3" gap="2">
+				<s:List id="id_list" 
+						width="100%" height="100%"
+						left="3" right="3" top="3" bottom="3"
+						horizontalScrollPolicy="off"
+						maxHeight="55" borderVisible="false"
+						dataProvider="{DataProvider}"
+						skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+						itemRenderer="{ResultRenderer}" 
+						click="id_list_clickHandler(event)"/><!-- change="Value_changeHandler()"labelField="{labelFeild}" -->
+				
+				<!--<s:Line height="100%" visible="{ShowPRN}" includeInLayout="{ShowPRN}">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+				</s:Line>-->
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

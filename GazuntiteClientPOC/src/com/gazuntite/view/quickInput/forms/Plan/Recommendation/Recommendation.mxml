@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:controls="com.gazuntite.view.controls.*"
+		 xmlns:lists="com.gazuntite.view.lists.*"
+		 >
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.view.itemrenderers.Plan.Recommandation.*;
+			import com.gazuntite.view.itemrenderers.diagnosis.DiagnosisIRICD;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.services.valueObjects.Plan.RecommendationDTO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var _dataprovider:ArrayCollection;
+		
+			[Bindable]
+			public function get dataprovider():ArrayCollection
+			{
+				return _dataprovider;
+			}
+
+			public function set dataprovider(value:ArrayCollection):void
+			{
+				_dataprovider = value;
+			}
+			
+			public function ClearForm():void
+			{
+				ID_associtedDiganosis.selectedItemText = "";
+				id_discussedWithPatients.selected = undefined;
+				ID_duration.selectedItemText = "";
+				ID_method.selectedItemText = "";
+				ID_selectPlan.selectedItemText = "";
+				ID_webLinks.selectedItemText = "";
+			}
+
+			protected function SaveForm(event:MouseEvent):void
+			{
+				var Recommendation:RecommendationDTO = new RecommendationDTO();
+				Recommendation.assosiatedDignosis = ID_associtedDiganosis.selectedItemText;
+				Recommendation.selectionPlan = ID_selectPlan.selectedItemText;
+				Recommendation.method = ID_method.selectedItemText;
+				Recommendation.Duration = ID_duration.selectedItemText;
+				
+				var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+				e.payload = Recommendation; 
+				
+				ClearForm();
+				dispatchEvent(e);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:BorderContainer borderVisible="false" width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="4"/>
+		</s:layout>
+		<s:VGroup height="30%" width="100%">
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_selectPlan" 
+										   styleName="subTitle"
+										   labelField="selectPlan" 
+										   buttonLabel="Select Plan:"
+										   required="true" 
+										   width="34%" 
+										   />
+				<controls:CalloutLabelText id="ID_associtedDiganosis" 
+										   styleName="subTitle"
+										   labelField="associtedDiganosis" 
+										   buttonLabel="associted Diganosis :"
+										   required="false" 
+										   width="66%" 
+										   />
+				
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<controls:CalloutLabelText id="ID_webLinks" 
+										   styleName="subTitle"
+										   labelField="webLinks" 
+										   buttonLabel="Web Links:"
+										   required="false" 
+										   width="34%" 
+										   />
+				<controls:CalloutLabelText id="ID_method" 
+										   styleName="subTitle"
+										   labelField="method" 
+										   buttonLabel="Method :"
+										   required="true" 
+										   width="33%" 
+										   />
+				<controls:CalloutLabelText id="ID_duration" 
+										   styleName="subTitle"
+										   labelField="Duration" 
+										   buttonLabel="Duration :"
+										   required="true" 
+										   width="33%" 
+										   />			
+				
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:TextArea width="100%" heightInLines="3" skinClass="spark.skins.mobile.TextInputSkin"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="right">
+				<controls:ToggleSwitchLabel id="id_discussedWithPatients" 
+											styleName="subTitle"
+											label="Discussed With Patients:"
+											width="25%"/>
+				<s:Button id="ID_btnSave"
+						  styleName="button"
+						  label="Save"
+						  width="25%"
+						  click="SaveForm(event)"/>	
+			</s:HGroup>
+		</s:VGroup>
+		
+		<lists:SortableList id="id_SortableList" height="100%" width="100%" label="Recommandation records added"
+							dataProvider="{dataprovider}"
+							sortableIRList="{new ArrayCollection([{irClass:RecommandationIRPlan, name:'Plan'}, {irClass:RecommandationIRMethod, name:'Method'}, {irClass:RecommandationIRDuration, name:'Duration'}])}"
+							itemRenderer="com.gazuntite.view.itemrenderers.Plan.Recommandation.RecommandationIRPlan" 
+							/>
+	</s:BorderContainer>
+<!--							sortableFeildList="{new ArrayCollection(['Select Plan','Assosiated Diagnosis','Test Name'])}"-->
+
+</s:Group>

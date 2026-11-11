@@ -1,0 +1,529 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Containers 
+Black background containers*/
+
+.blackTitleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleBGContainer");
+}
+
+.blackBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackBGContainer");
+}
+
+.blackExtendedTitleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackExtendedTitleBGContainer");
+}
+
+.blackTitleGradientGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleGradientGreyBGContainer");
+}
+
+.blackTitleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleBGContainer");
+}
+
+.miniBlackBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.miniBlackBGContainer");
+}
+
+.jetBlackHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.jetBlackHeaderBGContainer");
+}
+
+.gradientBlackBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientBlackBGContainer");
+}
+
+/*********************************************************************************************/
+/*Silver background containers*/
+
+.gradientSilverGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientSilverGreyBGContainer");
+}
+
+.silverishWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.silverishWhiteBGContainer");
+}
+
+/*********************************************************************************************/
+/*White background containers*/
+
+
+.miniWhiteNGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.miniWhiteNGreyBGContainer");
+}
+
+.whiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whiteBGContainer");
+}
+
+.whitishGradientGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whitishGradientGreyBGContainer");
+}
+
+
+.pureWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.pureWhiteBGContainer");
+}
+
+.snowWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.snowWhiteBGContainer");
+}
+
+.whiteRectangularBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whiteRectangularBGContainer");
+}
+
+.whiteMultiRectangularBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whiteMultiRectangularBGContainer");
+}
+
+.whiteNGreyRectangularBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whiteNGreyRectangularBGContainer");
+}
+
+.miniWhiteNGreyRectangularBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.miniWhiteNGreyRectangularBGContainer");
+}
+
+/*********************************************************************************************/
+/*Orange background containers*/
+
+.orangeBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.orangeBGContainer");
+}
+
+.deepOrangeBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.deepOrangeBGContainer");
+}
+.whitishPeachBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whitishPeachBGContainer");
+}
+
+/*********************************************************************************************/
+/*Purple background containers*/
+
+.lightPurpleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightPurpleBGContainer");
+}
+
+.whitishPurpleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whitishPurpleBGContainer");
+}
+
+.purpluishWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.purpluishWhiteBGContainer");
+}
+
+/*********************************************************************************************/
+/*Blue background containers*/
+
+.torquiseTitleLightGreyBGContainerSkin
+{
+	skin-class : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.torquiseTitleLightGreyBGContainer");
+}
+
+.darkBlueTitleWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.darkBlueTitleWhiteBGContainer");
+}
+
+.blueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blueBGContainer");
+}
+
+.royalBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.royalBlueBGContainer");
+}
+.mediumBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumBlueBGContainer");
+}
+
+.mediumSlateBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumSlateBlueBGContainer");
+}
+
+.bluishBlackBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.bluishBlackBGContainer");
+}
+
+.lightSeaGreenBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightSeaGreenBGContainer");
+}
+
+.steelBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.steelBlueBGContainer");
+}
+
+.gradientBlueExtendedTitleBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientBlueExtendedTitleBGContainer");
+}
+
+.aliceBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.aliceBlueBGContainer");
+}
+
+/*********************************************************************************************/
+/*Brown background containers*/
+
+.beigeMultiShadeBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.beigeMultiShadeBGContainer");
+}
+
+.khakiBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.khakiBGContainer");
+}
+
+.blanchedAlmondBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blanchedAlmondBGContainer");
+}
+
+/*********************************************************************************************/
+/*Grey background containers*/
+
+.greyMultiShadeBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyMultiShadeBGContainer");
+}
+
+.greyImageBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyImageBGContainer");
+}
+
+.greyHeaderAliceBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyHeaderAliceBlueBGContainer");
+}
+
+.dimGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.dimGreyBGContainer");
+}
+
+.gradientLightGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientLightGreyBGContainer");
+}
+
+.gradientGreyImageBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientGreyImageBGContainer");
+}
+.greyMultiShadeExtendedBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyMutiShadeExtendedBGContainer");
+}
+
+.greyishWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyishWhiteBGContainer");
+}
+
+.greyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyBGContainer");
+}
+
+.greyNgreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyNgreyBGContainer");
+}
+
+.mediumGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumGreyBGContainer");
+}
+.greyishBlackBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyishBlackBGContainer");
+}
+
+.lightGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightGreyBGContainer");
+}
+
+.gradientDarkGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientDarkGreyBGContainer");
+}
+
+.greyNWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyNWhiteBGContainer");
+}
+
+.gradientGreyExtendedHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientGreyExtendedHeaderBGContainer");
+}
+
+
+.gradientGreyHeaderWhiteBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientGreyHeaderWhiteBGContainer");
+}
+
+.mediumBlueHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumBlueHeaderBGContainer");
+}
+
+.gradientWhitishGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientWhitishGreyBGContainer");
+}
+
+/*********************************************************************************************/
+/*Header containers
+/*Light purple  background containers*/
+
+.lightPurpleHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightPurpleHeaderBGContainer");
+}
+
+.blackHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackHeaderBGContainer");
+}
+
+.greyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.greyHeaderBGContainer");
+}
+
+.darkGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.darkGreyHeaderBGContainer");
+}
+
+.darkSteelBlueHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.darkSteelBlueHeaderBGContainer");
+}
+
+.mediumOrchidHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumOrchidHeaderBGContainer");
+}
+
+.darkGreyHeaderNonCornerBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.darkGreyHeaderNonCornerBGContainer");
+}
+
+.mediumGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.mediumGreyHeaderBGContainer");
+}
+
+.pinkHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.pinkHeaderBGContainer");
+}
+
+.lightGreenHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightGreenHeaderBGContainer");
+}
+
+.yellowGreenHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.yellowGreenHeaderBGContainer");
+}
+
+.lightGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lightGreyHeaderBGContainer");
+}
+
+.redHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.redHeaderBGContainer");
+}
+
+.darkGreenHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.darkGreenHeaderBGContainer");
+}
+
+.whitishGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whitishGreyHeaderBGContainer");
+}
+
+.slateBlueHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.slateBlueHeaderBGContainer");
+}
+.gradientDarkGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientDarkGreyHeaderBGContainer");
+}
+
+.gradientSlateGreyHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientSlateGreyHeaderBGContainer");
+}
+
+.gradientBlueHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.gradientBlueHeaderBGContainer");
+}
+
+.wheatHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.wheatHeaderBGContainer");
+}
+
+.deepSkyBlueHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.deepSkyBlueHeaderBGContainer");
+}
+
+
+.orangeHeaderBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.orangeHeaderBGContainer");
+}
+
+.whitishPinkBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.whitishPinkBGContainer");
+}
+
+
+/*********************************************************************************************/
+/* Title Containers 
+/*Black title blue background containers*/
+
+.blackTitleBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleBlueBGContainer");
+}
+
+.blackTitleGradientBlueBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleGradientBlueBGContainer");
+}
+
+
+/*Black title grey background containers*/
+.blackTitleGreyBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.blackTitleGreyBGContainer");
+}
+
+/*********************************************************************************************/
+/*Misc containers 
+/*TopBar containers*/
+
+.topBarSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.topBarContainer");
+}
+
+.sparkPanelSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.sparkPanel");
+}
+
+/* Collapsible panel containers*/
+
+.collapsiblePanelSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.collapsiblePanel");
+}
+
+/* Login  panel containers*/
+
+.logInBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.logInBGContainer");
+}
+
+/* Patient Search containers*/
+
+.patientSearchBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.patientSearchBGContainer");
+}
+
+/*Status containers*/
+
+.statusBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.statusBGContainer");
+}
+
+/*Document management containers*/
+
+.docManagBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.docManagBGContainer");
+}
+
+.lavendarRecordingBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.lavendarRecordingBGContainer");
+}
+
+/*Label containers*/
+
+.notesHeaderLabelBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.notesHeaderLabelBGContainer");
+}
+
+.tooltipBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.tooltipBGContainer");
+}
+
+.importPreviousVisitBGContainerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.containerSkins.importPreviousVisitBGContainer");
+}

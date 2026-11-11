@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   xmlns:components1="com.gazuntite.components.*"
+					   width="100%" height="100%"
+					   xmlns:dictation="com.gazuntite.components.dictation.*"
+					   xmlns:dictation1="com.gazuntite.common.view.components.dictation.*"
+					   xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					   creationComplete="cc(event)" 
+					   >
+	
+	<fx:Metadata>
+		[Event(name="closeInputOptionsPopup", type="flash.events.Event")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.rapidAccess.LoadAllQuickLinksEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			protected function close_clickHandler(event:MouseEvent):void
+			{
+				close(event);
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, close);
+				
+				if(!model.allQuickLinksList)
+				{
+					model.allQuickLinksList = new ArrayCollection();
+					var evts:LoadAllQuickLinksEvent = new LoadAllQuickLinksEvent(resultFunc);
+					CairngormEventDispatcher.getInstance().dispatchEvent(evts);
+				}
+			}
+			
+			private function resultFunc(arr:ArrayCollection):void
+			{
+				model.allQuickLinksList = arr;
+			}
+			
+			private function close(event:MouseEvent):void
+			{
+				removePopup();
+				FlexGlobals.topLevelApplication.removeEventListener(MouseEvent.CLICK, close);
+			}
+			
+			protected function id_manageTB_clickHandler(event:MouseEvent):void
+			{
+				if(id_manageTB.selected)
+				{
+					id_main.height = 216;
+				}
+				else
+				{
+					id_main.height = 90;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<components:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="-29" />
+	</components:layout>
+	
+	<s:SkinnableContainer	id="id_main" skinClass="com.gazuntite.skins.controls.container.input.InputOptionPopupSkin" width="270" height="90" >
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="5" paddingTop="5"/>
+		</s:layout>
+		
+		<s:HGroup width="100%" horizontalAlign="center" verticalAlign="middle"  gap="15" paddingTop="8" paddingBottom="7">
+			<s:ToggleButton toolTip="Camera" useHandCursor="true" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.CameraTBSkin" />
+			<s:ToggleButton toolTip="Elab" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ElabTBSkin" useHandCursor="true"/>
+			<s:ToggleButton toolTip="eRx" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ERXTBSkin" useHandCursor="true"/>
+			<s:ToggleButton toolTip="Rapid Access" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.RATBSkin" useHandCursor="true"/>
+			<s:ToggleButton toolTip="Communication" skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.ComTBSkin" useHandCursor="true"/>
+		</s:HGroup>  
+		
+		<s:VGroup width="100%" height="100%" gap="-2" horizontalAlign="left" paddingLeft="5"  paddingRight="5" verticalAlign="top">
+			<s:Group width="100%" >
+				<s:ToggleButton id="id_manageTB" 
+								skinClass="com.gazuntite.skins.controls.toggleButtonSkin.ManageTBSkin"
+								toolTip="Manage" useHandCursor="true" buttonMode="true"
+								left="0"
+								click="id_manageTB_clickHandler(event)"
+								/>
+				<s:Button visible="{!id_manageTB.selected}" top="4" buttonMode="true"
+						  click="close_clickHandler(event)" horizontalCenter="0"
+						  includeInLayout="{!id_manageTB.selected}"
+						  skinClass="com.gazuntite.skins.controls.button.input.InputOptionButtonSkin"
+						  toolTip="Close" useHandCursor="true"/>
+			</s:Group>
+			
+			<s:BorderContainer backgroundColor="0xE8E8E8" width="100%" height="89" borderVisible="false" cornerRadius="0" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}">
+				<s:List  id="id_allQuicklinks"
+						 width="100%" height="100%" 
+						 borderVisible="false" contentBackgroundAlpha="0"
+						 dataProvider="{model.allQuickLinksList}"
+						 itemRenderer="com.gazuntite.input.view.popups.AllQuickListRenderer"
+						 skinClass="com.gazuntite.skins.controls.list.TransparentInvisibleScrollSkin"
+						 />
+			</s:BorderContainer>
+			<s:Spacer height="12" width="100%" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}"/>
+			<s:Group width="100%" height="20" visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}">
+				<s:Button label="Set as default"
+						  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin"
+						  toolTip="Set as default"
+						  buttonMode="true"
+						  useHandCursor="true"
+						  left="0" width="100"
+						  />
+				<s:Button 
+					buttonMode="true" useHandCursor="true" toolTip="Close"
+					skinClass="com.gazuntite.skins.controls.button.input.InputOptionButtonSkin"
+					click="close_clickHandler(event)"
+					horizontalCenter="0" verticalCenter="0"
+					visible="{id_manageTB.selected}" includeInLayout="{id_manageTB.selected}"
+					/>
+				<s:Button label="Set as default"
+						  skinClass="com.gazuntite.skins.controls.button.SaveButtonSkin"
+						  toolTip="save"
+						  buttonMode="true"
+						  useHandCursor="true"
+						  right="0"
+						  />
+			</s:Group>
+		</s:VGroup>
+	</s:SkinnableContainer>
+	
+	
+</components:PopupGroup>

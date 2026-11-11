@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  visible="{viewModel.visible}"
+					  includeInLayout="{viewModel.visible}"
+					  skinClass="com.gazuntite.skins.controls.container.PatientDictationNoteViewSkin"
+					  creationComplete="cc()">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.core.DPIClassification;
+			
+			[Bindable] 
+			public var viewModel:PatientDictationNoteViewModel;
+			
+			private var _dictationNoteDataProvider:ArrayCollection;
+			
+			private function cc():void
+			{
+			}
+
+			[Bindable]
+			public function get dictationNoteDataProvider():ArrayCollection
+			{
+				return _dictationNoteDataProvider;
+			}
+
+			public function set dictationNoteDataProvider(value:ArrayCollection):void
+			{
+				_dictationNoteDataProvider = value;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="6" paddingRight="6" paddingTop="6" paddingBottom="4" gap="0"/>
+	</s:layout>
+	
+	<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="10" gap="8"/>
+		</s:layout>
+		<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle"/>
+		<s:DropDownList skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin"
+						selectedIndex="0" buttonMode="true" toolTip="Sort List">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object label="Recently Added"/>
+					<fx:Object label="Visit Date"/>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+	</s:SkinnableContainer>
+
+	<s:SkinnableContainer id="id_ListHeader" width="100%" height="29" skinClass="com.gazuntite.skins.controls.container.ePrescription.RxHeaderSkin">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="10"/>
+		</s:layout>
+		
+		<s:Label width="30" text="Sr.#" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6"/>
+		
+		<s:HGroup gap="0" width="100%" height="100%" verticalAlign="middle">
+			<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:Label width="100%" text="Visit Date" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		<s:HGroup gap="0" width="120" height="100%" verticalAlign="middle">
+			<!--<s:Line height="100%">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#000000" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>-->
+			
+			<s:Label width="100%" fontFamily="CalibriCFF" fontSize="14" color="#FFFFFFF" textAlign="left" paddingLeft="6" />
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+	<s:List id="id_DictationNoteList" width="100%" height="170" borderVisible="false"
+			dataProvider="{dictationNoteDataProvider}"
+			skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+			itemRenderer="com.gazuntite.dictation.view.dictation.PatientDictationNoteHistoryListIR"/>
+		
+</s:SkinnableContainer>

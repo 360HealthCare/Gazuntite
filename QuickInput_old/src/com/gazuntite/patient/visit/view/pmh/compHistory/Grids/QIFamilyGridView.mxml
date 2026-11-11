@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:validators="com.gazuntite.common.util.validators.*" 
+		 xmlns:diagnosis="com.gazuntite.patient.visit.view.assessment.diagnosis.*" 
+		 xmlns:itemEditors="com.gazuntite.common.view.itemEditors.*" 
+		 xmlns:commons="com.gazuntite.patient.visit.view.commons.*"
+		 creationComplete="cc()" preinitialize="preInitializeHandler()"
+		 >
+	
+	<fx:Script>
+			
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.patient.visit.dto.FamilyHistroyDTO;
+			import com.gazuntite.patient.visit.dto.ch.FamilyHistoryDTO;
+			import com.gazuntite.patient.visit.event.pmh.comphistory.ManagePatientFamilyHistoryEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.common.view.events.DataGridActionsEvent;
+			import com.gazuntite.controls.extended.components.LabelComboBox;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Label;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.events.CollectionEvent;
+			import mx.events.DataGridEvent;
+			import mx.events.ValidationResultEvent;
+			
+			
+			[Bindable]
+			public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			[Bindable]
+			public var deleteColumnData:Object;
+			
+			private var _hasViewChanged:Boolean;
+			private var _hasGridChanged:Boolean;
+			
+			[Bindable]
+			public function get hasViewChanged():Boolean
+			{
+				return _hasViewChanged;
+			}
+			
+			public function set hasViewChanged(value:Boolean):void
+			{
+				_hasViewChanged = value;
+			}
+			
+			private function preInitializeHandler():void
+			{
+				/* if (!deleteColumnData)
+					deleteColumnData = {};
+				
+				deleteColumnData["noteDataFields"] = {subject: "NoteSubject", note: "FamilyHistoryNote", header: "FamilyHistoryTypeName", statusFunction:RecordLevelNotesStatus};
+				deleteColumnData["dictationDataField"] = "DictationID";
+				deleteColumnData["recordIDField"] = "PatientFamilyHistoryID";
+				deleteColumnData["section"] = QIPopUpManager.VB_COMPREHENSIVE_HISTORY; */
+			}
+			
+			private function cc():void
+			{
+				id_DataGrid.addEventListener(DataGridActionsEvent.DELETE_RECORD_CLICK, deleteRecordClickHandler, false, 0, true);
+			}
+			
+			private function deleteRecordClickHandler(event:DataGridActionsEvent):void
+			{
+				if (!event.data)
+					return;
+				
+				var familyHistoryDTO:FamilyHistroyDTO;
+				
+				if (event.data is FamilyHistroyDTO)
+					familyHistoryDTO = event.data as FamilyHistroyDTO;
+				
+				if (!familyHistoryDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record", function():void
+				{
+					familyHistoryDTO.IsDeleted = true;
+					familyHistoryDTO.IsDirty = true;
+					
+					model.selectedFamilyHistoryRecord = familyHistoryDTO;
+					model.selectedFamilyHistoryRecord.ModifiedAt = new Date();
+					model.selectedFamilyHistoryRecord.ModifiedBy = model.LoggedInUserId;
+					
+					dispatchEvent(new Event("saveFamilyHistoryEvent", true));
+				});
+			}
+			
+			private var _familyHistoryDTOCollection:ArrayCollection;
+			private var _includeInLayout:Boolean;
+			private var _includeInLayoutChanged:Boolean = true;
+			
+			[Bindable]
+			public function get includeGridInLayout():Boolean
+			{
+				return _includeInLayout;
+			}
+			
+			public function set includeGridInLayout(value:Boolean):void
+			{
+				_includeInLayout = value;
+				_includeInLayoutChanged = true;
+				
+				invalidateProperties();
+			}
+			
+			[Bindable]
+			public function get familyHistoryDTOCollection():ArrayCollection
+			{
+				return _familyHistoryDTOCollection;
+			}
+			
+			public function set familyHistoryDTOCollection(value:ArrayCollection):void
+			{
+				_familyHistoryDTOCollection = value;
+				
+				if (_familyHistoryDTOCollection)
+				{
+					if (!_familyHistoryDTOCollection.hasEventListener(CollectionEvent.COLLECTION_CHANGE))
+					{
+						familyHistoryDTOCollection.addEventListener(CollectionEvent.COLLECTION_CHANGE, familyHistoryDTOCollectionChangeHandler, false, 0, true);
+					}
+					
+					if (familyHistoryDTOCollection.length)
+					{
+						includeGridInLayout = true;
+					}
+					else
+					{
+						includeGridInLayout = false;
+					}
+				}
+				else
+				{
+					includeGridInLayout = false;
+				}
+			}
+			
+			private function familyHistoryDTOCollectionChangeHandler(event:CollectionEvent):void
+			{
+				if (familyHistoryDTOCollection && familyHistoryDTOCollection.length)
+					includeGridInLayout = true;
+					
+				else
+					includeGridInLayout = false;
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(familyHistoryDTOCollection!=null){
+					familyHistoryDTOCollection.filterFunction=myFilter;
+					familyHistoryDTOCollection.refresh();
+				}
+			}
+			
+			private function myFilter(obj:*):Boolean
+			{
+				/* if(model.vbFilter == Constants.BY_VISIT)
+				{
+					if(model.vbVisitId == obj.VisitID)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				*/
+				return true; 
+			}
+			
+			public function displayRowNum(oItem:Object, iCol:int):String
+			{
+				var ret:String;
+				try
+				{
+					var rowNumber:int = id_DataGrid.dataProvider.getItemIndex(oItem) + 1; //Sort able column fails some how, don't know why?
+					ret = String(rowNumber);
+				}
+				catch(e:Error )
+				{
+					ret = "##";
+				}
+				return ret;
+			}
+			
+			public function displayStatus(oItem:Object,iCol:int):String
+			{
+				var vd:String = oItem.IsYesSelected.toString();
+				if( vd && vd.toLowerCase() == Constants.STRING_TRUE )
+				{
+					return "Yes";
+				}
+				else if( vd && vd.toLowerCase() == Constants.STRING_FALSE )
+				{
+					return "None";
+				} 
+				return ""; 
+			}
+			//get ReletionshipTypeName
+			public function getReletionshipTypeName(oItem:Object,iCol:int):String
+			{
+				 var str:String = '';
+				if(oItem.ReletionshipType.Name)
+					str = oItem.ReletionshipType.Name;
+				
+				if(str == 'self')
+					str = '';
+				
+				return str;  
+			}
+			
+			private function RecordLevelNotesStatus(hasNotes:Boolean, data:Object):void
+			{
+				if( hasNotes ) 
+					data.IsYesSelected = Constants.STRING_FALSE;
+				else
+					data.IsYesSelected = Constants.STRING_TRUE;
+				
+				familyHistoryDTOCollection.refresh();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<validators:ComboValidator id="comboValidator" property="selectedItem"/>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YY" />
+	</fx:Declarations>
+	<fx:Binding source="model.PreviousFamilyHistoryList" destination="familyHistoryDTOCollection"  />
+	<s:layout>
+		<s:VerticalLayout gap="0" />
+	</s:layout> 
+	
+	<s:Button label="Filter" click="button1_clickHandler(event)" visible="false" includeInLayout="false" id="id_applyFiler"/>
+	<components:LabelDataGrid id="id_DataGrid" width="100%" useRollOver="false"
+							  dataProvider="{familyHistoryDTOCollection}" 
+							  rowCount="{id_DataGrid.dataProvider.length ? id_DataGrid.dataProvider.length : 1}" 
+							  verticalScrollPolicy="on" horizontalScrollPolicy="off"
+							  maxHeight="100" columnWidths="{[25,'20%','15%','15%','10%','20%',90]}">
+		
+		<components:columns>
+			<mx:DataGridColumn headerText="Sr.#" editable="false" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" labelFunction="displayRowNum"/>
+			<mx:DataGridColumn headerText="Family History" editable="false" dataField="FamilyHistoryType.Name" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"  />
+			<mx:DataGridColumn headerText="Status" dataField="IsYesSelected" editorDataField="isYes" labelFunction="displayStatus" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true" >
+				<mx:itemEditor>
+					<fx:Component>
+						<diagnosis:YesNoItemEditor width="100%" height="90%" property="IsYesSelected" />
+						
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="ICD Code" dataField="DiseaseType.ID"  editable="false"  itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Relation"  dataField="ReletionshipType.Name" labelFunction="getReletionshipTypeName" editorDataField="editorText" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor labelField="RelationshipName" width="100%" height="100%" /> <!--dataProvider="{model.RelationshipTypesList}"-->
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Disease" dataField="DiseaseType.Name" editorDataField="editorText" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true">
+				<mx:itemEditor>
+					<fx:Component>
+						<itemEditors:SparkComboBoxItemEditor width="100%" height="100%" labelField="Description"   />
+					</fx:Component>
+				</mx:itemEditor>
+			</mx:DataGridColumn>
+			<commons:DataGridColumnEx data="{deleteColumnData}" headerText="" editable="false" itemRenderer="com.gazuntite.patient.visit.view.itemrenderers.DeleteRecordRendererCH"/>
+		</components:columns>
+	</components:LabelDataGrid>
+	
+	
+</s:Group>

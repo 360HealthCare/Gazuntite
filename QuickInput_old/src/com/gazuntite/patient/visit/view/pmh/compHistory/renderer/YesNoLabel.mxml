@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:family="com.gazuntite.patient.visit.view.pmh.compHistory.family.*" 
+		 
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var m_sLabel:String = "Press Yes or No";
+			private var m_sLabel2:String = "";
+			private var m_bIsSelected:Boolean 		= false;
+			
+			[Bindable]
+			public function get Label2():String
+			{
+				return m_sLabel2;
+			}
+
+			public function set Label2(value:String):void
+			{
+				m_sLabel2 = value;
+			}
+
+			[Bindable]
+			public function get Label():String
+			{
+				return m_sLabel;
+			}
+			
+			public function set Label(value:String):void
+			{
+				m_sLabel = value;
+			}
+			
+			[Bindable]
+			public function get IsSelected():Boolean
+			{
+				return m_bIsSelected;
+			}
+			
+			public function set IsSelected(value:Boolean):void
+			{
+				m_bIsSelected = value;
+			}
+			
+
+
+			protected function id_label2_valueCommitHandler(event:FlexEvent):void
+			{
+				id_leftQuote.visible = true;
+				id_rightQuote.visible = true;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout gap="0" horizontalAlign="center" verticalAlign="middle" />
+	</s:layout>
+	<mx:ViewStack id="id_Views" width="100%" height="100%" resizeToContent="true"  creationPolicy="all" selectedIndex="{IsSelected ? 1:0}">
+		<s:NavigatorContent width="100%">
+			<s:SkinnableContainer width="100%" height="119" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QIInnerYesNoBG">
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+				</s:layout>
+			
+				<s:HGroup width="100%" horizontalAlign="center">
+				<s:RichText id="id_label" text="{Label}" color="#000000" fontFamily="Calibri Bold" fontSize="13" />
+					<s:Label id="id_leftQuote" text='"' fontFamily="Calibri Bold" fontSize="14" visible="false" />
+				<s:RichText id="id_label2" text="{Label2}" color="#000000" fontFamily="Calibri Bold" fontSize="13"
+							/>
+					<!--valueCommit="id_label2_valueCommitHandler(event)"-->
+					
+					<s:Label id="id_rightQuote" text='"' fontFamily="Calibri Bold" fontSize="16" visible="false" />
+				</s:HGroup>
+			</s:SkinnableContainer>
+		</s:NavigatorContent>
+
+		<s:NavigatorContent width="100%">
+			<family:DetailsView id="id_DetailsView" width="100%" height="119" />
+		</s:NavigatorContent>
+	</mx:ViewStack>
+	
+	
+</s:Group>

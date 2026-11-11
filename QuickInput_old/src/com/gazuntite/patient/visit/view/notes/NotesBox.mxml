@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*" 
+		 xmlns:notes="com.gazuntite.patient.visit.view.notes.*"
+		 >
+	<fx:Script>
+		<![CDATA[
+			
+			import spark.events.TextOperationEvent;
+			
+			private var m_sNotesText:String = "";
+			
+			private var m_bHasChange:Boolean;
+			
+			//Ayesha: May 12 2011
+			private var dictationID:String;
+			[Bindable]
+			public function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+			}
+			
+			[Bindable]
+			public function get NotesText():String
+			{
+				return m_sNotesText;
+			}
+
+			public function set NotesText(value:String):void
+			{
+				m_sNotesText = value;
+			}
+
+
+			/**
+			 * Ayesha: 12 May 2011
+			 * */
+			public function registerVoiceHandler():void
+			{
+				//id_BoxHeader.id_VoiceBtn.addEventListener(MouseEvent.CLICK, voiceBtnClickHandler, false, 0, true);
+			}
+			private function cc():void
+			{
+				registerVoiceHandler();
+				
+				//to change icon, if dictation exists..
+				
+			}
+			
+			protected function textarea1_changeHandler(event:TextOperationEvent):void
+			{
+					hasChange = true;
+					
+					if( NotesText.length > 0 )
+						dispatchEvent( new Event("Notes_Change", true, true ) );
+			}
+
+
+			protected function id_ClearBtn_clickHandler(event:MouseEvent):void
+			{
+				id_TextArea.text = "";
+				id_TextArea.setFocus();
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+ 
+	
+	<s:SkinnableContainer id="id_notesBorder" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QInotesBG" width="100%" height="117">
+		
+		
+		<s:layout>
+			<s:VerticalLayout gap="1" paddingTop="-1" paddingLeft="1" paddingRight="1" paddingBottom="2" />
+		</s:layout>
+		
+		<notes:NotesBoxHeader id="id_BoxHeader" width="100%" height="23" />
+		<s:SkinnableContainer width="100%" height="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QInotesBG" >
+			<s:layout>
+				<s:VerticalLayout gap="-1" horizontalAlign="right" paddingLeft="2" paddingRight="2" paddingBottom="2" paddingTop="2"  />
+			</s:layout>
+			
+			<s:TextArea id="id_TextArea" width="100%" height="79" fontFamily="Calibri" change="textarea1_changeHandler(event)" text="{NotesText}" maxChars="1000"/>
+			
+			<s:HGroup width="100%" horizontalAlign="right" paddingTop="0">				
+				<s:Button id="id_ClearBtn" label="C" click="id_ClearBtn_clickHandler(event)" right="2" bottom="2" 
+						  skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.ClearBtn" buttonMode="true" useHandCursor="true" toolTip="Clear"  />
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+ 
+	
+</s:Group>

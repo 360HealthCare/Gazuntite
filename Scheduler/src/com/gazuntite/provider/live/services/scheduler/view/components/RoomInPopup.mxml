@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="250"
+		 title="Assign Room" 
+		 chromeColor="#000000" color="#FFFFFF" cornerRadius="5" controlBarVisible="false" 
+		 xmlns:components1="com.gazuntite.controls.extended.components.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout />
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.scheduler.dto.RoomDTO;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			
+			// ***************Accept Room Assignment*************************************
+			protected function id_AssignRoom_clickHandler(event:MouseEvent):void
+			{
+				if(dgRooms.selectedItem)
+				{
+					if(model.SelectedRoomDTO)
+						model.SelectedRoomDTO = null;
+					
+					model.SelectedRoomDTO = new RoomDTO();
+					
+					model.SelectedRoomDTO = dgRooms.selectedItem as RoomDTO;
+					dispatchEvent(new Event('hideRoomInPopupEvent', true, true));
+					
+				}else
+				{
+					Alert.show('Please select a room from list.', 'Info', 4, FlexGlobals.topLevelApplication.mainContainer);
+					return;
+				}
+			}
+			//********************* Get grid row no*********************************
+			private function getRowNo(item:Object, iCol:int):String
+			{
+				var strRowNum:String = "";
+				
+				if (dgRooms.dataProvider)
+				{
+					var rowNum:int = dgRooms.dataProvider.getItemIndex(item) + 1;
+					strRowNum = String(rowNum);
+				}
+				
+				return strRowNum;
+			}
+			// ********************Cancel Button handler*****************************
+			protected function idCancelRoom_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<components1:LabelDataGrid id="dgRooms" 
+							  width="100%" height="90%"
+							  dataProvider="{model.SelectedRoomList}" 
+							  rowCount="{dgRooms.dataProvider.length +1}" 
+							  verticalScrollBarStyleName="VScrollBar"
+							  columnWidths="{[30,'95%']}" headerHeight="0" > 
+		<components1:columns>
+			<mx:DataGridColumn labelFunction="getRowNo"/>
+			<mx:DataGridColumn headerText="Room Name" dataField="Title" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"  />
+		</components1:columns>
+	</components1:LabelDataGrid>
+	
+	<s:HGroup  width="100%" height="10%" horizontalAlign="right" verticalAlign="middle">
+		<s:Button id="id_AssignRoom"
+				  label="Assign Room" toolTip="Assign Room" width="100"
+				  click="id_AssignRoom_clickHandler(event)" styleName="blackButtonSkin"/>
+		<s:Button id="idCancelRoom" toolTip="cancel Room" width="100"
+				  label="Cancel" click="idCancelRoom_clickHandler(event)" styleName="blackButtonSkin"/>
+	</s:HGroup>
+	
+</s:Panel>

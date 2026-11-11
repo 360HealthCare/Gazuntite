@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   xmlns:components="com.gazuntite.controls.extended.components.*" 
+					   creationComplete="cc(event)" 
+					   >
+	<fx:Script>
+		<![CDATA[
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.gazuntite.provider.services.common.model.CommunicationViewModel;
+			
+			import mx.collections.IList;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			[Bindable]
+			private var viewModel:CommunicationViewModel = CommunicationViewModel.getInstance();
+			
+			private var _dataProvider:IList;
+			
+			[Bindable]
+			public function get dataProvider():IList
+			{
+				return _dataProvider;
+			}
+
+			public function set dataProvider(value:IList):void
+			{
+				_dataProvider = value;
+			}
+
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						var e:Event = new Event('closePopup', true);
+						dispatchEvent( e);
+					}
+				});
+				
+			}
+			
+			protected function option_clickHandler(event:Event):void
+			{
+				logger.debug( "selected View, Index: " + event.currentTarget.selectedItem.id + ", " + event.currentTarget.selectedIndex );
+				
+				switch (uiTab.selectedIndex)
+				{
+					case 0: 
+						viewModel.communicationViewSectionName = "PROFILE";
+						break;
+					case 1: 
+						viewModel.communicationViewSectionName = "EMAIL";
+						break;
+					case 2: 
+						viewModel.communicationViewSectionName = "SMS";
+						break;
+					case 3: 
+						viewModel.communicationViewSectionName = "CHAT";
+						break;
+					case 4: 
+						viewModel.communicationViewSectionName = "AUDIO";
+						break;
+					case 5: 
+						viewModel.communicationViewSectionName = "VIDEO";
+						break;
+				}
+				
+				var e:Event = new Event('optionChaned', true);
+				dispatchEvent( e);
+				
+				var ce:Event = new Event('closePopup', true);
+				dispatchEvent( ce);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	
+	<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.CommunicationActionBarBGSkin">
+		
+		
+		
+		<s:TabBar id="uiTab" dataProvider="{dataProvider}" labelField="id" change="option_clickHandler(event)"
+				  skinClass="com.gazuntite.skins.controls.tabbar.ComOptionPopTabBarSkin"
+				  verticalCenter="3"
+				  
+		>
+			<s:layout>
+				<s:HorizontalLayout gap="7" paddingLeft="8" />
+			</s:layout>
+		</s:TabBar>
+		
+		
+	</s:SkinnableContainer>
+	
+</components:PopupGroup>

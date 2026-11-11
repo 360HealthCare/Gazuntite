@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin" xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.assessment.recommendation.RecommendationDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			private var _recommendatonDTO:RecommendationDTO;
+			private var toolTipChanged:Boolean;
+			
+			[Bindable]
+			public function get recommendationDTO():RecommendationDTO
+			{
+				return _recommendatonDTO;
+			}
+			
+			public function set recommendationDTO(value:RecommendationDTO):void
+			{
+				_recommendatonDTO = value;
+			}
+			
+			public function associatedDiagnosisLabel(oItem:Object):String
+			{
+				if (null == model.diagnosisDTOList ||  model.diagnosisDTOList.length < 1)
+					return  "";
+				
+				var label:String = "";
+				
+				if (oItem && oItem.hasOwnProperty("IcdDto") && oItem.IcdDto)
+				{
+					if (oItem.IcdDto.hasOwnProperty("IcdCodeName"))
+					{
+						label += oItem.IcdDto.IcdCodeName + ", ";
+					}
+					
+					if (oItem.IcdDto.hasOwnProperty("IcdCodeDescription"))
+					{
+						label += oItem.IcdDto.IcdCodeDescription;
+					}
+					
+					label += oItem.IsChronic ? " (Chronic) " : " (Acute) ";
+				}
+				
+				return label;
+			}
+			
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" >
+		<s:VGroup width="80" gap="5" verticalAlign="top" horizontalAlign="left" paddingLeft="3">
+			<s:Label text="Plan Type:" width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Method:" width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Duration:" width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Description:" width="100%" styleName="patientFormLabel"/>
+		</s:VGroup>
+		
+		<s:VGroup width="100%" gap="5" verticalAlign="top" horizontalAlign="left">
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.plantype.Name}" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.methodtype.Name}" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.DurationType.Name}" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.Description}" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:VGroup>
+		
+		<s:VGroup width="250" gap="5" verticalAlign="top" horizontalAlign="left">
+			<s:Label text="Associated Diagnosis:"  width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Web Links:" width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Discussed With Patient:" width="125" styleName="patientFormLabel" maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup width="100%" gap="5" verticalAlign="top" horizontalAlign="left">
+			<s:Label width="100%" styleName="patientFormValue"  maxDisplayedLines="1" showTruncationTip="true" text="{recommendationDTO.DiagnosisInfo}"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.Links}" maxDisplayedLines="1" showTruncationTip="true"/>
+			<s:Label width="100%" styleName="patientFormValue" text="{recommendationDTO.IsDiscussedWithPatient ? 'Yes' : 'No'}" maxDisplayedLines="1" showTruncationTip="true"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingRight="0" paddingLeft="3">
+		<s:Label text="Notes:"	 styleName="patientFormLabel" />
+		<s:Label text="{recommendationDTO.Note}" toolTip="{recommendationDTO.Note}" styleName="patientFormValue" maxDisplayedLines="1" showTruncationTip="true" width="100%"/>
+		<s:ToggleButton id="id_btnDictation"
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{ (recommendationDTO.DictationID &amp;&amp; recommendationDTO.DictationID != DictationConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+						/>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{recommendationDTO.Note}" note="@{recommendationDTO.Note}"	isSaveButtonVisible="false"
+										 DictationID="{recommendationDTO.DictationID}" IsDictaionEditMode="false"/>
+	
+</s:SkinnableContainer>

@@ -1,0 +1,60 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+/*********************************************************************************************/
+/*Combo Boxes
+/*Light grey  background combo buttons*/
+
+.lightGreyComboBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.comboBoxSkins.lightGreyComboBox");
+}
+
+/*Optional Combo Boxes*/
+
+.optionalComboBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.comboBoxSkins.optionalComboBox");
+}
+
+.searchComboBoxSkin 
+{
+	skinClass :ClassReference("com.adobe.quivus.skins.chrome.comboBoxSkins.searchComboBox") ;
+}
+/*Required Combo Boxes*/
+
+.requiredComboBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.comboBoxSkins.requiredComboBox");
+}
+
+/*Transparent Combo Boxes*/
+
+.transparentComboBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.comboBoxSkins.transparentComboBox");
+}
+
+/*********************************************************************************************/
+/*List Boxes
+/*White  background list boxes*/
+
+.whiteListBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.listBoxSkins.whiteListBox");
+}
+
+
+.whiteListBoxBlueScrollerSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.listBoxSkins.whiteListBoxBlueScroller");
+}
+
+/*Misc list boxes*/
+
+.spinerListBoxSkin
+{
+	skinClass : ClassReference("com.adobe.quivus.skins.chrome.listBoxSkins.spinerListBox");
+}
+

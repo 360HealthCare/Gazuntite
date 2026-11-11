@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*" 
+		 xmlns:components="com.gazuntite.controls.extended.components.*"
+		 creationComplete="cc(event)"
+		 width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.eprescription.services.patient.dto.PharmaciesResult;
+			
+			import mx.events.FlexEvent;
+			
+			private var _selectedPharmacy:PharmaciesResult;
+			
+			[Bindable]
+			public function get selectedPharmacy():PharmaciesResult
+			{
+				return _selectedPharmacy;
+			}
+
+			public function set selectedPharmacy(value:PharmaciesResult):void
+			{
+				_selectedPharmacy = value;
+				
+			}
+
+			
+			public function toggView():void
+			{
+				var toggleView:Boolean = id_selectPharmacyVS.selectedIndex == 0;
+				
+				if( null != selectedPharmacy && toggleView)
+				{
+					id_selectPharmacyVS.selectedIndex = 1;
+				}
+				else
+				{
+					id_selectPharmacyVS.selectedIndex = 0;
+					id_pharmacySearchView.clearSearchResults();
+				}
+			}
+			
+			protected function selectionView_clickHandler(event:MouseEvent):void
+			{
+				toggView();
+			}
+			
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				id_pharmacySearchView.addEventListener("ReLoadPatientPharmacy",LoadPatientFavPharmacy);
+				id_favPharmacyView.addEventListener("ReLoadPatientPharmacy",LoadPatientFavPharmacy);
+				addEventListener("AddPharmacy",onAddPharmacy);
+			}
+			
+			private function LoadPatientFavPharmacy(e:Event):void
+			{
+				dispatchEvent(e.clone());
+			}
+			
+			private function onAddPharmacy(event:Event):void
+			{
+				id_selectPharmacyVS.selectedIndex = 1;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout  />
+	</s:layout>
+	
+		
+	<components:LabelViewStack id="id_selectPharmacyVS" width="100%" height="100%" borderVisible="false"  >
+		<s:ArrayList>
+			<newrx:FavoritPharmacyListView id="id_favPharmacyView" 
+										   width="100%" minWidth="175" height="113" visible="true" includeInLayout="{id_favPharmacyView.visible}" labelFeild="StoreName"/>
+			<newrx:SearchPharmacyView id="id_pharmacySearchView" 
+									  width="100%" minWidth="175"  click="selectionView_clickHandler(event)" />
+		</s:ArrayList>
+	</components:LabelViewStack>
+
+</s:Group>

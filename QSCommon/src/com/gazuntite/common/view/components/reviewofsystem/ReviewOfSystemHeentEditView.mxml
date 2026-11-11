@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="onCreated(event)"
+		 width="400" height="300" 
+		 xmlns:reviewofsystem="com.gazuntite.common.view.components.reviewofsystem.*"
+		 xmlns:components="com.gazuntite.components.*" 
+		 xmlns:components1="com.gazuntite.common.view.components.*" 
+		 resize="onResize(event)" 
+		 render="onRenderHandler(event)"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.components.reviewofsystem.skin.ROS_GeneralBlue_TB;
+			import com.gazuntite.common.view.components.reviewofsystem.skin.RoS_GeneralTB;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			/* [Bindable]
+			public var heentItemList:ArrayCollection; */
+			
+			private var m_oDataItem:IReviewOfSystemItem;
+			[Bindable]	public var selectedItem:IReviewOfSystemItem;
+			[Bindable]	public var selectedItemRow:int = 0;
+			[Bindable]	public var listItemHeight:int = 28;
+			[Bindable]	public var tabWidth:Number = 160;
+			[Bindable]	protected var viewModel:PatientInputPhysicalReviewOfSystemViewModel = PatientInputPhysicalReviewOfSystemViewModel.getInstance();
+			[Bindable]	protected var selectedInnerItemRow:int = 0;
+			[Bindable]  protected var selectedInnerItemColumn:int = 0;
+			[Bindable]	protected var listInnerItemHeight:int = 27;
+			[Bindable]	protected var listInnerItemWidth:int = 100;
+			[Bindable]	protected var listItemWidth:int = 100;
+			[Bindable]	protected var selectedItemColumn:int = 0;
+			protected var selectedPage:int = 0;
+			
+			[Bindable]
+			public function get dataItem():IReviewOfSystemItem
+			{
+				return m_oDataItem;
+			}
+			
+			public function set dataItem(value:IReviewOfSystemItem):void
+			{
+				m_oDataItem = value;
+				onDataIsDirty = value.IsDirty;
+				//scrollToPage(0);
+			}
+			
+			protected function onItemClicked(event:Event):void
+			{
+				var btn:ToggleButton = event.target as ToggleButton;
+				if( null != btn )
+				{
+					ReviewOfSystemHelper.setNormal( selectedItem, ! btn.selected );	
+					var ge:GeneralEvent = new GeneralEvent("childChanged", true);
+					ge.value = selectedItem;
+					btn.dispatchEvent( ge );
+					event.stopImmediatePropagation();
+					event.preventDefault();
+				}
+				
+				if (uiList.selectedIndex!=0)
+				{
+					var list:ArrayCollection = uiList.dataProvider as ArrayCollection;
+					list.removeItemAt(uiList.selectedIndex);
+					list.addItemAt(selectedItem, 0);
+					uiList.selectedIndex = 0;
+				}
+				
+				viewModel.showRosItemViewHeentDetailLevel = true;
+			}
+			
+			protected function onItemSelected(event:Event):void
+			{
+				selectedItem = uiList.selectedItem;
+				viewModel.showRosItemViewHeentDetailLevel = false;
+			}
+			
+			protected function onCreated(event:FlexEvent):void
+			{
+				scrollToPage(0);
+				addEventListener( "childChanged", onChildChanged);
+			}
+			protected function scrollToPage(newPage:Number):void
+			{
+				if ( null == dataItem || null == dataItem.children )//heentItemList==null)
+				{
+					return;
+				}
+				var item_height:Number = listItemHeight;
+				var total_items:int = dataItem.children.length; //heentItemList.length;
+				var item_per_page:int = Math.ceil(uiListContainer.height/item_height);
+				var total_pages:int = Math.ceil(total_items/item_per_page);
+				
+				if (newPage<0 || newPage>=total_pages)
+				{
+					return;
+				}
+				viewModel.showRosItemViewHeentDetailLevel = false;
+				viewModel.rosHeentSelectedItemIndex=-1;
+				
+				selectedPage = newPage;
+				var scroll_to_item:int = newPage*item_per_page;
+				var scroll_pos:int = scroll_to_item*item_height;
+				//				uiListContainer.verticalScrollPosition = scroll_pos;
+				uiScrollAnimatePath.valueTo = scroll_pos;
+				uiScrollAnimate.play();
+				//				uiPageLabel.text = (newPage+1).toString()+'/'+total_pages.toString();
+			}
+			
+			protected function onResize(event:ResizeEvent):void
+			{
+				if( null != dataItem && null != dataItem.children && dataItem.children.length > 0 )
+				{
+					viewModel.heentListItemWidth = (this.width - tabWidth) / dataItem.children.length;
+				}
+				else
+				{
+					viewModel.heentListItemWidth = (this.width - tabWidth) / 5;
+				}
+			}
+			
+			protected function togglebutton1_clickHandler(event:MouseEvent):void
+			{
+				event.target.dispatchEvent( new Event('normalClick', true ) );
+			}
+			
+			protected function onChildChanged(event:GeneralEvent):void
+			{
+				selectedItem.IsDirty = false;
+				selectedItem.IsNormal = ReviewOfSystemHelper.IsAllChildrenNormal( selectedItem ).toString();
+				selectedItem.IsDirty = true;
+			}
+			
+			protected function set onDataIsDirty(value:Boolean):void
+			{
+				if( value )
+				{
+					var hasAbnormal:Boolean = ReviewOfSystemHelper.IsAnyChildAbnormal(dataItem);
+					if(hasAbnormal)
+					{
+						id_AbnormalIndicator.visible = true;
+						id_NormalIndicator.visible = false;
+					}
+					else
+					{
+						id_AbnormalIndicator.visible = false;
+						id_NormalIndicator.visible = true;
+					}
+				}
+				else
+				{
+					id_AbnormalIndicator.visible = false;
+					id_NormalIndicator.visible = false;
+				}
+			}
+			
+			protected function onRenderHandler(event:Event):void
+			{
+				if( null != dataItem )
+					onDataIsDirty = dataItem.IsDirty;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="uiScrollAnimate" target="{uiListContainer}" duration="300">
+			<s:motionPaths>
+				<s:SimpleMotionPath id="uiScrollAnimatePath" property="verticalScrollPosition" />
+			</s:motionPaths>
+			
+		</s:Animate>
+	</fx:Declarations>
+	
+	<fx:Binding source="dataItem.IsDirty" destination="onDataIsDirty" />
+	
+	<s:filters>
+		<s:DropShadowFilter alpha="0.75" angle="45.0" blurX="4.0" blurY="4.0" color="#000000" distance="2" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+	</s:filters>
+	
+	<s:Group x="5" y="{selectedItemRow*listItemHeight+29}"	>
+		<s:ToggleButton label="{dataItem.label}" width="160" height="100%"
+						skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.ROS_GeneralBlue_TB"
+						selected="@{viewModel.showRosItemViewHeentLevel}"
+						change="viewModel.rosSelectedItemIndex=-1"
+						buttonMode="true"
+						/>
+<!--						skinClass="{!viewModel.showRosItemViewHeentDetailLevel ? ROS_GeneralBlue_TB : RoS_GeneralTB}"-->
+		
+		<s:HGroup width="100%" horizontalAlign="right" verticalAlign="middle"  right="15" verticalCenter="0">
+			<s:Button id="id_AbnormalIndicator" label="^" width="14" skinClass="com.gazuntite.skins.controls.button.input.AbnormalNotesButtonSkin"
+					  visible="true" includeInLayout="{id_AbnormalIndicator.visible}"/>
+			
+			<s:ToggleButton id="id_NormalIndicator" skinClass="com.gazuntite.controls.extended.skins.changeIndicator"
+							width="14" height="14" visible="true" includeInLayout="{id_NormalIndicator.visible}"
+							/>
+			
+			
+			
+			<s:ToggleButton selected="{dataItem.IsNormal == QSConstants.STRING_TRUE}"
+							skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.NTB1"
+							buttonMode="true" useHandCursor="true" toolTip="Normal"
+							click="togglebutton1_clickHandler(event)"
+							/>
+			
+		</s:HGroup>
+	</s:Group>
+	
+	<s:BorderContainer id="uiPanel" 
+					   left="{tabWidth}" top="0" right="0" bottom="0" cornerRadius="3" 
+					   backgroundColor="0x83A3FE" borderVisible="false"
+					   >
+		<!--backgroundColor="{id_upArrow.visible ? 0x83A3FE : 0xA9AFB6}"-->
+		<!--		<s:ToggleButton id="uiAllNormal" right="4" top="3" width="94" height="22"
+		skinClass="com.gazuntite.common.view.components.reviewofsystem.skin.AllNormalTB1"/>
+		-->		<s:HGroup id="uiListContainer" 
+						  height="100%" clipAndEnableScrolling="true" 
+						  left="4" top="2" bottom="2" horizontalAlign="center" 
+						  paddingTop="4" paddingBottom="0" paddingLeft="0">
+					<!-- heentItemList-->
+					<s:List id="uiList" width="100%" contentBackgroundAlpha="0"
+							dataProvider="{dataItem.children}"
+							itemRenderer="com.gazuntite.common.view.components.reviewofsystem.renderers.ReviewOfSystemHeentItemRenderer"
+							selectedIndex="{viewModel.rosHeentSelectedItemIndex}"
+							change="onItemSelected(event)" borderVisible="false"
+							click="onItemClicked(event)"
+							>
+						<s:layout>
+							<s:HorizontalLayout gap="0"/>
+						</s:layout>
+					</s:List>			
+					<!--			
+					<s:Button label="^" click="scrollToPage(selectedPage-1)" width="{uiList.width}"/>
+					<s:Label id="uiPageLabel"/>
+					<s:Button label="v" click="scrollToPage(selectedPage+1)" width="{uiList.width}"/>
+					-->		
+				</s:HGroup>
+	</s:BorderContainer>
+	
+	<reviewofsystem:ReviewOfSystemHeentItemDetailView
+		dataItem="{selectedItem}"
+		left="{tabWidth}" right="4" top="40" bottom="4"  
+		visible="{viewModel.showRosItemViewHeentDetailLevel}"
+		includeInLayout="{viewModel.showRosItemViewHeentDetailLevel}"
+		/>
+	
+	<s:Group id="id_upArrow" left="190" right="0" height="100%" visible="{!viewModel.showRosItemViewHeentDetailLevel}" includeInLayout="{!viewModel.showRosItemViewHeentDetailLevel}">
+		<components1:PleaseSelectUpView label="Select any item for input" horizontalCenter="0" verticalCenter="0" width="90%"/>
+	</s:Group>
+	
+</s:Group>

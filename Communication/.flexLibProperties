@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="com.zigron.provider.services.email.delegate.DeleteEmailDelegate"/>
+    <classEntry path="com.zigron.provider.services.email.event.DeleteEmailEvent"/>
+    <classEntry path="com.zigron.provider.services.email.view.emailview.MailInboxView"/>
+    <classEntry path="com.zigron.provider.services.email.view.event.ReadEmailEvent"/>
+    <classEntry path="com.zigron.provider.services.email.view.event.ReplyEmailEvent"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

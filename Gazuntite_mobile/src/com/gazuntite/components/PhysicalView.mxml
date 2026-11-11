@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" 
+					xmlns:components="com.gazuntite.components.*"
+					xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					width="100%" 
+					height="100%"
+					creationComplete="init(event)"
+					xmlns:st="library://ns.tink.ws/flex/spark"
+					xmlns:containers="ws.tink.spark.containers.*"
+					xmlns:local="*"
+					xmlns:itemRenderers="ws.tink.spark.itemRenderers.*" 
+					xmlns:layouts="ws.tink.spark.layouts.*"
+					xmlns:itemrenderers="com.gazuntite.components.itemrenderers.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.itemrenderers.QICoverFlowItemRenderer;
+			import com.gazuntite.events.CloseSlideoutEvent;
+			import com.gazuntite.skins.PatientExamSkin;
+			import com.riavalue.components.dualpanel.DualPanel;
+			import com.riavalue.layouts.*;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			import spark.components.Image;
+			import spark.components.List;
+			import spark.components.supportClasses.ItemRenderer;
+			import spark.effects.easing.Linear;
+			import spark.events.IndexChangeEvent;
+			
+			import ws.tink.*;
+			
+			[Bindable]
+			protected var dp:ArrayCollection = new ArrayCollection([]);
+			
+			public var title:String = "Physical";
+			
+			protected function init(event:FlexEvent):void
+			{
+				// dummy data for test binding
+				var v:ObjectProxy = new ObjectProxy();
+				v.title = "Vitals";
+				v.en = true; // important, in order to work smoothly we need to ensure the first data item is true
+				
+				var cc:ObjectProxy = new ObjectProxy();
+				cc.title = "Chief Complaint";
+				cc.en = false;
+				
+				var rs:ObjectProxy = new ObjectProxy();
+				rs.title = "Review of System";
+				rs.en = false;
+				
+				var phys:ObjectProxy = new ObjectProxy();
+				phys.title = "Physical";
+				phys.en = false;
+				
+				var ihl:ObjectProxy = new ObjectProxy();
+				ihl.title = "In-House Lab";
+				ihl.en = false;
+				
+				dp.disableAutoUpdate();
+				dp.addItem(v);
+				dp.addItem(cc);
+				dp.addItem(rs);
+				dp.addItem(phys);
+				dp.addItem(ihl);
+				
+				dp.refresh();
+				
+				list.selectedIndex = 0;
+				list.invalidateDisplayList();
+				
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				updateEnabledView(event.oldIndex, event.newIndex);	
+			}
+			
+			protected function tabBar_changeHandler(event:IndexChangeEvent):void
+			{
+				list.selectedIndex = tabBar.selectedIndex;
+				updateEnabledView(event.oldIndex, event.newIndex);
+			}
+			
+			protected function updateEnabledView(oldIndex:int, newIndex:int):void
+			{
+				dp.getItemAt(oldIndex).en = false;
+				dp.getItemAt(newIndex).en = true;
+				
+				var e:CloseSlideoutEvent = new CloseSlideoutEvent(CloseSlideoutEvent.CLOSE_SLIDEOUT);
+				dispatchEvent(e);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+	</fx:Declarations>
+	
+	<s:SkinnableContainer width="100%" 
+						  height="100%"
+						  skinClass="com.gazuntite.skins.GradientBackgroundViewSkin">
+		
+		<s:layout>
+			<s:BasicLayout />
+		</s:layout>
+		
+		<s:Scroller width="100%" height="100%">
+			<s:VGroup id="vGroup" 
+					  horizontalAlign="center" 
+					  paddingBottom="0"
+					  paddingLeft="0"
+					  paddingRight="0"
+					  width="100%" 
+					  height="100%">
+				
+				<s:List id="list" 
+						width="100%" 
+						height="100%"
+						contentBackgroundAlpha="0"
+						borderAlpha="0"
+						useVirtualLayout="false"
+						change="list_changeHandler(event)"
+						itemRenderer="com.gazuntite.components.itemrenderers.QICoverFlowItemRenderer"
+						dataProvider="{dp}">
+					
+					<s:layout>
+						<layouts:CoverflowLayout numUnselectedElements="-1" id="coverFlow"
+												 selectedIndex="{list.selectedIndex}"
+												 maximumZ="100"
+												 rotationX="0" rotationY="0"
+												 depthColor="0xFFFFFF" depthColorAlpha="10"
+												 horizontalAlign="center" verticalAlign="middle"
+												 elementHorizontalAlign="center" elementVerticalAlign="middle"
+												 horizontalAlignOffset="0" verticalAlignOffset="0"
+												 horizontalDisplacement="15" selectedHorizontalDisplacement="60"
+												 verticalDisplacement="0" selectedVerticalDisplacement="0"
+												 projectionCenterX="200" projectionCenterY="150" fieldOfView="22"
+												 easer="{new Linear( 0, 1 )}" duration="700"
+												 useScrollBarForNavigation="false" scrollBarDirection="horizontal"/>
+						
+					</s:layout>
+					
+				</s:List>
+				
+				
+				<s:TabBar id="tabBar"
+						  dataProvider="{dp}"
+						  labelField="title"
+						  horizontalCenter="0"
+						  change="tabBar_changeHandler(event)"
+						  selectedIndex="{list.selectedIndex}"
+						  skinClass="com.gazuntite.skins.BlueTabBarSkin"/>
+				
+			</s:VGroup>
+		</s:Scroller>
+		
+	</s:SkinnableContainer>
+	
+</s:Group>

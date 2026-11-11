@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+    xmlns:s="library://ns.adobe.com/flex/spark"
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+    xmlns:mx="library://ns.adobe.com/flex/mx" 
+	xmlns:ns="library://ns.tink.ws/flex/spark">
+
+    <fx:Metadata>
+		[HostComponent("com.riavalue.components.dualpanel.DualPanel")]
+	</fx:Metadata>
+
+    <s:states>
+        <s:State name="front"/>
+        <s:State name="back"/>
+    </s:states>
+
+    <s:layout>
+        <s:VerticalLayout gap="0"/>
+    </s:layout>
+
+    <s:TabBar id="tb"
+        width="100%"
+        dataProvider="{vs}" selectedIndex="{ currentState == 'front' ? 0 : 1 }"
+        change="{ prefsButton.dispatchEvent(new MouseEvent(MouseEvent.CLICK))}"/>
+	
+	<ns:BorderDataNavigator skinClass="ws.tink.spark.skins.controls.BorderDataNavigatorSkin"
+							width="100%" height="100%"
+							id="vs">
+		<s:Group id="frontContainerHolder"
+				 width="100%" height="100%"/>
+		<s:Group id="backContainerHolder"
+				 width="100%" height="100%"/>
+		
+		
+	</ns:BorderDataNavigator>
+
+    <!--<mx:ViewStack id="vs"
+        width="100%" height="100%">
+
+        <s:NavigatorContent 
+            width="100%" height="100%">
+
+            <s:Group id="frontContainerHolder"
+                width="100%" height="100%"/>
+        </s:NavigatorContent>
+
+        <s:NavigatorContent 
+            width="100%" height="100%">
+
+            <s:Group id="backContainerHolder"
+                width="100%" height="100%"/>
+        </s:NavigatorContent>
+    </mx:ViewStack>-->
+
+    <s:Button id="prefsButton"
+        width="30"
+        right="0"
+        includeInLayout="false" 
+		label="i"
+        visible="false"/>
+</s:Skin>

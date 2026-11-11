@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx" 
+					width="100%" height="100%">
+	
+	<s:SkinnableContainer width="100%" 
+						  height="100%"
+						  skinClass="com.gazuntite.skins.GradientBackgroundViewSkin">
+		
+		<s:layout>
+			<s:VerticalLayout paddingBottom="10"
+							  paddingLeft="10"
+							  paddingRight="10"
+							  paddingTop="10"
+							  horizontalAlign="center"
+							  verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:HGroup width="100%">
+			<s:Button label="Schedule" styleName="button"/>
+			<s:Button label="Waiting Room" styleName="button"/>
+			<s:Button label="Gazuntite Alert" styleName="button"/>
+			<s:Button label="e-Prescription" styleName="button"/>
+			<s:Button label="e-Labs" styleName="button"/>
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			<s:Button label="Billing" styleName="button"/>
+			<s:Button label="Document Mgmt" styleName="button"/>
+			<s:Button label="Referal Mgmt" styleName="button"/>
+			<s:Button label="Administration" styleName="button"/>
+			<s:Button label="Reports" styleName="button"/>
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+</s:Group>

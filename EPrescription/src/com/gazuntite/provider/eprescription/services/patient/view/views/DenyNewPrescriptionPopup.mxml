@@ -1,0 +1,1485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:PopupWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:components="com.gazuntite.controls.extended.components.*"
+						skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.TitleWindowSkin"
+						title="Deny New Prescription"
+						width="560" height="470">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.event.visit.CreateVisitCommonEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetNDCByDRUGIDProductIDEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetProductByDrugIDEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.GetStrengthByGenericProductIDEvent;
+			import com.gazuntite.provider.eprescription.services.patient.event.SearchDrugbyGNameEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.util.AppUtils;
+			import com.gazuntite.provider.eprescription.services.patient.util.EConstants;
+			import com.gazuntite.provider.eprescription.services.patient.view.events.MedicineSelectedEvent;
+			import com.gazuntite.provider.eprescription.services.patient.view.medicineSearch.medicineSearchList;
+			import com.gazuntite.provider.eprescription.services.patient.view.pharmacySearch.pharmacySearchPopup;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			[Bindable]
+			private var model : EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			private var _securityHeaderXML:XML;
+			private var pharmacySearch:pharmacySearchPopup;
+			private var _ServiceLevel:String;
+			private var pLoc:Point;
+			private var loc:Point;
+			private var medArrayCol:ArrayCollection;
+			private var prodArrayCol:ArrayCollection;
+			private var ndcArrayCol:ArrayCollection;
+			private var MedListView:medicineSearchList;
+			private var ProdListView:medicineSearchList;
+			private var NDCListView:medicineSearchList;
+			private var isMedicineSelected:Boolean;
+			private var csa_code:String = "";
+			private var chk1:Boolean; 
+			private var chk2:Boolean;
+			private var chk3:Boolean;
+			private var chk4:Boolean;
+			private var chk5:Boolean;
+			private var checkPrescriberServiceLevels:Boolean;
+			private var patient_ID:String;
+			private var encounterId:String;
+			private var _userTypeDTO:XML;
+			private var summary:RXSummary;
+			public var gaxenPatiendId:String;
+			public var patientID:int; 
+			private var _templateId:String;
+			private var _encounterTypeId:String;
+			private var _clinicBranchID:String;
+			private var _SPI:String;
+			private var _userId:String;
+			public var InsurancesXML:XML = <Insurances />;
+			public var fName:String = "";
+			public var mName:String = "";
+			public var lName:String = "";
+			public var visitArray:ArrayCollection = new ArrayCollection();
+			
+			//******************* Getter and setters **************************************
+			[Bindable]
+			public function get userId():String
+			{
+				return _userId;
+			}
+			
+			public function set userId(value:String):void
+			{
+				_userId = value;
+			}
+			[Bindable]
+			public function get SPI():String
+			{
+				return _SPI;
+			}
+			
+			public function set SPI(value:String):void
+			{
+				_SPI = value;
+			}
+			[Bindable]
+			public function get clinicBranchID():String
+			{
+				return _clinicBranchID;
+			}
+			
+			public function set clinicBranchID(value:String):void
+			{
+				_clinicBranchID = value;
+			}
+			[Bindable]
+			public function get encounterTypeId():String
+			{
+				return _encounterTypeId;
+			}
+			
+			public function set encounterTypeId(value:String):void
+			{
+				_encounterTypeId = value;
+			}
+			[Bindable]
+			public function get templateId():String
+			{
+				return _templateId;
+			}
+			
+			public function set templateId(value:String):void
+			{
+				_templateId = value;
+			}
+			[Bindable]
+			public function get userTypeDTO():XML
+			{
+				return _userTypeDTO;
+			}
+			
+			public function set userTypeDTO(value:XML):void
+			{
+				_userTypeDTO = value;
+			}
+			
+			[Bindable]
+			public function get securityHeaderXML():XML
+			{
+				return _securityHeaderXML;
+			}
+			
+			public function set securityHeaderXML(value:XML):void
+			{
+				_securityHeaderXML = value;
+			}
+			
+			//****************** methods ********************************
+			
+			// Pharmacy search button click handler
+			protected function pharmacy_clickHandler(event:MouseEvent):void
+			{
+				var pharmacyname:String = id_pharmacy.text;
+				if(pharmacyname == "")
+					pharmacyname = "0";
+				
+				if(!pharmacySearch)
+					pharmacySearch = new pharmacySearchPopup();
+				
+				pharmacySearch.addEventListener("SelectButtonClicked", selectPharmacy);
+				var pLoc:Point = new Point( this.x , this.y );
+				var loc:Point = this.localToGlobal( pLoc );
+				pharmacySearch.x = loc.x ; 
+				pharmacySearch.y = loc.y ;			
+				pharmacySearch.pharmacyName 	= pharmacyname;
+				pharmacySearch.inSearchPopup 	= true;
+				pharmacySearch.ShowPopup(this);
+				id_pharmacy.text = "";
+			}
+			// on selting pharmacy click handler
+			private function selectPharmacy(event:Event):void
+			{
+				if(pharmacySearch.id_pharmacySearch._Phone == "")
+				{
+					var alert:Alert = Alert.show("This Pharmacy does not have phone number, please select Other Pharmacy", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						id_PharmacyName.text 		= "";
+						id_NPCDID.text 				= "";
+						id_pharmacyAddress.text 	= "";
+						id_pharmacyPhone.text		= "";
+						return;
+					});
+					return;
+				}
+				
+				var servicelevels:int = parseInt(pharmacySearch.id_pharmacySearch._ServiceLevel);
+				if(servicelevels % 2 != 1)
+				{
+					var alert:Alert = Alert.show("This Pharmacy does not allow NewRX", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						id_PharmacyName.text 		= "";
+						id_NPCDID.text 				= "";
+						id_pharmacyAddress.text 	= "";
+						id_pharmacyPhone.text		= "";
+						return;
+					});
+				}
+				
+				id_PharmacyName.text 		= pharmacySearch.id_pharmacySearch._storename;
+				id_NPCDID.text 				= pharmacySearch.id_pharmacySearch._NCPDPID;
+				id_pharmacyAddress.text 	= pharmacySearch.id_pharmacySearch._AddressLine1;
+				id_pharmacyPhone.text		= pharmacySearch.id_pharmacySearch._Phone;
+				_ServiceLevel 				= pharmacySearch.id_pharmacySearch._ServiceLevel;
+				
+				pharmacySearch.removePopup();
+			}
+			//medicine search click handler
+			protected function id_searchBtn_clickHandler(event:MouseEvent):void
+			{
+				var drugName:String = id_medicine.text;
+				
+				if(drugName == "")
+				{
+					drugName = "0";
+				}
+				//{GENERICNAME}/{StartNumber}/{productGenName}/{NDC}
+				var getStaticLists: SearchDrugbyGNameEvent = new SearchDrugbyGNameEvent(drugName, "0" , "0", "0", MedicineSearch);				
+				getStaticLists.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists);
+				
+				pLoc = new Point( this.x ,this.y + id_medicine.y + 23);
+				loc = id_medicine.localToGlobal( pLoc );
+			}
+			
+			private function MedicineSearch(meds:XML):void
+			{
+				//trace("medicine Search results");
+				//trace("MEDICINE SEARH RES -- > "+meds.toXMLString());	
+				medArrayCol = new ArrayCollection();
+				for(var i:int=0; i<meds.Drugs.Drug.length(); i++)
+				{
+					var s_rownum:String = meds.Drugs.Drug[i].@rownum.toString();
+					var s_DrugName:String = meds.Drugs.Drug[i].@DrugName.toString();
+					var s_DRUG_ID:String = meds.Drugs.Drug[i].@DRUG_ID.toString();
+					medArrayCol.addItem({ rownum:s_rownum, DrugName:s_DrugName, DRUG_ID:s_DRUG_ID});
+				}
+				
+				if(MedListView)
+				{
+					if(!MedListView.visible)
+					{
+						MedListView.visible = true;
+						MedListView.x = loc.x - 15; 
+						MedListView.y = loc.y + 5 ;  
+						
+						MedListView.id_SearchList.dataProvider 	= medArrayCol;
+					}
+				}
+				else
+				{
+					createMedSearchList();		
+					MedListView.id_SearchList.labelField 	= "DrugName";
+				}
+			}
+			private function createMedSearchList():void
+			{
+				MedListView 				= new medicineSearchList();
+				MedListView.addEventListener( MedicineSelectedEvent.MED_SELECTED, OnMedItemClick);
+				MedListView.addEventListener( "closeSearchBox", clearMedSearchResults);
+				MedListView.minWidth = id_medicine.width;
+				MedListView.maxHeight = 170;
+				MedListView.x = loc.x - 15; 
+				MedListView.y = loc.y + 5 ;  
+				MedListView.ShowPopup( this );
+				//MedListView.id_SearchList.dataProvider = model.PharmacyListDTO.Pharmacies;
+				MedListView.id_SearchList.dataProvider 	= medArrayCol;
+				//MedListView.id_SearchList.labelField 	= "DrugName";
+			}
+			private function clearMedSearchResults(event:Event = null):void
+			{
+				if( MedListView && MedListView.visible )
+				{
+					MedListView.visible = false;
+					return
+				}
+			}
+			private function OnMedItemClick(event:Event):void
+			{
+				try
+				{
+					//trace("OnItemClick MEdlist rownum --> ",MedListView.id_SearchList.selectedItem.rownum );
+					id_medicine.text	= MedListView.id_SearchList.selectedItem.DrugName;
+					//id_genericName.text = MedListView.id_SearchList.selectedItem.tradeName;
+					//id_ndc.text 		= MedListView.id_SearchList.selectedItem.rownum;
+					var drugId:String = MedListView.id_SearchList.selectedItem.DRUG_ID;
+					var drugName:String = MedListView.id_SearchList.selectedItem.DrugName;
+					PopulateProductGenericField(drugId, "0", "0");
+					/* var ps:PharmacySelectedEvent = new PharmacySelectedEvent(PharmacySelectedEvent.PHARMACY_SELECTED);
+					ps.selection = SearchListView.id_SearchList.selectedItem;
+					dispatchEvent( ps ); */
+					clearMedSearchResults();
+					isMedicineSelected = true;
+				}
+				catch(e:Error)
+				{
+					//trace("ERROR --> OnItemClick", e );
+				}
+			}
+			private function PopulateProductGenericField(drugId:String="0", medicineName:String="0", ndc:String="0"):void
+			{
+				var GENPRODUCT_ID:String;
+				var getStaticLists: GetProductByDrugIDEvent = new GetProductByDrugIDEvent(drugId, medicineName, ndc,  function(response:XML):void
+				{
+					for(var i:int=0; i<response.Product.length(); i++)
+					{
+						var GenericName:String 	= response.Product[i].@GenericName.toString();
+						GENPRODUCT_ID 			= response.Product[i].@GENPRODUCT_ID.toString();					
+						csa_code 				= response.Product[i].@CSA_CODE.toString();
+						
+						if(csa_code == "1" || csa_code == "2")
+						{
+							var alert:Alert = Alert.show("This medication contains controlled substance", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+								
+								if(chk1 && chk5)
+								{
+									checkPrescriberServiceLevels = true;
+								}
+								else
+								{
+									checkPrescriberServiceLevels = false;
+								}
+								
+							});
+						}
+						
+						//prodArrayCol.addItem({ GenericName:GenericName, GENPRODUCT_ID:GENPRODUCT_ID});
+						id_genericName.text = GenericName;
+						
+						GetMedStrength(GenericName, '0');
+						//PopulateNDCField(drugId, "0", "0");
+						getNDCField("0", GENPRODUCT_ID, "0");
+					}
+				}
+				);
+				getStaticLists.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists); 				
+			}
+			private function GetMedStrength(GENPRODUCT_NAME:String, NDC:String):void
+			{
+				//GET STRENGTH...
+				var getMedicineStrengthEvent: GetStrengthByGenericProductIDEvent = new GetStrengthByGenericProductIDEvent(GENPRODUCT_NAME, NDC,  function(response:XML):void
+				{
+					//trace("MEDICINE STRENGTH ");
+					//trace(response.toXMLString());
+					var strengthAC:ArrayCollection = new ArrayCollection();
+					for(var i:int=0; i<response.Strengths.Strength.length(); i++)
+					{
+						var STRENGTH_ID:String 			= response.Strengths.Strength[i].@STRENGTH_ID.toString();
+						var STRENGTH_DESCRIPTION:String = response.Strengths.Strength[i].@STRENGTH_DESCRIPTION.toString();
+						strengthAC.addItem({ STRENGTH_ID:STRENGTH_ID, STRENGTH_DESCRIPTION:STRENGTH_DESCRIPTION});
+					}
+					id_strength.dataProvider = strengthAC;
+					id_strength.labelField = "STRENGTH_DESCRIPTION";
+					id_strength.selectedIndex = 0;
+				});
+				getMedicineStrengthEvent.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getMedicineStrengthEvent); 	
+			}
+			private function getNDCField(strengthID:String = '0', ProductId:String="0", ndc:String="0", drugId:String="0"):void
+			{
+				var getNDCByDRUGIDProductIDEvent: GetNDCByDRUGIDProductIDEvent = new GetNDCByDRUGIDProductIDEvent(strengthID, ProductId, ndc, drugId, function(response:XML):void
+				{
+					//trace("response MedicineNDCSearch "+response.toXMLString());	
+					medArrayCol = new ArrayCollection();
+					for(var i:int=0; i<response.NDC.length(); i++)
+					{
+						
+						var FORMATTED_NDC:String 	= response.NDC[i].@FORMATTED_NDC.toString();
+						var NDC:String 				= response.NDC[i].@NDC.toString();					
+						
+						medArrayCol.addItem({ FORMATTED_NDC:FORMATTED_NDC, NDC:NDC});
+						id_ndc.text = NDC;
+						break; // select top 1
+					} 			
+				}
+				);				
+				getNDCByDRUGIDProductIDEvent.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getNDCByDRUGIDProductIDEvent);	
+			}
+			// generic name search click handler
+			protected function id_searchGenericBtn_clickHandler(event:MouseEvent):void
+			{
+				pLoc = new Point( this.x ,this.y + id_genericName.y + 23);
+				loc = id_genericName.localToGlobal( pLoc );
+				
+				var genericName:String = id_genericName.text;
+				
+				if(genericName == "")
+				{
+					genericName = "0";
+				}
+				//{DrugID}/{productGenName}/{NDC}
+				
+				var getStaticLists: GetProductByDrugIDEvent = new GetProductByDrugIDEvent("0", genericName, "0", MedicineProdSearchList);				
+				getStaticLists.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists);
+				
+				PopulateMedicineField("0", "0", genericName, "0");
+			}
+			private function MedicineProdSearchList(response:XML):void
+			{
+				//trace("response MedicineProdSearch "+response.toXMLString());	
+				prodArrayCol = new ArrayCollection();
+				for(var i:int=0; i<response.Product.length(); i++)
+				{
+					var GenericName:String 		= response.Product[i].@GenericName.toString();
+					var GENPRODUCT_ID:String 	= response.Product[i].@GENPRODUCT_ID.toString();		
+					csa_code 					= response.Product[i].@CSA_CODE.toString();
+					
+					prodArrayCol.addItem({ GenericName:GenericName, GENPRODUCT_ID:GENPRODUCT_ID, CSA_CODE:csa_code});
+				} 							
+				
+				if(ProdListView)
+				{
+					if(!ProdListView.visible)
+					{
+						ProdListView.visible = true;
+						ProdListView.x = loc.x - 15; 
+						ProdListView.y = loc.y + 5 ;  
+						ProdListView.id_SearchList.dataProvider 	= prodArrayCol;
+					}
+				}
+				else
+				{
+					createProdSearchList();	
+					ProdListView.id_SearchList.labelField 	= "GenericName";
+				} 
+			}
+			private function PopulateMedicineField(medName:String, StartNo:String, genericName:String, ndc:String ):void
+			{
+				//{GENERICNAME}/{StartNumber}/{productGenName}/{NDC}							
+				var getStaticLists: SearchDrugbyGNameEvent = new SearchDrugbyGNameEvent(medName, StartNo , genericName, ndc,function(meds:XML):void
+				{
+					//trace("got meds ");
+					//trace("response MedicineSearch "+meds.toXMLString());	
+					//medArrayCol = new ArrayCollection();
+					for(var i:int=0; i<meds.Drugs.Drug.length(); i++)
+					{
+						var s_rownum:String = meds.Drugs.Drug[i].@rownum.toString();
+						var s_DrugName:String = meds.Drugs.Drug[i].@DrugName.toString();
+						var s_DRUG_ID:String = meds.Drugs.Drug[i].@DRUG_ID.toString();
+						//medArrayCol.addItem({ rownum:s_rownum, DrugName:s_DrugName, DRUG_ID:s_DRUG_ID});
+						id_medicine.text = s_DrugName;
+					}
+				});
+				getStaticLists.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists); 	
+			}
+			private function createProdSearchList():void
+			{
+				ProdListView 				= new medicineSearchList();
+				ProdListView.addEventListener( MedicineSelectedEvent.MED_SELECTED, OnProdItemClick);
+				ProdListView.addEventListener( "closeSearchBox", clearProdSearchResults);
+				ProdListView.minWidth = id_ndc.width;
+				ProdListView.width = id_ndc.width;
+				ProdListView.maxHeight = 170;
+				ProdListView.x = loc.x - 15; 
+				ProdListView.y = loc.y + 5 ;  
+				ProdListView.ShowPopup( this );
+				//MedListView.id_SearchList.dataProvider = model.PharmacyListDTO.Pharmacies;
+				ProdListView.id_SearchList.dataProvider 	= prodArrayCol;
+				ProdListView.id_SearchList.labelField 		= "GenericName";
+			}	
+			private function OnProdItemClick(event:Event):void
+			{
+				try
+				{
+					//trace("OnProdItemClick MEdlist  --> ",ProdListView.id_SearchList.selectedItem.GenericName );
+					var prodId:String 			= ProdListView.id_SearchList.selectedItem.GENPRODUCT_ID;
+					id_genericName.text 		= ProdListView.id_SearchList.selectedItem.GenericName;
+					csa_code 					= ProdListView.id_SearchList.selectedItem.CSA_CODE;
+					
+					if(csa_code == "1" || csa_code == "2")
+					{
+						var alert:Alert = Alert.show("This medication contains controlled substance", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						});
+					}
+					
+					GetMedStrength(id_genericName.text, '0');
+					var GenericName:String = ProdListView.id_SearchList.selectedItem.GenericName;
+					getNDCField("0", prodId, "0");
+					PopulateMedicineField("0", "0", GenericName, "0");
+					//{DrugID}/{GENPRODUCT_ID}/{NDC}										
+					clearProdSearchResults();
+					isMedicineSelected = true;
+				}
+				catch(e:Error)
+				{
+					//trace("ERROR --> OnItemClick", e );
+				}
+			}
+			
+			private function clearProdSearchResults(event:Event = null):void
+			{
+				if( ProdListView && ProdListView.visible )
+				{
+					ProdListView.visible = false;
+					return
+				}
+			}
+			// NDC search click handler
+			protected function id_searchNDCBtn_clickHandler(event:MouseEvent):void
+			{
+				pLoc = new Point( this.x ,this.y + id_ndc.y + 23);
+				loc = id_ndc.localToGlobal( pLoc );
+				
+				var ndc:String = id_ndc.text;
+				
+				if(ndc == "")
+				{
+					ndc = "0";
+				}
+				var getNDCByDRUGIDProductIDEvent: GetNDCByDRUGIDProductIDEvent = new GetNDCByDRUGIDProductIDEvent('0',"0", "0", ndc, MedicineNDCSearchList);				
+				getNDCByDRUGIDProductIDEvent.data = securityHeaderXML; 				
+				CairngormEventDispatcher.getInstance().dispatchEvent(getNDCByDRUGIDProductIDEvent);	
+			}
+			public function MedicineNDCSearchList(response:XML):void
+			{
+				ndcArrayCol = new ArrayCollection();
+				for(var i:int=0; i<response.NDC.length(); i++)
+				{
+					var FORMATTED_NDC:String 	= response.NDC[i].@FORMATTED_NDC.toString();
+					var NDC:String 				= response.NDC[i].@NDC.toString();					
+					ndcArrayCol.addItem({ FORMATTED_NDC:FORMATTED_NDC, NDC:NDC});
+				} 							
+				
+				if(NDCListView)
+				{
+					if(!NDCListView.visible)
+					{
+						NDCListView.visible = true;
+						NDCListView.x = loc.x - 15; 
+						NDCListView.y = loc.y + 5 ;  
+						NDCListView.id_SearchList.dataProvider 	= ndcArrayCol;
+					}
+				}
+				else
+				{
+					createNDCSearchList();	
+					NDCListView.id_SearchList.labelField 	= "NDC";
+				} 
+			}
+			private function createNDCSearchList():void
+			{
+				NDCListView 				= new medicineSearchList();
+				NDCListView.addEventListener( MedicineSelectedEvent.MED_SELECTED, OnNDCItemClick);
+				NDCListView.addEventListener( "closeSearchBox", clearNdcSearchResults);
+				NDCListView.minWidth = id_medicine.width;
+				NDCListView.maxHeight = 170;
+				NDCListView.x = loc.x - 15; 
+				NDCListView.y = loc.y + 5 ;  
+				NDCListView.ShowPopup( this );
+				//MedListView.id_SearchList.dataProvider = model.PharmacyListDTO.Pharmacies;
+				NDCListView.id_SearchList.dataProvider 	= ndcArrayCol;
+				NDCListView.id_SearchList.labelField 	= "NDC";
+			}	
+			private function OnNDCItemClick(event:Event):void
+			{
+				try
+				{
+					//trace("OnNDCItemClick MEdlist NDC --> ",NDCListView.id_SearchList.selectedItem.NDC );
+					//id_medicine.text	= MedListView.id_SearchList.selectedItem.DrugName;
+					//id_genericName.text = MedListView.id_SearchList.selectedItem.tradeName;
+					id_ndc.text 		= NDCListView.id_SearchList.selectedItem.NDC;
+					var ndc:String = NDCListView.id_SearchList.selectedItem.NDC;		
+					PopulateProductGenericField("0", "0", ndc);
+					PopulateMedicineField("0", "0", "0", ndc);
+					clearNdcSearchResults();
+					isMedicineSelected = true;
+				}
+				catch(e:Error)
+				{
+					trace("ERROR --> OnItemClick", e );
+				}
+			}
+			private function clearNdcSearchResults(event:Event = null):void
+			{
+				if( NDCListView && NDCListView.visible )
+				{
+					NDCListView.visible = false;
+					return
+				}
+			}
+			
+			//TA -  on N/A Visit change handler
+			protected function id_chkNAVisit_clickHandler(event:MouseEvent):void
+			{
+				if(id_chkNAVisit.selected)
+				{
+					id_associatedVisit.enabled = false;
+					id_chkCreateVisit.selected = false;
+				}
+				else
+				{
+					id_associatedVisit.enabled = true;
+				}
+			}
+			//TA -  on Create new visit Visit change handler
+			protected function id_chkCreateVisit_clickHandler(event:MouseEvent):void
+			{
+				if(id_chkCreateVisit.selected)
+				{
+					id_associatedVisit.enabled = false;
+					id_chkNAVisit.selected     = false;
+				}
+				else
+				{
+					id_associatedVisit.enabled = true;
+				}
+			}
+			// generate sig click handler
+			protected function id_btnSIG_clickHandler(event:MouseEvent):void
+			{				
+				if(id_dose.text.length != 0 && id_dosageForm.selectedItem && id_duration.text.length != 0 && id_frequency.selectedItem
+					&& id_dosageForm.selectedItem.Term != null && id_frequency.selectedItem.Description != null)
+				{
+					var SIG:String = "";
+					SIG += "Take ";
+					SIG += id_dose.text+" "+id_dosageForm.selectedItem.Term;
+					SIG += " for "+id_duration.text+" days, "+id_frequency.selectedItem.Description;
+				}
+				
+				if(id_route.selectedItem)
+				{
+					SIG += " via "+id_route.selectedItem.DOSE_ROUTE_DESCRIPTION+" ";
+				}
+				id_sig.text = SIG;
+			}
+			/**	TA - 28 Sep, 2012
+			 * Medication section > When Medicine name, Generic Name, NDC and Strength are 
+			 * populated> As soon as any of the first three fields is Edited (Remove, add or 
+			 * change a few characters/digits), the other three should be cleared automatically; 
+			 * should be populated with data matching with the edited values, if exists.
+			 * */
+			protected function id_medicine_changeHandler(event:TextOperationEvent):void
+			{
+				if((id_medicine.text.length > 0 && isMedicineSelected) ||(id_genericName.text.length > 0 && isMedicineSelected) || (id_ndc.text.length > 0 && isMedicineSelected))
+					clearMedicineSection();
+				
+			}
+			private function clearMedicineSection():void
+			{
+				isMedicineSelected 			= false;
+				id_medicine.text 			= '';
+				id_genericName.text		 	= '';
+				id_ndc.text					= '';
+				id_strength.dataProvider.removeAll();
+			}
+			//send button click handler
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				if(!checkPrescriberServiceLevels)
+				{
+					var alert:Alert = Alert.show("You don’t have the required service level to prescribe this medicine", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						return;											
+					});
+					return;
+				}
+				
+				if(!ValidateNEWRX() )
+				{
+//					id_sendBtn.setStyle("skinClass", blackButton);
+					return;
+				}
+				
+				if(id_chkCreateVisit.selected)
+				{
+					//	trace(createVisitXML() );
+					var getStaticLists: CreateVisitCommonEvent = new CreateVisitCommonEvent(patient_ID, function(response:XML):void
+					{
+						//trace("VISIT CREATION RESPONSE "+response.toXMLString());
+						encounterId = response;						
+						if(encounterId == "0")
+						{
+							var alert:Alert = Alert.show("Unable to create visit", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+								
+							});
+							return;
+						}
+						
+						AssignSummary(true, false, encounterId)
+					}
+					);				
+					getStaticLists.data = createVisitXML(); 				
+					CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists);
+				}
+				else if(id_chkNAVisit.selected)
+				{
+					AssignSummary(true, false, '-1')
+				}
+				else
+				{
+					AssignSummary(true);
+				}
+			}
+			//save
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(!checkPrescriberServiceLevels)
+				{
+					var alert:Alert = Alert.show("You don’t have the required service level to prescribe this medicine", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						return;
+					});
+					return;
+				}
+				
+				if(!ValidateNEWRX() )
+				{
+//					id_saveBtn.setStyle("skinClass", blackButton);
+					return;
+				}
+				
+				if(id_chkCreateVisit.selected)
+				{
+					//	trace(createVisitXML() );
+					var getStaticLists: CreateVisitCommonEvent = new CreateVisitCommonEvent(patient_ID, function(response:XML):void
+					{
+						//trace("VISIT CREATION RESPONSE "+response.toXMLString());
+						encounterId = response;						
+						if(encounterId == "0")
+						{
+							var alert:Alert = Alert.show("Unable to create visit", "Alert", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+								
+							});
+							return;
+						}
+						
+						AssignSummary(false, false, encounterId)
+					}
+					);				
+					getStaticLists.data = createVisitXML(); 				
+					CairngormEventDispatcher.getInstance().dispatchEvent(getStaticLists);
+				}
+				else if(id_chkNAVisit.selected)
+				{
+					AssignSummary(false, false, '-1')
+				}
+				else
+				{
+					AssignSummary(false);
+				}
+			}
+			// validate form
+			private function ValidateNEWRX():Boolean
+			{
+				var success:Boolean = new Boolean();
+				var errorStr:String = new String();
+				success = true;	
+				var toSetFocus:Object;
+				
+				if (id_PharmacyName.text.length == 0)
+				{
+					success = false;
+					errorStr += "Please select pharmacy \n";	
+					if (!toSetFocus)
+						toSetFocus = id_pharmacy;
+				}
+				
+				if (id_medicine.text.length == 0)
+				{
+					success = false;
+					errorStr += "Please select medicine \n";	
+					if (!toSetFocus)
+						toSetFocus = id_medicine;					
+				} 
+				
+				if(! (id_strength.selectedItem))
+				{
+					success = false;
+					errorStr += "Please Select Strength \n";
+					if (!toSetFocus)
+						toSetFocus = id_strength;
+					
+				} 
+				
+				if (id_ndc.text.length == 0)
+				{
+					success = false;
+					errorStr += "NDC code is must \n";	
+					//id_ndc.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_ndc;
+				}
+				
+				if (id_dose.text.length == 0)
+				{
+					success = false;
+					errorStr += "Please enter dose \n";	
+					//id_dose.setFocus();
+					
+					if (!toSetFocus)
+						toSetFocus = id_dose;
+				}
+				/* if (parseInt(id_dose.text) > 18)
+				{
+				success = false;
+				errorStr += "Maximum dose cannot exceed 18 \n";	
+				
+				if (!toSetFocus)
+				toSetFocus = id_dose;
+				} */
+				
+				if(! (id_dosageForm.selectedItem))
+				{
+					success = false;
+					errorStr += "Please Select Dosage Form \n";
+					//id_dosageForm.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_dosageForm;
+					
+				}
+				if (id_quantity.text.length == 0)
+				{
+					success = false;
+					errorStr += "Please enter quantity \n";	
+					//id_quantity.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_quantity;
+				}
+				if(! (id_quantityForm.selectedItem ))
+				{
+					success = false;
+					errorStr += "Please Select Quantity Form \n";	
+					//id_quantityForm.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_quantityForm;
+				}
+				if(! (id_frequency.selectedItem ))
+				{
+					success = false;
+					errorStr += "Please Select Frequency \n";	
+					//id_frequency.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_frequency;
+				}
+				if(! (id_route.selectedItem ))
+				{
+					success = false;
+					errorStr += "Please Select Route \n";	
+					//id_route.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_route;
+				}
+				
+				if(!id_chk_PRN.selected)
+				{
+					if (id_refills.text.length == 0)
+					{
+						id_refills.text = "0";
+						/* success = false;
+						errorStr += "Please enter refills \n";	
+						id_refills.setFocus(); */
+					}
+				}
+				if(! (id_substitution.selectedItem ))
+				{
+					success = false;
+					errorStr += "Please Select Substitution \n";	
+					//id_substitution.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_substitution;
+				}
+				
+				/* 	if(! (id_type.selectedItem ))
+				{
+				success = false;
+				errorStr += "Please Select Type \n";	
+				id_type.setFocus();
+				} */
+				
+				if(!id_chkCreateVisit.selected && !id_chkNAVisit.selected)
+				{
+					if(! (id_associatedVisit.selectedItem ))
+					{
+						success = false;
+						errorStr += "Please Select Associated Visit \n";	
+						//id_associatedVisit.setFocus();
+						if (!toSetFocus)
+							toSetFocus = id_associatedVisit;
+					}
+				}
+				
+				if (id_sig.text.length == 0)
+				{
+					success = false;
+					errorStr += "Please enter SIG \n";	
+					//id_quantity.setFocus();
+					if (!toSetFocus)
+						toSetFocus = id_sig;
+				}
+				
+				if(success == false)
+				{
+					var alert:Alert = Alert.show(errorStr, "Required Fields", 4, FlexGlobals.topLevelApplication.mainContainer, function(event:Event):void{
+						if (toSetFocus)
+							toSetFocus.setFocus();
+					});
+					
+					//PopUpManager.centerPopUp (alert);
+				}
+				return success;
+			}
+			
+			private function createVisitXML():XML
+			{
+				var visitDTO:XML					= <VisitDTO />;
+				visitDTO.IsDeleted 					= "false";
+				visitDTO.IsDirty 					= "false";
+				visitDTO.AppointmentId 				= "0";
+				visitDTO.IsRecordEditable			= "true";
+				visitDTO.IsValidDataExists			= "false";
+				visitDTO.IsVirtualVisit				= "false";
+				visitDTO.OwnerId 					= "0";
+				visitDTO.PlaceOfServiceTypeID		= "0";
+				
+				visitDTO.RecordStatus				= "";
+				visitDTO.SignedByUserId				= "0";
+				visitDTO.SignedByUserType			= "1";
+				visitDTO.SignedDate					= "2012-01-01T00:00:00";
+				visitDTO.TemplateVisitId			= "0";									
+				
+				
+				visitDTO.PatientId 					= patient_ID; //model.loadedPatientId;
+				visitDTO.TemplateId 				= templateId;
+				visitDTO.EncounterTypeId 			= encounterTypeId;
+				
+				//visitDTO.CreatedStationID 		= model.userSelectedStationDTO.StationID;
+				
+				//visitDTO.ClinicBranch 			= new ClinicBranchDTO();
+				visitDTO.ClinicBranch.ClinicBranchIdSeq = clinicBranchID;
+				visitDTO.ClinicBranch.AvgPatientPerDay = 0;
+				visitDTO.UserId 					= userId;				
+				
+				visitDTO.UserType.UserTypeId		= model.LoggedInUserProviderTypeId;
+				
+				visitDTO.VisitStatus				= EConstants.UN_SIGNED_STATUS;
+				visitDTO.ModifiedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.SignedDate 				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.CoSignedDate				= "2012-01-01T00:00:00";//EConstants.NULL_DATE;
+				visitDTO.RecGuid 					= EConstants.GUID_FORMAT;
+				visitDTO.DictationID 				= EConstants.GUID_FORMAT;
+				
+				//M new fields addded in DTO
+				//28 Mar 2011
+				visitDTO.CreatedBy 					= userId;
+				visitDTO.ModifiedBy					= userId;
+				visitDTO.VisitDate					= AppUtils.getToday(); 
+				visitDTO.CreatedAt 					= AppUtils.getToday(); //"2012-01-01T00:00:00"; 
+				visitDTO.ModifiedAt 				= AppUtils.getToday();// EConstants.NULL_DATE;		
+				visitDTO.CreatedStationID			= "1";
+				
+				
+				visitDTO.appendChild(userTypeDTO);
+				
+				return visitDTO;
+				
+			}
+			private function AssignSummary(sendOnly:Boolean, isChronic:Boolean = false, encounterId:String="0"):void
+			{
+				summary  = new RXSummary();
+				
+				var pLoc:Point = new Point( this.x , this.y );
+				var loc:Point = this.localToGlobal( pLoc );
+				summary.x = loc.x ; 
+				summary.y = loc.y ;				
+				
+				summary.gaxenPatiendId 		= gaxenPatiendId;
+				summary.patientID 			= patientID;
+				summary.securityHeaderXML 	= securityHeaderXML;
+				
+				summary.ShowPopup(this);
+				//provider
+				summary.SPI							= SPI;
+				
+				summary.sendOnly 	= sendOnly;
+				summary.isChronic 	= isChronic;
+				
+				//patient
+				summary.id_PatientName.label 		= id_PatientName.label; 
+				summary.id_quivusId.text 			= id_quivusId.text;
+				summary.id_dob.text 				= id_dob.text;
+				summary.id_gender.text 				= id_gender.text;
+				
+				//patient insurance
+				summary.insuranceCol 				= InsurancesXML; //insuranceCol;
+				
+				//pharmacy
+				summary.id_PharmacyName.text 		= id_PharmacyName.text; 
+				summary.id_NPCDID.text 				= id_NPCDID.text;
+				summary.id_pharmacyPhone.text 		= id_pharmacyPhone.text; 
+				summary.id_pharmacyAddress.text 	= id_pharmacyAddress.text;
+				
+				//summary.id_pharmacyNotes.text		= id_pharmacyNotes.text;
+				//TA			summary.id_pharmacyNotes.label		= id_pharmacyNotes.text;
+				
+				//medication
+				summary.id_medicine.text 			= id_medicine.text; 
+				summary.id_genericName.text 		= id_genericName.text;
+				summary.id_ndc.text					= id_ndc.text;
+				summary.id_strength.text			= id_strength.selectedItem? id_strength.selectedItem.STRENGTH_DESCRIPTION: "";
+				summary.StrengthId					= id_strength.selectedItem? id_strength.selectedItem.STRENGTH_ID: "";
+				summary.id_dose.text				= id_dose.text;
+				summary.id_ndc.text					= id_ndc.text;
+				summary.id_dosageForm.text			= id_dosageForm.selectedItem?id_dosageForm.selectedItem.Term: "";
+				summary.DosageCode					= id_dosageForm.selectedItem?id_dosageForm.selectedItem.Code: "";
+				summary.id_quantity.text			= id_quantity.text;
+				summary.id_quantityForm.text		= id_quantityForm.selectedItem? id_quantityForm.selectedItem.Term: "";
+				summary.QuantityForm				= id_quantityForm.selectedItem? id_quantityForm.selectedItem.Code: "";
+				summary.Frequency					= id_frequency.selectedItem? id_frequency.selectedItem.Abbreviation: "";
+				summary.id_frequency.text			= id_frequency.selectedItem? id_frequency.selectedItem.Description: "";
+				summary.id_route.text				= id_route.selectedItem? id_route.selectedItem.DOSE_ROUTE_DESCRIPTION: "";
+				summary.Route						= id_route.selectedItem? id_route.selectedItem.DOSE_ROUTE_ID: "";
+				summary.id_duration.text			= id_duration.text;
+				//summary.id_ndc.text				= id_chk_PRN.selected;
+				
+				if(id_chk_PRN.selected)
+				{
+					summary.isPRN					= "true";
+					summary.id_refills.text			= "As needed";
+				}
+				else
+				{
+					summary.isPRN					= "false";
+					summary.id_refills.text			= id_refills.enabled? id_refills.text: "0";
+				}
+				summary.id_substitution.text		= id_substitution.selectedItem? id_substitution.selectedItem.SubstitutionCode: "";
+				summary.id_type.text				= id_type.selectedItem? id_type.selectedItem.data:"";
+				
+				if(encounterId != "0" && encounterId != "" && id_chkCreateVisit.selected)
+				{
+					//new visit created.
+					summary.id_associatedVisit.text		= AppUtils.formatDate(AppUtils.getToday()); 
+					summary.EncounterId					= encounterId;
+					summary.visitDate					= AppUtils.getToday(); 
+				}
+				else if(encounterId == "-1" && id_chkNAVisit.selected)
+				{
+					//NA visit created.
+					summary.id_associatedVisit.text		= 'N/A'; // NA shown in summary view --- AppUtils.formatDate(AppUtils.getToday()); 
+					summary.EncounterId					= encounterId;
+					summary.visitDate					= AppUtils.getToday(); 
+				}
+				else
+				{
+					//Associate visit
+					summary.id_associatedVisit.text		= id_associatedVisit.selectedItem? AppUtils.formatDate(id_associatedVisit.selectedItem.VisitDate): "";
+					summary.EncounterId					= id_associatedVisit.selectedItem? id_associatedVisit.selectedItem.VisitID: "";
+					//encounterId							= id_associatedVisit.selectedItem? id_associatedVisit.selectedItem.VisitID: "";
+					trace("encounterId of exisiting Visit: "+summary.EncounterId);
+					summary.visitDate					= id_associatedVisit.selectedItem? id_associatedVisit.selectedItem.VisitDate: "";
+				}
+				
+				//summary.id_sig.text					= id_sig.text;
+				summary.id_sig.label					= id_sig.text;
+				summary.id_NPCDID.text				= id_NPCDID.text;
+				
+				summary.id_PatientName.label			= fName + ' '+ lName;
+				summary.id_gender.text				= id_gender.text;
+				summary.id_dob.text					= id_dob.text;
+				summary.id_phone.text				= id_phone.text;
+				summary.id_address.label			= id_address.text;
+				summary.id_address.toolTip			= id_address.text;
+				summary.isActive					= id_isActiveBtn.selected? "true":"false";				
+				summary.addEventListener("NewRXSuccessful", resetForm);
+			}
+			
+			private function resetForm(event:Event):void
+			{
+				//patient info
+				/* id_PatientName.text  				= ""; 
+				id_quivusId.text 					= ""; 
+				id_dob.text 						= ""; 
+				id_gender.text 						= ""; 
+				id_phone.text 						= ""; 
+				id_address.text 					= "";  */
+				
+				//pharmacy info
+				id_medicine.text					= "";
+				id_PharmacyName.text 				= "";  
+				id_NPCDID.text 						= ""; 
+				id_pharmacyPhone.text 				= "";  
+				id_pharmacyAddress.text 			= ""; 
+				
+				//medication info
+				id_medicine.text 					= "";  
+				id_genericName.text 				= ""; 
+				id_ndc.text 						= ""; 
+				id_strength.dataProvider.removeAll();
+				
+				id_associatedVisit.dataProvider.removeAll();
+				visitArray.removeAll();
+				id_dose.text 						= ""; 
+				id_ndc.text 						= ""; 
+				id_quantity.text 					= ""; 
+				id_quantity.text 					= "0"; 
+				id_quantityForm.textInput.text 		= "";
+				id_quantityForm.selectedIndex 		= -1;
+				id_frequency.selectedIndex			= -1;
+				id_frequency.textInput.text 		= "";
+				id_dosageForm.selectedIndex 		= -1;
+				id_dosageForm.textInput.text 		= "";
+				id_route.selectedIndex 				= -1;
+				id_route.textInput.text 			= "";
+				id_duration.text					= ""; 				
+				id_refills.text						= ""; 
+				id_substitution.selectedIndex 		= -1;
+				id_substitution.textInput.text 		= "";
+				id_type.selectedIndex				= -1; 
+				id_type.textInput.text 				= "";
+				id_associatedVisit.selectedIndex 	= -1;
+				id_associatedVisit.textInput.text 	= "";
+				if(!id_associatedVisit.enabled)
+					id_associatedVisit.enabled = true;
+				
+				//TA - NA impl
+				id_chkCreateVisit.selected 			= false;
+				id_chkNAVisit.selected 			    = false;
+				id_sig.text							= ""; 
+				id_NPCDID.text						= "";
+				//id_medicationBG.enabled  			= false;
+				//id_pharmacySearchBG.enabled 		= false;
+				//id_showFavoritePharmaciesBtn.enabled= false;
+				isMedicineSelected					= false;
+			}
+			// frequency change hadnler
+			protected function id_frequency_changeHandler(event:IndexChangeEvent):void
+			{
+				calculateDuration();
+			}
+			public function calculateDuration():void
+			{
+				if(id_dose.text.length != 0 && id_quantity.text.length != 0)
+				{
+					var dose:int 		= parseInt(id_dose.text);
+					var quantity:int 	= parseInt(id_quantity.text);
+					var duration:Number;
+					var eachday:Number;
+					var freq:Number;
+					
+					if(id_frequency.selectedItem.Abbreviation == "TID")
+					{
+						freq = 3;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "3X/W")
+					{
+						freq = 3/7;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "QID")
+					{
+						freq = 4;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "5X/D")
+					{
+						freq = 5;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q18H")
+					{
+						freq = 24/18;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q36H")
+					{
+						freq = 24/36;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q48H")
+					{
+						freq = 24/48;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q72H")
+					{
+						freq = 24/72;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q7D")
+					{
+						freq = 1/7;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "every other day")
+					{
+						freq = 0.5;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "once a day")
+					{
+						freq = 1;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q1MO")
+					{
+						freq = 1/30;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "1X/W")
+					{
+						freq = 1/7;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "BID")
+					{
+						freq = 2;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "2X/W")
+					{
+						freq = 2/7;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q15MIN")
+					{
+						freq = 60*24 / 15;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q1H")
+					{
+						freq = 24;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "10X/D") //10 times a day
+					{
+						freq = 10;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "12X/D")
+					{
+						freq = 12;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "16X/D")
+					{
+						freq = 16;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "6X/D")
+					{
+						freq = 6;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "7X/D")
+					{
+						freq = 7;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "8X/D")
+					{
+						freq = 8;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q16H") //every 16 hours
+					{
+						freq = 24/16;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q2W") //every 2 weeks
+					{
+						freq = 1/14;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q30MIN") //every 30 minutes
+					{
+						freq = 60*24 / 30;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q40H") //every 40 hours
+					{
+						freq = 24 / 40;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "QY") //yearly
+					{
+						freq = 1/365;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "9X/D")
+					{
+						freq = 9;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "9X/D")
+					{
+						freq = 9;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q3W")
+					{
+						freq = 1/21;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q5D")
+					{
+						freq = 1/5;
+					}
+					else if(id_frequency.selectedItem.Abbreviation == "Q60H")
+					{
+						freq = 24 / 60;
+					}
+					else
+					{
+						freq = 1;
+					}
+					
+					eachday = dose * freq;
+					duration = quantity/eachday;
+					duration = Math.round(duration);
+					id_duration.text = duration.toString();
+				}
+			}
+			protected function id_chk_PRN_clickHandler(event:Event):void
+			{
+				if(id_chk_PRN.selected)
+				{					
+					id_refills.text 	= "0";
+					id_refills.enabled 	= false;
+				}
+				else
+				{
+					id_refills.enabled 	= true;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+	</fx:Declarations>
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" gap="1"/>
+		</s:layout>
+		
+		<s:HGroup width="100%">
+			<s:VGroup width="45%">
+				<s:Label color="#333333" fontSize="14"  text="PATIENT DETAILS" fontFamily="Calibri" fontWeight="bold"/>
+				<s:SkinnableContainer  width="100%">
+					<s:layout>	
+						<s:VerticalLayout paddingLeft="4" paddingRight="2" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+					</s:layout>
+					<s:HGroup width="100%">						
+						<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+						<s:Button id="id_PatientName" fontFamily="Calibri" color="#333333" 
+								 label="{model.selectedApproveRefillRequest.pharmacyPatientDTO.FirstName +' '+model.selectedApproveRefillRequest.pharmacyPatientDTO.LastName}"
+								 toolTip="{model.selectedApproveRefillRequest.pharmacyPatientDTO.FirstName +' '+model.selectedApproveRefillRequest.pharmacyPatientDTO.LastName}"/>
+					</s:HGroup>
+					<s:HGroup width="100%">						
+						<s:Label fontFamily="Calibri" color="#666666" text="GID" width="60"/>
+						<s:Label id="id_quivusId" fontFamily="Calibri" color="#333333" text="" />
+					</s:HGroup>
+					<s:HGroup width="100%">	
+						<s:Label fontFamily="Calibri" color="#666666" text="DOB" width="60"/>
+						<s:Label id="id_dob" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.DOB.substr(0, 9)}" />
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Label fontFamily="Calibri" color="#666666" text="Gender" width="60"/>
+						<s:Label id="id_gender" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyPatientDTO.Gender == 'F'?'Female':'Male'}" />
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60" />
+						<s:Label id="id_phone" fontFamily="Calibri" color="#333333" text="" />
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+						<s:Label id="id_address" width="100%" fontFamily="Calibri" color="#333333" text="" maxWidth="165" maxDisplayedLines="1"  />
+					</s:HGroup>
+				</s:SkinnableContainer>
+				
+				<s:Spacer height="5" />
+				
+				<s:HGroup width="100%">
+					<s:Label color="#333333" fontSize="14"  text="PHARMACY" fontFamily="Calibri" fontWeight="bold"/>
+				</s:HGroup>
+				<s:SkinnableContainer id="id_pharmacySearchBG" styleName="patientSearchBGContainerSkin" height="23" width="100%" >
+					
+					<s:HGroup width="100%" verticalAlign="middle"  height="100%" >
+						<components:LabelTextInput id="id_pharmacy" width="100%" prompt="Pharmacy search"  
+												   fontFamily="Calibri" toolTip="Search with NCPDP ID" height="100%"/>
+						<s:Button click="pharmacy_clickHandler(event)" height="100%" width="22" styleName="orangeSearchButtonSkin" buttonMode="true" toolTip="Search Pharmacies" />
+					</s:HGroup>
+				</s:SkinnableContainer>
+				<s:SkinnableContainer  width="100%" >
+					<s:layout>	
+						<s:VerticalLayout paddingLeft="4" paddingRight="4" paddingBottom="2" paddingTop="5" horizontalAlign="left" gap="8" />
+					</s:layout>
+					<s:HGroup width="100%">						
+						<s:Label fontFamily="Calibri" color="#666666" text="Name" width="60" />
+						<s:Label id="id_PharmacyName" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.StoreName}" maxWidth="165" maxDisplayedLines="1" />
+					</s:HGroup>
+					<s:HGroup width="100%">						
+						<s:Label fontFamily="Calibri" color="#666666" text="NCPDP ID" width="60"/>
+						<s:Label id="id_NPCDID" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.NCPDPID}" />
+					</s:HGroup>
+					<s:HGroup width="100%">	
+						<s:Label fontFamily="Calibri" color="#666666" text="Phone" width="60"/>
+						<s:Label id="id_pharmacyPhone" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.PhonePrimary}" />
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Label fontFamily="Calibri" color="#666666" text="Address" width="60"/>
+						<s:Label id="id_pharmacyAddress" fontFamily="Calibri" color="#333333" text="{model.selectedApproveRefillRequest.pharmacyDTO.AddressLine1}" maxWidth="165" maxDisplayedLines="1" />
+					</s:HGroup>
+				</s:SkinnableContainer>
+			</s:VGroup>
+			<s:SkinnableContainer id="id_medicationBG"  width="100%" >
+				<s:layout>
+					<s:VerticalLayout paddingBottom="7" paddingLeft="7" paddingRight="7" paddingTop="7" gap="4" />
+				</s:layout>	
+				<s:Label color="#333333" fontSize="14" text="MEDICATION" fontFamily="Calibri" fontWeight="bold"/>
+				<s:HGroup width="100%">
+					<s:SkinnableContainer styleName="patientSearchBGContainerSkin" height="23" width="100%" >						
+						<s:HGroup width="100%" verticalAlign="middle" paddingTop="2">
+							
+							<components:LabelTextInput id="id_medicine"
+													   prompt="Medicine Name" width="100%" restrict="[A-Z a-z , . % ' 0-9]" required="true"
+													   paddingLeft="3" paddingTop="2" paddingRight="3" paddingBottom="5" toolTip="Medicine Name" maxChars="105"	   text="" change="id_medicine_changeHandler(event)"/>
+							<s:Button id="id_searchBtn" click="id_searchBtn_clickHandler(event)" height="23" width="22" styleName="orangeSearchButtonSkin" buttonMode="true" toolTip="Search Medicine" />
+							
+						</s:HGroup>
+					</s:SkinnableContainer>															
+					<s:DropDownList id="id_strength" prompt="Strength" width="75%"  toolTip="Strength"	/>									  
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:SkinnableContainer styleName="patientSearchBGContainerSkin" height="23" width="100%" >						
+						<s:HGroup width="100%" verticalAlign="middle" paddingTop="2">
+							
+							<components:LabelTextInput id="id_genericName" 
+													   prompt="Generic Name" width="100%" restrict="[A-Z a-z , . % ' 0-9]" required="true"
+													   paddingLeft="3" paddingTop="2" paddingRight="3" paddingBottom="5" toolTip="Generic Name"  text="" change="id_medicine_changeHandler(event)"/>
+							<s:Button id="id_searchGenericBtn" 
+									  click="id_searchGenericBtn_clickHandler(event)" height="23" width="22" styleName="orangeSearchButtonSkin" buttonMode="true" toolTip="Search Medicine" />
+							
+						</s:HGroup>
+					</s:SkinnableContainer>
+					<s:SkinnableContainer styleName="patientSearchBGContainerSkin" height="23" width="75%" >	
+						<s:HGroup width="100%" verticalAlign="middle" paddingTop="2">
+							
+							<components:LabelTextInput id="id_ndc"
+													   prompt="NDC" width="100%" restrict="[A-Z a-z , . ' 0-9]" required="true"
+													   paddingLeft="3" paddingTop="2" paddingRight="3" paddingBottom="5" toolTip="NDC" maxChars="35"  text="" change="id_medicine_changeHandler(event)"/>
+							<s:Button id="id_searchNDCBtn" 
+									  click="id_searchNDCBtn_clickHandler(event)" height="23" width="22" styleName="orangeSearchButtonSkin" buttonMode="true" toolTip="Search NDC" />
+						</s:HGroup>
+					</s:SkinnableContainer>			
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<components:LabelTextInput id="id_dose" 
+											   prompt="Dose" width="100%" restrict="[0-9]"  required="true" maxChars="3"
+											   paddingLeft="3" paddingTop="5" paddingRight="3" paddingBottom="3" toolTip="Dose"	   text=""/>
+					<components:LabelComboBox id="id_dosageForm" 
+											  prompt="Dosage Form" width="75%" 	 required="true" toolTip="Dosage Form"		 />
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<components:LabelTextInput id="id_quantity" 
+											   prompt="Quantity" width="100%" restrict="[0-9]" maxChars="2"  required="true"
+											   paddingLeft="3" paddingTop="5" paddingRight="3" paddingBottom="3" toolTip="Quantity"   text=""/>
+					<components:LabelComboBox id="id_quantityForm" 
+											  prompt="Quantity Form" width="75%"  required="true" toolTip="Quantity Form" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<components:LabelComboBox id="id_frequency" 
+											  prompt="Frequency" width="100%"  required="true" change="id_frequency_changeHandler(event)"	 toolTip="Frequency" />
+					<components:LabelComboBox id="id_route" 
+											  prompt="Route" width="75%"  required="true" toolTip="Route"	 />
+				</s:HGroup>
+				<s:HGroup width="100%" >
+					<components:LabelTextInput id="id_duration" 
+											   prompt="Duration" width="100%" restrict="[0-9]" maxChars="3" editable="false"
+											   paddingLeft="3" paddingTop="5" paddingRight="3" paddingBottom="3"  toolTip="Duration" text=""/>
+					<s:HGroup width="75%" verticalAlign="middle">						
+						<components:LabelTextInput id="id_refills" 
+												   prompt="#Refills" width="70%"  required="true" restrict="[0-9]" maxChars="2" toolTip="Refills" />
+						<s:CheckBox id="id_chk_PRN" 
+									label="PRN" selected="false" width="30%" change="id_chk_PRN_clickHandler(event)" toolTip="PRN" />
+					</s:HGroup>
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<components:LabelComboBox id="id_substitution" prompt="Substitution" width="100%"  required="true" toolTip="Substitution" />
+					<components:LabelComboBox id="id_type" prompt="Type" width="75%"  required="true" toolTip="Type">
+						<components:dataProvider>
+							<s:ArrayList>
+								<fx:Object label="OTC" data="OTC"/>
+								<fx:Object label="History" data="History"/>	
+							</s:ArrayList>
+						</components:dataProvider>
+					</components:LabelComboBox>
+				</s:HGroup>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<components:LabelComboBox id="id_associatedVisit" 
+											  prompt="Associated Visit" width="100%"  required="true" labelField="VisitDate" 										  
+											  toolTip="Associated Visit"  />
+					<s:CheckBox id="id_chkNAVisit" 
+								label="N/A Visit" click="id_chkNAVisit_clickHandler(event)" toolTip="N/A Visit"/>
+					<s:CheckBox id="id_chkCreateVisit" 
+								label="Create New Visit" click="id_chkCreateVisit_clickHandler(event)" toolTip="Create New Visit"/>
+					<s:Label text="Active" fontFamily="Calibri" color="#333333" />
+					<s:HGroup gap="0">						
+						<s:RadioButton id="id_isActiveBtn" 
+									   styleName="yesRadioButtonSkin" selected="true" buttonMode="true" toolTip="Active" />
+						<s:RadioButton styleName="noRadioButtonSkin" buttonMode="true" toolTip="Inactive" />
+					</s:HGroup>
+				</s:HGroup>
+				<s:Spacer height="8" />
+				<s:HGroup width="100%">
+					<s:VGroup width="100%" horizontalAlign="left">
+						<s:Button  id="id_btnSIG" 
+								   label="Generate SIG" width="100" buttonMode="true" toolTip="Generate SIG" click="id_btnSIG_clickHandler(event)" />
+						<components:LabelTextArea id="id_sig" height="70" width="100%" prompt="SIG" maxChars="140"  restrict="[A-Z a-z 0-9]" toolTip="SIG"/>
+					</s:VGroup>  
+				</s:HGroup>
+				<s:Spacer height="8" />
+				<s:HGroup width="100%" horizontalAlign="left" gap="3" verticalAlign="middle">
+					<s:Button id="id_sendBtn"  
+							  label="Send" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Send" click="button3_clickHandler(event)"/>
+					<s:Button id="id_saveBtn" 
+							  label="Save" styleName="blackButtonSkin" width="60" buttonMode="true" toolTip="Save" click="button2_clickHandler(event)" />
+				</s:HGroup>
+			</s:SkinnableContainer>
+		</s:HGroup>
+	</s:Group>
+</components:PopupWindow>

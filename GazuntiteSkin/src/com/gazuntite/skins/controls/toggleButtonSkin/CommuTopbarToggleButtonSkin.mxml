@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+       width="60"
+		>
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+
+	
+	<!-- selected -->
+	<s:Path includeIn="disabled,up" 
+			data="M 5.804 0 L 40.628 0 C 42.231 0 43.531 1.299 43.531 2.902 L 46.433 17.138 C 46.433 18.74 45.134 20.04 43.531 20.04 L 2.902 20.04 C 1.299 20.04 0 18.74 0 17.138 L 2.902 2.902 C 2.902 1.299 4.201 0 5.804 0 Z"
+			x="12" y="1">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B1B1B1" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#9B9C9C" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:Path includeIn="down,over" 
+			data="M 5.804 0 L 40.628 0 C 42.231 0 43.531 1.299 43.531 2.902 L 46.433 17.138 C 46.433 18.74 45.134 20.04 43.531 20.04 L 2.902 20.04 C 1.299 20.04 0 18.74 0 17.138 L 2.902 2.902 C 2.902 1.299 4.201 0 5.804 0 Z"
+			x="12" y="1">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#53BDDA" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2A81A9" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#1876A2" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#369AC4" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="down" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:BitmapImage includeIn="disabled,down,over,up"  smooth="true"
+				   source="@Embed('/assets/images/communicationicon.png')"
+				   x.disabled="25" y="3"
+				   x.down="25"
+				   x.over="25" 
+				   x.up="25" >
+		<s:filters>
+			<s:GlowFilter alpha="1.0" blurX="10" blurY="10" color="#FFFFFF" includeIn="down,over" inner="true" knockout="false" quality="3" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="#0078C1" distance="0" hideObject="false" includeIn="over" inner="true" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" includeIn="down,over" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="6.0" blurY="6.0" color="#595959" includeIn="disabled" inner="true" knockout="false" quality="3" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="disabled" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+	<s:Path includeIn="downAndSelected,overAndSelected,upAndSelected" y="8"
+			data="M 20.879 0 L 66.911 0 C 72.771 0 73.097 2.639 75.063 5.377 L 87.789 31.421 C 87.789 34.392 85.382 36.799 82.412 36.799 L 5.377 36.799 C 2.407 36.799 0 34.392 0 31.421 L 12.726 5.377 C 14.576 2.639 16.405 0 20.879 0 Z"
+			x.downAndSelected="-7" y.downAndSelected="1"
+			x.overAndSelected="-7" y.overAndSelected="1"
+			x.upAndSelected="-7" y.upAndSelected="1">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#53BDDA" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2A81A9" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#1876A2" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#3198C4" ratio="0.796078431372549"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:Path data="M 20.879 0 L 66.911 0 C 72.771 0 73.097 2.639 75.063 5.377 L 87.789 31.421 C 87.789 34.392 85.382 36.799 82.412 36.799 L 5.377 36.799 C 2.407 36.799 0 34.392 0 31.421 L 12.726 5.377 C 14.576 2.639 16.405 0 20.879 0 Z" includeIn="disabledAndSelected" x="-8" y="1">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#B1B1B1" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#9B9C9C" ratio="0.5058823529411764"/>
+				<s:GradientEntry alpha="1.0" color="#FFFFFF" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:Path>
+	<s:BitmapImage includeIn="disabledAndSelected,downAndSelected,over,overAndSelected,upAndSelected"
+				   x="29" smooth="true" source="@Embed('/assets/images/communicationiconwhite.png')"
+				   x.disabledAndSelected="21" y.disabledAndSelected="4"
+				   x.downAndSelected="22" y.downAndSelected="4"
+				   visible.over="false" y.over="0"
+				   x.overAndSelected="22" y.overAndSelected="4"
+				   x.upAndSelected="22" y.upAndSelected="4">
+		<s:filters>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" includeIn="downAndSelected,overAndSelected,upAndSelected" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:GlowFilter alpha="1.0" blurX="10" blurY="10" color="#595959" includeIn="disabledAndSelected" inner="true" knockout="false" quality="2" strength="10"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="2" blurY="2" color="0x000000" distance="1" hideObject="false" includeIn="disabledAndSelected" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+	</s:BitmapImage>
+	
+</s:Skin>

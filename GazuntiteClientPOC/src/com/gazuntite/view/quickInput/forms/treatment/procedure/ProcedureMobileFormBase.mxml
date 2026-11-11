@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<forms1:MobileFormBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:controls="com.gazuntite.view.controls.*"
+					  xmlns:spicefactory="http://www.spicefactory.org/parsley"
+					  xmlns:forms="com.gazuntite.forms.*"
+					  
+					  creationComplete="creationCompleteHandler(event)" xmlns:forms1="com.gazuntite.view.quickInput.forms.*"
+					  
+					  >
+	
+	<fx:Metadata>
+		[Event(name="saveFormData", type="com.gazuntite.events.SaveFormDataEvent")]
+	</fx:Metadata>
+	
+	<fx:Metadata>
+		[ManagedEvents("saveFormData")]
+		[ManagedEvents("getCPTProcedureEvent")]
+	</fx:Metadata>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.events.cpt.GetCPTProcedureEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.Treatment.ProcedureDTO;
+			import com.gazuntite.services.valueObjects.cpt.CPTProcedureDTO;
+			import com.gazuntite.services.valueObjects.diagnosis.DiagnosisDTO;
+			
+			import mx.events.FlexEvent;
+			import mx.utils.ObjectProxy;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				if(sharedModel.ICDCodeDTOList.length > 0)
+				{
+					_selectedRecord = sharedModel.ICDCodeDTOList.getItemAt(0) as CPTProcedureDTO;
+				}
+				
+				var e:GetCPTProcedureEvent = new GetCPTProcedureEvent();
+				dispatchEvent(e);
+				
+			}
+			
+			protected function validateEditForm():Boolean
+			{
+				/* if(id_AssociatedWith.selectedItemText == "")
+				{
+					return false;
+				} */
+				/* 
+				if(id_ICDDescription.selectedItemText == "")
+				{
+					return false;
+				}
+				
+				if(id_ICDCode.selectedItemText == "")
+				{
+					return false;
+				}
+				 */
+				return true;
+			}
+			
+			protected function clearForm():void
+			{
+			/* 	id_AssociatedWith.selectedItemText 	= "";
+				id_ICDDescription.selectedItemText 	= "";
+				id_ICDCode.selectedItemText 		= "";
+				id_OnSetDate.selectedItemText 		= "";
+				id_IsChronic.selected		 		= undefined;
+				 */
+			}
+			
+			private function saveForm(event:MouseEvent):void
+			{
+				if( validateEditForm() )
+				{
+					 var procedure:ProcedureDTO = new ProcedureDTO();
+					 
+					 procedure.CPTCode = ID_CPTCode.selectedItemText;
+					 procedure.Procedure = ID_Procedure.selectedItemText;
+					 
+					// treatment.AssociatedWith	= id_AssociatedWith.selectedItemText;
+				  // diagnosis.Description 		= id_ICDDescription.selectedItemText;
+				
+					
+					var e:SaveFormDataEvent = new SaveFormDataEvent(SaveFormDataEvent.SAVE_FORM_DATA, true);
+					e.payload = procedure; 
+					
+					if(_isEditForm)
+					{
+						e.isUpdate = true;
+					}
+					else
+					{
+						clearForm();
+					}
+					
+					dispatchEvent(e);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	
+	
+	
+	<forms:layout>
+		<s:VerticalLayout paddingBottom="10"
+						  paddingLeft="10"
+						  paddingRight="10"
+						  paddingTop="10"/>
+	</forms:layout>
+	
+	<s:Image source="assets/done.png" includeInLayout="{_isEditForm}"/>
+	<s:Image source="assets/edit.png" includeInLayout="{!_isEditForm}"/>
+	
+	
+
+	
+	<!--<controls:CalloutLabelText id="id_AssociatedWith" 
+							   styleName="title"
+							   labelField="associatedWith" 
+							   buttonLabel="Procedure with:"
+							   required="true"
+							   
+							   width="50%"
+							   >
+		
+		
+		
+		<controls:dataProvider>
+			<s:ArrayCollection>
+				<fx:Object associatedWith="This Visit" immunization="7-Valent" dose="1000000"/>
+				<fx:Object associatedWith="Last Visit" immunization="Immunization 2" dose="1000000"/>
+				<fx:Object associatedWith="Visit 3" immunization="Immunization 3" dose="1000000"/>
+				<fx:Object associatedWith="Visit 4" immunization="Immunization 3" dose="2000000"/>
+				<fx:Object associatedWith="Visit 5" immunization="Immunization 3" dose="3000000"/>
+				<fx:Object associatedWith="Visit 6" immunization="Immunization 3" dose="4000000"/>
+				<fx:Object associatedWith="Visit 7" immunization="Immunization 3" dose="5000000"/>
+			</s:ArrayCollection>
+		</controls:dataProvider>
+	</controls:CalloutLabelText>
+	-->
+	
+	<s:HGroup width="100%">
+		<controls:CalloutLabelText  id="ID_CPTCode"
+									styleName="title"
+									labelField="CPTCode" 
+									buttonLabel="CPT Code:"
+									required="true"	
+									width="50%"
+									
+									>
+		<controls:dataProvider>
+			<s:ArrayCollection>
+				<fx:Object CPTCode="Code 1" Procedure="Procedure 2" dose="1000000"/>
+				<fx:Object CPTCode="Code 3" Procedure="Procedure 3" dose="1000000"/>
+				<fx:Object CPTCode="Code 4" Procedure="Procedure 3" dose="2000000"/>
+				<fx:Object CPTCode="Code 5" Procedure="Procedure 3" dose="3000000"/>
+				<fx:Object CPTCode="Code 6" Procedure="Procedure 3" dose="4000000"/>
+				<fx:Object CPTCode="Code 7" Procedure="Procedure 3" dose="5000000"/>
+			</s:ArrayCollection>
+		</controls:dataProvider>
+	</controls:CalloutLabelText>
+		
+		<controls:CalloutLabelText id="ID_Procedure" 
+								   styleName="subTitle"
+								   labelField="Procedure" 
+								   buttonLabel="Procedure:"
+								   required="true"
+								   width="50%" 
+								   >
+			<controls:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object CPTCode="Code 1" Procedure="Procedure 2" dose="1000000"/>
+					<fx:Object CPTCode="Code 3" Procedure="Procedure 3" dose="1000000"/>
+					<fx:Object CPTCode="Code 4" Procedure="Procedure 3" dose="2000000"/>
+					<fx:Object CPTCode="Code 5" Procedure="Procedure 3" dose="3000000"/>
+					<fx:Object CPTCode="Code 6" Procedure="Procedure 3" dose="4000000"/>
+					<fx:Object CPTCode="Code 7" Procedure="Procedure 3" dose="5000000"/>
+				</s:ArrayCollection>
+			</controls:dataProvider>
+		</controls:CalloutLabelText>
+	</s:HGroup>
+	
+	
+	<s:HGroup width="100%" >
+		
+		<!--<controls:CalloutLabelDateSpinner id="id_OnSetDate"
+										  newStyleName="subTitle"
+										  labelField="OnSetDate" 
+										  buttonLabel="On Set:"
+										  required="true"
+										  isEditForm="false"
+										  
+										  width="50%"
+										  />-->
+		
+		<!--<controls:ToggleSwitchLabel id="id_IsChronic" 
+									styleName="subTitle"
+									label="Chronic:" 
+									
+									width="120"/>-->
+		
+	</s:HGroup>
+	
+	<s:Button id="actionBtn"
+			  styleName="button"
+			  label="{_buttonLabel}"
+			  click="saveForm((event))"/>
+	
+	
+	
+</forms1:MobileFormBase>

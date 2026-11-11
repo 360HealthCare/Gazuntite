@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" xmlns:buttonSkins="com.adobe.gazuntite.skins.chrome.buttonSkins.*"
+				width="100%" xmlns:components="com.gazuntite.components.*" xmlns:util="com.gazuntite.common.util.*" xmlns:encounter="com.gazuntite.history.view.views.encounter.*" xmlns:dictation="com.gazuntite.components.dictation.*" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" xmlns:dictation2="com.gazuntite.dictation.view.dictation.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.DictationNoteHistoryDTO;
+			import com.gazuntite.common.dto.PatientEncounterDTO;
+			import com.gazuntite.common.event.GetPatientGaxenIdEvent;
+			import com.gazuntite.common.event.visit.GenerateSoapNotePreviewCommonEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.history.view.event.PatientEncounterListEvent;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			[Bindable]
+			private var model:HistoryModelLocator = HistoryModelLocator.getInstance();
+			
+			[Bindable]
+			private var patientEncounterDTO:PatientEncounterDTO;
+			
+			[Bindable]
+			private var dictationNoteViewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				patientEncounterDTO = data as PatientEncounterDTO;
+				dictationNoteViewModel.inlineEditing = true;
+				
+				if (!patientEncounterDTO.CanSignCosign)
+				{
+					uiSign.visible = false;
+					uiSign.includeInLayout = false;
+				}
+				else if (patientEncounterDTO.CanSignCosign.toLowerCase() == "true")
+				{
+					uiSign.label = "Sign";
+					uiSign.toolTip = "Sign";
+				}
+				else if (patientEncounterDTO.CanSignCosign.toLowerCase() == "false")
+				{
+					uiSign.label = "Co-Sign";
+					uiSign.toolTip = "Co-Sign";
+				}
+				else
+				{
+					//uiSign.visible = false;
+					//uiSign.includeInLayout = false;
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				id_Header.setStyle("skinClass", itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			public function getFormattedVisitDate(dto:PatientEncounterDTO):String
+			{
+				if (!dto)
+					return "";
+				
+				if (!dto.hasOwnProperty("VisitDate"))
+					return "";
+				
+				if (!dto.VisitDate)
+					return "";
+				
+				var formattedVisitDate:String = UtilityFunctions.FormatDate(dto.VisitDate, "MM/DD/YYYY");
+				
+				return formattedVisitDate;
+			}
+			
+			private function viewReportClickHandler():void
+			{
+				var getGaxenEv:GetPatientGaxenIdEvent = new GetPatientGaxenIdEvent(patientEncounterDTO.UserID.toString(), onGetPatientGaxenId);
+				
+				if (!model.gaxenID)
+				{
+					CairngormEventDispatcher.getInstance().dispatchEvent(getGaxenEv);
+				}
+				
+				else if (model.gaxenID && model.gaxenID == "0")
+				{
+					CairngormEventDispatcher.getInstance().dispatchEvent(getGaxenEv);
+				}
+				else
+				{
+					generateSOAPNotePreview();
+				}
+				
+			}
+			
+			private function onGetPatientGaxenId(result:XML):void
+			{
+				var gaxenID:String = result[0];
+				
+				if (!gaxenID)
+					return;
+				
+				if (gaxenID == "0")
+					return;
+				
+				model.gaxenID = gaxenID;
+				
+				generateSOAPNotePreview();
+			}
+			
+			private function generateSOAPNotePreview():void
+			{
+				if (!patientEncounterDTO)
+					return;
+				
+				var visitID:int = parseInt(patientEncounterDTO.VisitId);
+				
+				if (isNaN(visitID))
+					return;
+				
+				var ev:GenerateSoapNotePreviewCommonEvent = new GenerateSoapNotePreviewCommonEvent(visitID, model.LoggedInUserSessionID, model.LoggedInUserSelectedBranchId,
+						model.LoggedInUserSelectedStationId, false, model.isMale, false, model.gaxenID, patientEncounterDTO.VisitProvider,
+						patientEncounterDTO.VisitEncounterTypeName, patientEncounterDTO.PlaceOfServiceTypeName, onLoadingSOAPNoteComplete);
+				
+				//CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}
+			
+			public function onLoadingSOAPNoteComplete(resp:String, isURL:Boolean = false ):void
+			{
+				if (isURL)
+				{
+					reportViewer.reportURL = resp;
+					reportViewer.visible = false;
+					reportViewer.includeInLayout = true;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout >
+		<s:VerticalLayout gap="0" horizontalAlign="center" paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"/> 
+	</s:layout>
+	
+	<s:SkinnableContainer id="id_Header" width="100%" height="28">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" paddingLeft="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Label id="SrNo" 
+				 text="{patientEncounterDTO.serialNumber.toString()}" fontFamily="CalibriCFF" fontSize="14" width="30"
+				 paddingLeft="6" maxDisplayedLines="1"/>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="visitDate" 
+					 text="{getFormattedVisitDate(patientEncounterDTO)}" toolTip="{getFormattedVisitDate(patientEncounterDTO)}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="location" 
+					 text="{patientEncounterDTO.StationName}" toolTip="{patientEncounterDTO.StationName}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="visitType" 
+					 text="{patientEncounterDTO.VisitEncounterTypeName}" toolTip="{patientEncounterDTO.VisitEncounterTypeName}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="placeOfService" 
+					 text="{patientEncounterDTO.PlaceOfServiceTypeName}" toolTip="{patientEncounterDTO.PlaceOfServiceTypeName}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="provider" 
+					 text="{patientEncounterDTO.VisitProvider}" toolTip="{patientEncounterDTO.VisitProvider}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="left" verticalAlign="middle" gap="0">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			<s:Label id="status" 
+					 text="{patientEncounterDTO.VisitStatus}" toolTip="{patientEncounterDTO.VisitStatus}" 
+					 fontFamily="CalibriCFF" fontSize="14" width="100%"
+					 paddingLeft="6" maxDisplayedLines="1"/>
+		</s:HGroup>
+		
+		<s:HGroup width="10%" horizontalAlign="center" verticalAlign="middle">
+			<buttonSkins:buttonNavSeparator width="1" height="100%"/>
+			
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Button id="uiSign" buttonMode="true" useHandCursor="true" toolTip="Sign/Co-Sign"  includeInLayout="false" visible="false"
+						  skinClass="com.gazuntite.skins.controls.button.history.VisitSignBTNSkin"/>
+				<s:Button id="uiPrint" skinClass="com.gazuntite.skins.controls.button.eLab.PrintButton"  includeInLayout="false" visible="false"
+						  buttonMode="true" useHandCursor="true" toolTip="Print" click="viewReportClickHandler()"/>
+				
+				<s:Button id="uiViewReport" includeInLayout="false" visible="false"
+						  buttonMode="true" useHandCursor="true" toolTip="View"
+						  skinClass="com.gazuntite.skins.controls.button.DocViewButton" click="viewReportClickHandler()"/>
+				
+				<s:Button id="uiViewHistory"  includeInLayout="false" visible="false"
+						  buttonMode="true" useHandCursor="true" toolTip="History"
+						  skinClass="com.gazuntite.skins.controls.button.HistoryViewButonSkin"/>
+				
+				<s:ToggleButton id="uiDication" skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+								buttonMode="true" useHandCursor="true" toolTip="Dictation" selected="@{dictationNoteViewModel.inDictationMode}"/>
+				
+				<s:ToggleButton id="uiNote" skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+								buttonMode="true" useHandCursor="true" toolTip="Notes" selected="@{dictationNoteViewModel.inNoteMode}"/>
+				
+				<s:Button id="uiEdit" skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton"  includeInLayout="false" visible="false"
+								buttonMode="true" useHandCursor="true" toolTip="Edit Visit"/>
+			</s:HGroup>
+			
+		</s:HGroup>
+		
+	</s:SkinnableContainer>
+	
+	<dictation2:PatientDictationNoteView width="100%" note="@{data.Notes}" isSaveButtonVisible="false"
+										 viewModel="{dictationNoteViewModel}"/>
+	<encounter:PatientEncounterReportViewer id="reportViewer" width="100%" visible="false" includeInLayout="false"/>
+</s:ItemRenderer>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dualpanel:DualPanel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:dualpanel="com.riavalue.components.dualpanel.*"
+					 xmlns:spicefactory="http://www.spicefactory.org/parsley" 
+					 
+					 xmlns:controls="com.gazuntite.components.controls.*" 
+					 xmlns:diagnosis="com.gazuntite.forms.diagnosis.*"
+					 
+					 skinClass="com.riavalue.components.dualpanel.SpinSkin"
+					 
+					 width="100%"
+					 height="100%"
+					 transitionDuration="300"
+					 creationComplete="creationCompleteHandler(event)" 
+					 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRAssociatedWith;
+			import com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRChronic;
+			import com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRICD;
+			import com.gazuntite.events.ArrangeByEvent;
+			import com.gazuntite.events.SaveFormDataEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.services.valueObjects.diagnosis.DiagnosisDTO;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.supportClasses.ListBase;
+			
+			[Bindable]
+			protected var editObject:DiagnosisDTO;
+			
+			[Bindable]
+			public var sharedModel:SharedModel;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function saveFormDataHandler(event:SaveFormDataEvent):void
+			{
+				if(event.payload != null)
+				{
+					if(event.isUpdate)
+					{
+						// save updated form item
+						var i:int = id_HistoryList.selectedIndex;
+						sharedModel.diagnosisHistoryAC.setItemAt(event.payload, i);
+						editObject = sharedModel.diagnosisHistoryAC.getItemAt(i) as DiagnosisDTO;
+					}
+					else
+					{
+						sharedModel.addedDiagnosisAC.addItem(event.payload);
+						sharedModel.diagnosisHistoryAC.addItem(event.payload);
+					}
+					
+				}
+				
+				invalidateDisplayList();
+				
+			}
+			
+			protected function arrangebycalloutbutton2_arrangeByHandler(event:ArrangeByEvent):void
+			{
+				var l:ListBase; // we don't know yet if this is a List or SpinnerList we're dealing with
+				
+				if(this.currentState == "normal")
+				{
+					l = id_AddedList;
+				}
+				else
+				{
+					l = id_HistoryList;
+				}
+				
+				switch(event.field)
+				{
+					case "Associated With":
+						l.itemRenderer = new ClassFactory(DiagnosisIRAssociatedWith);
+						break;
+					case "ICD":
+						l.itemRenderer = new ClassFactory(DiagnosisIRICD);
+						break;
+					case "Chronic":
+						l.itemRenderer = new ClassFactory(DiagnosisIRChronic);
+						break;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<spicefactory:Configure/>
+		<spicefactory:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<dualpanel:states>
+		<s:State name="normal"/>
+		<s:State name="normalFlipped"/>
+	</dualpanel:states> 
+	
+	
+	<dualpanel:frontView>
+		<controls:CoverFlowPanelView id="id_CFPFrontView"
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 
+									 title="{'Diagnosis: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 
+									 >
+			<controls:layout>
+				<s:VerticalLayout paddingBottom="0"
+								  paddingLeft="0"
+								  paddingRight="0"
+								  paddingTop="0"
+								  horizontalAlign="center"/>
+			</controls:layout>
+			
+			<diagnosis:DiagnosisForm id="id_AddRecordForm"
+										 width="100%"
+										 height="100%"
+										 saveFormData="saveFormDataHandler(event)"
+										 />
+			
+			<s:BorderContainer width="100%"
+							   height="24"
+							   borderWeight="1" 
+							   borderColor="0x898989"
+							   cornerRadius="0" 
+							   dropShadowVisible="false"
+							   borderAlpha="1">
+				
+				<s:backgroundFill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry color="0x898989" ratio=".1"/>
+						<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+					</s:LinearGradient>
+				</s:backgroundFill>
+				
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="bottom" 
+										paddingLeft="10"
+										paddingBottom="10"/>
+				</s:layout>
+				
+				<controls:ArrangeByCalloutButton label="Arrange By:"
+												 color="0x000000"
+												 arrangeBy="arrangebycalloutbutton2_arrangeByHandler(event)">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object name="Associated With"/>
+							<fx:Object name="ICD"/>
+							<fx:Object name="Chronic"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:ArrangeByCalloutButton>
+				
+				<s:Label text="Diagnosis records added:" styleName="listLabel"/>
+				
+			</s:BorderContainer>
+			
+			<s:List id="id_AddedList"
+					width="100%"
+					height="100%"
+					contentBackgroundColor="0xffffff"
+					dataProvider="{sharedModel.addedDiagnosisAC}"
+					itemRenderer="com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRAssociatedWith"/>
+			
+			
+		</controls:CoverFlowPanelView>
+		
+	</dualpanel:frontView>
+	
+	<dualpanel:backView>
+		<controls:CoverFlowPanelView id="id_CFPBackView"
+									 width="100%" 
+									 height="100%"
+									 backgroundColor="0xffffff"
+									 
+									 title="{'Diagnosis: ' + sharedModel.patientName}"
+									 contentBackgroundAlpha="1"
+									 skinClass="com.gazuntite.skins.DualPanelViewSkin"
+									 
+									 >
+			<controls:layout>
+				<s:VerticalLayout paddingBottom="0"
+								  paddingLeft="0"
+								  paddingRight="0"
+								  paddingTop="0"
+								  horizontalAlign="center"/>
+			</controls:layout>
+			
+			<diagnosis:DiagnosisMobileHistoryForm id="id_EditRecordForm"
+										 width="100%"
+										 height="100%"
+										 saveFormData="saveFormDataHandler(event)"
+										 />
+			
+			<s:BorderContainer width="100%"
+							   height="24"
+							   borderWeight="1" 
+							   borderColor="0x898989"
+							   cornerRadius="0" 
+							   dropShadowVisible="false"
+							   borderAlpha="1">
+				
+				<s:backgroundFill>
+					<s:LinearGradient rotation="90">
+						<s:GradientEntry color="0x898989" ratio=".1"/>
+						<s:GradientEntry color="0xf3f3f3" ratio=".9"/>
+					</s:LinearGradient>
+				</s:backgroundFill>
+				
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="bottom" 
+										paddingLeft="10"
+										paddingBottom="10"/>
+				</s:layout>
+				
+				<controls:ArrangeByCalloutButton label="Arrange By:"
+												 color="0x000000"
+												 arrangeBy="arrangebycalloutbutton2_arrangeByHandler(event)">
+					<controls:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object name="Associated With"/>
+							<fx:Object name="ICD"/>
+							<fx:Object name="Chronic"/>
+						</s:ArrayCollection>
+					</controls:dataProvider>
+				</controls:ArrangeByCalloutButton>
+				
+				<s:Label text="Diagnosis Histroy records added:" styleName="listLabel"/>
+				
+			</s:BorderContainer>
+			
+			<s:List id="id_HistoryList"
+					width="100%"
+					height="100%"
+					contentBackgroundColor="0xffffff"
+					dataProvider="{sharedModel.addedDiagnosisAC}"
+					itemRenderer="com.gazuntite.components.itemrenderers.diagnosis.DiagnosisIRAssociatedWith"/>
+			
+			
+		</controls:CoverFlowPanelView>
+	</dualpanel:backView>
+	
+	
+</dualpanel:DualPanel>

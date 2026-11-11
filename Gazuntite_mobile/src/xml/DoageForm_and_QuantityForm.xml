@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LoadStaticData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<DosageForms>
+    <Form Code="C42893" Term="Chewable Tablet"/>
+    <Form Code="C42896" Term="Coated Pellet in Capsule"/>
+    <Form Code="C25158" Term="Capsule"/>
+    <Form Code="C60884" Term="Cloth"/>
+    <Form Code="C42895" Term="Coated Capsule"/>
+    <Form Code="C78746" Term="21 Day Tablet"/>
+    <Form Code="C78747" Term="28 Day Tablet"/>
+    <Form Code="C64886" Term="Adult Suppository"/>
+    <Form Code="C42887" Term="Aerosol"/>
+    <Form Code="C42888" Term="Aerosol Foam"/>
+    <Form Code="C68935" Term="Aerosol Mist"/>
+    <Form Code="C69030" Term="Aerosol Solution"/>
+    <Form Code="C42889" Term="Aerosol Spray"/>
+    <Form Code="C60897" Term="Augmented Cream"/>
+    <Form Code="C91136" Term="Augmented Gel"/>
+    <Form Code="C60957" Term="Augmented Lotion"/>
+    <Form Code="C60984" Term="Augmented Ointment"/>
+    <Form Code="C91227" Term="Auto-Injector"/>
+    <Form Code="C69012" Term="Bandage"/>
+    <Form Code="C68950" Term="Bar"/>
+    <Form Code="C91137" Term="Bar Soap"/>
+    <Form Code="C42890" Term="Bead"/>
+    <Form Code="C64875" Term="Biting Capsule"/>
+    <Form Code="C42891" Term="Block"/>
+    <Form Code="C91138" Term="Buccal Film"/>
+    <Form Code="C64880" Term="Candy"/>
+    <Form Code="C64874" Term="Buccal Capsule"/>
+    <Form Code="C42755" Term="Buccal Tablet"/>
+    <Form Code="C64878" Term="Cachet"/>
+    <Form Code="C68951" Term="Cake"/>
+    <Form Code="C68943" Term="Capsule 12 Hour Sustained Release"/>
+    <Form Code="C68944" Term="Capsule 24 Hour Sustained Release"/>
+    <Form Code="C45414" Term="Cement"/>
+    <Form Code="C42894" Term="Chewing Gum"/>
+    <Form Code="C42678" Term="Cigarette"/>
+    <Form Code="C42897" Term="Coated Tablet"/>
+    <Form Code="C69002" Term="Compressed Sugar Coated Caplet"/>
+    <Form Code="C60891" Term="Concentrated"/>
+    <Form Code="C42899" Term="Concentrated Injectable Solution"/>
+    <Form Code="C69001" Term="Concentrated Oral"/>
+    <Form Code="C42900" Term="Cone"/>
+    <Form Code="C69024" Term="Controlled Release Capsule"/>
+    <Form Code="C42713" Term="Extended Release"/>
+    <Form Code="C43451" Term="Extended Release Bead Implant"/>
+    <Form Code="C42916" Term="Extended Release Capsule"/>
+    <Form Code="C42917" Term="Extended Release Coated Capsule"/>
+    <Form Code="C42918" Term="Extended Release Coated Pellet"/>
+    <Form Code="C42919" Term="Extended Release Core"/>
+    <Form Code="C91140" Term="Extended Release Enteric Coated Capsule"/>
+    <Form Code="C91141" Term="Extended Release Enteric Coated Tablet"/>
+    <Form Code="C60926" Term="Extended Release Fiber"/>
+    <Form Code="C42920" Term="Extended Release Film"/>
+    <Form Code="C42928" Term="Extended Release Film Coated Capsule"/>
+    <Form Code="C64899" Term="Foam Bath"/>
+    <Form Code="C60927" Term="for Solution"/>
+    <Form Code="C60928" Term="for Suspension"/>
+    <Form Code="C42933" Term="Gas"/>
+    <Form Code="C64883" Term="Dusting Powder"/>
+    <Form Code="C42909" Term="Effervescent Granule"/>
+    <Form Code="C64884" Term="Effervescent Powder"/>
+    <Form Code="C42910" Term="Effervescent Tablet"/>
+    <Form Code="C42911" Term="Electrically Controlled Extended Release Patch"/>
+    <Form Code="C42912" Term="Elixir"/>
+    <Form Code="C42913" Term="Emulsion"/>
+    <Form Code="C42914" Term="Emulsion for Injection"/>
+    <Form Code="C42915" Term="Enema"/>
+    <Form Code="C64885" Term="Enema Powder"/>
+    <Form Code="C64871" Term="Enema Tablet"/>
+    <Form Code="C68945" Term="Enteric Coated Capsule"/>
+    <Form Code="C42758" Term="Enteric Coated Tablet"/>
+    <Form Code="C42742" Term="Erosion Controlled Extended Release"/>
+    <Form Code="C42932" Term="Film"/>
+    <Form Code="C42931" Term="Film Coated Tablet"/>
+    <Form Code="C68982" Term="Flake"/>
+    <Form Code="C64898" Term="Foam"/>
+    <Form Code="C60929" Term="Extended Release for Suspension"/>
+    <Form Code="C42935" Term="Extended Release Gel Forming Solution"/>
+    <Form Code="C69067" Term="Extended Release Granule"/>
+    <Form Code="C42921" Term="Extended Release Granule for Suspension"/>
+    <Form Code="C42922" Term="Extended Release Insert"/>
+    <Form Code="C60934" Term="Extended Release Liquid"/>
+    <Form Code="C42923" Term="Extended Release Patch"/>
+    <Form Code="C42924" Term="Extended Release Suppository"/>
+    <Form Code="C42925" Term="Extended Release Suspension"/>
+    <Form Code="C42927" Term="Extended Release Tablet"/>
+    <Form Code="C42929" Term="Extract"/>
+    <Form Code="C42930" Term="Film Coated Extended Release Tablet"/>
+    <Form Code="C68973" Term="Gel Forming Solution"/>
+    <Form Code="C42936" Term="Gelatin Coated Capsule"/>
+    <Form Code="C64872" Term="Gelatin Coated Tablet"/>
+    <Form Code="C45416" Term="Graft"/>
+    <Form Code="C68991" Term="Fluid Extract"/>
+    <Form Code="C68966" Term="Frozen Premix Intravenous Piggyback Solution"/>
+    <Form Code="C78748" Term="Gargle"/>
+    <Form Code="C42934" Term="Gel"/>
+    <Form Code="C60994" Term="Gel Forming Drop Solution"/>
+    <Form Code="C48193" Term="Generator"/>
+    <Form Code="C42937" Term="Globule"/>
+    <Form Code="C42938" Term="Granule"/>
+    <Form Code="C69066" Term="Granule for Reconstitution"/>
+    <Form Code="C42939" Term="Granule for Solution"/>
+    <Form Code="C42940" Term="Granule for Suspension"/>
+    <Form Code="C42941" Term="Gum"/>
+    <Form Code="C64904" Term="Hard Capsule"/>
+    <Form Code="C64882" Term="Homeopathic Globule"/>
+    <Form Code="C42752" Term="Hypodermic Tablet"/>
+    <Form Code="C42942" Term="Implant"/>
+    <Form Code="C42943" Term="Implantable Pellet"/>
+    <Form Code="C42944" Term="Inhalant"/>
+    <Form Code="C42669" Term="Immediate Release"/>
+    <Form Code="C42892" Term="Chewable Bar"/>
+    <Form Code="C64876" Term="Chewable Capsule"/>
+    <Form Code="C42905" Term="Delayed Release Tablet"/>
+    <Form Code="C68954" Term="Dental Cone"/>
+    <Form Code="C45413" Term="Dental Liner"/>
+    <Form Code="C42907" Term="Dentifrice Paste"/>
+    <Form Code="C42908" Term="Dentifrice Powder"/>
+    <Form Code="C42740" Term="Diffusion Controlled Extended Release"/>
+    <Form Code="C69071" Term="Disintegrating Tablet"/>
+    <Form Code="C42756" Term="Dispensing Tablet"/>
+    <Form Code="C42741" Term="Dissolution Controlled Extended Release"/>
+    <Form Code="C69033" Term="Douche Powder"/>
+    <Form Code="C69032" Term="Douche Solution"/>
+    <Form Code="C42763" Term="Dressing"/>
+    <Form Code="C29012" Term="Drop"/>
+    <Form Code="C60992" Term="Drop Solution"/>
+    <Form Code="C60995" Term="Drop Suspension"/>
+    <Form Code="C68997" Term="Drop Suspension Final"/>
+    <Form Code="C42898" Term="Concentrated Solution"/>
+    <Form Code="C42731" Term="Controlled Release"/>
+    <Form Code="C69026" Term="Controlled Release Liquid"/>
+    <Form Code="C69025" Term="Controlled Release Tablet"/>
+    <Form Code="C28944" Term="Cream"/>
+    <Form Code="C42901" Term="Crystal"/>
+    <Form Code="C64881" Term="Cube"/>
+    <Form Code="C45415" Term="Culture"/>
+    <Form Code="C68949" Term="Degradable Controlled Release Capsule"/>
+    <Form Code="C42730" Term="Delayed Release"/>
+    <Form Code="C42902" Term="Delayed Release Capsule"/>
+    <Form Code="C42903" Term="Delayed Release Granule"/>
+    <Form Code="C42997" Term="Delayed Release Particle Tablet"/>
+    <Form Code="C42904" Term="Delayed Release Pellet in Capsule"/>
+    <Form Code="C69059" Term="Dental"/>
+    <Form Code="C42906" Term="Dentifrice Gel"/>
+    <Form Code="C43525" Term="Disc"/>
+    <Form Code="C42679" Term="Douche"/>
+    <Form Code="C91142" Term="Inhalant Powder"/>
+    <Form Code="C91143" Term="Inhalant Solution"/>
+    <Form Code="C64879" Term="Inhaler Capsule"/>
+    <Form Code="C42946" Term="Injectable"/>
+    <Form Code="C42926" Term="Injectable Extended Release Suspension"/>
+    <Form Code="C42950" Term="Injectable Lipid Complex"/>
+    <Form Code="C42951" Term="Injectable Liposomal Suspension"/>
+    <Form Code="C69037" Term="Injectable Lyophilized Powder"/>
+    <Form Code="C42945" Term="Injectable Solution"/>
+    <Form Code="C42988" Term="Injectable Sonicated Suspension"/>
+    <Form Code="C42995" Term="Injectable Suspension"/>
+    <Form Code="C60933" Term="Insert"/>
+    <Form Code="C78793" Term="Internal Powder"/>
+    <Form Code="C68971" Term="Intraperitoneal Solution"/>
+    <Form Code="C47915" Term="Intrauterine Device"/>
+    <Form Code="C68967" Term="Intravenous Piggyback Solution"/>
+    <Form Code="C68965" Term="Intravenous Solution"/>
+    <Form Code="C42947" Term="Irrigant"/>
+    <Form Code="C47916" Term="Kit"/>
+    <Form Code="C42952" Term="Lipstick"/>
+    <Form Code="C42948" Term="Jelly"/>
+    <Form Code="C42949" Term="Liniment"/>
+    <Form Code="C60931" Term="Liposomal Injection"/>
+    <Form Code="C42953" Term="Liquid"/>
+    <Form Code="C42954" Term="Liquid Filled Capsule"/>
+    <Form Code="C68953" Term="Liquid Soap"/>
+    <Form Code="C69068" Term="Lollipop"/>
+    <Form Code="C29167" Term="Lotion"/>
+    <Form Code="C60958" Term="Lotion Shampoo"/>
+    <Form Code="C42955" Term="Lozenge"/>
+    <Form Code="C42956" Term="Lyophilized Powder for Extended Release Injectable Suspension"/>
+    <Form Code="C42959" Term="Lyophilized Powder for Injectable Liposomal Suspension"/>
+    <Form Code="C42957" Term="Lyophilized Powder for Injectable Solution"/>
+    <Form Code="C42958" Term="Lyophilized Powder for Injectable Suspension"/>
+    <Form Code="C91151" Term="Nasal Cream"/>
+    <Form Code="C91152" Term="Nasal Gel"/>
+    <Form Code="C91153" Term="Nasal Inhalant"/>
+    <Form Code="C91154" Term="Nasal Inhaler"/>
+    <Form Code="C68988" Term="Medicated Adhesive Patch"/>
+    <Form Code="C91144" Term="Medicated Bar Soap"/>
+    <Form Code="C68958" Term="Medicated Film"/>
+    <Form Code="C91145" Term="Medicated Liquid Soap"/>
+    <Form Code="C68957" Term="Medicated Pad"/>
+    <Form Code="C91146" Term="Medicated Shampoo"/>
+    <Form Code="C68952" Term="Medicated Soap"/>
+    <Form Code="C64901" Term="Medicated Sponge"/>
+    <Form Code="C68955" Term="Medicated Swab"/>
+    <Form Code="C91147" Term="Medicated Tape"/>
+    <Form Code="C64877" Term="Membrane Coated Capsule"/>
+    <Form Code="C64873" Term="Membrane Coated Tablet"/>
+    <Form Code="C42960" Term="Metered Aerosol"/>
+    <Form Code="C91148" Term="Metered Dose Inhaler"/>
+    <Form Code="C60930" Term="Metered Gel"/>
+    <Form Code="C42961" Term="Metered Powder"/>
+    <Form Code="C64888" Term="Micro Enema"/>
+    <Form Code="C91149" Term="Mucosal Spray"/>
+    <Form Code="C69064" Term="Nasal"/>
+    <Form Code="C42962" Term="Metered Spray"/>
+    <Form Code="C42712" Term="Modified Release"/>
+    <Form Code="C29269" Term="Mouthwash"/>
+    <Form Code="C91150" Term="Mucous Membrane Topical Solution"/>
+    <Form Code="C42963" Term="Multilayered Extended Release Tablet"/>
+    <Form Code="C42964" Term="Multilayered Tablet"/>
+    <Form Code="C91155" Term="Nasal Ointment"/>
+    <Form Code="C91156" Term="Nasal Solution"/>
+    <Form Code="C91157" Term="Nasal Spray"/>
+    <Form Code="C91158" Term="Nasal Suspension"/>
+    <Form Code="C68941" Term="Non-Aerosol Spray"/>
+    <Form Code="C69017" Term="Non-Medicated Swab"/>
+    <Form Code="C48624" Term="Not Applicable"/>
+    <Form Code="C69031" Term="Ocular System"/>
+    <Form Code="C42965" Term="Oil"/>
+    <Form Code="C42966" Term="Ointment"/>
+    <Form Code="C69039" Term="Ophthalmic"/>
+    <Form Code="C91159" Term="Ophthalmic Cream"/>
+    <Form Code="C91160" Term="Ophthalmic Gel"/>
+    <Form Code="C91161" Term="Ophthalmic Irrigation Solution"/>
+    <Form Code="C69038" Term="Ophthalmic Liquid"/>
+    <Form Code="C91162" Term="Ophthalmic Ointment"/>
+    <Form Code="C91163" Term="Ophthalmic Solution"/>
+    <Form Code="C91164" Term="Ophthalmic Suspension"/>
+    <Form Code="C42744" Term="Oral"/>
+    <Form Code="C91165" Term="Oral Capsule"/>
+    <Form Code="C91166" Term="Oral Cream"/>
+    <Form Code="C91167" Term="Oral Foam"/>
+    <Form Code="C91168" Term="Oral Gel"/>
+    <Form Code="C91169" Term="Oral Ointment"/>
+    <Form Code="C91170" Term="Oral Paste"/>
+    <Form Code="C91171" Term="Oral Powder"/>
+    <Form Code="C68981" Term="Oral Reconstituted Suspension"/>
+    <Form Code="C68996" Term="Oral Solution"/>
+    <Form Code="C91172" Term="Oral Spray"/>
+    <Form Code="C91173" Term="Oral Strip"/>
+    <Form Code="C68992" Term="Oral Suspension"/>
+    <Form Code="C68993" Term="Oral Suspension Final"/>
+    <Form Code="C43243" Term="Oral Tablet"/>
+    <Form Code="C61006" Term="Orally Disintegrating Delayed Release Tablet"/>
+    <Form Code="C69040" Term="Otic"/>
+    <Form Code="C91174" Term="Otic Cream"/>
+    <Form Code="C91175" Term="Otic Ointment"/>
+    <Form Code="C42999" Term="Orally Disintegrating Tablet"/>
+    <Form Code="C69008" Term="Osmotic Laser Drilled Tablet"/>
+    <Form Code="C42760" Term="Osmotic Pump Extended Release"/>
+    <Form Code="C91176" Term="Otic Solution"/>
+    <Form Code="C91177" Term="Otic Suspension"/>
+    <Form Code="C62653" Term="Pack"/>
+    <Form Code="C47887" Term="Packing"/>
+    <Form Code="C69016" Term="Pad"/>
+    <Form Code="C42746" Term="Parenteral"/>
+    <Form Code="C42967" Term="Paste"/>
+    <Form Code="C60985" Term="Pastille"/>
+    <Form Code="C42968" Term="Patch"/>
+    <Form Code="C69042" Term="Pediatric Liquid"/>
+    <Form Code="C64887" Term="Pediatric Suppository"/>
+    <Form Code="C42969" Term="Pellet"/>
+    <Form Code="C42636" Term="Pharmaceutical"/>
+    <Form Code="C25394" Term="Pill"/>
+    <Form Code="C42979" Term="Rinse"/>
+    <Form Code="C42980" Term="Salve"/>
+    <Form Code="C42970" Term="Plaster"/>
+    <Form Code="C42736" Term="Polymeric Microsphere"/>
+    <Form Code="C47913" Term="Poultice"/>
+    <Form Code="C42972" Term="Powder"/>
+    <Form Code="C42971" Term="Powder Aerosol"/>
+    <Form Code="C42977" Term="Powder for Injectable Extended Release Suspension"/>
+    <Form Code="C42974" Term="Powder for Injectable Solution"/>
+    <Form Code="C42976" Term="Powder for Injectable Suspension"/>
+    <Form Code="C69069" Term="Powder for Injection"/>
+    <Form Code="C64907" Term="Powder for Oral Solution"/>
+    <Form Code="C64908" Term="Powder for Oral Suspension"/>
+    <Form Code="C69070" Term="Powder for Reconstitution"/>
+    <Form Code="C42973" Term="Powder for Solution"/>
+    <Form Code="C42975" Term="Powder for Suspension"/>
+    <Form Code="C91139" Term="Powder Inhaler"/>
+    <Form Code="C68972" Term="Pudding"/>
+    <Form Code="C69046" Term="Rectal"/>
+    <Form Code="C60988" Term="Ring"/>
+    <Form Code="C68983" Term="Powder Like Non-Effervescent Granule"/>
+    <Form Code="C91179" Term="Prefilled Applicator"/>
+    <Form Code="C97717" Term="Pre-filled Pen Syringe"/>
+    <Form Code="C91180" Term="Prefilled Syringe"/>
+    <Form Code="C68984" Term="Reconstituted Oral Drop"/>
+    <Form Code="C68985" Term="Reconstituted Oral Solution"/>
+    <Form Code="C69045" Term="Rectal Cream"/>
+    <Form Code="C91181" Term="Rectal Foam"/>
+    <Form Code="C91182" Term="Rectal Gel"/>
+    <Form Code="C69047" Term="Rectal Ointment"/>
+    <Form Code="C91183" Term="Rectal Powder"/>
+    <Form Code="C91184" Term="Rectal Spray"/>
+    <Form Code="C68989" Term="Rectal Suppository"/>
+    <Form Code="C42978" Term="Resin Gum"/>
+    <Form Code="C45244" Term="Semisolid"/>
+    <Form Code="C42981" Term="Shampoo"/>
+    <Form Code="C42982" Term="Shampoo Suspension"/>
+    <Form Code="C28276" Term="Skin Patch"/>
+    <Form Code="C42983" Term="Soap"/>
+    <Form Code="C64909" Term="Soft Capsule"/>
+    <Form Code="C45235" Term="Solid"/>
+    <Form Code="C42984" Term="Soluble Film"/>
+    <Form Code="C42985" Term="Soluble Tablet"/>
+    <Form Code="C42986" Term="Solution"/>
+    <Form Code="C69028" Term="Solution for Reconstitution"/>
+    <Form Code="C42987" Term="Solution for Slush"/>
+    <Form Code="C47912" Term="Sponge"/>
+    <Form Code="C42989" Term="Spray"/>
+    <Form Code="C42990" Term="Spray Suspension"/>
+    <Form Code="C68946" Term="Sprinkle Capsule"/>
+    <Form Code="C42991" Term="Stick"/>
+    <Form Code="C47914" Term="Strip"/>
+    <Form Code="C47889" Term="Suture"/>
+    <Form Code="C47898" Term="Swab"/>
+    <Form Code="C42996" Term="Syrup"/>
+    <Form Code="C42751" Term="Sublingual Tablet"/>
+    <Form Code="C42992" Term="Sugar Coated Tablet"/>
+    <Form Code="C42993" Term="Suppository"/>
+    <Form Code="C42994" Term="Suspension"/>
+    <Form Code="C68986" Term="Suspension 12 Hour Sustained Release"/>
+    <Form Code="C69027" Term="Suspension for Reconstitution"/>
+    <Form Code="C42672" Term="Sustained Release"/>
+    <Form Code="C69007" Term="Sustained Release Buccal Tablet"/>
+    <Form Code="C69043" Term="Sustained Release Capsule"/>
+    <Form Code="C69044" Term="Sustained Release Oral Liquid"/>
+    <Form Code="C69036" Term="Sustained Release Parenteral"/>
+    <Form Code="C68947" Term="Sustained Release Pellet Capsule"/>
+    <Form Code="C78751" Term="Sustained Release Tablet"/>
+    <Form Code="C42998" Term="Tablet"/>
+    <Form Code="C69004" Term="Tablet 12 Hour Sustained Release"/>
+    <Form Code="C69003" Term="Tablet 24 Hour Sustained Release"/>
+    <Form Code="C60997" Term="Tablet Coated Particle"/>
+    <Form Code="C61004" Term="Tablet for Solution"/>
+    <Form Code="C61005" Term="Tablet for Suspension"/>
+    <Form Code="C69006" Term="Tablet Particle Crystal"/>
+    <Form Code="C42759" Term="Tablet Triturate"/>
+    <Form Code="C47892" Term="Tampon"/>
+    <Form Code="C47897" Term="Tape"/>
+    <Form Code="C78749" Term="Tar"/>
+    <Form Code="C69063" Term="Throat Spray"/>
+    <Form Code="C43000" Term="Tincture"/>
+    <Form Code="C91186" Term="Toothpaste"/>
+    <Form Code="C42747" Term="Topical"/>
+    <Form Code="C91187" Term="Topical Cream"/>
+    <Form Code="C43001" Term="Troche"/>
+    <Form Code="C38046" Term="Unspecified"/>
+    <Form Code="C69048" Term="Vaginal"/>
+    <Form Code="C91188" Term="Topical Foam"/>
+    <Form Code="C91189" Term="Topical Gel"/>
+    <Form Code="C91190" Term="Topical Lotion"/>
+    <Form Code="C91191" Term="Topical Oil"/>
+    <Form Code="C91192" Term="Topical Ointment"/>
+    <Form Code="C91193" Term="Topical Powder"/>
+    <Form Code="C91178" Term="Topical Powder Spray"/>
+    <Form Code="C64905" Term="Topical Solution"/>
+    <Form Code="C91194" Term="Topical Spray"/>
+    <Form Code="C68998" Term="Topical Suspension"/>
+    <Form Code="C43002" Term="Unassigned"/>
+    <Form Code="C64902" Term="Unmedicated Sponge"/>
+    <Form Code="C69052" Term="Urethral"/>
+    <Form Code="C91195" Term="Urethral Gel"/>
+    <Form Code="C69053" Term="Urethral Suppository"/>
+    <Form Code="C69050" Term="Vaginal Cream"/>
+    <Form Code="C47890" Term="Vaginal Diaphragm"/>
+    <Form Code="C69051" Term="Vaginal Foam"/>
+    <Form Code="C91197" Term="Vaginal Gel"/>
+    <Form Code="C69054" Term="Vaginal Ointment"/>
+    <Form Code="C91198" Term="Vaginal Powder"/>
+    <Form Code="C91199" Term="Vaginal Ring"/>
+    <Form Code="C91200" Term="Vaginal Spray"/>
+    <Form Code="C68990" Term="Vaginal Suppository"/>
+    <Form Code="C69049" Term="Vaginal Tablet"/>
+    <Form Code="C43003" Term="Wafer"/>
+    <Form Code="C64903" Term="Wash"/>
+    <Form Code="C78750" Term="Wax"/>
+    <Form Code="C64910" Term="Wound Stick"/>
+</DosageForms>
+<QuantityForms>
+    <Form Code="C69093" Term="Cassette"/>
+    <Form Code="C48505" Term="Liter"/>
+    <Form Code="C48539" Term="Suppository"/>
+    <Form Code="C53504" Term="Swab"/>
+    <Form Code="C48540" Term="Syringe"/>
+    <Form Code="C48541" Term="Tablespoon"/>
+    <Form Code="C48542" Term="Tablet"/>
+    <Form Code="C62421" Term="Tabminder"/>
+    <Form Code="C48543" Term="Tampon"/>
+    <Form Code="C48544" Term="Teaspoon"/>
+    <Form Code="C54704" Term="Tray"/>
+    <Form Code="C48548" Term="Troche"/>
+    <Form Code="C48549" Term="Tube"/>
+    <Form Code="C38046" Term="Unspecified"/>
+    <Form Code="C48551" Term="Vial"/>
+    <Form Code="C48552" Term="Wafer"/>
+    <Form Code="C48484" Term="Container"/>
+    <Form Code="C48489" Term="Cylinder"/>
+    <Form Code="C48490" Term="Disk"/>
+    <Form Code="C62417" Term="Dose Pack"/>
+    <Form Code="C96265" Term="Dual Pack"/>
+    <Form Code="C53499" Term="Film"/>
+    <Form Code="C48494" Term="Fluid Ounce"/>
+    <Form Code="C48580" Term="Gallon"/>
+    <Form Code="C48155" Term="Gram"/>
+    <Form Code="C69124" Term="Gum"/>
+    <Form Code="C48499" Term="Implant"/>
+    <Form Code="C48501" Term="Inhalation"/>
+    <Form Code="C62275" Term="Inhaler"/>
+    <Form Code="C62418" Term="Inhaler Refill"/>
+    <Form Code="C62276" Term="Insert"/>
+    <Form Code="C67283" Term="Intravenous Bag"/>
+    <Form Code="C28252" Term="Kilogram"/>
+    <Form Code="C48504" Term="Kit"/>
+    <Form Code="C53502" Term="Sponge"/>
+    <Form Code="C48506" Term="Lozenge"/>
+    <Form Code="C48491" Term="Metric Drop"/>
+    <Form Code="C28253" Term="Milligram"/>
+    <Form Code="C28254" Term="Milliliter"/>
+    <Form Code="C28251" Term="Millimeter"/>
+    <Form Code="C71204" Term="Nebule"/>
+    <Form Code="C100052" Term="Needle Free Injection"/>
+    <Form Code="C69086" Term="Ocular System"/>
+    <Form Code="C48519" Term="Ounce"/>
+    <Form Code="C48520" Term="Package"/>
+    <Form Code="C48521" Term="Packet"/>
+    <Form Code="C65032" Term="Pad"/>
+    <Form Code="C82484" Term="Paper"/>
+    <Form Code="C48524" Term="Patch"/>
+    <Form Code="C48529" Term="Pint"/>
+    <Form Code="C48530" Term="Pouch"/>
+    <Form Code="C48531" Term="Pound"/>
+    <Form Code="C65060" Term="Puff"/>
+    <Form Code="C48534" Term="Quart"/>
+    <Form Code="C62609" Term="Ring"/>
+    <Form Code="C71324" Term="Sachet"/>
+    <Form Code="C48536" Term="Scoopful"/>
+    <Form Code="C48537" Term="Spray"/>
+    <Form Code="C53503" Term="Stick"/>
+    <Form Code="C48538" Term="Strip"/>
+    <Form Code="C48473" Term="Ampule"/>
+    <Form Code="C62412" Term="Applicator"/>
+    <Form Code="C78783" Term="Applicatorful"/>
+    <Form Code="C48474" Term="Bag"/>
+    <Form Code="C48475" Term="Bar"/>
+    <Form Code="C53495" Term="Bead"/>
+    <Form Code="C54564" Term="Blister"/>
+    <Form Code="C53498" Term="Block"/>
+    <Form Code="C48476" Term="Bolus"/>
+    <Form Code="C48477" Term="Bottle"/>
+    <Form Code="C48478" Term="Box"/>
+    <Form Code="C48479" Term="Can"/>
+    <Form Code="C62413" Term="Canister"/>
+    <Form Code="C64696" Term="Caplet"/>
+    <Form Code="C48480" Term="Capsule"/>
+    <Form Code="C54702" Term="Carton"/>
+    <Form Code="C48481" Term="Cartridge"/>
+    <Form Code="C62414" Term="Case"/>
+</QuantityForms>
+<Substitutions>
+    <Substitution SubstitutionCode="0" SubstitutionText="Allowed"/>
+    <Substitution SubstitutionCode="1" SubstitutionText="Not Allowed"/>
+</Substitutions>
+<Routes>
+    <Route DOSE_ROUTE_ID="14810" DOSE_ROUTE_DESCRIPTION="buccal"/>
+    <Route DOSE_ROUTE_ID="12015" DOSE_ROUTE_DESCRIPTION="epidural"/>
+    <Route DOSE_ROUTE_ID="2049" DOSE_ROUTE_DESCRIPTION="inhalation"/>
+    <Route DOSE_ROUTE_ID="1482" DOSE_ROUTE_DESCRIPTION="into the affected catheter"/>
+    <Route DOSE_ROUTE_ID="2410" DOSE_ROUTE_DESCRIPTION="intra-articular"/>
+    <Route DOSE_ROUTE_ID="20880" DOSE_ROUTE_DESCRIPTION="intracavernously"/>
+    <Route DOSE_ROUTE_ID="16105" DOSE_ROUTE_DESCRIPTION="intracavitary"/>
+    <Route DOSE_ROUTE_ID="12111" DOSE_ROUTE_DESCRIPTION="intracoronary"/>
+    <Route DOSE_ROUTE_ID="2412" DOSE_ROUTE_DESCRIPTION="intradermal"/>
+    <Route DOSE_ROUTE_ID="8029" DOSE_ROUTE_DESCRIPTION="intralesional"/>
+    <Route DOSE_ROUTE_ID="2414" DOSE_ROUTE_DESCRIPTION="intramuscular"/>
+    <Route DOSE_ROUTE_ID="2416" DOSE_ROUTE_DESCRIPTION="intraperitoneal"/>
+    <Route DOSE_ROUTE_ID="15921" DOSE_ROUTE_DESCRIPTION="intrapleural"/>
+    <Route DOSE_ROUTE_ID="2417" DOSE_ROUTE_DESCRIPTION="intrathecal"/>
+    <Route DOSE_ROUTE_ID="2418" DOSE_ROUTE_DESCRIPTION="intratracheal"/>
+    <Route DOSE_ROUTE_ID="2420" DOSE_ROUTE_DESCRIPTION="intravenous"/>
+    <Route DOSE_ROUTE_ID="16781" DOSE_ROUTE_DESCRIPTION="intravesical"/>
+    <Route DOSE_ROUTE_ID="2423" DOSE_ROUTE_DESCRIPTION="nasal"/>
+    <Route DOSE_ROUTE_ID="2426" DOSE_ROUTE_DESCRIPTION="oral"/>
+    <Route DOSE_ROUTE_ID="2430" DOSE_ROUTE_DESCRIPTION="rectal"/>
+    <Route DOSE_ROUTE_ID="2431" DOSE_ROUTE_DESCRIPTION="subcutaneous"/>
+    <Route DOSE_ROUTE_ID="2432" DOSE_ROUTE_DESCRIPTION="sublingual"/>
+</Routes>
+<Frequencies>
+    <Frequency Description="3 times a day" Abbreviation="TID"/>
+    <Frequency Description="3 times a week" Abbreviation="3X/W"/>
+    <Frequency Description="4 times a day" Abbreviation="QID"/>
+    <Frequency Description="5 times a day" Abbreviation="5X/D"/>
+    <Frequency Description="every 18 hours" Abbreviation="Q18H"/>
+    <Frequency Description="every 36 hours" Abbreviation="Q36H"/>
+    <Frequency Description="every 48 hours" Abbreviation="Q48H"/>
+    <Frequency Description="every 72 hours" Abbreviation="Q72H"/>
+    <Frequency Description="every 7 days" Abbreviation="Q7D"/>
+    <Frequency Description="every other day" Abbreviation="every other day"/>
+    <Frequency Description="once a day" Abbreviation="once a day"/>
+    <Frequency Description="once a month" Abbreviation="Q1MO"/>
+    <Frequency Description="once a week" Abbreviation="1X/W"/>
+    <Frequency Description="2 times a day" Abbreviation="BID"/>
+    <Frequency Description="2 times a week" Abbreviation="2X/W"/>
+    <Frequency Description="every 15 minutes" Abbreviation="Q15MIN"/>
+    <Frequency Description="every hour" Abbreviation="Q1H"/>
+    <Frequency Description="10 times a day" Abbreviation="10X/D"/>
+    <Frequency Description="12 times a day" Abbreviation="12X/D"/>
+    <Frequency Description="16 times a day" Abbreviation="16X/D"/>
+    <Frequency Description="6 times a day" Abbreviation="6X/D"/>
+    <Frequency Description="7 times a day" Abbreviation="7X/D"/>
+    <Frequency Description="8 times a day" Abbreviation="8X/D"/>
+    <Frequency Description="every 16 hours" Abbreviation="Q16H"/>
+    <Frequency Description="every 2 weeks" Abbreviation="Q2W"/>
+    <Frequency Description="every 30 minutes" Abbreviation="Q30MIN"/>
+    <Frequency Description="every 40 hours" Abbreviation="Q40H"/>
+    <Frequency Description="yearly" Abbreviation="QY"/>
+    <Frequency Description="9 times a day" Abbreviation="9X/D"/>
+    <Frequency Description="every 3 weeks" Abbreviation="Q3W"/>
+    <Frequency Description="every 5 days" Abbreviation="Q5D"/>
+    <Frequency Description="every 60 hours" Abbreviation="Q60H"/>
+    <Frequency Description="every 6 weeks" Abbreviation="Q6W"/>
+    <Frequency Description="3 times a day (after meals)" Abbreviation="TIDPC"/>
+    <Frequency Description="3 times a day (before meals)" Abbreviation="TIDAC"/>
+    <Frequency Description="3 times a day (with meals)" Abbreviation="TIDWM"/>
+    <Frequency Description="4 times a day (after meals and at bedtime)" Abbreviation="QIDPCHS"/>
+    <Frequency Description="4 times a day (before meals and at bedtime)" Abbreviation="QIDACHS"/>
+    <Frequency Description="4 times a day (with meals and at bedtime)" Abbreviation="QIDWMHS"/>
+    <Frequency Description="every 10 minutes" Abbreviation="Q10MIN"/>
+    <Frequency Description="every 12 hours" Abbreviation="Q12H"/>
+    <Frequency Description="every 2 hours" Abbreviation="Q2H"/>
+    <Frequency Description="every 24 hours" Abbreviation="Q24H"/>
+    <Frequency Description="every 3 days" Abbreviation="Q3D"/>
+    <Frequency Description="every 3 hours" Abbreviation="Q3H"/>
+    <Frequency Description="every 4 days" Abbreviation="Q4D"/>
+    <Frequency Description="every 4 hours" Abbreviation="Q4H"/>
+    <Frequency Description="every 5 minutes" Abbreviation="Q5MIN"/>
+    <Frequency Description="every 6 hours" Abbreviation="Q6H"/>
+    <Frequency Description="every 8 hours" Abbreviation="Q8H"/>
+    <Frequency Description="every 96 hours" Abbreviation="Q96H"/>
+    <Frequency Description="once" Abbreviation="1X"/>
+    <Frequency Description="once a day (at bedtime)" Abbreviation="once a day (at bedtime)"/>
+    <Frequency Description="once a day (in the morning)" Abbreviation="QAM"/>
+    <Frequency Description="once a day (before a meal)" Abbreviation="QDAC"/>
+    <Frequency Description="4 to 6 times a day" Abbreviation="4-6X/D"/>
+    <Frequency Description="every 1 to 2 hours" Abbreviation="Q1-2H"/>
+    <Frequency Description="every 3 months" Abbreviation="Q3MO"/>
+    <Frequency Description="every 30 to 60 minutes" Abbreviation="Q30-60MIN"/>
+    <Frequency Description="5 times a week" Abbreviation="5X/W"/>
+    <Frequency Description="2 times a day (with meals)" Abbreviation="BIDWM"/>
+    <Frequency Description="2 to 4 times a day" Abbreviation="2-4X/D"/>
+    <Frequency Description="1 to 2 times a day" Abbreviation="1-2X/D"/>
+    <Frequency Description="every 6 to 15 minutes" Abbreviation="Q6-15MIN"/>
+    <Frequency Description="every 10 to 15 minutes" Abbreviation="Q10-15MIN"/>
+    <Frequency Description="every 4 to 6 hours" Abbreviation="Q4-6H"/>
+    <Frequency Description="every 6 to 8 hours" Abbreviation="Q6-8H"/>
+    <Frequency Description="3 to 4 times a day" Abbreviation="3-4X/D"/>
+    <Frequency Description="1 to 4 times a day" Abbreviation="1-4X/D"/>
+    <Frequency Description="twice" Abbreviation="2X"/>
+    <Frequency Description="every 5 to 8 months" Abbreviation="Q5-8MO"/>
+    <Frequency Description="4 times a week" Abbreviation="4X/W"/>
+    <Frequency Description="6 times a week" Abbreviation="6X/W"/>
+    <Frequency Description="every 10 to 30 minutes" Abbreviation="Q10-30MIN"/>
+    <Frequency Description="every 2 to 3 hours" Abbreviation="Q2-3H"/>
+    <Frequency Description="every 2 to 3 minutes" Abbreviation="Q2-3MIN"/>
+    <Frequency Description="every 2 to 4 hours" Abbreviation="Q2-4H"/>
+    <Frequency Description="every 25 to 60 minutes" Abbreviation="Q25-60MIN"/>
+    <Frequency Description="every 25 minutes" Abbreviation="Q25MIN"/>
+    <Frequency Description="every 2 to 5 minutes" Abbreviation="Q2-5MIN"/>
+    <Frequency Description="every 2 minutes" Abbreviation="Q2MIN"/>
+    <Frequency Description="every 3 to 4 hours" Abbreviation="Q3-4H"/>
+    <Frequency Description="every 3 to 5 hours" Abbreviation="Q3-5H"/>
+    <Frequency Description="every 3 to 6 hours" Abbreviation="Q3-6H"/>
+    <Frequency Description="every 4 weeks" Abbreviation="Q4W"/>
+    <Frequency Description="every 5 to 15 minutes" Abbreviation="Q5-15MIN"/>
+    <Frequency Description="every 6 months" Abbreviation="Q6MO"/>
+    <Frequency Description="every 8 to 12 hours" Abbreviation="Q8-12H"/>
+    <Frequency Description="every other week" Abbreviation="QOW"/>
+    <Frequency Description="every 20 minutes" Abbreviation="Q20MIN"/>
+    <Frequency Description="every 5 hours" Abbreviation="Q5H"/>
+    <Frequency Description="every 5 to 10 minutes" Abbreviation="Q5-10MIN"/>
+    <Frequency Description="2 times a day (after meals)" Abbreviation="BIDPC"/>
+    <Frequency Description="once a day (after a meal)" Abbreviation="QDPC"/>
+    <Frequency Description="every other day (at bedtime)" Abbreviation="QODHS"/>
+    <Frequency Description="once (at bedtime)" Abbreviation="1XHS"/>
+    <Frequency Description="once a day (in the evening)" Abbreviation="QPM"/>
+    <Frequency Description="every 3 to 4 weeks" Abbreviation="Q3-4W"/>
+    <Frequency Description="3 to 4 times a week" Abbreviation="3-4X/W"/>
+    <Frequency Description="1 to 3 times a day" Abbreviation="1-3X/D"/>
+    <Frequency Description="every 4 hours while awake" Abbreviation="Q4HWA"/>
+    <Frequency Description="every minute" Abbreviation="Q1MIN"/>
+    <Frequency Description="3 times" Abbreviation="3X"/>
+    <Frequency Description="every 4 months" Abbreviation="Q4MO"/>
+    <Frequency Description="every 90 minutes" Abbreviation="Q90MIN"/>
+    <Frequency Description="every 10 hours" Abbreviation="Q10H"/>
+    <Frequency Description="every 4 hours (5 times/day)" Abbreviation="Q4H,5X/D"/>
+    <Frequency Description="Monday through Friday" Abbreviation="M-F"/>
+    <Frequency Description="Monday, Wednesday, and Friday" Abbreviation="MWF"/>
+    <Frequency Description="in the morning and at bedtime" Abbreviation="AMHS"/>
+    <Frequency Description="2 times a day (before meals)" Abbreviation="BIDAC"/>
+    <Frequency Description="now" Abbreviation="NOW"/>
+    <Frequency Description="every 4 to 8 hours" Abbreviation="Q4-8H"/>
+    <Frequency Description="every 3 to 6 months" Abbreviation="Q3-6MO"/>
+    <Frequency Description="every 3 to 4 days" Abbreviation="Q3-4D"/>
+    <Frequency Description="2 times a day (3 days a week)" Abbreviation="BIDTIW"/>
+    <Frequency Description="every 3 minutes" Abbreviation="Q3MIN"/>
+    <Frequency Description="every 8 weeks" Abbreviation="Q8W"/>
+    <Frequency Description="every 2 months" Abbreviation="Q2MO"/>
+    <Frequency Description="2 times a month" Abbreviation="2X/MO"/>
+    <Frequency Description="every 4 minutes" Abbreviation="Q4MIN"/>
+</Frequencies>
+</LoadStaticData>

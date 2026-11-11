@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:sf="http://www.spicefactory.org/parsley"
+					  skinClass="com.gazuntite.skins.MainContainerSplitViewSkin"
+					  width="100%" height="100%"
+					  >
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.PatientViewModel;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.model.valueObjects.search.SearchEngineDTO;
+			
+			import mx.logging.ILogger;
+			import mx.utils.Base64Decoder;
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			
+			[Bindable]
+			private var model : ApplicationModel = ApplicationModel.getInstance();
+			
+			private var loadUrl:URLRequest ;
+			
+			private var SEListViewPopup:SearchEngineListViewPopup;
+			private var SEAddmorePopup:AddmoreSearchEnginesPopup;
+			
+			
+			[Bindable]
+			private var iconData:ByteArray;
+			
+			
+			[Bindable]
+			public function get UrlRequest():URLRequest
+			{
+				return loadUrl;
+			}
+			
+			public function set UrlRequest(value:URLRequest):void
+			{
+				loadUrl = value;
+				id_htmlArea.location =  loadUrl.url
+			}
+			
+			public function GoBack(event:MouseEvent):void
+			{
+				id_htmlArea.historyBack();
+				event.stopImmediatePropagation();
+			}
+			
+			public function GoForward(event:MouseEvent):void
+			{
+				id_htmlArea.historyForward();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function Close_clickHandler(event:MouseEvent):void
+			{
+				var lc:Event = new Event( "close", true, false );
+				dispatchEvent( lc );
+			}
+			
+			protected function max_clickHandler(event:MouseEvent):void
+			{
+				PatientViewModel.getInstance().closeAllTabs();
+			}
+			
+			
+			protected function textinput1_clickHandler(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+			}
+			
+			protected function addmore_clickHandler(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != SEAddmorePopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				SEAddmorePopup = new AddmoreSearchEnginesPopup(); 
+				SEAddmorePopup.ShowPopup( this );
+				
+				SEAddmorePopup.addEventListener("change", function(event:Event):void 
+				{ 
+					UrlRequest = new URLRequest(SEAddmorePopup.id_Selist.selectedItem.URL + id_SearchText.text); 
+				});
+				
+				SEAddmorePopup.addEventListener("closePopup", function(event:Event):void { removeAllPopups(); });
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				
+				SEAddmorePopup.move( pt.x - (SEAddmorePopup.width - event.currentTarget.width  ) + 2 , pt.y + event.currentTarget.height - 2 ); 
+			}
+			
+			protected function changeSE_clickHandler(event:MouseEvent):void
+			{
+				var toggleView:Boolean = null != SEListViewPopup;
+				
+				removeAllPopups();
+				
+				if(toggleView )
+				{
+					return;
+				}
+				
+				SEListViewPopup = new SearchEngineListViewPopup(); 
+				SEListViewPopup.ShowPopup( this );
+				/*
+				SEListViewPopup.addEventListener("change", function(event:Event):void 
+				{ 
+					model.userPrefferedSearchEngineDTO = SEListViewPopup.id_Selist.selectedItem as SearchEngineDTO;
+					UrlRequest = new URLRequest(model.userPrefferedSearchEngineDTO.URL + id_SearchText.text); 
+					var decoder:Base64Decoder = new Base64Decoder();
+					decoder.decode( model.userPrefferedSearchEngineDTO.IconBase64 );
+					iconData = decoder.toByteArray(); 
+					
+					id_SEIconBtn.visible = false;
+				});
+				*/
+				SEListViewPopup.addEventListener("closePopup", function(event:Event):void { removeAllPopups(); });
+				
+				var pt:Point = event.currentTarget.parent.localToGlobal(new Point(event.currentTarget.x, event.currentTarget.y));
+				SEListViewPopup.move( pt.x   , pt.y + event.currentTarget.height - 3 );
+				SEListViewPopup.width = id_searchView.width - 5;
+			}
+			
+			public function removeAllPopups():void
+			{
+				if( SEListViewPopup && SEListViewPopup.isPopUp )
+				{
+					SEListViewPopup.removePopup();
+					SEListViewPopup 		= null;
+					id_SEIconBtn.selected 	= false;
+				}
+				
+				if( SEAddmorePopup && SEAddmorePopup.isPopUp )
+				{
+					SEAddmorePopup.removePopup();
+					SEAddmorePopup = null;
+					//id_addmore.selected = false;
+				}
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				var query:String = id_SearchText.text;
+				
+				//this.UrlRequest = new URLRequest(model.userPrefferedSearchEngineDTO.URL /* + "/search?q=" */ + query);
+				this.UrlRequest = new URLRequest(model.userPrefferedSearchEngineDTO.URL + query);
+				event.stopImmediatePropagation();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup id="id_content" height="100%"  gap="0" width="100%" verticalAlign="top" horizontalAlign="center">
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.WebPanelBodySkin" width="100%" height="100%">		
+			<s:layout>
+				<s:VerticalLayout paddingTop="3" paddingLeft="3" paddingRight="3" paddingBottom="3" gap="3" verticalAlign="middle" horizontalAlign="center" />
+			</s:layout>
+			
+			<s:HGroup width="100%" gap="5" paddingTop="0" verticalAlign="middle">
+				<s:Button skinClass="com.gazuntite.skins.controls.button.WebSearch.BrowserLeftArrowButtonSkin" click="GoBack(event)" toolTip="Back" useHandCursor="true" buttonMode="true" />
+				<s:Button skinClass="com.gazuntite.skins.controls.button.WebSearch.BrowserRightArrowButtonSkin" click="GoForward(event)" toolTip="Forward" useHandCursor="true" buttonMode="true"/>
+				<!--<s:Button label="{UtilityFunctions.TitleCase('Google')}"  />-->
+				<s:Spacer width="10"/>
+				<s:Label fontFamily="CalibriCFFBold" fontSize="16" text="GOOGLE" />
+				<s:Spacer width="60%"/>
+				
+				<s:SkinnableContainer id="id_searchView" 
+									  minWidth="200" width="40%" height="27" skinClass="com.gazuntite.skins.controls.container.WebSearchContainerSkin"
+									  >
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="middle" gap="1" paddingRight="2" />
+					</s:layout>
+					<s:ToggleButton id="id_SEIconBtn"
+									click="changeSE_clickHandler(event)"
+									skinClass="com.gazuntite.skins.controls.toggleButtonSkin.bar.WebsearchTBSkin"
+									buttonMode="true" toolTip="Open Websearch View" useHandCursor="true"
+									/>
+									
+						<!--
+					<s:Button id="id_SEIconBtn"
+							  click="changeSE_clickHandler(event)" 
+							  includeInLayout="{id_SEIconBtn.visible}" 
+							  buttonMode="true" useHandCursor="true" 
+							  toolTip="Select Search Engine" skinClass="com.gazuntite.skins.controls.button.miniSearchButtonSkin" 
+							  />
+					
+					<s:Image source="{iconData}" click="changeSE_clickHandler(event)"
+							 visible="{!id_SEIconBtn.visible}" includeInLayout="{!id_SEIconBtn.visible}"
+							 height="12" width="12" toolTip="Select Search Engine" buttonMode="true" useHandCursor="true"/>
+					-->
+					<s:TextInput id="id_SearchText" 
+								 width="100%" height="100%" borderVisible="false"
+								 click="textinput1_clickHandler(event)" 
+								 prompt="Search"
+								 skinClass="com.gazuntite.skins.controls.textInput.transparentTextInputSkin"/>
+					
+					<s:Button click="button2_clickHandler(event)"   
+							  buttonMode="true" useHandCursor="true" toolTip="Search" 
+							  skinClass="com.gazuntite.skins.controls.button.SerachPatientButtonSkin" 
+							  height="100%"/>
+				</s:SkinnableContainer>	
+				
+				<s:Spacer width="80%"/>
+				
+				<s:ToggleButton id="expand" 
+								label="Expand"
+								buttonMode="true" useHandCursor="true" toolTip="{expand.selected?'Restore':'Expand'}"
+								skinClass="com.gazuntite.skins.controls.button.eLab.ExpandButtonSkin"
+								/>
+				<s:Button id="Close"
+						  label="Close"  toolTip="Close"
+						  skinClass="com.gazuntite.skins.controls.button.blackCloseButtonSkin"
+						  useHandCursor="true" buttonMode="true" click="Close_clickHandler(event)" 
+						  />
+			</s:HGroup>
+			
+			<mx:HTML id="id_htmlArea" 
+					 location="http:\\www.google.com" width="100%" height="97%" minHeight="0"  
+					 verticalScrollBarStyleName="htmlVScroll" horizontalScrollPolicy="off" />
+			
+		</s:SkinnableContainer>				
+	</s:VGroup>
+</s:SkinnableContainer>

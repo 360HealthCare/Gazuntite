@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:view="com.gazuntite.provider.eprescription.services.patient.view.*"
+					  xmlns:newrx="com.gazuntite.provider.eprescription.services.patient.view.views.newrx.*"
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc(event)" 
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.ModuleDictationDTO;
+			import com.gazuntite.common.dto.ModuleNoteDTO;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.GetPatientGaxenIdEvent;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.common.event.visit.ManageModuleNotesEvent;
+			import com.gazuntite.common.view.components.CustomSaveAndMoveNextAlert;
+			import com.gazuntite.common.view.events.SelectSection;
+			import com.gazuntite.dictation.view.dictation.PatientDictationNoteViewEvent;
+			import com.gazuntite.input.event.visit.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			import com.gazuntite.input.utils.QIUtilityFunctions;
+			import com.gazuntite.input.view.viewmodel.PatientInputEvent;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.view.views.newrx.NewRXPanel;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]	public var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	public var NavItems:ArrayCollection;
+			[Bindable]	private var viewModel:PatientInputMedicationPrescriptionViewModel = PatientInputMedicationPrescriptionViewModel.getInstance();
+			private var _SelectedPatient:PatientDTO;
+			[Bindable]	private var EpreModel:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			[Bindable] private var notesDTO:ModuleNoteDTO;
+			
+			//M:26Nov2013
+			[Bindable]	private var dictationDTO:ModuleDictationDTO;
+			
+			[Bindable]  public var RecordLevelNote:String = '';
+			
+			public function get SelectedPatient():PatientDTO
+			{
+				return _SelectedPatient;
+			}
+			
+			[Bindable]
+			public function set SelectedPatient(value:PatientDTO):void
+			{
+				
+				_SelectedPatient = value;
+				
+				if(null != value && uiInboxList != null)
+					LoadMedications();
+				
+			}
+			
+		 	public var IsviewDirty:Boolean = false;
+			
+			protected function cc(event:FlexEvent):void
+			{
+				notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.CHRONIC_MEDICATION_MODULE_NAME);
+				
+				dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.CHRONIC_MEDICATION_MODULE_NAME);
+				
+				addEventListener(PatientDictationNoteViewEvent.PATIENT_DICTATION_NOTE_SAVE_EVENT, patientDictationNoteSaveHandler, false, 0, true);
+				addEventListener("LoadPatientMedications",LoadPatientMedications);
+				
+				addEventListener('ChronicViewDirty',function():void{
+				
+					IsviewDirty = true;
+				
+				});
+				
+				addEventListener('ChronicViewCleaned',function():void{
+				
+					IsviewDirty = false;
+				
+				});
+				
+			}
+			
+			private function LoadPatientMedications(event:Event):void
+			{
+				LoadMedications();
+				
+				viewModel.medicationDictationNoteViewModel.visible = false; // to close Dictaion panel
+			}
+			
+			
+			public function ClearChronicInputView():void
+			{
+				if(id_ChronicPanel && id_ChronicPanel.id_newRxView.id_InputView)
+				{
+					//id_ChronicPanel.id_newRxView.id_InputView.OpenForQuickInputChronic(model.VisitID.toString(),model.VisitDate.toString());
+					id_ChronicPanel.id_newRxView.id_InputView.ResetCompleteRXForm();
+				}
+				
+				if(model.medicationDTOList)
+					model.medicationDTOList.removeAll();
+				
+				notesDTO = null;
+				dictationDTO = null;
+				
+				
+				if( null != id_DictationNote )
+				{
+					id_DictationNote.SectionLevelNote = "";
+					id_DictationNote.resetToDefault();
+				}
+				
+			}
+			
+			public function onSuccessfullVisitSave():void
+			{
+				var ev:PatientInputEvent = new PatientInputEvent(PatientInputEvent.REFRESH_PATIENT_ENCOUNTER_LIST, true);
+				dispatchEvent(ev);
+			}
+			
+			public function LoadMedications():void
+			{
+				if(SelectedPatient && SelectedPatient.GAXENID != '') // check if patient have medication or not -> No GAXENID mean no medication , by Moeen Mohsin 
+				{
+					
+					var eusername:String  	= EpreModel.SearchProviderDetailsResults.EUserName;
+					var epassword:String  	= EpreModel.SearchProviderDetailsResults.EPassword;
+					var gaxenUserId:String 	= EpreModel.SearchProviderDetailsResults.GAXENID;
+					
+					var securityHeaderXML:XML	 			= <Header />;					
+					securityHeaderXML.@EUserName	= eusername;
+					securityHeaderXML.@EPassword	= epassword;
+					securityHeaderXML.@ClinicID		= "sad";
+					
+					id_filterDropdown.selectedIndex
+					
+					
+					var loadMedication:LoadPatientMedEvent = new LoadPatientMedEvent('0', SelectedPatient.GAXENID  ,model.ChronicArrangeByIndex + 5, LoadMedicationCallBack);
+					loadMedication.data = securityHeaderXML;
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadMedication);
+				}
+				
+				else
+				{
+					var getGaxenIDEv:GetPatientGaxenIdEvent = new GetPatientGaxenIdEvent(SelectedPatient.UserID.toString(), onGetGaxenId);
+					CairngormEventDispatcher.getInstance().dispatchEvent(getGaxenIDEv);
+				}
+			}
+			
+			public function onGetGaxenId(result:XML):void
+			{
+				if (!result)
+					return;
+				
+				var gaxenID:String = result[0];
+				
+				if (!gaxenID)
+					return;
+				
+				if (gaxenID == "0")
+					return;
+				
+				model.gaxenID = gaxenID;
+				SelectedPatient.GAXENID = gaxenID;
+				model.gaxenIDSaved = true;
+				
+				model.patientDTO.GAXENID = gaxenID;
+				
+				LoadMedications();
+			}
+			
+			private function LoadMedicationCallBack(patientMedAC:ArrayCollection, patientChronicMedAC:ArrayCollection, patientMedAC_inactive:ArrayCollection, patientChronicMedAC_inactive:ArrayCollection):void
+			{
+				if(model.medicationDTOList.length)
+					model.medicationDTOList.removeAll();
+				
+				model.medicationDTOList = patientChronicMedAC;
+			}
+			
+			private function patientDictationNoteSaveHandler(event:PatientDictationNoteViewEvent):void
+			{
+				event.moduleName = QIConstants.CHRONIC_MEDICATION_MODULE_NAME;
+				//event.data = notesDTO;
+				
+				if(null == notesDTO)
+					notesDTO = QIUtilityFunctions.getModuleNoteDTO(QIConstants.CHRONIC_MEDICATION_MODULE_NAME);
+				
+				notesDTO.Note = event.data.toString() ;
+					
+				if(event.isNoteSave)
+				{
+					var manage:ManageModuleNotesEvent = new ManageModuleNotesEvent( notesDTO, QIConstants.CHRONIC_MEDICATION_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( manage );
+				}
+				else
+				{
+					if (!dictationDTO)
+					{
+						var dictaionId:String = id_DictationNote.SectionLevelDictationID;
+						
+						dictationDTO = QIUtilityFunctions.getModuleDictationDTO(QIConstants.CHRONIC_MEDICATION_MODULE_NAME);
+						dictationDTO.DictationID = dictaionId;
+					}
+					
+					var dicEvent:ManageModuleDictationEvent = new ManageModuleDictationEvent( dictationDTO, QIConstants.CHRONIC_MEDICATION_MODULE_NAME, model.LoggedInUserId, model.LoggedInUserSessionID, model.LoggedInUserSelectedBranchId, ManageModuleNotesCallBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent( dicEvent );
+				}
+			}
+			
+			private function ManageModuleNotesCallBack(isNoteSaved:Boolean, moduleName:String):void
+			{
+				trace(moduleName + " module Notes save operation " + isNoteSaved ? "successful":"failed")
+				
+				if(isNoteSaved)
+					viewModel.medicationDictationNoteViewModel.visible = false;
+			}
+			
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.medicationDTOList && model.medicationDTOList.length)
+				{
+					switch (uiSortDropDown.selectedIndex)
+					{
+						case 0:
+							model.medicationDTOList = UtilityFunctions.SortArrayCollection(model.medicationDTOList,'SerialNo',true,false);
+							break;
+						case 1: 
+							model.medicationDTOList = UtilityFunctions.SortArrayCollection(model.medicationDTOList,'drugName',false,false);
+							break;
+					}
+				}
+				else
+				{
+					if(uiSortDropDown)
+						uiSortDropDown.selectedIndex = 0;
+				}
+			}
+			
+			
+			protected function NextClick_handler():void
+			{
+				if(IsviewDirty)
+				{
+					var hideOption:String = CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE ;
+					QIUtilityFunctions.AskMoveNextAlert( MoveHandler, null, hideOption );
+				}
+				else
+					MovetoNextTab();
+				
+				
+			}
+			
+			private function MoveHandler(value:String):void
+			{
+				switch(value)
+				{
+					case CustomSaveAndMoveNextAlert.SAVE_AND_MOVE_NEXT :
+						SaveAndMoveNext();
+						break;
+					case CustomSaveAndMoveNextAlert.SAVE_AND_ADD_MORE :
+						SaveChronicMed();
+						break;
+					case CustomSaveAndMoveNextAlert.DISCARD_AND_MOVE_NEXT :
+						DiscardAndMoveNext();
+						break;
+				}
+			}
+			
+			private function DiscardAndMoveNext():void
+			{
+				id_ChronicPanel.id_newRxView.id_InputView.ResetRXForm();
+				MovetoNextTab();
+			}
+			
+			private function SaveAndMoveNext():void
+			{
+				SaveChronicMed();
+				MovetoNextTab();
+			}
+			
+			protected function MovetoNextTab():void
+			{
+				dispatchEvent(new SelectSection(SelectSection.SelectSelectionEvent,'Immunization'));
+			}
+			
+			protected function SaveChronicMed():void
+			{
+				id_ChronicPanel.id_newRxView.SaveChronicMed_fromAnyWhere();
+			}
+			protected function id_filterDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				LoadMedications();
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Binding source="model.medicationDTOList" destination="DataList_changeHandler" />
+	<fx:Binding destination="SelectedPatient" source="model.patientDTO" /> 
+	
+	<s:layout>
+		<s:VerticalLayout	gap="0" paddingTop="1" paddingBottom="10"	/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" 
+								  PrevSectionLabel="Comprehensive HX"
+								  label="CHRONIC MEDICATION" 
+								  NextSectionLabel="Immunization"
+								  NavItems="{NavItems}"
+								  maxSectionCounter="4"  sectionNumber="3" showInputPart="true"
+								  MainSectionLabel="History"
+								  dictationNoteViewModel="{viewModel.medicationDictationNoteViewModel}"  
+								  SectionLevelNote="@{notesDTO.Note}"
+								  SectionLevelDictationID="@{dictationDTO.DictationID}"
+								  />
+	
+	<dictation2:NewPatientDictationNoteView  id="id_DictationNote" 
+											 width="100%" minHeight="47" 
+											 isSectionLevel="true"
+											 viewModel="{viewModel.medicationDictationNoteViewModel}"  
+											 SectionLevelNote="@{notesDTO.Note}"
+											 RecordLevelNote="@{RecordLevelNote}"
+											 SectionLevelDictationID="@{dictationDTO.DictationID}"
+											 />
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" horizontalAlign="right"/>
+			</s:layout>
+			
+			<newrx:NewRXPanel id="id_ChronicPanel"
+							  width="100%" height="133"  
+							  openforInputChronic="true" 
+							  IsforInput="true" 
+							  selectedPatient="{SelectedPatient}"
+							  visitID="{model.VisitID}" 
+							  visitDate="{UtilityFunctions.FormatDate(model.VisitDate,'MM/DD/YY')}"
+							  RecordLevelNote="@{RecordLevelNote}" 
+							  RecordLevelDictationID="@{id_DictationNote.RecordLevelDictationID}"
+							  />
+			
+			<s:HGroup width="100%" horizontalAlign="right" paddingRight="4">
+				
+				<s:Button id="id_Chronic"
+						  toolTip="Add Medication"
+						  enabled="{id_ChronicPanel.id_newRxView.id_InputView.id_MedicineInputView.isFormComplete}"
+						  buttonMode="true" useHandCursor="true"
+						  click="SaveChronicMed()" 
+						  skinClass="com.gazuntite.skins.controls.button.SavePlusButtonSkin"
+						  />
+				<s:Button click="NextClick_handler()"
+						  skinClass="com.gazuntite.skins.controls.button.BlackButtonSkin" 
+						  label="Next"
+						  toolTip="Next"
+						  buttonMode="true" useHandCursor="true"
+						  />
+			</s:HGroup>
+			
+			<s:Spacer height="4" />
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:HGroup verticalAlign="middle" left="10" gap="8" verticalCenter="0">
+					<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+					<s:DropDownList id="uiSortDropDown"
+									skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+									selectedIndex="0"
+									buttonMode="true" toolTip="Sort List"
+									change="SortDataList()"
+									>
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object label="Recently Added" />
+								<fx:Object label="Medication Name" />
+							</s:ArrayCollection>
+						</s:dataProvider>
+					</s:DropDownList>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" right="10" gap="8" verticalCenter="0" >
+					<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+					<s:DropDownList id="id_filterDropdown"
+									skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+									selectedIndex="@{model.ChronicArrangeByIndex}"
+									buttonMode="true" toolTip="Filter List"
+									change="id_filterDropdown_changeHandler(event)"
+									>
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object label="Active" />
+								<fx:Object label="History" />
+								<fx:Object label="All" />
+							</s:ArrayCollection>
+						</s:dataProvider>
+					</s:DropDownList>
+				</s:HGroup>
+			</s:SkinnableContainer>
+			
+			<s:List id="uiInboxList"
+					borderVisible="false"
+					height="100%"	minHeight="50"
+					dataProvider="{model.medicationDTOList}"
+					width="100%" allowMultipleSelection="true"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.medication.CMedicationListItemRenderer"
+					/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

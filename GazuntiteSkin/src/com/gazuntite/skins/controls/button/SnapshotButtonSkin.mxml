@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="141" height="30">
+	<fx:Metadata>[HostComponent("spark.components.Button")]</fx:Metadata>
+	
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+	</s:states>
+	
+	<s:Rect includeIn="disabled,up" x="11.5" y="3.5" width="129" height="23" radiusX="4">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#456EBF" ratio="0"
+								 color.disabled="#999999"/>
+				<s:GradientEntry alpha="1.0" color="#244487" ratio="1"
+								 color.disabled="#666666"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1"/>
+		</s:filters>
+		<s:stroke>
+			<s:SolidColorStroke caps="none" color="#163066" joints="miter" miterLimit="4" weight="1"
+								color.disabled="#666666"/>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Rect includeIn="down,over" x="11.5" y="3.5" width="129" height="23" radiusX="4"
+			alpha.down="0.85">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry ratio="0" color="#C68475" alpha="1.0"/>
+				<s:GradientEntry ratio="0.5254901960784314" color="#64281A" alpha="1.0"/>
+				<s:GradientEntry ratio="0.5294117647058824" color="#491B11" alpha="1.0"/>
+				<s:GradientEntry ratio="1" color="#491B11" alpha="1.0"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter alpha="0.25" angle="90" blurX="0" blurY="0" color="#FFFFFF" distance="1" hideObject="false" inner="false" knockout="false" quality="3" strength="1"/>
+			<s:DropShadowFilter alpha="0.5" angle="90" blurX="1" blurY="1" color="0x000000" distance="1" hideObject="false" inner="true" knockout="false" quality="3" strength="1" blurX.down="5" blurY.down="5" alpha.down="0.89"/>
+		</s:filters>
+		<s:stroke>
+			<s:LinearGradientStroke caps="none" joints="miter" miterLimit="4" rotation="90" weight="1">
+				<s:GradientEntry alpha="1.0" color="#333333" ratio="0"/>
+				<s:GradientEntry alpha="1" color="#000000" ratio="1"/>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<s:RichText y="8" right="11" color="#FFFFFF" fontFamily="CalibriCFF" fontSize="15" lineHeight="0"
+				paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" tabStops="S0 S50"
+				text="Take a Snapshot" trackingRight="0%"/>
+	<s:BitmapImage x="0" y="0" smooth="true" source="@Embed('/assets/images/cam.png')"/>
+</s:Skin>

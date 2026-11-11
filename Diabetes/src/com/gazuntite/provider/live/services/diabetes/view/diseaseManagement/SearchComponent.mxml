@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:diabetesGuideLine="com.gazuntite.provider.live.services.diabetes.view.diseaseManagement.diabetesGuideLine.*"
+		 creationComplete="cc(event)" xmlns:components="com.gazuntite.controls.extended.components.*">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.diabetes.view.event.DiabetesSearchEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var _ListDataProvider:ArrayCollection;
+			private var _DropDownDataProvider:ArrayCollection;
+			private var _ShowAsPopup:Boolean 	= false;
+			private var searchTypeCase:int 		= 1;
+			public var listSelectedItem:Object;
+			
+			/* [Embed(source="com/gazuntite/provider/search/services/patient/view/skins/assets/selected_name.png")]
+			[Bindable]	public var selected_name:Class;  */
+			
+			[Bindable]
+			public function get DropDownDataProvider():ArrayCollection
+			{
+				return _DropDownDataProvider;
+			}
+
+			public function set DropDownDataProvider(value:ArrayCollection):void
+			{
+				_DropDownDataProvider = value;
+			}
+
+			[Bindable]
+			public function get ListDataProvider():ArrayCollection
+			{
+				return _ListDataProvider;
+			}
+			
+			public function set ListDataProvider(value:ArrayCollection):void
+			{
+				_ListDataProvider = value;
+			}
+			
+			
+			public function get ShowAsPopup():Boolean
+			{
+				return _ShowAsPopup;
+			}
+			
+			public function set ShowAsPopup(value:Boolean):void
+			{
+				_ShowAsPopup = value;
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			private function showList(value:Boolean):void
+			{
+				id_SearchListView.visible = value;
+				
+				if( ShowAsPopup && value && false == id_SearchListView.isPopUp)
+				{
+					var pos:Point = new Point(id_textInput.x, id_textInput.y);
+					
+					removeElement(id_SearchListView);
+					id_SearchListView.ShowPopup( this );
+					
+					var pt:Point = localToGlobal(pos);
+					id_SearchListView.move( pt.x - 30, pt.y + this.height ); 
+					
+					id_SearchListView.width = this.width;
+					
+					FlexGlobals.topLevelApplication.addEventListener(MouseEvent.MOUSE_DOWN, function(event:MouseEvent):void
+					{
+						if( ShowAsPopup && true == id_SearchListView.isPopUp)
+						{
+							removePop();
+						}
+					});
+				}
+				else if( false == value && true == id_SearchListView.isPopUp)
+				{
+					removePop();
+				}
+				
+			}
+			
+			private function removePop():void
+			{
+				id_SearchListView.removePopup();
+				id_SearchListView.visible = false
+				addElement(id_SearchListView);
+			}
+			
+			protected function textInput_keyUpHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode == Keyboard.ENTER)
+				{
+					var eve:DiabetesSearchEvent = new DiabetesSearchEvent(DiabetesSearchEvent.DIABETIC_SEARCH_EVENT,true);
+					eve.SearchString = id_textInput.text;
+					eve.callback = DiabetesSearchCallback;
+					dispatchEvent(eve);
+				}
+			}
+			
+			public function DiabetesSearchCallback(DataProvider:ArrayCollection):void
+			{
+				ListDataProvider = DataProvider;
+				
+				showList( true ); 
+				id_SearchListView.refreshList( id_textInput.text );
+			}
+			
+			protected function id_searchType_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function id_image_clickHandler(event:MouseEvent):void
+			{
+				id_searchType.openDropDown();
+				event.stopImmediatePropagation();
+			}
+			
+			protected function searchType_changeHandler(event:IndexChangeEvent):void
+			{
+				showList( false );
+				id_textInput.text = '';
+				
+				//dispatchEvent(new IndexChangeEvent
+				/*
+				switch(id_searchType.selectedIndex)
+				{
+					 case 0:
+						id_textInput.prompt = 'First Name';
+						searchTypeCase = 1;
+						id_image.source = selected_name;
+						break;
+					case 1:
+						id_textInput.prompt = 'Last Name';
+						searchTypeCase = 2;
+						id_image.source = selected_name;
+						break;
+					case 2:
+						id_textInput.prompt = 'SSN';
+						searchTypeCase = 3;
+						id_image.source = selected_ssn;
+						break;
+					case 3:
+						id_textInput.prompt = 'DOB';
+						searchTypeCase = 4;
+						id_image.source = selected_dob;
+						break;
+					case 4:
+						id_textInput.prompt = 'ID';
+						searchTypeCase = 5;
+						id_image.source = selected_id;
+						break;
+					case 5:
+						id_textInput.prompt = 'GID';
+						searchTypeCase = 6;
+						id_image.source = selected_gid;
+						break;
+					 
+					default:
+						break;
+				}*/
+			}
+			
+			protected function id_SearchListView_ItemClickedHandler(event:Event):void
+			{
+				 if(id_SearchListView.id_SearchList.selectedItem)
+					 listSelectedItem = id_SearchListView.id_SearchList.selectedItem;
+				 
+				 clearSearchResults();
+			}
+			
+			public function clearSearchResults():void
+			{
+				if( id_SearchListView && id_SearchListView.visible )
+				{
+					id_textInput.text		= '';
+					showList( false );
+					return
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="-2" />
+	</s:layout>
+	<s:SkinnableContainer id="id_Main" width="100%" height="29"  skinClass="com.gazuntite.skins.controls.container.PatientSearchBackgroundSkin">
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectionBg" width="35" height="28" left="0" visible="{!id_SearchListView.visible}" includeInLayout="{!id_SearchListView.visible}"/>
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.controls.container.PatientSearchSelectedBg" width="35" height="28" left="0" visible="{id_SearchListView.visible}" includeInLayout="{id_SearchListView.visible}"/>
+		
+		<s:Group left="3" verticalCenter="0">
+			<s:DropDownList id="id_searchType" left="0"
+							labelField="label" requireSelection="true"
+							skinClass="com.gazuntite.skins.controls.combobox.CustomDropDownListSkin"
+							itemRenderer="spark.skins.spark.DefaultComplexItemRenderer"	
+							width="1" height="1" click="id_searchType_clickHandler(event)" change="searchType_changeHandler(event)"
+							dataProvider="{DropDownDataProvider}"><!---->
+				<!--<s:dataProvider>
+					<s:ArrayList>
+						<s:BitmapImage source="@Embed('com/gazuntite/provider/live/services/diabetes/asserts/images/clockblue.png')" />
+						<s:BitmapImage source="@Embed('com/gazuntite/provider/live/services/diabetes/asserts/images/new.png')" />
+					</s:ArrayList>
+				</s:dataProvider>-->
+			</s:DropDownList>
+			
+			<s:Button id="id_image" 
+					  width="30" height="19" left="0" click="id_image_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="More Options" />
+			<!--<s:Image id="id_image" 
+			width="30" height="19" left="0" click="id_image_clickHandler(event)" buttonMode="true" useHandCursor="true" toolTip="More Options"/>--><!-- source="{selected_name}"-->
+		</s:Group>
+		
+		<components:LabelTextInput id="id_textInput" 
+								   borderVisible="false" borderAlpha="0" height="100%"
+								   focusAlpha="0" left="30" right="21" verticalCenter="0" fontSize="15"
+								   prompt="Select Test or Procedure" restrict="[A-Z a-z , . / \- 0-9]" 
+								   keyUp="textInput_keyUpHandler(event)"
+								   fontFamily="CalibriCFF"
+								   skinClass="com.gazuntite.controls.extended.skins.transparentTextInputSkin" 
+								   toolTip="Search Patient"/>
+	</s:SkinnableContainer>
+	
+	
+	<diabetesGuideLine:SearchReasultList id="id_SearchListView" width="100%" 
+										 ListDataProvider="{ListDataProvider}"
+										 ItemClicked="id_SearchListView_ItemClickedHandler(event)"
+										 CloseSearchBox="clearSearchResults()"
+										 visible="false" includeInLayout="{id_SearchListView.visible}" />
+</s:Group>

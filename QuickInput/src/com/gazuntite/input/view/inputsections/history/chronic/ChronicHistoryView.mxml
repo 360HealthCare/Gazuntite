@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  skinClass="com.gazuntite.skins.controls.container.PatientInputSubViewContainerSkin" 
+					  xmlns:supportclass="com.gazuntite.view.patient.supportclass.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  xmlns:skins="com.gazuntite.input.view.skins.*"
+					  xmlns:dictation1="com.gazuntite.common.view.components.dictation.*"
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  creationComplete="cc(event)"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.common.dto.PatientDTO;
+			import com.gazuntite.common.event.GetPatientGaxenIdEvent;
+			import com.gazuntite.common.event.LoadPatientMedEvent;
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.provider.eprescription.services.patient.model.EPrescriptionModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.DropDownEvent;
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]
+			public var NavItems:ArrayCollection;
+			
+			
+			private var _SelectedPatient:PatientDTO;
+			
+			public function get SelectedPatient():PatientDTO
+			{
+				return _SelectedPatient;
+			}
+			
+			[Bindable]
+			public function set SelectedPatient(value:PatientDTO):void
+			{
+				
+				_SelectedPatient = value;
+				
+				if(null != value && uiInboxList != null)
+					LoadMedications();
+				
+			}
+			
+			[Bindable]	private var EpreModel:EPrescriptionModelLocator = EPrescriptionModelLocator.getInstance();
+			
+			[Bindable]
+			private var viewModel:PatientInputMedicationPrescriptionViewModel = PatientInputMedicationPrescriptionViewModel.getInstance();
+			
+			protected function onSortDropdownOpen(event:DropDownEvent):void
+			{
+				uiSortDropdown.dropDown.x = uiSortDropdown.x + 24 ; //add container left padding, should convert to global if we really want perfect
+			}
+			
+			public function set DataList_changeHandler(value:ArrayCollection):void
+			{
+				SortDataList();
+			}
+			
+			public function SortDataList():void
+			{
+				if(model.medicationDTOList && model.medicationDTOList.length)
+				{
+					switch (uiSortDropdown.selectedIndex)
+					{
+						case 0:
+							model.medicationDTOList = UtilityFunctions.SortArrayCollection(model.medicationDTOList,'SerialNo',true,false);
+							break;
+						case 1: 
+							model.medicationDTOList = UtilityFunctions.SortArrayCollection(model.medicationDTOList,'drugName',false,false);
+							break;
+					}
+				}
+					
+				else
+				{
+					if(uiSortDropdown)
+						uiSortDropdown.selectedIndex = 0;
+				}
+				
+			}
+			
+			protected function id_filterDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				LoadMedications();
+			}
+			
+			public function LoadMedications():void
+			{
+				if(SelectedPatient && SelectedPatient.GAXENID != '') // check if patient have medication or not -> No GAXENID mean no medication , by Moeen Mohsin 
+				{
+					
+					var eusername:String  	= EpreModel.SearchProviderDetailsResults.EUserName;
+					var epassword:String  	= EpreModel.SearchProviderDetailsResults.EPassword;
+					var gaxenUserId:String 	= EpreModel.SearchProviderDetailsResults.GAXENID;
+					
+					var securityHeaderXML:XML	 			= <Header />;					
+					securityHeaderXML.@EUserName	= eusername;
+					securityHeaderXML.@EPassword	= epassword;
+					securityHeaderXML.@ClinicID		= "sad";
+					
+					
+					var loadMedication:LoadPatientMedEvent = new LoadPatientMedEvent('0', SelectedPatient.GAXENID  , (model.ChronicArrangeByIndex + 5), LoadMedicationCallBack);
+					loadMedication.data = securityHeaderXML;
+					CairngormEventDispatcher.getInstance().dispatchEvent(loadMedication);
+				}
+					
+				else
+				{
+					var getGaxenIDEv:GetPatientGaxenIdEvent = new GetPatientGaxenIdEvent(SelectedPatient.UserID.toString(), onGetGaxenId);
+					CairngormEventDispatcher.getInstance().dispatchEvent(getGaxenIDEv);
+				}
+			}
+			
+			public function onGetGaxenId(result:XML):void
+			{
+				if (!result)
+					return;
+				
+				var gaxenID:String = result[0];
+				
+				if (!gaxenID)
+					return;
+				
+				if (gaxenID == "0")
+					return;
+				
+				model.gaxenID = gaxenID;
+				SelectedPatient.GAXENID = gaxenID;
+				model.gaxenIDSaved = true;
+				
+				model.patientDTO.GAXENID = gaxenID;
+				
+				LoadMedications();
+			}
+			
+			private function LoadMedicationCallBack(patientMedAC:ArrayCollection, patientChronicMedAC:ArrayCollection, patientMedAC_inactive:ArrayCollection, patientChronicMedAC_inactive:ArrayCollection):void
+			{
+				model.medicationDTOList = patientChronicMedAC;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				addEventListener("LoadPatientMedications",LoadPatientMedications);
+				
+			}
+			
+			private function LoadPatientMedications(event:Event):void
+			{
+				LoadMedications();
+				
+				viewModel.medicationDictationNoteHistoryViewModel.visible = false; // to close Dictaion panel
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Binding source="model.medicationDTOList" destination="DataList_changeHandler" />
+	<fx:Binding destination="SelectedPatient" source="model.patientDTO" />
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout
+			gap="0" paddingBottom="10"
+			/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%"  PrevSectionLabel="Comprehensive HX"
+								  label="CHRONIC MEDICATION" 
+								  NextSectionLabel="Immunization" 
+								  NavItems="{NavItems}"
+								  maxSectionCounter="4"  sectionNumber="3" showHistoryPart="true" 
+								  MainSectionLabel="History"
+								  dictationNoteViewModel="{viewModel.medicationDictationNoteHistoryViewModel}"
+								  />
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.medicationDictationNoteHistoryViewModel}" 
+												dictationNoteDataProvider="{model.chronicMedicationDictationNoteHistoryDTOList}"/>
+	
+	<s:Scroller width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" >
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout gap="0" />
+			</s:layout>
+			
+			<s:SkinnableContainer width="100%" height="27" skinClass="com.gazuntite.skins.PatientSortBarSkin">
+				<s:HGroup verticalAlign="middle" left="10" gap="8" verticalCenter="0">
+					<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+					<s:DropDownList id="uiSortDropdown"
+									skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+									selectedIndex="0"
+									buttonMode="true" toolTip="Sort List"
+									change="SortDataList()"
+									>
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object label="Recently Added" />
+								<fx:Object label="Medication Name" />
+							</s:ArrayCollection>
+						</s:dataProvider>
+					</s:DropDownList>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle" right="10" gap="8" verticalCenter="0" >
+					<s:Label text="Arrange By:" styleName="emailInboxToolbarTitle" />
+					<s:DropDownList id="id_filterDropdown"
+									skinClass="com.gazuntite.skins.controls.list.PatientSortBarDropListSkin" 
+									selectedIndex="@{model.ChronicArrangeByIndex}"
+									buttonMode="true" toolTip="Filter List"
+									change="id_filterDropdown_changeHandler(event)"
+									>
+						<s:dataProvider>
+							<s:ArrayCollection>
+								<fx:Object label="Active" />
+								<fx:Object label="History" />
+								<fx:Object label="All" />
+							</s:ArrayCollection>
+						</s:dataProvider>
+					</s:DropDownList>
+				</s:HGroup>
+			</s:SkinnableContainer>
+			<s:List id="uiInboxList"
+					width="100%" allowMultipleSelection="true"
+					height="100%"
+					minHeight="50"
+					skinClass="com.gazuntite.skins.controls.list.PatientInputListSkin"
+					borderVisible="false"
+					dataProvider="{model.medicationDTOList}"
+					itemRenderer="com.gazuntite.input.view.components.patient.itemrenderer.medication.CMedicationHistoryListItemRenderer"
+					/>
+		</s:Group>
+	</s:Scroller>
+</s:SkinnableContainer>

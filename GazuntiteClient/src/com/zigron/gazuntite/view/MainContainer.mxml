@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:topbar="com.zigron.gazuntite.view.topbar.*" 
+					  xmlns:exambar="com.zigron.gazuntite.view.exambar.*" 
+					  xmlns:practicemanager="com.zigron.gazuntite.view.practicemanager.*" 
+					  xmlns:input="com.gazuntite.view.patient.input.*" 
+					  xmlns:patient="com.zigron.gazuntite.view.patient.*"
+					  creationComplete="cc(event)"
+					  click="onMainContainerClick(event)"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.view.MainContainerViewModel;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.history.model.HistoryModelLocator;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.video.chat.manager.VideoChatManager;
+			import com.gazuntite.webRTC.manager.OpenTokWebViewManager;
+			import com.gazuntite.webRTC.view.event.IncomingCallViewEvent;
+			import com.zigron.gazuntite.logging.LoggingUtil;
+			import com.zigron.gazuntite.model.ApplicationModel;
+			import com.zigron.gazuntite.utils.ChromeUtil;
+			import com.zigron.gazuntite.utils.Constants;
+			import com.zigron.gazuntite.view.event.PracticeManagerClickEvent;
+			import com.zigron.gazuntite.view.topbar.communication.CommunicationView;
+			import com.zigron.gazuntite.view.topbar.provider.EditProviderProfile;
+			import com.zigron.gazuntite.view.topbar.rapidaccess.RapidAccessView;
+			import com.zigron.gazuntite.view.topbar.site.WebsiteView;
+			import com.zigron.gazuntite.view.topbar.websearch.WebsearchView;
+			
+			import mx.controls.Alert;
+			import mx.core.IVisualElement;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.logging.ILogger;
+			import mx.managers.PopUpManager;
+			
+			
+			[Bindable] private var model : ApplicationModel = ApplicationModel.getInstance();
+			[Bindable] protected var mainViewModel:MainContainerViewModel = MainContainerViewModel.getInstance();
+			[Bindable] private var showDebugBorders:Boolean = false;
+			[Bindable] private var currentOpenView_fromTop:IVisualElement;
+			private var isUserLogedIn:Boolean 			= false;
+			
+			
+			private var logger : ILogger = LoggingUtil.getLogger( this );
+			private var chatManager:VideoChatManager = VideoChatManager.getInstance();
+			private var opentokchat:OpenTokWebViewManager = OpenTokWebViewManager.getInstance();
+			[Bindable]
+			public function set userLoggedIn(value:Boolean):void
+			{
+				if( value )
+				{
+					InitComponents();
+				}
+				else
+				{
+					ClearUserData();
+					//id_login.id_password.text = "";
+				}
+				
+				//isUserLogedIn = value;
+			}
+			
+			
+			private function ClearUserData():void
+			{
+				model.userImageData = '';
+			}
+			public function get userLoggedIn():Boolean
+			{
+				return isUserLogedIn;
+			}
+			
+			
+			protected function cc(event:FlexEvent):void
+			{
+				chatManager.addEventListener( "hookVideoUI", onHookVideoUI );
+				//opentokchat.addEventListener('VideoCallEnded' ,CallEnded);
+				addEventListener('CloseAllOpenPanel', removeOpenedfromTop);
+				addEventListener('updatePateintGaxenID', onUpdatePatientGaxenIDEvent);
+			}
+			private function onUpdatePatientGaxenIDEvent(e:GeneralEvent):void
+			{
+				trace(e.value);
+				HistoryModelLocator.getInstance().PatientGaxenID = e.value.toString();
+			}
+			protected function on_topbar_mouseDown(event:MouseEvent):void
+			{
+				ChromeUtil.moveWindow();
+				id_examBar.switchToDefault();	// Switch to default state of Exam bar
+			}
+			
+			/* private function CallEnded(event:Event):void
+			{
+			
+			opentokchat.removeEventListener('incommingCall',OnIncomingCall);
+			InitComponents();
+			} */
+			
+			private function InitComponents():void
+			{
+				//Alert.show('InitComponents Called from MainContainer', 'test alert' );
+				opentokchat.Init();
+				opentokchat.addEventListener('incommingCall',OnIncomingCall);
+			} 
+			private var callTimer:Timer; 
+			private var myAlert:Alert; 
+			
+			private function OnIncomingCall(event:IncomingCallViewEvent):void
+			{
+				var oldWidth:Number 	= Alert.buttonWidth;
+				var oldYesLabel:String	= Alert.yesLabel;
+				var oldNoLabel:String	= Alert.noLabel;
+				Alert.yesLabel 			= "Accept Call";
+				Alert.noLabel 			= "Reject Call";
+				Alert.buttonWidth 		= 150;
+				
+				
+				
+				myAlert = Alert.show("Incoming Video Call from "+ event.callerName , "Call Alert!", Alert.YES|Alert.NO, this, 
+					function( event:CloseEvent):void
+					{
+						
+						if( event.detail == Alert.YES )//Alert.yesLabel="Accept Call";
+						{
+							if(id_patientMainContainer)//clear popups of Inputs
+								id_patientMainContainer.id_patientInputMain.removeInputOptionsPopup();
+							setExamBarDeafults();     // clear popups of exambar
+							if(mainViewModel.showPriacticeManagerView)
+								mainViewModel.showPriacticeManagerView = false;
+							opentokchat.AcceptCall();
+							uiPracticeManagerBar.setAllDefaults(); // de select all button into default state
+							onHookVideoUI();
+							
+						}
+							
+						else if( event.detail == Alert.NO )//Alert.noLabel="Reject Call";
+						{
+							opentokchat.RejectCall();
+						}
+						
+						//restore old AlertBox setting
+						Alert.buttonWidth = oldWidth;
+						Alert.yesLabel = oldYesLabel;
+						Alert.noLabel = oldNoLabel;
+					});
+				
+				callTimer = new Timer(50000, 1);
+				callTimer.reset();
+				callTimer.start();
+				callTimer.addEventListener(TimerEvent.TIMER_COMPLETE, removeCallAlert); 
+				
+				Alert.buttonWidth = oldWidth;
+				Alert.yesLabel = oldYesLabel;
+				Alert.noLabel = oldNoLabel;
+			}
+			
+			private function removeCallAlert(event:TimerEvent):void
+			{
+				callTimer.stop();
+				callTimer = null;
+				PopUpManager.removePopUp(myAlert);
+			}
+			
+			private function addViewFromTop(type:Class):void
+			{
+				var toggleView:Boolean = currentOpenView_fromTop is type; // same button click is a toggle effect
+				removeOpenedfromTop(); 
+				
+				if( toggleView )
+					return;
+				
+				currentOpenView_fromTop 				= new type();
+				currentOpenView_fromTop.percentWidth  	= 100;
+				currentOpenView_fromTop.percentHeight	= 100;
+				
+				currentOpenView_fromTop.y	= -1;
+				
+				currentOpenView_fromTop.addEventListener("close", function():void{removeOpenedfromTop()});
+				mainViewModel.addEventListener(MainContainerViewModel.EVENT_CLOSE_TOPBAR, function():void{removeOpenedfromTop()});
+				
+				id_TopContentArea.addElement( currentOpenView_fromTop );
+				
+				//				id_TopbarContainer.percentHeight = 92;
+				id_TopContentArea.visible = true;
+				mainViewModel.topbarExpended = true
+				
+			}
+			
+			private function removeOpenedfromTop(event:* = null):void
+			{
+				if( UtilityFunctions.IsNotNullOrEmpty( currentOpenView_fromTop ) )
+				{
+					if( id_TopContentArea.contains( currentOpenView_fromTop as DisplayObject ) )
+					{
+						removeAllConnection();
+						id_TopContentArea.removeElement( currentOpenView_fromTop );
+						currentOpenView_fromTop 	= null;
+						id_TopContentArea.visible 	= false;
+						mainViewModel.topbarExpended = false;
+						
+					}
+				}
+			}
+			
+			private function removeAllConnection():void
+			{
+				//WebsiteView
+				if (id_topbarview.id_LogoButton.selected && currentOpenView_fromTop is WebsiteView) 
+				{
+					id_topbarview.id_LogoButton.selected = false;
+				}
+				
+				//RapidAccessView
+				if (id_topbarview.id_RapidAccess.selected && currentOpenView_fromTop is RapidAccessView) 
+				{
+					id_topbarview.id_RapidAccess.selected = false;
+				}
+				
+				//CommunicationView
+				if (id_topbarview.id_Communication.selected && currentOpenView_fromTop is CommunicationView) 
+				{
+					id_topbarview.id_Communication.selected = false;
+				}
+				
+				//WebsearchView
+				if (id_topbarview.id_WebSearch.selected && currentOpenView_fromTop is WebsearchView) 
+				{
+					id_topbarview.id_WebSearch.selected = false;
+				}
+				
+				//EditProviderProfile
+			//	if (id_topbarview.id_ProfileBtn.selected && currentOpenView_fromTop is EditProviderProfile) 
+			//	{
+			//		id_topbarview.id_ProfileBtn.selected = false;
+			//	}
+				
+				setExamBarDeafults();
+				
+			}
+			
+			protected function id_topbarview_logoClickHandler(event:Event):void
+			{
+				addViewFromTop( WebsiteView );
+				setExamBarDeafults();
+			}
+			
+			
+			protected function id_topbarview_webSearchClickHandler(event:Event):void
+			{
+				addViewFromTop( WebsearchView );
+				setExamBarDeafults();
+			}
+			
+			protected function rapidAccessClickHandler(event:Event):void
+			{
+				addViewFromTop( RapidAccessView );
+				setExamBarDeafults();
+			}
+			
+			protected function communicationClickHandler(event:Event):void
+			{
+				addViewFromTop( CommunicationView );
+				setExamBarDeafults();
+			}
+			
+			protected function id_topbarview_userImageClickHandler(event:Event):void
+			{
+				addViewFromTop( EditProviderProfile );
+				setExamBarDeafults();
+			}
+			private function onHookVideoUI(event:Event = null):void
+			{
+				id_topbarview.id_Communication.selected = true;
+				var commView:CommunicationView = currentOpenView_fromTop as CommunicationView;
+				if(null == commView )
+				{
+					addViewFromTop( CommunicationView );
+					var commViewCC:Function = function(event:FlexEvent):void
+					{
+						currentOpenView_fromTop.removeEventListener( FlexEvent.CREATION_COMPLETE, commViewCC);
+						commView = currentOpenView_fromTop as CommunicationView;
+						if(null != commView )
+						{
+							commView.SelectVideoTab();
+						}
+						
+					}
+					currentOpenView_fromTop.addEventListener( FlexEvent.CREATION_COMPLETE, commViewCC);
+				}
+				else
+				{
+					commView.SelectVideoTab();
+				}
+			}
+			
+			public function set updateHeight(param:*):void
+			{
+				id_TopbarContainer.percentHeight = mainViewModel.topvarViewPercentHeight;
+				id_TopbarContainer.minHeight = mainViewModel.topbarViewMinHeight;
+				if (!mainViewModel.topbarExpended)
+				{
+					id_TopbarContainer.height = mainViewModel.topbarViewMinHeight;
+				}
+				else
+				{
+					id_TopbarContainer.minHeight = mainViewModel.topbarViewMinHeight;
+					
+					id_TopbarContainer.height = mainViewModel.topvarViewHeight;
+				}
+				
+				uiPatientHeaderAndDetail.percentHeight = mainViewModel.patientViewPercentHeight;
+				//				uiPatientHeaderAndDetail.minHeight = mainViewModel.patientViewMinHeight;
+				if (!mainViewModel.topbarExpended)
+				{
+					//					uiPatientHeaderAndDetail.height = mainViewModel.patientViewMinHeight;
+				}
+			}
+			
+			//			public function set updateHeight(param:*):void
+			//			{
+			//				id_TopbarContainer.percentHeight = mainViewModel.topvarViewPercentHeight;
+			//				id_TopbarContainer.minHeight = mainViewModel.topbarViewMinHeight;
+			//				if (!mainViewModel.topbarExpended)
+			//				{
+			//					id_TopbarContainer.height = mainViewModel.topbarViewMinHeight;
+			//				}
+			//				else
+			//				{
+			//					id_TopbarContainer.minHeight = mainViewModel.topbarViewMinHeight;
+			//				}
+			//				
+			//				uiPatientHeaderAndDetail.percentHeight = mainViewModel.patientViewPercentHeight;
+			////				uiPatientHeaderAndDetail.minHeight = mainViewModel.patientViewMinHeight;
+			//				if (!mainViewModel.topbarExpended)
+			//				{
+			////					uiPatientHeaderAndDetail.height = mainViewModel.patientViewMinHeight;
+			//				}
+			//			}
+			public function set updateDivider(param:*):void
+			{
+				//				var show_divider:Boolean = (mainViewModel.expanedViewCount==2);
+				//				for (var i:Number = 0;i<uiDividerBox.numDividers;i++)
+				//				{
+				//					uiDividerBox.getDividerAt(i).visible = show_divider;
+				////					uiDividerBox.getDividerAt(i).includeInLayout = show_divider;
+				//				}
+				////				uiDividerBox.setStyle("dividerThickness", show_divider?3:0);
+				//				uiDividerBox.setStyle("verticalGap", show_divider?6:0);
+			}
+			
+			protected function onMainContainerClick(event:MouseEvent):void
+			{
+				var inside_practice_container:Boolean = uiPracticeManagerContainer.hitTestPoint(event.stageX, event.stageY, false);
+				var inside_practice_bar:Boolean = uiPracticeManagerBar.hitTestPoint(event.stageX, event.stageY, false);
+				if (mainViewModel.showPriacticeManagerView 
+					&& !inside_practice_container
+					&& !inside_practice_bar)
+				{
+					mainViewModel.showPriacticeManagerView = false;
+					
+					uiPracticeManagerBar.onclosePriacticeManagerView();
+					event.stopImmediatePropagation();
+				}
+			}
+			
+			protected function PracticeManagerClickEventHandler(event:PracticeManagerClickEvent):void
+			{
+				setExamBarDeafults();
+				
+				uiPracticeManagerContainer.id_header.id_selectedView.text = event.selected_Section;
+				uiPracticeManagerContainer.id_header.id_selectedView.toolTip = event.selected_Section;
+				
+				switch(event.selected_Section)
+				{
+					case Constants.SCHEDULAR_SECTION:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 0;
+						break;
+					case Constants.EPRESCRIPTION_SECTION:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 1;
+						break;
+					case Constants.ELAB_SECTION:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 2;
+						break;
+					case Constants.DMG_SECTION:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 3;
+						break;
+					case Constants.BILLING_SECTION:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 4;
+						break;
+					case Constants.DISEASE_MANAGEMENT:
+						uiPracticeManagerContainer.id_Views.selectedIndex = 5;
+						break;
+				}
+			}
+			
+			protected function practiceManagerContainer_clickHandler(event:MouseEvent):void
+			{
+				setExamBarDeafults();
+			}
+			//Set the Exambar To its Default State
+			public function setExamBarDeafults():void
+			{
+				id_examBar.switchToDefault();	// Switch to default state of Exam bar
+			}
+			//TA -- 7 oct, 2013
+			// This function loops through all Quick Input section and clear the Input Form & set into default.
+			protected function ClearInputFormEventHandler(event:Event):void
+			{
+				id_patientMainContainer.id_patientInputMain.clearInputForms();	
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingRight="3" paddingLeft="3" paddingBottom="3" paddingTop="3" gap="3"/>
+	</s:layout>
+	
+	<fx:Binding source="{mainViewModel.topvarViewPercentHeight}" destination="updateHeight"/>
+	<fx:Binding source="model.isUserLoginSuccessfully" destination="userLoggedIn" twoWay="true" /> 
+	<fx:Binding source="{mainViewModel.patientViewPercentHeight}" destination="updateHeight"/>
+	<fx:Binding source="{mainViewModel.expanedViewCount}" destination="updateDivider"/>
+
+	<s:VGroup id="uiDividerBox" gap="4" width="100%" height="100%" 	>
+		<s:BorderContainer id="id_TopbarContainer" 
+						   borderAlpha="{showDebugBorders?1:0}" backgroundAlpha="{showDebugBorders?1:0}" 
+						   borderVisible="{showDebugBorders}" borderColor="0xff0000"
+						   width="100%" 
+						   minHeight="66"
+						   >
+			<s:layout>
+				<s:VerticalLayout  gap="0"/>
+			</s:layout>
+			<topbar:TopbarView id="id_topbarview"
+							   width="100%" height="68"
+							   userImageClick="id_topbarview_userImageClickHandler(event)"
+							   logoClick="id_topbarview_logoClickHandler(event)"
+							   rapidAccessClick="rapidAccessClickHandler(event)"
+							   communicationClick="communicationClickHandler(event)"
+							   webSearchClick="id_topbarview_webSearchClickHandler(event)"
+							   mouseDown="on_topbar_mouseDown(event)"  
+							   skinClass="com.gazuntite.skins.controls.container.TopbarBGSkin"
+							   />
+			<s:BorderContainer id="id_TopContentArea" 
+							   width="100%" height="100%" styleName="mainView"
+							   visible="false" includeInLayout="{id_TopContentArea.visible}" 
+							   />
+		</s:BorderContainer>
+		
+		<s:VGroup id="uiPatientHeaderAndDetail"
+				  width="100%"  gap="4"	  minHeight="{mainViewModel.patientViewMinHeightPreferred}"
+				  >
+			<exambar:Exambar id="id_examBar" 
+							 width="100%" 
+							 ExambarAnyClick="setExamBarDeafults();"
+							 ClearInputFormEvent="ClearInputFormEventHandler(event)"
+							 />	
+				<exambar:PatientMainContainer id="id_patientMainContainer"	  width="100%"  height="100%" />
+		</s:VGroup>
+	</s:VGroup>
+	
+	<s:Rect height="100%"	visible="{mainViewModel.showBottomFiller}" includeInLayout="{mainViewModel.showBottomFiller}" />
+	<practicemanager:PracticeManagerViewExpanded id="uiPracticeManagerContainer"
+												 visible="{mainViewModel.showPriacticeManagerView}"
+												 includeInLayout="false" y="120" x="3" 
+												 height="{this.height-uiPracticeManagerContainer.y-uiPracticeManagerBar.height}"
+												 width="{this.width-uiPracticeManagerContainer.x*2}" 
+												 click="practiceManagerContainer_clickHandler(event)"
+												 />
+	<practicemanager:PracticeManagerView id="uiPracticeManagerBar" 
+										 width="100%"  PracticeManagerClickEvent="PracticeManagerClickEventHandler(event)" 
+										 click="practiceManagerContainer_clickHandler(event)"
+										 />
+</s:SkinnableContainer>

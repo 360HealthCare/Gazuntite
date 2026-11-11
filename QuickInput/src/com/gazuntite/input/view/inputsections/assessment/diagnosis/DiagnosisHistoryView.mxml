@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:diagnosis="com.gazuntite.input.view.components.patient.itemrenderer.diagnosis.*" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*" 
+					  xmlns:component="com.gazuntite.view.patient.component.*"
+					  xmlns:dictation="com.gazuntite.components.dictation.*" 
+					  xmlns:skins="com.gazuntite.input.view.skins.*"
+					  >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.input.model.QIModelLocator;
+			import com.gazuntite.input.utils.QIConstants;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]	private var model:QIModelLocator = QIModelLocator.getInstance();
+			[Bindable]	private var viewModel:PatientInputAssessmentDiagnosisViewModel = PatientInputAssessmentDiagnosisViewModel.getInstance();
+			[Bindable]	public var NavItems:ArrayCollection;
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingBottom="5"/>
+	</s:layout>
+	
+	<skins:PatientSubViewTitleBar width="100%" label="DIAGNOSIS"  maxSectionCounter="3"   sectionNumber="1" showHistoryPart="true"
+								  PrevSectionLabel=""
+								  NextSectionLabel="Treatment"
+								  NavItems="{NavItems}"
+								  MainSectionLabel="Assessment"
+									  dictationNoteViewModel="{viewModel.dictationNoteHistoryViewModel}"/>
+	
+	<dictation2:PatientDictationNoteHistoryView width="100%" viewModel="{viewModel.dictationNoteHistoryViewModel}"
+											   dictationNoteDataProvider="{model.diagosisDictationNoteHistoryDTOList}"/>
+	
+	<s:VGroup width="100%" height="100%" gap="-5" paddingTop="10" paddingLeft="2" paddingRight="2" horizontalAlign="center">
+		
+		<s:ButtonBar dataProvider="{uiViewStack}" 
+					 labelField="id" 
+					 skinClass="com.gazuntite.skins.controls.buttonBar.BlackBtnBar">
+			<s:layout>
+				<s:ButtonBarHorizontalLayout gap="2" />
+			</s:layout>
+		</s:ButtonBar>
+		
+		<s:Scroller width="100%" height="100%" 
+					horizontalScrollPolicy="off" verticalScrollPolicy="auto" skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin">
+			<s:Group width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout gap="0" />
+				</s:layout>
+				
+				<s:BorderContainer id="id_skin" height="100%" width="100%"  borderColor="0x000000" borderWeight="3">
+					<s:layout>
+						<s:VerticalLayout  horizontalAlign="center" verticalAlign="top" paddingBottom="4" paddingLeft="4" paddingRight="4" paddingTop="2"/>
+					</s:layout>
+					<components:LabelViewStack id="uiViewStack" width="100%" height="100%" backgroundAlpha="0" borderVisible="false">
+						<s:ArrayList>
+							<diagnosis:DiagnosisHistoryListView id="Acute" width="100%" height="100%" 
+																diagnosisCollection="{model.diagnosisDTOAcuteHistoryList}"
+																sectionName="{QIConstants.ACUTE_DIAGNOSIS_HISTORY}"/>
+							<diagnosis:DiagnosisHistoryListView id="Chronic" width="100%" height="100%" 
+																diagnosisCollection="{model.diagnosisDTOChronicHistoryList}"
+																sectionName="{QIConstants.CHRONIC_DIAGNOSIS_HISTORY}"/>
+							<diagnosis:DiagnosisHistoryListView id="Resolved" width="100%" height="100%"
+																sectionName="{QIConstants.RESOLVED_DIAGNOSIS_HISTORY}"/>
+							<!--diagnosisCollection="{model.diagnosisDTOResolvedHistoryList}"-->
+						</s:ArrayList>
+					</components:LabelViewStack>
+				</s:BorderContainer>
+			</s:Group>
+		</s:Scroller>
+	</s:VGroup>
+</s:SkinnableContainer>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						  xmlns:s="library://ns.adobe.com/flex/spark" 
+						  xmlns:mx="library://ns.adobe.com/flex/mx" 
+						  focusEnabled="true">
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.provider.live.services.elab.view.event.ElabActionEvent;
+			
+					
+			private function onEnterResultClick(event:MouseEvent):void	
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_RESULT_ENTER_CLICK));
+			}
+
+			private function onViewResultClick(event:MouseEvent):void
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_RESULT_VIEW_CLICK));
+				
+			}
+			
+			private function onViewAttachementClick(event:MouseEvent):void
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.ELAB_RESULT_VIEW_ATTACHMENT_CLICK));
+			}
+			
+			/* private function onEditClick(event:MouseEvent):void	
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.EDIT_RECORD_CLICK));
+			}
+			
+			private function onSaveClick(event:MouseEvent):void	
+			{
+				dispatchEvent(new ElabActionEvent(ElabActionEvent.SAVE_RECORD_CLICK));
+			} */
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+	</s:layout>
+	
+	<s:Button id="id_EnterResult" click="onEnterResultClick(event)" label="Enter Result"   toolTip="Enter Result" buttonMode="true"
+			 skinClass="com.gazuntite.skins.controls.button.enterResultButton" width="100"
+			   enabled="{!data.ResultAvailable}"/>
+	<!--visible="{! data.ResultAvailable}" includeInLayout="{! data.ResultAvailable}"-->
+
+	<s:Button id="id_ViewAttachement" width="15" height="15" buttonMode="true"
+			  click="onViewAttachementClick(event)" enabled="{data.AttachmentAvailable}"
+			  toolTip="View Attachement" skinClass="com.gazuntite.skins.controls.button.attachmentViewButton"/>
+	
+	<s:Button id="id_ViewResult" label="ViewR" buttonMode="true" click="onViewResultClick(event)"
+			  enabled="{data.ResultAvailable}"
+			  skinClass="com.gazuntite.skins.controls.button.viewBtnIcon"
+			  toolTip="View Result"/>
+	
+	
+	<!--<s:Button id="id_Other" width="45" click="onSaveClick(event)" label="Save" toolTip="Save" buttonMode="true" styleName="blackButtonSkin" 
+			  visible="false" includeInLayout="{id_Save.visible}"/>-->
+</s:MXDataGridItemRenderer>

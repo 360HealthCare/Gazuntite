@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*" 				
+				xmlns:procedure="com.gazuntite.provider.live.services.billing.superBill.view.procedure.*" 
+				autoDrawBackground="false"
+				width="100%" 
+				initialize="init()" 
+				>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.typeDTO.CPTMedicalTypeDTO;
+			import com.gazuntite.provider.live.services.billing.superBill.dto.SuperBillProcedureInfoDTO;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			
+			[Bindable]	private var procedureDTO:SuperBillProcedureInfoDTO;
+			
+			[Bindable]	private var selectedProcedure:CPTMedicalTypeDTO;
+			
+			[Bindable]	public var inEditMode:Boolean = false;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				procedureDTO = data as SuperBillProcedureInfoDTO;
+				
+				selectedProcedure =new CPTMedicalTypeDTO();
+				
+				selectedProcedure.CPTMedicalTypeID = procedureDTO.CPTMedicalTypeID;
+				selectedProcedure.ProcedureCode = procedureDTO.ProcedureCode;
+				selectedProcedure.ProcedureDescription = procedureDTO.ProcedureDescription;
+				
+				invalidateDisplayList();
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function init():void
+			{
+				removeGlow();
+			}
+			
+			private function toggleEditView():void
+			{
+		//		inEditMode = !inEditMode;
+				
+				if(inEditMode)
+				{
+					applyGlow();			
+				}
+				else
+				{
+					removeGlow();
+				}
+				
+			}
+			
+			private function applyGlow():void
+			{
+			//	glow1.alpha = 1;
+			//	glowAnimation.play();
+			}
+			public function removeGlow():void
+			{
+				glowAnimation.play(null, true);
+				glow1.alpha = 0;
+			}
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!procedureDTO)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{					
+					/* procedureDTO.IsDeleted = true;
+					
+					var ev:SuperBillProcedureEvent = new SuperBillProcedureEvent(
+					SuperBillProcedureEvent.SUPER_BILL_PROCEDURE_DELETE_EVENT, true);
+					
+					ev.procedureDTO = procedureDTO;
+					
+					dispatchEvent(ev); */
+				});
+				
+				event.stopPropagation();
+			}
+			
+			private function showGlow():void
+			{
+				if (Boolean(procedureDTO.IsCreatedFromSuperBill))
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>	
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="0" blurY="0" alpha="0" color="#EA8033" strength="4" inner="true"/>
+	</s:filters>
+	
+	<s:SkinnableContainer id="id_Header" 
+						  width="100%" height="30" buttonMode="true" toolTip="Open/Close Details" click="toggleEditView()">
+		<s:HGroup width="100%" height="100%" verticalAlign="middle" horizontalAlign="left"  paddingLeft="8"  >
+			
+			<s:Label id="procCode" text="{procedureDTO.ProcedureCode}" width="10%"  color="#333333" fontFamily="CalibriCFF"	 
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1" toolTip="{'Code: ' + procedureDTO.ProcedureCode}" />
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			<s:Label id="procDesc" text="{procedureDTO.ProcedureDescription}"  width="50%" color="#333333" fontFamily="CalibriCFF"	
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1" toolTip="{'Description: ' + procedureDTO.ProcedureDescription}"/>
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			<s:Label id="procUnit" text="{procedureDTO.Unit}"  width="15%" color="#333333" fontFamily="CalibriCFF"	 
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1" toolTip="{'Units: ' + procedureDTO.Unit}"/>
+			<s:Line height="100%" >
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			<s:Label id="procFee" text="{procedureDTO.Fee}"  width="15%" color="#333333" fontFamily="CalibriCFF"	 
+					 fontSize="14" showTruncationTip="true" maxDisplayedLines="1" toolTip="{'Proc. Charge: ' + procedureDTO.Fee}"/>
+			<s:Line height="100%" visible="false" includeInLayout="false">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#4B4B4B" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:HGroup width="10%" height="100%" verticalAlign="middle" horizontalAlign="center" visible="false" includeInLayout="false">
+				
+				<s:Button id="id_btnEdit"						
+						  buttonMode="true" toolTip="Edit"
+						  skinClass="com.gazuntite.skins.controls.button.eLab.EditRecordButton"
+						  includeInLayout="{id_btnEdit.visible}"
+						  />			
+				<s:Button right="4" top="8"
+						  skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin" 
+						  buttonMode="true" useHandCursor="true" toolTip="Delete Procedure"
+						  click="deleteClickHandler(event)"/>
+			</s:HGroup>	
+		</s:HGroup>
+		
+			
+	</s:SkinnableContainer>
+	
+	<s:Group id="gp" width="{id_Header.width - 5}" top="30"  visible="{inEditMode}" includeInLayout="{inEditMode}" >
+		<s:layout>
+			<s:VerticalLayout gap="-4" paddingBottom="3" paddingLeft="10" paddingRight="3" paddingTop="4"  />
+		</s:layout>
+		<procedure:SuperBillProcedureInputView width="100%" isInItemRenderer="true" visible="{inEditMode}" includeInLayout="{inEditMode}" 
+											   selectedProcedure="{selectedProcedure}" procedureDTO="{procedureDTO}" showInputView="true" />
+	</s:Group>
+	
+</s:ItemRenderer>

@@ -1,0 +1,487 @@
+<ImmunizationTypesResponse xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.QuickInput.PMH.Immunization" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ImmunzationTypeList xmlns:a="http://schemas.datacontract.org/2004/07/Quivus.Model.TypeDTOs">
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>45</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>13-valent</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>44</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>7-Valent</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>20</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Adenovirus</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>21</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Adenovirus vaccine, type 7</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>22</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Anthrax</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>24</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Bacillus Calmette-Guerin vaccine (BCG) for bladder cancer
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>83</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>BCG vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>3</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Botulinum antitoxin, equine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>4</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Botulism immune globulin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>25</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Cholera vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>80</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Cholera vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>5</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Cytomegalovirus immune globulin (CMV-IGIV)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>75</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Diphteria Toxoid</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>6</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Diphtheria antitoxin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>66</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Diphtheria, tetanus toxoids, and pertussis (DTP)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>56</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, Tetanus, Accellular Pertussis and Hemophilus Influenza B (Hib) (DTaP-Hib)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>55</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, Tetanus, Acellular Pertussis, and Inactivated Poliovirus (DTaP-IPV)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>77</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, Tetanus, Acellular Pertussis, Haemophilus Influenza Type B, and Inactivated Poliovirus (DTaP-Hib-IPV)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>54</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, Tetanus, Acellular Pertussis, Hepatitis B, and Inactivated Poliovirus (DTaP-HepB-IPV)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>78</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, tetanus, and Acellular Pertussis (TdaP)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>57</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Diphtheria, tetanus, Whole Cell Pertussis and Hemophilus Influenza B (Hib) (DTP-Hib)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>58</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Diptheria, Tetanus, Accellular Pertussis (DTaP)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>76</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Encephalitis, Japanese</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>109</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>H1N1</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>19</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>H1N1 immunization administration</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>97</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hemophilus Influenza B</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>91</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hemophilus influenza B</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>30</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hemophilus influenza b vaccine (Hib), HbOC conjugate
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>31</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hemophilus influenza b vaccine (Hib), PRP-D conjugate
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>32</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hemophilus influenza b vaccine (Hib), PRP-OMP conjugate
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>33</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hemophilus influenza b vaccine (Hib), PRP-T conjugate
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>26</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis A</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>29</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis A and Hepatitis B</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>84</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis A vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>27</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hepatitis A vaccine, pediatric/adolescent dosage-2 dose schedule
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>28</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hepatitis A vaccine, pediatric/adolescent dosage-3 dose schedule
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>93</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>100</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B and Hemophilus Influenza B (HepB-Hib)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>7</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B immune globulin (HBIG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>85</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>96</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B vaccine, adolescent (2 dose schedule)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>98</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Hepatitis B vaccine, adolescent/high risk infant dosage
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>99</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Hepatitis B vaccine, adult dosage</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>101</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Human Papilloma Virus (HPV)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>35</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Human Papilloma virus (HPV) vaccine, types 16, 18</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>1</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Immune globulin (IG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>2</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Immune globulin (IGIV)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>94</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Immunization, passive; immune serum globulin, human (ISG)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>95</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Immunization, passive; specific hyperimmune serum globulin
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>34</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Influenza</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>79</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Influenza virus vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>36</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Influenza virus vaccine, for children 6-35 months</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>37</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Influenza virus vaccine, for use in individuals 3 years of age and above
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>41</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Influenza virus vaccine, live</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>42</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Influenza virus vaccine, pandemic formulation, H1N1
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>38</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Influenza virus vaccine, split virus, for children 6-35 months of age
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>39</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Influenza virus vaccine, split virus, for use in individuals 3 years of age and above
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>40</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Influenza virus vaccine, whole virus</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>92</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Japanese encephalitis virus vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>89</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Japanese encephalitis virus vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>43</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Lyme Disease</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>61</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Measles</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>64</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Measles and Rubella</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>63</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Measles, Mumps and Rubella (MMR)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>65</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Meningococcal</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>88</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Meningococcal conjugate vaccine, serogroups A, C, Y and W-135
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>87</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Meningococcal Conjugate, Serogroups C and Y, Hemophilus Influenza B (Hib-MenCY)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>111</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Mumps</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>60</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Mumps virus vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>110</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Pandemic</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>82</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Plague</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>67</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Poliovirus, Live</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>86</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Polysaccharide 23-valent</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>46</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rabies</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>9</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rabies immune globulin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>8</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rabies immune globulin (RIG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>81</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rabies vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>47</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rabies vaccine, for intradermal use</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>10</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Respiratory syncytial virus immune globulin (RSV-IgIM)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>11</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Respiratory syncytial virus immune globulin (RSV-IGIV)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>12</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rho(D) immune globulin (RhIG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>13</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rho(D) immune globulin (RhIG), human, mini-dose</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>14</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rho(D) immune globulin (RhIGIV)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>48</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rotavirus</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>49</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Rotavirus vaccine, human, attenuated, 2 dose schedule
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>62</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Rubella</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>68</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Subcutaneous</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>69</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Tetanus and Diphtheria</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>74</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Tetanus and diphtheria toxoids (Td)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>15</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Tetanus immune globulin (TIG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>59</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Tetanus Toxoid</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>71</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Tetanus, Diphtheria, and Acellular Pertussis (TdaP)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>23</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Tuberculosis (BCG)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>50</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Typhoid</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>70</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Typhoid vaccine</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>53</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Typhoid vaccine, acetone-killed, dried (AKD)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>52</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Typhoid vaccine, heat- and phenol-inactivated (H-P)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>51</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>
+Typhoid vaccine, Vi capsular polysaccharide (ViCPs)
+</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>18</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Unlisted immune globulin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>102</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Unlisted Vaccine/Toxoid</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>16</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Vaccinia immune globulin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>17</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Varicella-zoster immune globulin</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>72</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Vericella (Chicken Pox)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>73</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Yellow Fever</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+<a:ImmunizationTypeDTO>
+<a:ImmunizationTypeId>90</a:ImmunizationTypeId>
+<a:ImmunizationTypeName>Zoster (Shingles)</a:ImmunizationTypeName>
+</a:ImmunizationTypeDTO>
+</ImmunzationTypeList>
+</ImmunizationTypesResponse>
+

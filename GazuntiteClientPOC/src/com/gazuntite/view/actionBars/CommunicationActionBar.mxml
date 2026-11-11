@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:sf="http://www.spicefactory.org/parsley" 
+					  width="100%" 
+					  height.normal="130" 
+					  height.down="430"
+					  height.full="700"
+					  height.patientSearch="540"
+					  creationComplete="init(event)"
+					  backgroundColor="0x000000"
+					  xmlns:controls="com.gazuntite.view.controls.*" 
+					  xmlns:ns="library://ns.tink.ws/flex/spark" 
+					  xmlns:communication="com.gazuntite.view.communication.*" 
+					  xmlns:ipe="com.gazuntite.components.controls.ipe.*" 
+					  xmlns:components="com.gazuntite.components.*" 
+					  xmlns:callouts="com.gazuntite.view.controls.callouts.*">
+	
+	<fx:Metadata>
+		[ManagedEvents("endChatEvent")]
+		[ManagedEvents("commOpen")]
+		
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.events.CommOpenEvent;
+			import com.gazuntite.events.EndChatEvent;
+			import com.gazuntite.events.IPESelectionEvent;
+			import com.gazuntite.model.SharedModel;
+			import com.gazuntite.view.communication.CommunicationView;
+			import com.gazuntite.view.communication.RapidAccessView;
+			import com.gazuntite.view.communication.SearchView;
+			import com.gazuntite.view.communication.site.WebsiteView;
+			import com.zigron.provider.eprescription.services.patient.view.EditProfileView;
+			
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			import spark.components.ButtonBar;
+			import spark.events.IndexChangeEvent;
+			
+			import ws.tink.spark.controls.BorderDataNavigator;
+			import ws.tink.spark.skins.controls.BorderDataNavigatorSkin;
+			
+			[Bindable]
+			protected var _labelText:String;
+			
+			[Bindable]
+			protected var open:Boolean = false;
+			
+			protected var vs:BorderDataNavigator;
+			
+			protected var selectedIndex:int = -1;
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var sharedModel:SharedModel = new SharedModel();
+			
+			public function get labelText():String
+			{
+				return _labelText;
+			}
+			
+			public function set labelText(value:String):void
+			{
+				_labelText = value;
+			}
+			
+			protected function init(event:FlexEvent):void
+			{
+				
+			}
+			
+			protected function handleOpenEffectEnd(event:EffectEvent):void
+			{
+				createSubviews();
+			}
+			
+			protected function createSubviews():void
+			{
+				vs.addItem(new WebsiteView());
+				vs.addItem(new RapidAccessView());
+				vs.addItem(new CommunicationView());
+				vs.addItem(new SearchView());
+				vs.addItem(new EditProfileView());
+				
+				setHudView();
+			}
+			
+			protected function setHudView():void
+			{
+				// set correct view
+				if(selectedIndex == -1)
+				{
+					// if selectedIndex is not set, use the tabBar's selected index + 1 to compensate for views with no tabBar buttons
+					vs.selectedIndex = tabBar.selectedIndex + 1;
+				}else
+				{
+					// if it is set, the click event must have come from the logo or editProfile button
+					tabBar.selectedIndex = -1;
+					vs.selectedIndex = selectedIndex;
+				}
+				
+				if(selectedIndex == 0)
+				{
+					sharedModel.logoWebsiteVisible = true;
+					sharedModel.editProfileBGVisible = false;
+				}
+				if(selectedIndex == 4)
+				{
+					sharedModel.logoWebsiteVisible = false;
+					sharedModel.editProfileBGVisible = true;
+				}
+				
+				checkState();
+				
+				// reset selectedIndex
+				selectedIndex = -1;
+			}
+			
+			protected function resetTabBarButtons():void
+			{
+				sharedModel.logoWebsiteVisible = false;
+				sharedModel.editProfileBGVisible = false;
+			}
+			
+			protected function tabbar1_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				//trace(event.oldIndex + " : " + event.newIndex);
+				//trace(tabBar.selectedIndex);
+				
+				resetTabBarButtons();
+				
+				var e:CommOpenEvent = new CommOpenEvent(CommOpenEvent.COMM_OPEN);
+				
+				if(event.newIndex < 0)
+				{
+					open = false;
+					
+					var ece:EndChatEvent = new EndChatEvent(EndChatEvent.END_CHAT_EVENT);
+					dispatchEvent(ece);
+					
+					sharedModel.videoOn = false;
+					
+					// must have toggled button to close
+					hudGroup.removeElement(vs);
+					//vs = null;
+					this.currentState = "normal";
+					
+					e.isOpen = false;
+					dispatchEvent(e);
+					
+					return;
+				}
+				
+				if(!open)
+				{
+					
+					open = true;
+					
+					checkState();
+					
+					e.isOpen = true;
+					dispatchEvent(e);
+					
+					vs = new BorderDataNavigator();
+					vs.setStyle("skinClass", ws.tink.spark.skins.controls.BorderDataNavigatorSkin);
+					
+					vs.percentHeight = 100;
+					vs.percentWidth = 100;
+					
+					hudGroup.addElement(vs);
+					
+				}
+				else
+				{
+					if(vs != null)
+					{
+						//vs.selectedIndex = tabBar.selectedIndex;
+						setHudView();
+					}
+				}
+				
+			}
+			
+			protected function checkState():void
+			{
+				if(selectedIndex == 0)
+				{
+					this.currentState = "full";
+				}else
+				{
+					this.currentState = "down";
+				}
+			}
+			
+			private function handleHudClick(index:int):void
+			{
+				var e:IndexChangeEvent = new IndexChangeEvent(IndexChangeEvent.CHANGE);
+				e.newIndex = index;
+				
+				selectedIndex = index;
+				
+				tabbar1_changeHandler(e);
+			}
+			
+			protected function handleIPESelection(event:IPESelectionEvent):void
+			{
+				sharedModel.doctorAddress = event.selection;
+			}
+			
+			protected function showDoctorsAddress(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				sharedModel.doctorSearchVisible = true;
+			}
+			
+			protected function showDoctorStatus(event:MouseEvent):void
+			{
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				sharedModel.doctorStatusVisible = true;
+			}
+			
+			protected function image1_clickHandler(event:MouseEvent):void
+			{
+				if(this.currentState == "patientSearch")
+				{
+					this.currentState = "normal";
+				}else
+				{
+					this.currentState = 'patientSearch';
+					//tabBar.selectedIndex = -1;
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<sf:Configure/>
+		<sf:FastInject property="sharedModel" type="{SharedModel}"/>
+	</fx:Declarations>
+	
+	<s:transitions>
+		<s:Transition fromState="*" toState="down">
+			<s:Parallel duration="200" effectEnd="handleOpenEffectEnd(event)">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="*" toState="normal">
+			<s:Parallel duration="250">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="*" toState="full">
+			<s:Parallel duration="200">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="*" toState="patientSearch">
+			<s:Parallel duration="300">
+				<s:Resize target="{this}"/>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="down" />
+		<s:State name="full"/>
+		<s:State name="patientSearch"/>
+		<s:State name="disabled" />
+	</s:states>
+	
+	<s:layout>
+		<s:VerticalLayout gap="-2"/>
+	</s:layout>
+	
+	<s:Group width="100%">
+		
+		
+		<s:Image source="assets/logoSelected.png"
+				 x="6" width="100"
+				 visible="{sharedModel.logoWebsiteVisible}"
+				 includeInLayout="{sharedModel.logoWebsiteVisible}"/>
+		
+		<!-- Main header -->
+		<s:HGroup width="100%"
+				  y="0"
+				  gap="-15"
+				  verticalAlign="middle">
+			
+			<!--<s:HGroup verticalAlign="middle" 
+					  horizontalAlign="left" 
+					  width="100%"
+					  paddingLeft="5">
+				-->
+				<!--<s:HGroup width="100%" gap="1">-->
+				<s:Image source="assets/shield-gazuntite.png"
+						 scaleMode="letterbox"
+						 click="handleHudClick(0)"/>
+			<s:VGroup>
+				
+			
+			 <s:Label text="GAZUNTITE" 
+					 styleName="gazuntiteTitle"/>
+				<s:Label id="lblVersion" 
+						 styleName="versionLabel"
+						 text="{sharedModel.versionNumber}"/>
+			</s:VGroup>
+				<!--</s:HGroup>-->
+					
+					
+				
+			<!--</s:HGroup>-->
+			
+			
+			<!-- Doctor address search -->
+			<s:VGroup horizontalAlign="center" width="100%">
+				
+				<s:SkinnableContainer skinClass="com.gazuntite.skins.ActionBarSkin" 
+									  width="210" height="22">
+					
+					<s:Label id="actionBarTitle"
+							 text="{sharedModel.doctorName.toUpperCase()}" 
+							 styleName="drName"
+							 horizontalCenter="0"
+							 verticalCenter="0"/>
+					
+					<s:Button skinClass="com.gazuntite.skins.BlackArrowSmallSkin"
+							  right="4" verticalCenter="0"
+							  visible="{!sharedModel.doctorSearchVisible}"
+							  includeInLayout="{!sharedModel.doctorSearchVisible}"
+							  click="showDoctorsAddress(event)"/>
+					
+					<s:Button skinClass="com.gazuntite.skins.BlackArrowSmallInsetSkin"
+							  right="4" verticalCenter="0"
+							  visible="{sharedModel.doctorSearchVisible}"
+							  includeInLayout="{sharedModel.doctorSearchVisible}"
+							  click="showDoctorsAddress(event)"/>
+					
+				</s:SkinnableContainer>
+				
+				<s:Label text="{sharedModel.doctorAddress}"
+						 styleName="gazuntiteTitleSmall"/>
+				
+				<s:ButtonBar skinClass="com.gazuntite.skins.CommButtonBarSkin"
+							 id="tabBar"
+							 width="180"
+							 chromeColor="0x000000"
+							 labelField="label"
+							 selectedIndex="-1"
+							 change="tabbar1_changeHandler(event)">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Rapid Access" 
+									   icon="@Embed('assets/rapidAccessIcon.png')"
+									   iconSelected="@Embed('assets/rapidAccessIconSelected.png')"/>
+							<fx:Object label="Patient Profile" 
+									   icon="@Embed('assets/patientProfileIcon.png')"
+									   iconSelected="@Embed('assets/patientProfileIconSelected.png')"/>
+							<fx:Object label="Search" 
+									   icon="@Embed('assets/searchIcon.png')"
+									   iconSelected="@Embed('assets/searchIconSelected.png')"/>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:ButtonBar>
+				
+			</s:VGroup>
+			
+			
+			<!-- Profile & status -->
+			<s:Group height="100%" 
+					 width="100%">
+				
+				<s:BorderContainer bottom="-1"
+								   right="45"
+								   borderColor="0x369dc7"
+								   borderWeight="6"
+								   visible="{sharedModel.editProfileBGVisible}"
+								   includeInLayout="{sharedModel.editProfileBGVisible}">
+					
+					<s:Image source="assets/doctorProfilePic.png"
+							 click="handleHudClick(4)"/>
+					
+				</s:BorderContainer>
+				
+				<s:Image source="assets/doctorProfilePic.png"
+						 bottom="5"
+						 click="handleHudClick(4)"
+						 right="50"
+						 visible="{!sharedModel.editProfileBGVisible}"
+						 includeInLayout="{!sharedModel.editProfileBGVisible}"/>
+				
+				<s:Image source="{sharedModel.doctorStatusImg}"
+						 click="showDoctorStatus(event)"
+						 right="10"
+						 bottom="5"/>
+				
+				
+				
+			</s:Group>
+			
+		</s:HGroup>
+	</s:Group>
+	
+	<s:BorderContainer id="hudGroup" 
+					   width="100%" 
+					   height="100%" 
+					   includeIn="down, full"
+					   borderColor="0x369dc7"
+					   borderWeight="6">
+		
+	</s:BorderContainer>
+	
+	
+	<!-- Gray HUD bar -->
+	<s:SkinnableContainer id="grayHUD" 
+						  width="100%" 
+						  height="52"
+						  height.patientSearch="300"
+						  skinClass="com.gazuntite.skins.GrayBarSkin"
+						  bottom="0">
+		
+		<s:Image source="assets/patientProfilePic.png"
+				 horizontalCenter="-160"/>
+		
+		<s:SkinnableContainer skinClass="com.gazuntite.skins.ActionBarSkin" 
+							  width="270" 
+							  height="24"
+							  x="185"
+							  top="1" horizontalCenter="0">
+			
+			<s:Label text="{sharedModel.patientName}" 
+					 styleName="drName"
+					 paddingLeft="10"
+					 verticalCenter="0"/>
+			
+			<s:Image source="assets/blackArrowBtn-small.png"
+					 right="5"
+					 verticalCenter="0"
+					 click="image1_clickHandler(event)"/>
+			
+		</s:SkinnableContainer>
+		
+		<s:Image source="assets/blackArrowBtn-small.png"
+				 right="5" bottom="5"/>
+		
+		<!-- Input Tabs -->
+		<s:HGroup horizontalCenter="0" 
+				  bottom="0"
+				  gap="-3"
+				  verticalAlign="bottom">
+			
+			<s:Spacer width="13"/>
+			
+			<s:Image source="assets/profileArrowBtn_disabled.png"/>
+			
+			<s:Image source="assets/historyArrowBtn_disabled.png"/>
+			
+			<s:Image source="assets/inputArrowBtn_disabled.png"/>
+		</s:HGroup>
+		
+		
+		
+	</s:SkinnableContainer>
+	
+</s:SkinnableContainer>

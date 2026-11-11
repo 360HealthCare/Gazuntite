@@ -1,0 +1,18 @@
+<ImmunizationAutoCompleteResponse xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse.QuickInput.PMH.Immunization" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<ErrorCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ErrorDetails xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseCode xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">0</ResponseCode>
+<ResponseMessage xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<ResponseStatus xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse">true</ResponseStatus>
+<ResponseWarning xmlns="http://schemas.datacontract.org/2004/07/QuivusManager.ServiceResponse.ServiceCustomResponse" i:nil="true"/>
+<AutoCompleteList xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+<a:string>
+series Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque mattis quam at turpis consequat ac venenatis velit bibendum.
+</a:string>
+<a:string>series 1</a:string>
+<a:string>series 2</a:string>
+<a:string>series 3</a:string>
+<a:string>series 4</a:string>
+<a:string>series 5</a:string>
+</AutoCompleteList>
+</ImmunizationAutoCompleteResponse>

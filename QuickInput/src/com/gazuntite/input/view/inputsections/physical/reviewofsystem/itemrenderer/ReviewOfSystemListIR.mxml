@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:components="com.gazuntite.components.*"
+				xmlns:dictation="com.gazuntite.components.dictation.*"
+				xmlns:dictation1="com.gazuntite.dictation.view.dictation.*" 
+				xmlns:itemrenderer="com.gazuntite.input.view.inputsections.physical.reviewofsystem.itemrenderer.*" 
+				autoDrawBackground="false" width="100%" 
+				creationComplete="cc(event)" 
+				>
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.physical.ros.ROSPhysicalBaseDTO;
+			import com.gazuntite.common.util.QSConstants;
+			import com.gazuntite.common.view.events.GeneralEvent;
+			import com.gazuntite.controls.calendar.views.NullCalendarDescriptor;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationRedButtonSkin;
+			import com.gazuntite.skins.controls.list.GeneralListAlternateItemSkin;
+			import com.gazuntite.skins.controls.list.GeneralListItemSkin;
+			import com.gazuntite.utils.UtilityFunctions;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			[Bindable]	private var dto:ROSPhysicalBaseDTO;
+			private var _Headerlabell:String;
+			
+			[Bindable]
+			public function get Headerlabel():String
+			{
+				return _Headerlabell;
+			}
+			
+			public function set Headerlabel(value:String):void
+			{
+				_Headerlabell = value;
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				dto = data as ROSPhysicalBaseDTO;
+				if(null != dto)
+				{
+					if(dto.MainCategoryName == 'HEENT')
+						Headerlabel = dto.SubCategoryName +' : ' +dto.SubLevel3CategoryName;
+					else
+						Headerlabel = dto.MainCategoryName +' : ' +dto.SubCategoryName;
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number,  unscaledHeight:Number):void 
+			{
+				id_Header.setStyle('skinClass', itemIndex % 2 ? GeneralListAlternateItemSkin : GeneralListItemSkin);
+				if(itemIndex == 0)
+					id_layout.paddingTop = 3;
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
+			private function onDictationNoteButtonsClick(event:MouseEvent):void
+			{
+				if (viewModel.inDictationMode || viewModel.inNoteMode)
+					data.inDictationNoteMode = true;
+					
+				else
+					data.inDictationNoteMode = false;
+				
+				//editView.visible = data.inDictationNoteMode;
+				//editView.includeInLayout = data.inDictationNoteMode;
+				
+				event.stopPropagation();
+			}
+			
+			private function showGlow():void
+			{
+				if (!dto)
+					return;
+				
+				if ( id_ExpandedView.visible || dto.inEditMode )
+				{
+					glow1.alpha = 1;
+					glowAnimation.play();
+				}
+				else
+				{
+					glowAnimation.play(null, true);
+					glow1.alpha = 0;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+				id_patientDictationNoteView.isSectionLevel = false;
+			}
+			
+			
+			//////////////////////////////////////////////////
+			
+			private function deleteClickHandler(event:MouseEvent):void
+			{
+				if (!dto)
+					return;
+				
+				UtilityFunctions.AskMessage("Do you want to delete selected record?", function():void
+				{
+					dto.IsDeleted = true;
+					dto.IsDirty = true;
+					
+					var ge:GeneralEvent = new GeneralEvent("deleteClick", true);
+					ge.value = dto;
+					dispatchEvent( ge );
+				});
+				
+				event.stopPropagation();
+			}
+			
+			// section 1 is Expand View & section 2 for Edit view
+			protected function toggleEditView(event:MouseEvent):void
+			{				
+				if (!dto)
+					return;
+				
+				dto.inEditMode = !dto.inEditMode;
+				id_ExpandedView.visible = false;
+				if(!dto.inEditMode)
+					id_EditView.viewModel.visible = false;
+				showGlow();
+				
+				id_EditView.addEventListener('saveStatus',function(event:Event):void{
+					
+					dto.inEditMode = false;
+					id_btnEdit.selected = false;
+					id_EditView.viewModel.visible = false;
+					showGlow();
+				});
+				
+				event.stopImmediatePropagation();
+				event.preventDefault();
+			}
+			
+			protected function id_Header_clickHandler(event:MouseEvent):void
+			{
+				if( !dto.inEditMode )
+				{
+					id_ExpandedView.visible = !id_ExpandedView.visible; 
+					showGlow();
+				}else if(dto.inEditMode)
+				{
+					dto.inEditMode = false;
+					id_btnEdit.selected = false;
+					id_ExpandedView.visible = true;
+					id_EditView.viewModel.visible = false;
+					showGlow();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="glowAnimation" target="{glow1}" duration="250" >
+			<s:motionPaths>
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurX"  />
+				<s:SimpleMotionPath valueFrom="0" valueTo="10" property="blurY"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	
+	<s:filters>
+		<s:GlowFilter id="glow1" blurX="5" blurY="5" alpha="0" color="#3575D0" strength="3" inner="false"/>
+	</s:filters>
+	
+	<s:layout>
+		<s:VerticalLayout id="id_layout" horizontalAlign="center" verticalAlign="top" gap="0" paddingBottom="1" paddingLeft="4" paddingRight="4"/>
+	</s:layout>
+	
+	
+	<s:SkinnableContainer id="id_Header" 
+						  width="100%" height="26" buttonMode="true"
+						  click="id_Header_clickHandler(event)"
+						  >
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle"/>
+		</s:layout>
+		
+		<s:HGroup width="100%" verticalAlign="middle" paddingLeft="5" paddingRight="5">
+			<s:Label  color="#333333" 
+					  fontFamily="CalibriCFF" 
+					  fontSize="14" maxDisplayedLines="1" verticalCenter="0"
+					  text="{itemIndex + 1 + '. '}"
+					  width="20"
+					  />
+			<s:Label color="#333333" 
+					 fontFamily="CalibriCFF" 
+					 fontSize="14" maxDisplayedLines="1" verticalCenter="0"
+					 width="100%"
+					 text="{Headerlabel}" 
+					 toolTip="{Headerlabel}"/>
+<!--					 text="{(itemIndex +1) + '. ' +	 (dto.MainCategoryName == 'HEENT' ? '': dto.MainCategoryName) + (dto.SubCategoryName.length > 0 ? (' : ' + dto.SubCategoryName ): '') + (dto.SubLevel3CategoryName.length > 0 ? (' : '+ dto.SubLevel3CategoryName) : '')}" -->
+			
+			<!--<s:ToggleButton id="id_btnNormal" color="#333333" skinClass="com.gazuntite.input.view.skins.NormalAbNormalIndicatorButtonSkin"
+			fontFamily="CalibriCFF" fontSize="14" verticalCenter="0"
+			label="{dto.IsNormal == QSConstants.STRING_TRUE ? 'Normal':'Abnormal'}" 
+			selected="{id_btnNormal.label == 'Abnormal'}" />-->
+			
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="100%" horizontalAlign="right" verticalAlign="middle" gap="8" paddingRight="6"  >
+			<!--<s:Image source="@Embed('com/gazuntite/common/view/components/reviewofsystem/skin/images/new.png')" verticalCenter="0"/>
+			<s:ToggleButton id="uiDictation"
+			selected="@{viewModel.inDictationMode}" toolTip="Record level Dictation"
+			skinClass="com.gazuntite.skins.controls.button.input.DictationButtonSkin"
+			click="onDictationNoteButtonsClick(event)"/>
+			<s:ToggleButton id="uiNote"
+			selected="@{viewModel.inNoteMode}" toolTip="Record level Notes"
+			skinClass="com.gazuntite.skins.controls.button.input.WriteNoteButtonSkin"
+			click="onDictationNoteButtonsClick(event)"/>-->
+			
+			<s:Image id="id_imgAbnormal" source="@Embed('/assets/images/Abnormal.png')" verticalCenter="0" visible="{dto.IsAbNormal == QSConstants.STRING_TRUE}" includeInLayout="{dto.IsAbNormal == QSConstants.STRING_TRUE}" />
+			<s:Image  source="@Embed('/assets/images/Normal.png')" verticalCenter="0" visible="{dto.IsNormal == QSConstants.STRING_TRUE}" includeInLayout="{dto.IsNormal == QSConstants.STRING_TRUE}" />
+			
+			<s:Label color="#333333" 
+					 fontFamily="CalibriCFF" fontSize="14" maxDisplayedLines="1" verticalCenter="0"
+					 text="{UtilityFunctions.FormatDate(dto.VisitDate, 'MM/DD/YYYY')}" toolTip="{UtilityFunctions.FormatDate(dto.VisitDate, 'MM/DD/YYYY')}"/>
+			
+			<s:ToggleButton id="id_btnEdit"
+							click="toggleEditView(event)"
+							buttonMode="true" toolTip="Edit the Record"
+							skinClass="com.gazuntite.skins.controls.toggleButtonSkin.input.EditRecordArrowTBSkin"
+							/>
+			
+			<s:Button skinClass="com.gazuntite.skins.controls.button.input.RecycleButtonSkin"
+					  buttonMode="true" useHandCursor="true" toolTip="Delete Record"
+					  click="deleteClickHandler(event)"
+					  />
+			
+		</s:HGroup>
+	</s:SkinnableContainer>
+	
+	<s:Group id="id_ExpandedView" width="{id_Header.width - 5}" visible="false" includeInLayout="{id_ExpandedView.visible}">
+		<s:layout>
+			<s:VerticalLayout gap="-4" />
+		</s:layout>
+		
+		<s:SkinnableContainer width="100%" height="100%" skinClass="com.gazuntite.skins.controls.container.ePrescription.NewRXExpandRendererSkin">
+			<s:layout>
+				<s:VerticalLayout paddingLeft="5" paddingRight="5" paddingTop="4" paddingBottom="5"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label maxDisplayedLines="1" text="{(dto.MainCategoryName == 'HEENT' ? (dto.SubLevel3CategoryName+ ' :' ) : (dto.SubCategoryName +' :') )}" styleName="patientFormLabel" width="180"/>
+				<s:Label maxDisplayedLines="1" styleName="patientFormValue" text="{dto.IsAbNormal == QSConstants.STRING_TRUE ? 'Abnormal' : 'Normal'}" toolTip="{}" width="100%"/>
+				<!--<s:Label maxDisplayedLines="1" styleName="patientFormValue" text="{UtilityFunctions.FormatDate(dto.VisitDate, 'MM/DD/YYYY')}" toolTip="{UtilityFunctions.FormatDate(dto.VisitDate, 'MM/DD/YYYY')}" width="100%"/>-->
+			</s:HGroup>
+			
+			<s:HGroup width="100%" verticalAlign="middle" paddingRight="5">
+				<s:Label   maxDisplayedLines="1" text="Notes:" styleName="patientFormLabel" width="180"/>
+				<s:Label   width="100%" maxDisplayedLines="1" text="{dto.Note}" styleName="patientFormValue" />
+				
+				<s:ToggleButton id="id_btnDictation"
+								selected="@{viewModel.inDictationMode}"
+								toolTip="Record Level Dictation"
+								click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+								skinClass="{ (dto.DictationID &amp;&amp; dto.DictationID != QSConstants.GUID_FORMAT) ? DictationRedButtonSkin:DictationButtonSkin }"
+								/>
+			</s:HGroup>
+			
+			<dictation1:PatientDictationNoteView id="id_patientDictationNoteView" 
+												 width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{dto.Note}" note="@{dto.Note}" 
+												 isSaveButtonVisible="false" DictationID="{dto.DictationID}" IsDictaionEditMode="{false}"
+												 />
+		</s:SkinnableContainer>
+	</s:Group>
+	
+	<itemrenderer:ReviewOfSystemEditView id="id_EditView" 
+										 dataItem="{dto}" width="{id_Header.width - 5}" visible="{dto.inEditMode}" includeInLayout="{dto.inEditMode}" />
+	
+</s:ItemRenderer>

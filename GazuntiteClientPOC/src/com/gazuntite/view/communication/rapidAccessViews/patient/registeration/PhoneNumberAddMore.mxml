@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:components="com.zigron.controls.extended.components.*"
+		 
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.model.SharedModel;
+			import com.zigron.common.util.ValidationUtils;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			
+			[Bindable]
+			[Inject(id="sharedModel")]
+			public var model:SharedModel = new SharedModel();
+			
+			private var _phoneID:int = 0;
+			
+			public function resetFields():void
+			{
+				if (id_TelNumber)
+					id_TelNumber.text = "";
+				
+				if (id_ExtNumber)
+					id_ExtNumber.text = "";
+				
+				if (id_TelNumberKind)
+					id_TelNumberKind.selectedIndex = -1;
+			}
+			
+			public function getPhoneNumberDetails():Object
+			{
+				var result:Object;
+				
+				if (id_TelNumber && id_TelNumber.text)
+				{
+					if (!result)
+						result = {};
+					
+					result["phoneNumber"] = getPhoneNumberWithoutMasking(id_TelNumber.text);
+				}
+				
+				if (id_TelNumberKind && id_TelNumberKind.selectedItem)
+				{
+					if (result)
+						result["phoneNumberKind"] = (id_TelNumberKind.selectedItem );//as PhoneNumberTypeDTO);
+				}
+				
+				if (id_ExtNumber)
+				{
+					if (result)
+						result["phoneExtension"] = id_ExtNumber.text;
+				}
+				if(phoneID)
+				{
+					if (result)
+						result["phoneID"] = phoneID;
+				}
+				
+				return result;
+			}
+			
+			public function isInValid(mustEnterRequiredFields:Boolean = false, errorStrToAppend:String = ""):Object
+			{
+				var isNotValid:Boolean = false;
+				var errorStr:String = "";
+				var toSetFocus:*;
+				
+				ValidationUtils.Trim(id_TelNumber);
+				ValidationUtils.Trim(id_ExtNumber);
+				//id_TelNumber.text = getPhoneNumberWithoutMasking(id_TelNumber.text);
+				
+				if (id_TelNumber.text.length || id_ExtNumber.text.length || id_TelNumberKind.selectedIndex != -1)
+				{
+					if (id_TelNumber.text.length >= 1 && id_TelNumber.text.length <= 13)
+					{
+						if (!ValidationUtils.isValidPhone2(getPhoneNumberWithoutMasking(id_TelNumber.text)))
+						{
+							isNotValid = true;
+							
+							if (errorStrToAppend)
+								errorStr += errorStrToAppend + " ";
+							
+							errorStr += "The data in phone number is invalid.\n";
+							
+							if (!toSetFocus)
+								toSetFocus = id_TelNumber;
+						}
+					}
+					else
+					{
+						isNotValid = true;
+						errorStr += "Specify maximum 10 digits for ";
+						//errorStr += "Specify minimum 10 and maximum 20 digits for ";
+						
+						if (errorStrToAppend)
+						{
+							errorStr += errorStrToAppend.toLowerCase() + " ";
+						}
+						
+						errorStr += "phone number.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumber;
+					}
+					
+					if (id_ExtNumber.text.length && !ValidationUtils.isValidPhoneExt(id_ExtNumber))
+					{
+						isNotValid = true;
+						
+						if (errorStrToAppend)
+							//errorStr += errorStrToAppend + " ";
+						
+						errorStr = "Data in "+errorStrToAppend+" phone number extention is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_ExtNumber;
+					}
+					
+					if (!ValidationUtils.isValidValueSelected(id_TelNumberKind))
+					{
+						isNotValid = true;
+						
+						if (errorStrToAppend)
+							//errorStr += errorStrToAppend + " ";
+						
+						errorStr = "Data in "+errorStrToAppend+" phone type is invalid.\n";
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumberKind;
+					}
+				}
+				else
+				{
+					if (mustEnterRequiredFields)
+					{
+						isNotValid = true;
+						
+						errorStr += "Specify maximum 10 digits for ";
+						//errorStr += "Specify minimum 10 and maximum 20 digits for ";
+						
+						if (errorStrToAppend)
+							errorStr += errorStrToAppend.toLowerCase() + " ";
+						
+						errorStr += "phone number.\n";
+						
+						if (errorStrToAppend)
+							//errorStr += errorStrToAppend + " ";
+						
+						errorStr = "Data in "+errorStrToAppend+" phone type is invalid.\n";
+						
+						
+						if (!toSetFocus)
+							toSetFocus = id_TelNumber;
+					}else{
+						isNotValid = true;
+					}
+						
+				}
+				
+				var result:Object = {"isNotValid":isNotValid, "errorStr": errorStr, "toSetFocus": toSetFocus};
+				
+				return result;
+			}
+			
+			public function isGetEdited():Boolean
+			{
+				if (id_TelNumber.text.length || id_TelNumberKind.selectedIndex != -1)
+					return true;
+				
+				return false;
+			}
+			
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_TelNumber.tabIndex=tabIndex;
+				id_ExtNumber.tabIndex=tabIndex+1;
+				id_TelNumberKind.tabIndex=tabIndex+2;
+				id_TelNumber.setFocus();
+			}
+
+			public function get phoneID():int
+			{
+				return _phoneID;
+			}
+
+			public function set phoneID(value:int):void
+			{
+				_phoneID = value;
+			}
+			
+			protected function comboChangeIndicator(event:IndexChangeEvent):void 
+			{
+				if(id_TelNumberKind.selectedIndex != -1 )
+				{
+					haschange= true;
+				}else
+				{
+					haschange= false;
+				}
+			}
+			protected function textInputChangeIndicator(event:TextOperationEvent):void 
+			{
+				if(id_TelNumber.text.length>0 ||id_ExtNumber.text.length >0 )
+				{
+					haschange= true;
+				}else
+				{
+					haschange= false;
+				}
+				
+				if(id_TelNumber.text.length > 0 )
+				{
+					id_ExtNumber.enabled 		= true;
+					id_TelNumberKind.enabled 	= true;
+				}
+				else
+				{
+					id_ExtNumber.enabled 		= false;
+					id_TelNumberKind.enabled 	= false;
+				} 
+				
+				applyMask();
+			}
+
+			[Bindable]
+			public function get haschange():Boolean
+			{
+				return _haschange;
+			}
+
+			public function set haschange(value:Boolean):void
+			{
+				_haschange = value;
+			}
+
+			private var _haschange:Boolean;
+			
+			//Tahir Alvi - apply masking on the phone number
+			public function applyMask():void
+			{
+				var s:String      = id_TelNumber.text.replace(/[^0-9]/g,"");
+				id_TelNumber.text = '('+s.substring(0,3) + (s.length>3?")"+s.substring(3,6) + (s.length>6?"-"+s.substring(6,10):""):"");
+				id_TelNumber.selectRange(id_TelNumber.text.length, id_TelNumber.text.length);
+				
+				if(id_TelNumber.text.length == 1 && id_TelNumber.text == '(')
+					id_TelNumber.text = '';
+			}
+			//Tahir Alvi - remove masking on the phone number
+			public function getPhoneNumberWithoutMasking(text:String):String
+			{
+				var val1:String = text;
+				var val2:String = val1.replace('(','');
+				var val3:String = val2.replace(')','');
+				var val4:String = val3.replace('-','');
+				
+				return val4;
+			}
+			//Tahir Alvi - apply masking on the phone number at load time
+			public function setPhoneNumberMasking(val:String):String
+			{
+				var val_Format:String = '(' + val.substring(0,3) + ')' + val.substring(3,6) + '-' + val.substring(6,10);
+				return val_Format;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:HGroup width="100%">
+		<components:LabelTextInput id="id_TelNumber"  width="50%" prompt="Telephone #"    restrict="[0-9]" toolTip="Enter phone no " change="textInputChangeIndicator(event)"/>
+		<components:LabelTextInput id="id_ExtNumber" width="20%" prompt="Ext" maxChars="4" restrict="[0-9]" toolTip="Enter phone ext" change="textInputChangeIndicator(event)"  />
+		<components:LabelComboBox id="id_TelNumberKind" prompt="Phone type" width="55%"
+								  change="comboChangeIndicator(event)" required="true"
+								  labelField="NumberTypeName" autoWidth="false" toolTip="Select phone no type"
+								  dataProvider="{model.addressBookStaticDataDTO.PhoneNumberTypes}" />
+	</s:HGroup>
+	
+</s:Group>

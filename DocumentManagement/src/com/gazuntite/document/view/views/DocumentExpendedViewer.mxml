@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" 
+				   backgroundColor="#FFFFFF"
+				   cornerRadius="3"
+				   dropShadowVisible="false"
+				   creationComplete="cc(event)"
+				   >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			private var _documentName:String
+			private var _documentUrl:String;
+			private var _isOrder:Boolean;
+			
+			[Bindable]
+			private var showHtmlView:Boolean;
+			
+			private function closeClickHandler():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			[Bindable]
+			public function get documentName():String
+			{
+				return _documentName;
+			}
+			
+			public function set documentName(value:String):void
+			{
+				_documentName = value;
+			}
+			
+			[Bindable]
+			public function get documentUrl():String
+			{
+				return _documentUrl;
+			}
+			
+			public function set documentUrl(value:String):void
+			{
+				_documentUrl = value;
+				
+			}
+			
+			[Bindable]
+			public function get isOrder():Boolean
+			{
+				return _isOrder;
+			}
+			
+			public function set isOrder(value:Boolean):void
+			{
+				_isOrder = value;
+				
+				if (value)
+				{
+					showHtmlView = true;
+				}
+				else
+				{
+					showHtmlView = false;
+				}
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				FlexGlobals.topLevelApplication.addEventListener(MouseEvent.CLICK, function(event:Event):void
+				{
+					if( isPopUp )
+					{
+						//remove here
+						closeClickHandler();
+						
+					}
+				});
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingTop="0" paddingLeft="0" paddingRight="0"/>
+	</s:layout>
+	
+	<s:BorderContainer id="header" width="100%" skinClass="com.gazuntite.skins.controls.container.dmg.DMGDocViewerHeaderSkin" >
+		<s:layout>
+			<s:HorizontalLayout paddingLeft="8" paddingRight="4" paddingTop="6" paddingBottom="6" verticalAlign="middle"/>
+		</s:layout>
+		<s:Label id="title" text="DOCUMENT VIEWER" fontFamily="CalibriCFF" fontSize="14" />
+		<s:Label id="documentNameLbl" text="{documentName}" width="100%" 
+				 fontFamily="CalibriCFFBold" fontSize="16" textAlign="center"/>
+		<s:Button id="close" click="closeClickHandler()"
+				  skinClass="com.gazuntite.skins.controls.button.SpinnerCancelButton"
+				  buttonMode="true" useHandCursor="true" toolTip="Close"
+				  />
+	</s:BorderContainer>
+	
+	<s:Group width="100%" height="100%">
+		<mx:HTML id="id_Html" width="100%" height="100%" location="{documentUrl}" 
+				 visible="{showHtmlView}" includeInLayout="{showHtmlView}" paddingLeft="5" paddingRight="2"
+				 verticalScrollBarStyleName="htmlVScroll" horizontalScrollPolicy="off"/>
+		<s:Scroller id="staticImage" width="100%" height="100%" visible="{!showHtmlView}" includeInLayout="{!showHtmlView}"
+					skinClass="com.gazuntite.skins.controls.list.InvisibleScrollerSkin" horizontalScrollPolicy="off">
+			<s:Group width="100%" height="100%">
+				<s:Image id="id_displayImage" source="{documentUrl}"
+						 />
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
+	
+</s:BorderContainer>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009"
+		height="66" width="61">
+	<fx:Metadata>[HostComponent("com.gazuntite.controls.extended.components.ImageButton")]</fx:Metadata>
+	<s:states>
+		<s:State name="up"/>
+		<s:State name="over"/>
+		<s:State name="down"/>
+		<s:State name="disabled"/>
+		<s:State name="upAndSelected"/>
+		<s:State name="overAndSelected"/>
+		<s:State name="downAndSelected"/>
+		<s:State name="disabledAndSelected"/>
+	</s:states>
+
+	<s:Rect height="70"  includeIn="up,disabled,disabledAndSelected,down,downAndSelected,over,overAndSelected,upAndSelected" 
+			radiusX="3" width="61"  visible.disabledAndSelected="false" visible.up="false" visible.disabled="false" x="0" y="0">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#54BFDC" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="#2981A9" ratio="0.4980392156862745"/>
+				<s:GradientEntry alpha="1.0" color="#1875A2" ratio="0.5019607843137255"/>
+				<s:GradientEntry alpha="1.0" color="#369AC4" ratio="1"/>
+			</s:LinearGradient>
+		</s:fill>
+		<s:filters>
+			<s:DropShadowFilter includeIn="down" blurX="2" blurY="2" distance="0" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="90"/>
+			<s:DropShadowFilter includeIn="downAndSelected" blurX="2" blurY="2" distance="0" hideObject="false" color="0x000000" inner="true" strength="1" alpha="0.5" quality="3" knockout="false" angle="90"/>
+		</s:filters>
+	</s:Rect>
+	<s:BitmapImage smooth="true" source="{hostComponent.Source}" height="66" width="61" horizontalCenter="0" verticalCenter="0"	/>
+	<!--<s:BitmapImage id="id_dummy" smooth="true" source="@Embed('providerimg.png')" horizontalCenter="0" verticalCenter="0" visible="{!hostComponent.Source.length > 0}" includeInLayout="{!hostComponent.Source.length > 0}"/>-->
+	
+</s:Skin>

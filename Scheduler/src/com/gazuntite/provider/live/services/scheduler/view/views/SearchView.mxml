@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*"
+					  styleName="blackTitleBGContainerSkin3" 
+					  width="100%" height="100%"  
+					  >
+	<s:layout>
+		<s:VerticalLayout paddingTop="12" paddingBottom="7" paddingLeft="2" paddingRight="2" />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.gazuntite.provider.live.services.scheduler.dto.staticData.SearchTypeDTO;
+			import com.gazuntite.provider.live.services.scheduler.dto.staticData.StaticDataDTO;
+			import com.gazuntite.provider.live.services.scheduler.event.SearchAppointmentsEvent;
+			import com.gazuntite.provider.live.services.scheduler.event.SearchPatientEvent;
+			import com.gazuntite.provider.live.services.scheduler.model.SchedulerModelLocator;
+			import com.gazuntite.provider.live.services.scheduler.view.itemrenderer.SearchGrid;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.ValidationResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var model:SchedulerModelLocator = SchedulerModelLocator.getInstance();
+			[Bindable] private var searchStr:String
+			private var vResult:ValidationResultEvent;
+			
+			
+			//- called on each time view is switched from other view
+			public function creComp():void
+			{
+				id_FieldsCmbo.setFocus();
+			}
+			
+			private function searchAppointments():void
+			{
+				searchStr = id_SearchTextInput.text;
+				if(id_FieldsCmbo.selectedIndex != -1 && searchStr.length == 0){
+					Alert.show("Please Write somethig for Search", "Empty Search Text",4,FlexGlobals.topLevelApplication.mainContainer );
+					return;
+				}
+				
+				if( id_FieldsCmbo.selectedItem && searchStr && searchStr.length )
+				{
+					clearOldSearch();
+					var sft:SearchTypeDTO = id_FieldsCmbo.selectedItem as SearchTypeDTO;
+					while( searchStr.indexOf( "/" ) !=-1 )
+						searchStr = searchStr.replace( "/", "-" ); //for REST url
+					//call SearchPatient Service other than date
+					//call SearchPatient Service if date is selected
+					if(id_FieldsCmbo.selectedItem.Name == 'Date')
+					{
+						vResult = dateVal.validate(searchStr);
+						if(vResult.type == ValidationResultEvent.VALID)
+						{
+							SeachAppointment_handler(searchStr, model.currentPage_Apponintments);
+						}
+						else{
+							Alert.show('Please write date in following format'+'\n'+'MM-DD-YYYY or MM/DD/YYYY', 'Wrong Format',4,FlexGlobals.topLevelApplication.mainContainer);
+						}
+					}
+					else
+					{
+						SeachAppointment_handler(searchStr, model.currentPage_Apponintments);
+					}
+				}
+				else
+				{
+					Alert.show("Please Select a Search Type from Dropdown!", "Select Search Type",4,FlexGlobals.topLevelApplication.mainContainer );
+				}
+			}
+			//Cal Search Appointments Service
+			private function SeachAppointment_handler(_searchStr:String, _pageNo:int):void
+			{
+				var SAppEvent:SearchAppointmentsEvent = new SearchAppointmentsEvent(model.loggedInUserProviderId, model.loggedInUserId, model.loggedInUserSelectedStationId, id_FieldsCmbo.selectedItem.ID, _searchStr, _pageNo , populateAppointments);
+				CairngormEventDispatcher.getInstance().dispatchEvent( SAppEvent );
+				cursorManager.setBusyCursor();
+			}
+			private function populateAppointments(val:* =null):void
+			{
+				id_SearchTextInput.text = '';
+				
+				if(model.SearchAppointmentList.length > 0)
+				{
+					dg_Appointments.dataProvider = model.SearchAppointmentList;
+					lblInfo.visible = false;
+					dg_Appointments.visible = true;
+				}else{
+					lblInfo.text 			= 'No Appointment found against [" '+ searchStr+' "]'; 
+					lblInfo.toolTip 		= 'No Appointment found against [" '+ searchStr+' "]'; 
+					lblInfo.visible 		= true;
+					dg_Appointments.visible = false;
+				}
+			}
+			private function clearOldSearch():void
+			{
+				if(model.SearchAppointmentList == null)
+					return;
+				if(model.SearchAppointmentList.length > 0)
+					model.SearchAppointmentList.removeAll(); 
+			}
+			
+			protected function cmbSelectType_changeHandler(event:IndexChangeEvent):void
+			{
+				/* if(id_SearchTextInput.text.length <= 0)
+				{ */
+				id_SearchTextInput.prompt = '--'+id_FieldsCmbo.selectedItem.Name+'--';
+				if(id_FieldsCmbo.selectedItem.Name == 'Date'){
+					id_SearchTextInput.prompt = ''; id_SearchTextInput.text = '';
+					id_SearchTextInput.prompt += 'MM-DD-YYYY or MM/DD/YYYY'
+				}
+				//	}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateValidator id="dateVal"  inputFormat="MM-DD-YYYY"  />
+	</fx:Declarations>
+	
+	
+	<s:HGroup width="100%" paddingLeft="5" verticalAlign="middle" >
+		<components:LabelComboBox id="id_FieldsCmbo" 
+								  prompt="--Search Type--" dataProvider="{model.StaticData.SearchFieldTypeList}" labelField="Name"  width="20%"
+								  change="cmbSelectType_changeHandler(event)" styleName="optionalComboBoxSkin"/>
+		
+		<s:SkinnableContainer width="60%" styleName="patientSearchBGContainerSkin" >
+			<s:layout >
+				<s:HorizontalLayout gap="0" verticalAlign="middle"/>
+			</s:layout>
+			
+			<components:LabelTextInput id="id_SearchTextInput"  
+									   prompt="Search" focusAlpha="0"   width="100%" restrict="a-zA-Z0-9 -/"
+									   skinClass="com.adobe.gazuntite.skins.chrome.textInputSkins.transparentTextInput"/>
+			<s:Button label="Search"  click="searchAppointments()" styleName="orangeSearchButtonSkin"
+					  buttonMode="true" toolTip="Search Appointment" height="19" width="23"/>
+		</s:SkinnableContainer>
+		<s:Label visible="true" width="20%" color="#F1BE6E" fontFamily="Calibri" fontSize="13"
+				 fontWeight="bold" includeInLayout="true" maxDisplayedLines="1"
+				 text="{'Total Records'+' '+ '('+model.totalRecords_SearchApp.toString()+')'}"/>
+		<s:Label id="lblInfo" 
+				 text="No Appointment found against this query!" maxDisplayedLines="1" width="150" visible="false" includeInLayout="{lblInfo.visible}" 
+				 color="#FFFFFF" fontFamily="Calibri" verticalAlign="middle" toolTip="No Appointment found against this query!"/>
+		
+	</s:HGroup>
+	
+	<s:Scroller width="100%" height="100%">
+		<s:VGroup id="gpSearch" width="100%" height="100%">
+			<components:LabelDataGrid id="dg_Appointments" width="100%" rowCount="{dg_Appointments.dataProvider.length + 1}"
+									  sortableColumns="false" resizableColumns="false" allowDragSelection="false" verticalScrollBarStyleName="VScrollBar"
+									  visible="false" includeInLayout="{dg_Appointments.visible}"
+									  columnWidths="{['20%', '15%', '20%','15%','15%','15%']}">
+				<components:columns>
+					<mx:DataGridColumn headerText="Patient" 		 dataField="PatientName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="GID"         dataField="QuivusID" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Provider"         dataField="ProviderName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Status"           dataField="StatusName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Location"         dataField="StationName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+					<mx:DataGridColumn headerText="Type"           	 dataField="TypeName" itemRenderer="mx.controls.Label" headerRenderer="mx.controls.Label" wordWrap="true"/>
+				</components:columns>
+			</components:LabelDataGrid>
+		</s:VGroup>
+	</s:Scroller>
+	
+</s:SkinnableContainer>

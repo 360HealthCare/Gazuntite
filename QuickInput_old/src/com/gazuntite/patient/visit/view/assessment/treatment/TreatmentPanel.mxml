@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<commons:QICollapseableView xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx"
+							xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+							xmlns:prescription="com.gazuntite.patient.visit.view.assessment.treatment.prescription.*"
+							xmlns:procedure="com.gazuntite.patient.visit.view.assessment.treatment.procedure.*"
+							QSViewStateChange="qicollapseableview1_QSViewStateChangeHandler(event)"
+							creationComplete="cc(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarFocusSkin;
+			import com.adobe.gazuntite.skins.QuickInput.QIinternalBarSkin;
+			import com.gazuntite.patient.visit.dto.ModuleNoteDTO;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleNotesEvent;
+			import com.gazuntite.patient.visit.event.assessment.treatment.procedure.LoadProcedureByVisitIDEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.patient.visit.utils.managers.QIPopUpManager;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			private var isSectionLevel:Boolean;
+			[Bindable] public var model : QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _SetIcon:Boolean;
+			
+			[Bindable]
+			public function get SetIcon():Boolean
+			{
+				return _SetIcon;
+			}
+			
+			public function set SetIcon(value:Boolean):void
+			{
+				_SetIcon = value;
+				if(value)
+				{
+					this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.TREATMENT_MODULE_NAME);	
+					this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.TREATMENT_MODULE_NAME);	
+					
+					if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_Header.setIcons(false,false);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_Header.setIcons(true,false);
+					else if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_Header.setIcons(false,true);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_Header.setIcons(true,true);
+					
+				}
+				else
+				{
+					this.notesDTO = null;
+					this.DictationDTO = null;
+					id_Header.setIcons(false,false);
+				}
+			}
+			
+			
+			
+			private function id_TreatmentViews_changeHandler(event:IndexChangedEvent):void
+			{
+				QIPopUpManager.hideAllPopUps();
+				
+				if (!isSectionLevel)
+				{
+					if (id_ProcedureView)
+					{
+						//id_ProcedureView.id_Add.id_WriteNotes.selected = false;
+					}
+					
+				}
+				
+				if(event.newIndex == 1)
+					id_ProcedureView.id_CPTCode.setFocus();
+			}
+			
+			private function procedureCreationHandler():void
+			{
+				id_ProcedureView.loadGridData();
+			}
+			
+			protected function id_noteIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			protected function id_dictationIndicator_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function qicollapseableview1_QSViewStateChangeHandler(event:QSViewStateEvent):void
+			{
+				if(event.viewState == QSViewStateEvent.EXPANDED_VIEW)
+				{
+					if(id_Prescription!=null)
+						id_Prescription.loadGridData();
+					if(id_ProcedureView!=null)
+						id_ProcedureView.loadGridData();
+					
+					if( id_Header )
+					{
+						id_Header.HeadingLable = id_Header.HeadingLable.toUpperCase();
+						id_Header.setStyle("skinClass", QIinternalBarFocusSkin);
+						id_Header.id_headingLbl.setStyle("color", 0xffffff);
+						id_Header.id_expandBtn.selected = true;
+					} 
+				}
+					
+				else if(event.viewState == QSViewStateEvent.COLLAPSED_VIEW)
+				{
+					if( id_Header )
+					{
+						id_Header.HeadingLable = UtilityFunctions.TitleCase(id_Header.HeadingLable);
+						id_Header.setStyle("skinClass", QIinternalBarSkin);
+						id_Header.id_headingLbl.setStyle("color", 0x000000);
+						id_Header.id_expandBtn.selected = false;
+						
+					} 
+					
+					//QIPopUpManager.hideAllSectionPopUps(QIPopUpManager.HPI_CC);
+				}
+				
+			}
+			
+			protected function id_Prescription_creationCompleteHandler(event:FlexEvent):void
+			{
+				id_Prescription.id_nextBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+					id_Prescription.AllowMoveToNextPanel( function():void
+					{
+						id_TreatmentViews.selectedIndex = 1;									
+					});
+				});
+				
+				id_Prescription.loadGridData();
+			}
+			
+			override protected function id_Header_showNotesPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.TREATMENT_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.TREATMENT_MODULE_NAME);
+				
+				super.id_Header_showNotesPanelHandler( event );
+				
+				
+			}
+			override protected function onNotesSave(event:Event):void
+			{
+				if(this.notesDTO.ModuleNoteId == 0) // new note
+				{
+					this.notesDTO.ManagedByUserId = model.LoggedInUserId;
+					this.notesDTO.CreatedBy = model.LoggedInUserId;
+					this.notesDTO.CreatedAt = new Date();
+					this.notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(Constants.TREATMENT_MODULE_NAME);
+					this.notesDTO.VisitID = model.VisitID;
+					this.notesDTO.PatientID = model.patientID;
+				}
+				else // edited Notes
+				{
+					this.notesDTO.ModifiedBy = model.LoggedInUserId;
+					this.notesDTO.ModifiedAt = new Date();
+					this.notesDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleNotesEvent = new ManageModuleNotesEvent(this.notesDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				trace("child class should implement dictation here");
+			}
+			
+			override protected function id_Header_showDictationPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.TREATMENT_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.TREATMENT_MODULE_NAME);
+				
+				super.id_Header_showDictationPanelHandler( event );
+			}
+			
+			override protected function onDictationSave(event:Event):void
+			{
+				if(this.DictationDTO.ModuleDictationId == 0) // new Dication
+				{
+					this.DictationDTO.ManagedByUserId = model.LoggedInUserId;
+					this.DictationDTO.CreatedBy = model.LoggedInUserId;
+					this.DictationDTO.CreatedAt = new Date();
+					this.DictationDTO.ModuleTypeID = QIUtilityFunctions.getModuleIDByName(Constants.TREATMENT_MODULE_NAME);
+					this.DictationDTO.VisitID = model.VisitID;
+					this.DictationDTO.PatientID = model.patientID;
+				}
+				else // edited Dication
+				{
+					this.DictationDTO.ModifiedBy = model.LoggedInUserId;
+					this.DictationDTO.ModifiedAt = new Date();
+					this.DictationDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleDictationEvent = new ManageModuleDictationEvent(this.DictationDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				//trace("child class should implement saveNotes here");
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				/* id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{						
+				id_Header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);						
+				});
+				
+				event.stopImmediatePropagation(); */
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Binding source="model.checkNotesExsist" destination="SetIcon" />
+	
+	
+	<commons:HeaderContents>
+		<commons:SectionHeader id="id_Header" width="100%" HeadingLable="{HeadingLable}" ShowVitalHeader="{ShowVitalHeader}"  ShowSaveButton="{ShowSaveButton}" 	
+							   pinPanel="id_Header_pinPanelHandler(event)"
+							   showNotesPanel="id_Header_showNotesPanelHandler(event)" 
+							   showDictationPanel="id_Header_showDictationPanelHandler(event)"  />
+	</commons:HeaderContents>
+	
+	<s:SkinnableContainer width="100%" skinClass="com.gazuntite.patient.visit.view.commons.QISectionBGSkin">
+		<s:layout>
+			<s:VerticalLayout paddingTop="7" />
+		</s:layout>
+		
+		<s:SkinnableContainer  width="100%" >
+			<s:layout>
+				<s:VerticalLayout  verticalAlign="top" gap="0" />  <!--horizontalAlign="{isSlideOut? 'right':'center'}" paddingRight="3"
+				paddingTop="{isSlideOut? -2:0}" paddingLeft="{isSlideOut? 1:1}"-->
+			</s:layout>
+			
+			<!--<notes:QISectionLevelNotesDictation id="id_notesDictation" width="100%" />-->
+			
+			<s:SkinnableContainer id="sc_Treatment"  width="100%" minHeight="50">
+				<!-- visible="{model.securityProxyObject.PatientExam.QuickInput.Assessment.Treatments.IsViewAllowed}" includeInLayout="{sc_Treatment.visible}"-->
+				
+				
+				<s:layout>
+					<s:VerticalLayout gap="-5" horizontalAlign="left"  paddingLeft="3" paddingRight="3" paddingTop="5" paddingBottom="0"/>
+				</s:layout>
+				
+				<s:HGroup >
+					
+					<s:TabBar skinClass="com.adobe.gazuntite.skins.chrome.tabBarSkins.QIrecordingsTabBar"
+							  buttonMode="true" dataProvider="{id_TreatmentViews}" />
+					
+				</s:HGroup>
+				
+				<s:SkinnableContainer width="100%" height="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.planPanel">
+					<s:layout>
+						<s:VerticalLayout paddingTop="5" paddingLeft="0" paddingRight="0" paddingBottom="0"/>
+					</s:layout>
+					<mx:ViewStack id="id_TreatmentViews" width="100%" height="100%" resizeToContent="true" change="id_TreatmentViews_changeHandler(event)" creationPolicy="all">
+						<s:NavigatorContent width="100%" label="Prescription" height="100%">
+							
+							<prescription:PrescriptionBodyView id="id_Prescription" width="100%" creationComplete="id_Prescription_creationCompleteHandler(event)" /> <!--includeInLayout="{id_Prescription.visible}"
+							visible="{model.securityProxyObject.PatientExam.QuickInput.Assessment.Treatments.Prescription.IsViewAllowed}"-->
+						</s:NavigatorContent>
+						
+						<s:NavigatorContent width="100%" label="Procedure" >
+							
+							<procedure:ProcedureBodyView id="id_ProcedureView" width="100%" creationComplete="procedureCreationHandler()"  />
+							<!--includeInLayout="{id_ProcedureView.visible}" visible="{model.securityProxyObject.PatientExam.QuickInput.Assessment.Treatments.Procedures.IsViewAllowed}"-->
+							
+						</s:NavigatorContent>
+						
+					</mx:ViewStack>
+					<s:HGroup width="100%">					
+						<s:HGroup id="id_IndicatorGrp" width="100%" horizontalAlign="left" >
+							<s:Button id="id_noteIndicator" label="Notes" visible="false" 
+									  click="id_noteIndicator_clickHandler(event)" toolTip="View Notes" 
+									  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.notesIndicatorBtnSkin" /> <!--includeInLayout="{id_noteIndicator.visible}"-->
+							<s:Button id="id_dictationIndicator" label="Dictation" visible="false" 
+									  click="id_dictationIndicator_clickHandler(event)" toolTip="Play Dictation" 
+									  useHandCursor="true" buttonMode="true" skinClass="com.adobe.gazuntite.skins.chrome.buttonSkins.dictationIndicatorBtnSkin"/> <!--includeInLayout="{id_dictationIndicator.visible}"-->
+						</s:HGroup>
+						<s:Group id="id_spacer" width="100%" height="1" />
+					</s:HGroup>
+					
+					
+				</s:SkinnableContainer>
+			</s:SkinnableContainer>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+</commons:QICollapseableView>

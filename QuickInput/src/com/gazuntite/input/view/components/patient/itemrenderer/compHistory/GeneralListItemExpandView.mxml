@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:components="com.gazuntite.controls.extended.components.*" 
+					  xmlns:dictation="com.gazuntite.components.dictation.*"
+					  creationComplete="cc(event)" xmlns:dictation1="com.gazuntite.common.view.components.dictation.*" 
+					  xmlns:dictation2="com.gazuntite.dictation.view.dictation.*"
+					  >
+	<fx:Script>
+		<![CDATA[
+			import com.gazuntite.common.dto.pmh.compHistory.MedicalHistoryDTO;
+			import com.gazuntite.dictation.utils.DictationConstants;
+			import com.gazuntite.skins.controls.button.input.DictataionRedButtonSkin;
+			import com.gazuntite.skins.controls.button.input.DictationButtonSkin;
+			import com.gazuntite.viewModel.PatientDictationNoteViewModel;
+			
+			import mx.events.FlexEvent;
+			
+			[Bindable]	public var medicalHistoryDto:MedicalHistoryDTO;
+			private var _isExpand:Boolean = false;
+			
+			[Bindable]	public var viewModel:PatientDictationNoteViewModel = new PatientDictationNoteViewModel();
+			
+			[Bindable]
+			public function get isExpand():Boolean
+			{
+				return _isExpand;
+			}
+			
+			public function set isExpand(value:Boolean):void
+			{
+				_isExpand = value;
+				if(!isExpand)
+					viewModel.visible = false;
+			}
+			
+			protected function cc(event:FlexEvent):void
+			{
+				viewModel.inlineEditing = true;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<mx:DateFormatter id="formatDateTime" formatString="MM/DD/YYYY" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout paddingLeft="8" paddingRight="5" paddingTop="5" paddingBottom="5" gap="5"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" >
+		<s:VGroup width="25%" >
+			<s:Label text="Category :" width="100%"	 styleName="patientFormLabel" />
+			<s:Label text="ICD:" width="100%" styleName="patientFormLabel"/>
+			<s:Label text="Diagnosis:" width="100%" styleName="patientFormLabel"/>
+		</s:VGroup>
+		
+		<s:VGroup width="25%" >
+			<s:Label text="{medicalHistoryDto.medicalhistorytype.Name}" 	width="100%" styleName="patientFormValue" showTruncationTip="true" maxDisplayedLines="1"/>
+			<s:Label text="{medicalHistoryDto.ICDDTO.IcdCodeName}" 			width="100%" styleName="patientFormValue" showTruncationTip="true" maxDisplayedLines="1"/>
+			<s:Label text="{medicalHistoryDto.ICDDTO.IcdCodeDescription}" 	width="100%" styleName="patientFormValue" showTruncationTip="true" maxDisplayedLines="1"/>
+		</s:VGroup>
+		
+		<s:VGroup width="25%" >
+			<s:Label text="Active:" width="100%"	 styleName="patientFormLabel" />
+			<s:Label text="Date:" width="100%" styleName="patientFormLabel"/>
+		</s:VGroup>
+		
+		<s:VGroup width="25%" >
+			<s:Label text="{medicalHistoryDto.isActive ? 'Yes' : 'No'}" 	width="100%" styleName="patientFormValue" showTruncationTip="true" maxDisplayedLines="1"/>
+			<s:Label text="{medicalHistoryDto.OnSet}" width="100%" styleName="patientFormValue" showTruncationTip="true" maxDisplayedLines="1"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" > 
+		<s:Label text="Notes:"	 styleName="patientFormLabel" width="25%" />
+		<s:Label text="{medicalHistoryDto.Note}" toolTip="{medicalHistoryDto.Note}" styleName="patientFormValue" 
+				 maxDisplayedLines="1" showTruncationTip="true" width="50%"/>
+		<s:HGroup width="25%" horizontalAlign="right" paddingRight="8">			
+		<s:ToggleButton id="id_btnDictation" 
+						selected="@{viewModel.inDictationMode}"
+						toolTip="Record Level Dictation"
+						click="{!id_btnDictation.selected ? viewModel.visible = false : true}"
+						skinClass="{medicalHistoryDto.DictationID &amp;&amp; medicalHistoryDto.DictationID != DictationConstants.GUID_FORMAT ? DictataionRedButtonSkin :DictationButtonSkin }"
+						/>
+		</s:HGroup>
+	</s:HGroup>
+	
+	<dictation2:PatientDictationNoteView width="100%" minHeight="47" viewModel="{viewModel}" noteTooltip="{medicalHistoryDto.Note}" IsDictaionEditMode="false"
+										 note="@{medicalHistoryDto.Note}"	DictationID="{medicalHistoryDto.DictationID}" isSaveButtonVisible="false"/>
+	
+</s:SkinnableContainer>

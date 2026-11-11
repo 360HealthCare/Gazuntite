@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="utf-8"?>
+<commons:QICollapseableView xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx"
+							xmlns:commons="com.gazuntite.patient.visit.view.commons.*" 
+							xmlns:view="com.gazuntite.patient.visit.view.*"
+							creationComplete="group1_creationCompleteHandler(event)"
+							QSViewStateChange="id_NewQuickInputPanel_QSViewStateChangeHandler(event)" 
+							xmlns:components="com.gazuntite.controls.extended.components.*">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.adobe.gazuntite.skins.chrome.containerSkins.quickInputHeaderSkin;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleDictationEvent;
+			import com.gazuntite.patient.visit.event.NotesDictation.ManageModuleNotesEvent;
+			import com.gazuntite.patient.visit.event.visit.LoadVisitModuleTypesEvent;
+			import com.gazuntite.patient.visit.event.visit.MarkValidDataExistsEvent;
+			import com.gazuntite.patient.visit.model.QIModelLocator;
+			import com.gazuntite.patient.visit.utils.Constants;
+			import com.gazuntite.patient.visit.utils.QIUtilityFunctions;
+			import com.gazuntite.common.view.events.QSViewStateEvent;
+			import com.gazuntite.utils.UtilityFunctions;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.resize.ResizeManager;
+			import spark.resize.verticalResizeHandle;
+			
+			private var allowUserLogIn:Boolean;
+			
+			[Bindable]
+			private var model:QIModelLocator = QIModelLocator.getInstance();
+			
+			private var _SetIcon:Boolean;
+			
+			[Bindable]
+			public function get SetIcon():Boolean
+			{
+				return _SetIcon;
+			}
+			
+			public function set SetIcon(value:Boolean):void
+			{
+				_SetIcon = value;
+				if(value)
+				{
+					this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.QUICK_INPUT_MODULE_NAME);	
+					this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.QUICK_INPUT_MODULE_NAME);	
+					
+					if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_header.setIcons(false,false);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID == Constants.GUID_FORMAT)
+						id_header.setIcons(true,false);
+					else if((notesDTO.Note.length == 0 || notesDTO.NoteSubject.length == 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_header.setIcons(false,true);
+					else if((notesDTO.Note.length != 0 || notesDTO.NoteSubject.length != 0) && DictationDTO.DictationID != Constants.GUID_FORMAT)
+						id_header.setIcons(true,true);
+					
+				}
+				else
+				{
+					this.notesDTO = null;
+					this.DictationDTO = null;
+					id_header.setIcons(false,false);
+				}
+			}
+			
+			
+			[Bindable]private var m_bHasChange:Boolean;
+			
+			
+			[Bindable]
+			public function set ShowLogin(value:Boolean):void
+			{
+				allowUserLogIn = value;
+			}
+			
+			public function get ShowLogin():Boolean
+			{
+				return allowUserLogIn;
+			}
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			/* public function CreateVisit(event:CreateVisitUIEvent):void
+			{
+			
+			} */
+			
+			/* public function CreateVisit_handler(visit:VisitDTO):void
+			{
+			var cve:CreateVisitEvent = new CreateVisitEvent(visit);
+			CairngormEventDispatcher.getInstance().dispatchEvent( cve );
+			}
+			*/
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				
+			}
+			
+			protected function id_NewQuickInputPanel_QSViewStateChangeHandler(event:QSViewStateEvent):void
+			{
+				
+				if(id_QIContent!=null)
+				{
+					if(event.viewState == QSViewStateEvent.COLLAPSED_VIEW)
+					{
+						id_QIContent.visible			= false;
+						id_QIContent.includeInLayout	= false;
+						id_header.id_headerSkin.enabled = false;
+						id_header.id_expandBtn.selected = false;
+					}
+						
+					else 
+					{
+						id_QIContent.visible			= true;
+						id_QIContent.includeInLayout	= true;
+						id_header.id_headerSkin.enabled = true;
+						id_header.id_expandBtn.selected = true;
+					}
+				}
+				
+				
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+				id_QIContent.id_CloseVisit.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					UtilityFunctions.AskMessage(Constants.MSG_SURE_CLOSE_WITHOUT_SAVE, function():void{
+						
+						var PatientClose:Event = new Event("CloseQIPanel",true,true);
+						dispatchEvent( PatientClose); 
+						
+					},null,null,null); 
+				});
+				
+				////////Header Contorl Started ////////////////
+				
+				id_header.id_headerSkin.setStyle("skinClass", quickInputHeaderSkin);
+				
+				id_header.id_NotesBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					
+					
+					id_notesDictation.id_Area.visible 			= true;
+					id_notesDictation.id_Area.includeInLayout 	= true;
+					
+					//id_notesDictation.id_VBViews.selectedIndex 	= 0;
+					
+					id_header.id_OptionPopUp.displayPopUp = false;
+					id_header.id_iconButtons.selected = false;
+					
+					id_notesDictation.id_notesPanel.id_body.id_subject.setFocus();
+					
+					/* id_notesDictation.dictationPanel.rec_btn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{													
+					id_header.setIcons(true, 
+					id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+					hasChange = true;
+					});	 */
+					/* id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+					{						
+					id_header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+					id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);						
+					});
+					
+					event.stopImmediatePropagation(); */
+					
+				}); 
+				
+				/* id_header.id_DictationBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+				if( QSSecurityUtil.Security.IsModuleEditable( QSSecurityUtil.QI_VISIT_PROPERTIES ) )
+				{
+				id_notesDictation.notesDTO = QSUtilityFunctions.getModuleNoteDTO(Constants.QUICK_INPUT_MODULE_NAME);
+				id_notesDictation.DictationDTO = QSUtilityFunctions.getModuleDictationDTO(Constants.QUICK_INPUT_MODULE_NAME);
+				
+				id_notesDictation.id_Area.visible 		= true;
+				id_notesDictation.id_Area.includeInLayout = true;
+				id_notesDictation.id_VBViews.selectedIndex = 1;
+				
+				
+				id_header.id_OptionPopUp.displayPopUp = false;
+				id_header.id_iconButtons.selected = false;
+				
+				
+				id_notesDictation.dictationPanel.rec_btn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{													
+				id_header.setIcons(true, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);
+				hasChange = true;
+				});	
+				id_notesDictation.id_notesPanel.id_body.id_SaveBtn.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{						
+				id_header.setIcons(id_notesDictation.DictationDTO.DictationID && id_notesDictation.DictationDTO.DictationID != Constants.GUID_FORMAT, 
+				id_notesDictation.id_notesPanel.id_body.id_message.text.length > 0);						
+				});
+				
+				event.stopImmediatePropagation();
+				}
+				}); */
+				
+				id_header.id_SaveVisit.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
+				{
+					
+					if(model.VisitProviderSelected != -1)
+					{
+						saveVisitDataClickHandler(event);
+						event.stopImmediatePropagation();
+					}else
+					{
+						UtilityFunctions.AskMessage('Please save a provider before visit save',closeHandler,null,null,null);
+						//Alert.show(, 'info',4, FlexGlobals.topLevelApplication.mainContainer, closeHandler);
+					}
+					
+				});
+				//addEventListener('openSetProviderPopup', onOpenSetProviderPopup)
+			}
+			
+			
+			private function TogglePanelVisiblity():void
+			{
+				if(id_QIContent.visible)
+				{
+					id_QIContent.visible = false;
+					id_QIContent.includeInLayout = false;
+					id_header.id_expandBtn.selected = false;
+				}
+				else
+				{
+					id_QIContent.visible = true;
+					id_QIContent.includeInLayout = true;
+					id_header.id_expandBtn.selected = true;
+				}
+			}
+			
+			private function saveVisitDataClickHandler(event:MouseEvent):void
+			{
+				if (model.EncounterTypeId != 0 && model.placeOfServiceID != 0)
+				{
+					var SaveEvent:MarkValidDataExistsEvent = new MarkValidDataExistsEvent(callBack);
+					CairngormEventDispatcher.getInstance().dispatchEvent(SaveEvent);
+					//UtilityFunctions.ShowMessage("Visit Saved successfully","Visit Saved");
+				}
+				else
+				{
+					Alert.show('Please select encounter Type and Place of service.','Info',4, FlexGlobals.topLevelApplication.mainContainer);
+				}
+			}
+			// call back of 
+			protected function callBack():void
+			{
+				//Tahir Alvi - Dispach event for update VB Patient Encouner List.
+				dispatchEvent(new Event('updateVBPatientEncounerList', true, true));
+			}
+			private function onOpenSetProviderPopup(e:Event):void
+			{
+				showProviderPopup();
+			}
+			
+			private function closeHandler(event:CloseEvent):void
+			{
+				showProviderPopup();
+			}
+			
+			private function onCloseSetProviderPopup(event:MouseEvent):void
+			{
+				id_header.id_OptionPopUp.displayPopUp = false;
+				id_header.id_iconButtons.selected = false;
+			}
+			
+			public function quickInputCloseHandler():void
+			{
+				ResetArrayCollections();
+				ResetPanelsExpendedViews();// reset all panels expended view , to be reopend on new visit	
+				ResetQIForms();
+			}
+			
+			public function ResetPanelsExpendedViews():void
+			{
+				if(id_QIContent.id_PMHView)
+				{
+					id_QIContent.id_PMHView.DeSelectAllNavButton();
+					id_QIContent.id_PMHView.DeSelectAllPageBtn();
+					id_QIContent.id_PMHView.collupseAllPanel();
+					id_QIContent.id_PMHView.currentSelectedView = null;
+					id_QIContent.id_PMHView.currentIndex = 1;
+				}
+				if(id_QIContent.id_PhysicalView)
+				{
+					id_QIContent.id_PhysicalView.DeSelectAllNavButton();
+					id_QIContent.id_PhysicalView.DeSelectAllPageBtn();
+					id_QIContent.id_PhysicalView.collupseAllPanel();
+					id_QIContent.id_PhysicalView.currentSelectedView = null;
+					id_QIContent.id_PhysicalView.currentIndex = 1;
+				}
+				if(id_QIContent.id_AssessmentView)
+				{
+					id_QIContent.id_AssessmentView.DeSelectAllNavButton();
+					id_QIContent.id_AssessmentView.DeSelectAllPageBtn();
+					id_QIContent.id_AssessmentView.collupseAllPanel();
+					id_QIContent.id_AssessmentView.currentSelectedView = null;
+					id_QIContent.id_AssessmentView.currentIndex = 1;
+				}
+				
+				id_QIContent.id_QIViews.selectedIndex = 0;
+			}
+			private function ResetArrayCollections():void
+			{
+				if(model.QIAllergyDTOList != null && model.QIAllergyDTOList.length > 0)
+					model.QIAllergyDTOList.removeAll();
+				// MEDICAL HISTORY
+				if(model.PreviousGeneralMedicalHistoryList != null && model.PreviousGeneralMedicalHistoryList.length > 0)
+					model.PreviousGeneralMedicalHistoryList.removeAll();
+				// FAMILY HISTORY
+				if(model.PreviousFamilyHistoryList!= null && model.PreviousFamilyHistoryList.length > 0)
+					model.PreviousFamilyHistoryList.removeAll();
+				// SOCIAL HISTORY
+				if(model.PreviousSocialHistoryList!= null && model.PreviousSocialHistoryList.length > 0)
+					model.PreviousSocialHistoryList.removeAll();
+				// CHRONIC MEDICATION
+				if(model.medicationDTOList!= null && model.medicationDTOList.length > 0)
+					model.medicationDTOList.removeAll();
+				// VITALS
+				if(model.immunizationDTOList!= null && model.immunizationDTOList.length > 0)
+					model.immunizationDTOList.removeAll();
+				// CC HPI
+				if(model.HPI_CCDTOList!= null && model.HPI_CCDTOList.length > 0)
+					model.HPI_CCDTOList.removeAll();
+				// ROS
+				if(model.rosDTOList!= null && model.rosDTOList.length > 0)
+				{
+					model.rosDTOList.removeAll();
+					model.rosDTOList = null;
+				}
+				// PHYSICALS
+				if(model.physicalDTOList!= null && model.physicalDTOList.length > 0)
+				{
+					model.physicalDTOList.removeAll();
+					model.physicalDTOList = null;
+				}
+				// LAB IN
+				if(model.inHouseLabList!= null && model.inHouseLabList.length > 0)
+					model.inHouseLabList.removeAll();
+				// DIAGANOSIS
+				if(model.patientDiagnosisDTOListByPatientId!= null && model.patientDiagnosisDTOListByPatientId.length > 0)
+					model.patientDiagnosisDTOListByPatientId.removeAll();
+				// PRESCRIPTION
+				if(model.prescriptionDToList!= null && model.prescriptionDToList.length > 0)
+					model.prescriptionDToList.removeAll();
+				// PROCEDURE
+				if(model.ProcedureDTOList!= null && model.ProcedureDTOList.length > 0)
+					model.ProcedureDTOList.removeAll();
+				// LAB OUT				
+				if(model.laboutDTOList!= null && model.laboutDTOList.length > 0)
+					model.laboutDTOList.removeAll();
+				// UN SINGED VISITS
+				if(model.unSignedVisitDates!= null && model.unSignedVisitDates.length > 0)
+					model.unSignedVisitDates.removeAll();
+				// RECOMMENDATION
+				if(model.RecommendationDTOList!= null && model.RecommendationDTOList.length > 0)
+					model.RecommendationDTOList.removeAll();
+				// FOLLOW UP
+				if(model.followUpDataControlType!= null && model.followUpDataControlType.length > 0)
+					model.followUpDataControlType.removeAll();
+				// 
+				
+				if(model.PatientFollowupMerged!= null && model.PatientFollowupMerged.length > 0)
+					model.PatientFollowupMerged.removeAll();
+				
+				if(model.PatientMedicationDTOlist!= null && model.PatientMedicationDTOlist.length > 0)
+					model.PatientMedicationDTOlist.removeAll();
+				
+				
+				
+				if(model.moduleNotes!= null && model.moduleNotes.length > 0)
+					model.moduleNotes.removeAll();
+				
+				if(model.moduleDictationList!= null &&model.moduleDictationList.length > 0)
+					model.moduleDictationList.removeAll();
+				
+				model.gaxenID = '';
+				
+				if(model.VitalDTO != null )
+					model.VitalDTO = null;
+				
+				if(!model.checkNotesExsist) // force excution binding
+					model.checkNotesExsist = true;
+				model.checkNotesExsist = false;
+				model.NotesDictationFlag = false;
+				//id_QIContent.id_AssessmentView.id_DiagnosisPanel.ExpandedView = false;
+			}
+			//Tahir Alvi - Here reset all quick input form to default state
+			private function ResetQIForms():void
+			{
+				id_QIContent.id_PMHView.id_AlergiesPanel.id_alergiesView.resetAllergyForm();//clear Allergy panel
+				id_QIContent.id_PMHView.id_ChronicmedicationPanel.id_MedicationBodyView.resetMedicationForm();//clear medication panel
+				id_QIContent.id_PMHView.id_HistoryPanel.resetComprehensiveHistory();//clear comprehensive history panel
+				id_QIContent.id_AssessmentView.id_TreatmentPanel.id_Prescription.resetPrescriptionForm();//clear Prescription panel
+				id_QIContent.id_PhysicalView.id_vital.id_vitalBodyView.resetVitalForm();
+				//Reset Header Setting 
+				id_header.id_EncounterType.selectedIndex 	= -1;
+				id_header.id_PlaceOfService.selectedIndex 	= -1;
+				
+			}
+			
+			///////////////Header Controls ////////////////////////////////
+			
+			[Bindable]
+			public override function get hasChange():Boolean
+			{
+				return m_bHasChange;
+			}
+			
+			public override function set hasChange(value:Boolean):void
+			{
+				m_bHasChange = value;
+				
+				
+				if( value || (id_QIContent.id_PMHView && id_QIContent.id_PMHView.hasChange ) || (id_QIContent.id_PhysicalView && id_QIContent.id_PhysicalView.hasChange ) || (id_QIContent.id_AssessmentView && id_QIContent.id_AssessmentView.hasChange ) )
+				{
+					m_bHasChange = true;
+					
+					if( id_header &&  id_header.id_ChangeIndicator )
+					{
+						id_header.id_ChangeIndicator.visible		 = true;
+						id_header.id_ChangeIndicator.includeInLayout = true;
+					}
+					
+				}
+				else
+				{
+					m_bHasChange = false;
+					
+					if( id_header &&  id_header.id_ChangeIndicator )
+					{
+						id_header.id_ChangeIndicator.visible		 = false;
+						id_header.id_ChangeIndicator.includeInLayout = false;
+					}
+				}
+			}
+			
+			private function ShowSetProviderPanel(event:MouseEvent):void
+			{
+				showProviderPopup();
+			}
+			
+			private function showProviderPopup():void
+			{
+				var popup:SetProviderPopup = new SetProviderPopup();
+				popup = PopUpManager.createPopUp(this,SetProviderPopup,true) as SetProviderPopup;
+				var pLoc:Point = id_header.id_ProviderBtn.parent.localToGlobal( new Point( id_header.id_ProviderBtn.x -250 , id_header.id_ProviderBtn.y  +  id_header.id_ProviderBtn.height + 10 ) );
+				popup.move(pLoc.x ,pLoc.y);
+				popup.id_btnSave.addEventListener(MouseEvent.CLICK, onSaveSetProviderPopup);
+				popup.id_closeBtn.addEventListener(MouseEvent.CLICK, onCloseSetProviderPopup);
+			}
+			private function onSaveSetProviderPopup(event:MouseEvent):void
+			{
+				id_header.id_OptionPopUp.displayPopUp = false;
+				id_header.id_iconButtons.selected = false;
+			}
+			
+			private function ShowComingSoonPanel(event:MouseEvent):void
+			{
+				
+				var popup:ComingSoon = new ComingSoon();
+				popup.ShowPopup( this );
+				popup.height = 125;
+				popup.width = 200;
+				
+				var pLoc:Point = id_header.id_ImportBtn.parent.localToGlobal( new Point( id_header.id_ImportBtn.x -250 , id_header.id_ImportBtn.y  +  id_header.id_ImportBtn.height + 10 ) ); 
+				popup.move(pLoc.x ,pLoc.y  ); 
+				
+			}
+			
+			public function AppearUI(isNewVisit:Boolean):void
+			{
+				/* id_QIContent.visible = true;
+				id_QIContent.includeInLayout = true;
+				id_header.visible = true; 
+				id_header.includeInLayout = true;  */
+				if(model.QIAllergyDTOList != null && model.QIAllergyDTOList.length == 0)
+				{
+					id_QIContent.id_PMHView.id_AlergiesPanel.id_alergiesView.id_AllergiesGrid.visible = true;
+					id_QIContent.id_PMHView.id_AlergiesPanel.id_alergiesView.id_AllergiesGrid.visible = false;
+				}
+				
+				id_QIContent.id_AssessmentView.SelectNextByIndex();
+				id_QIContent.id_PMHView.SelectNextByIndex();
+				id_QIContent.id_PhysicalView.SelectNextByIndex();
+				//select default Encounter Type and place of Service for new Visit.
+				id_header.selectDefaultType();
+			}
+			
+			protected function id_header_clickHandler(event:MouseEvent):void
+			{
+				TogglePanelVisiblity();
+				event.stopImmediatePropagation();
+			}
+			
+			
+			override protected function id_Header_showNotesPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.QUICK_INPUT_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.QUICK_INPUT_MODULE_NAME);
+				
+				super.id_Header_showNotesPanelHandler( event );
+				
+				
+			}
+			override protected function onNotesSave(event:Event):void
+			{
+				if(this.notesDTO.ModuleNoteId == 0) // new note
+				{
+					this.notesDTO.ManagedByUserId = model.LoggedInUserId;
+					this.notesDTO.CreatedBy = model.LoggedInUserId;
+					this.notesDTO.CreatedAt = new Date();
+					this.notesDTO.ModuleTypeId = QIUtilityFunctions.getModuleIDByName(Constants.QUICK_INPUT_MODULE_NAME);
+					this.notesDTO.VisitID = model.VisitID;
+					this.notesDTO.PatientID = model.patientID;
+				}
+				else // edited Notes
+				{
+					this.notesDTO.ModifiedBy = model.LoggedInUserId;
+					this.notesDTO.ModifiedAt = new Date();
+					this.notesDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleNotesEvent = new ManageModuleNotesEvent(this.notesDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				trace("child class should implement Notes here");
+			}
+			
+			override protected function id_Header_showDictationPanelHandler(event:Event):void
+			{	
+				this.notesDTO = null;
+				this.DictationDTO = null;
+				
+				this.notesDTO = QIUtilityFunctions.getModuleNoteDTO(Constants.QUICK_INPUT_MODULE_NAME);	
+				this.DictationDTO = QIUtilityFunctions.getModuleDictationDTO(Constants.QUICK_INPUT_MODULE_NAME);
+				
+				super.id_Header_showDictationPanelHandler( event );
+			}
+			
+			override protected function onDictationSave(event:Event):void
+			{
+				if(this.DictationDTO.ModuleDictationId == 0) // new Dication
+				{
+					this.DictationDTO.ManagedByUserId = model.LoggedInUserId;
+					this.DictationDTO.CreatedBy = model.LoggedInUserId;
+					this.DictationDTO.CreatedAt = new Date();
+					this.DictationDTO.ModuleTypeID = QIUtilityFunctions.getModuleIDByName(Constants.QUICK_INPUT_MODULE_NAME);
+					this.DictationDTO.VisitID = model.VisitID;
+					this.DictationDTO.PatientID = model.patientID;
+				}
+				else // edited Dication
+				{
+					this.DictationDTO.ModifiedBy = model.LoggedInUserId;
+					this.DictationDTO.ModifiedAt = new Date();
+					this.DictationDTO.IsDirty = true;
+				}	
+				
+				var ev: ManageModuleDictationEvent = new ManageModuleDictationEvent(this.DictationDTO);
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+				
+				if(SetIcon)
+					SetIcon = false;
+				SetIcon = true;
+				//trace("child class should implement saveNotes here");
+			}
+			
+			
+			protected function id_QIContent_creationCompleteHandler(event:FlexEvent):void
+			{
+				var ev: LoadVisitModuleTypesEvent = new LoadVisitModuleTypesEvent();
+				CairngormEventDispatcher.getInstance().dispatchEvent(ev);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Binding source="id_QIContent.id_PMHView.hasChange" destination="hasChange" /> 
+	<fx:Binding source="id_QIContent.id_PhysicalView.hasChange" destination="hasChange"  /> 
+	<fx:Binding source="id_QIContent.id_AssessmentView.hasChange" destination="hasChange"  /> 
+	<fx:Binding source="model.checkNotesExsist" destination="SetIcon" />
+	
+	
+	<commons:HeaderContents>
+		<view:QuickInputHeader id="id_header" width="100%" height="23"
+							   ImportBtnClick="ShowComingSoonPanel(event)" ProviderBtnClick="ShowSetProviderPanel(event)"
+							   showNotesPanel="id_Header_showNotesPanelHandler(event)" 
+							   showDictationPanel="id_Header_showDictationPanelHandler(event)"   />
+	</commons:HeaderContents>
+	
+	
+	<components:ResizeableGroup id="id_contentsResizer" width="{id_header.width }" height="100%" bottom="0"  minHeight="50"
+								resizeDirection="{ResizeManager.DIRECTION_VERTICAL}" resizeHandle="{new verticalResizeHandle()}"><!--maxHeight="{isSlideOut? ChromeUtil.topLevelMainContainer.height-98: ChromeUtil.topLevelMainContainer.height-229 }"-->
+		<s:VGroup id="id_contents" gap="-4" width="100%" height="100%" paddingTop="-4" horizontalAlign="center"
+				  >
+			
+			<s:BorderContainer borderVisible="false" width="100%" height="100%" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.QuickInputBackGroundSkin">
+				<s:layout>
+					<s:VerticalLayout gap="3" paddingLeft="3" paddingRight="3" paddingTop="6"/>
+				</s:layout>
+				
+				<view:QuickInputView id="id_QIContent" width="100%" height="100%" left="4" right="4" top="4" bottom="4" creationComplete="id_QIContent_creationCompleteHandler(event)"/>
+				
+				<s:SkinnableContainer width="100%" height="15" skinClass="com.adobe.gazuntite.skins.chrome.containerSkins.scrollerBlueBG">
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="top" horizontalAlign="center" paddingBottom="0" paddingTop="0" />
+					</s:layout>
+					<mx:Spacer height="10" />
+				</s:SkinnableContainer>
+				
+			</s:BorderContainer>
+		</s:VGroup>
+	</components:ResizeableGroup>
+	
+</commons:QICollapseableView>
